@@ -1,8 +1,11 @@
-num_of_training_images = 1000
-num_of_val_images = 200
-learning_rate = 4e-5
-num_output = 1
+num_of_training_images = 946
+num_of_val_images = 100
+learning_rate = 5e-5
+num_output = 2
 mlp_hidden_sizes=[512,256]
-num_epochs = 18
-angle_range = 180
-###########
+num_epochs = 17
+angle_range = 90
+shift_x_range = 100
+shift_y_range = 80
+clip_model_name = "openai/clip-vit-base-patch32"
+vit_model_name = "google/vit-base-patch16-224-in21k"

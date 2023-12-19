@@ -9,36 +9,43 @@ import numpy as np
 
 
 class CustomDataset(torch.utils.data.Dataset):
-    def __init__(self, dataset, transform=None, angle_range=180):
+    def __init__(self, dataset, transform=None, angle_range=None, shift_x_range=None, shift_y_range=None):
         self.dataset = dataset
         self.transform = transform
         self.angle_range = angle_range
+        self.shift_x_range=shift_x_range
+        self.shift_y_range=shift_y_range
 
     def __len__(self):
         return len(self.dataset)
 
     def __getitem__(self, idx):
-        image = self.dataset[idx]['image']
-
-        #Generate random angle
-        angle = random.uniform(-self.angle_range, self.angle_range)
+        original_image = self.dataset[idx]['image']
 
         # Transform: Resize, center, grayscale
-        image = self.transform(image)
+        original_image = self.transform(original_image)
 
-        # Rotate image
-        rotated_image = F.rotate(image, angle)
+        # Generate random affine params
+        # angle = 0 if self.angle_range == 0 else random.uniform(-self.angle_range, self.angle_range)
+        shift_x = 0 if self.shift_x_range == 0 else random.uniform(-self.shift_x_range, self.shift_x_range)
+        shift_y = 0 if self.shift_y_range == 0 else random.uniform(-self.shift_y_range, self.shift_y_range)
+
+        translated_image = F.affine(original_image, angle=0, translate=(shift_x, shift_y), scale=1, shear=0)
 
         # Convert both images to tensor and rescale [0,255] -> [0,1]
-        rotated_image, image  = F.to_tensor(rotated_image), F.to_tensor(image)
+        translated_image, original_image  = F.to_tensor(translated_image), F.to_tensor(original_image)
 
-        # Convert angle to tensor and rescale [0,255] -> [0,1]
-        rescaled_angle = abs(angle) / self.angle_range
-        rescaled_angle = torch.tensor(rescaled_angle, dtype=torch.float32).view(1,)
+        # Rescale params -> [0,1]
+        # angle = 0 if self.angle_range == 0 else abs(angle) / self.angle_range
+        shift_x = 0 if self.shift_x_range == 0 else abs(shift_x) / self.shift_x_range
+        shift_y = 0 if self.shift_y_range == 0 else abs(shift_y) / self.shift_y_range
+        
+        # Convert params to tensor
+        # angle = torch.tensor(angle, dtype=torch.float32).view(1,)
+        params = torch.tensor([shift_x, shift_y], dtype=torch.float32)
 
-        #TODO: normalize images
-        return image, rotated_image, rescaled_angle
-
+        # TODO: normalize images
+        return original_image, translated_image, params
 
 transform = transforms.Compose([
     transforms.Resize(256),
@@ -55,8 +62,8 @@ train_dataset = dataset["train"].select(np.arange(num_of_training_images))
 val_dataset = dataset["validation"].select(np.arange(num_of_val_images))
 
 # Create an instance dataset
-custom_train_dataset = CustomDataset(train_dataset, transform=transform, angle_range=angle_range)
-custom_val_dataset = CustomDataset(val_dataset, transform=transform,angle_range=angle_range)
+custom_train_dataset = CustomDataset(train_dataset, transform=transform, angle_range=0, shift_x_range=shift_x_range, shift_y_range=shift_y_range)
+custom_val_dataset = CustomDataset(val_dataset, transform=transform,angle_range=0, shift_x_range=shift_x_range, shift_y_range=shift_y_range)
 
 # Create a DataLoader
 train_loader = DataLoader(custom_train_dataset, batch_size=32, shuffle=True, pin_memory=True)

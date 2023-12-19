@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-
 import torch.nn as nn
 
 class MLP(nn.Module):
@@ -19,6 +18,7 @@ class MLP(nn.Module):
         return self.layers(x)
 
 def plot_over_epoch(x, y, x_label, y_label, connecting_lines=True):
+    
     if connecting_lines:
       plt.plot(x, y)
     else:

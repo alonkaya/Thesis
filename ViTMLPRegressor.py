@@ -1,6 +1,7 @@
 from params import *
+from utils import *
+from CustomDataset import train_loader, val_loader
 import torch
-import torch.nn as nn
 import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPModel
 from sklearn.metrics import mean_absolute_error
@@ -98,11 +99,12 @@ class ViTMLPRegressor(nn.Module):
             labels = []
             outputs = []
 
-            for original_image, rotated_image, label in train_loader:
-                original_image, rotated_image, label = original_image.to(self.device), rotated_image.to(self.device), label.to(self.device)
+            for original_image, translated_image, label in train_loader:
+                original_image, translated_image, label = original_image.to(self.device), translated_image.to(self.device), label.to(self.device)
+                # angle, shift_x, shift_y = params
 
                 # Foward pass
-                output, cosine_similarity = self.forward(original_image, rotated_image)
+                output, cosine_similarity = self.forward(original_image, translated_image)
 
                 # Compute loss
                 loss = self.criterion(output, label)
@@ -113,34 +115,38 @@ class ViTMLPRegressor(nn.Module):
                 self.optimizer.step()
 
                 # Extend lists with batch statistics
-                labels.extend(label.flatten().tolist())
-                outputs.extend(output.detach().cpu().flatten().tolist())
-                cosine_similarities.extend(cosine_similarity.tolist())
-
+                labels.append(label)
+                outputs.append(output.detach().cpu().to(self.device))
+                # cosine_similarities.extend(cosine_similarity.tolist())
+      
             # Calculate and store root training loss for the epoch
             train_loss_sqrt = torch.sqrt(loss.detach().cpu()).item()
             root_train_loss.append(train_loss_sqrt)
 
             # Calculate and store mean absolute error for the epoch
-            train_mae.append(mean_absolute_error(labels, outputs))
+            mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
+            train_mae.append(mae.cpu())
 
-            # Extend list of all labels with current epoch's labels
-            all_labels.extend(labels)
+            # Extend list of all labels with current epoch's labels for cosine_similarity plot
+            # all_labels.extend(labels)
 
             # Validation
             self.eval()
             val_labels = []
             val_outputs = []
             with torch.no_grad():
-                for original_image, rotated_image, val_label in val_loader:
-                    original_image, rotated_image, val_label = original_image.to(self.device), rotated_image.to(self.device), val_label.to(self.device)
-
-                    val_output, _ = self.forward(original_image, rotated_image)
+                for original_image, translated_image, val_label in val_loader:
+                    original_image, translated_image, val_label = original_image.to(self.device), translated_image.to(self.device), val_label.to(self.device)
+ 
+                    val_output, _ = self.forward(original_image, translated_image)
                     val_loss = self.criterion(val_output, val_label)
-                    val_labels.extend(val_label.flatten().tolist())
-                    val_outputs.extend(val_output.cpu().flatten().tolist())
 
-                val_mae.append(mean_absolute_error(val_labels, val_outputs))
+                    val_outputs.append(val_output.to(self.device))
+                    val_labels.append(val_label)
+
+                # Calculate and store mean absolute error for the epoch
+                mae = torch.mean(torch.abs(torch.cat(val_labels, dim=0) - torch.cat(val_outputs, dim=0)))
+                val_mae.append(mae.cpu())
 
             # Calculate and store root validation loss for the epoch
             val_loss_sqrt = torch.sqrt(val_loss.detach().cpu()).item()
@@ -152,20 +158,13 @@ class ViTMLPRegressor(nn.Module):
         plot_over_epoch(x=range(1, num_epochs + 1), y=root_val_loss, x_label="Epoch", y_label='Root validation Loss')
         plot_over_epoch(x=range(1, num_epochs + 1), y=train_mae, x_label="Epoch", y_label='Training MAE')
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae, x_label="Epoch", y_label='VAlidation MAE')
-        plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False)
+        # plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False)
 
 
         # Save
         # torch.save(self.state_dict(), 'vit_mlp_regressor.pth')
 
-    def load_model(self, model_path):
-        self.load_state_dict(torch.load(model_path))
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
-
-clip_model_name = "openai/clip-vit-base-patch32"
-vit_model_name = "google/vit-base-patch16-224-in21k"
 
 model = ViTMLPRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, regress = True, freeze_pretrained_model=False)
 model = model.to(device)
