@@ -86,12 +86,10 @@ class ViTMLPRegressor(nn.Module):
 
     def train_model(self, train_loader, val_loader, num_epochs=10):
         # Lists to store training statistics
-        root_train_loss = []
-        root_val_loss = []
+        all_train_loss = []
+        all_val_loss = []
         train_mae = []
         val_mae = []
-        cosine_similarities = []
-        all_labels = []
         for epoch in range(num_epochs):
             self.train()
 
@@ -120,8 +118,8 @@ class ViTMLPRegressor(nn.Module):
                 # cosine_similarities.extend(cosine_similarity.tolist())
       
             # Calculate and store root training loss for the epoch
-            train_loss_sqrt = torch.sqrt(loss.detach().cpu()).item()
-            root_train_loss.append(train_loss_sqrt)
+            train_loss = loss.detach().cpu().item()
+            all_train_loss.append(train_loss)
 
             # Calculate and store mean absolute error for the epoch
             mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
@@ -149,13 +147,13 @@ class ViTMLPRegressor(nn.Module):
                 val_mae.append(mae.cpu())
 
             # Calculate and store root validation loss for the epoch
-            val_loss_sqrt = torch.sqrt(val_loss.detach().cpu()).item()
-            root_val_loss.append(val_loss_sqrt)
+            val_loss = val_loss.detach().cpu().item()
+            all_val_loss.append(val_loss)
 
-            print(f'Epoch {epoch+1}/{num_epochs}, Root validation Loss: {val_loss_sqrt} Root training Loss: {train_loss_sqrt} Training MAE: {train_mae[-1]}\n')
+            print(f'Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]}\n')
 
-        plot_over_epoch(x=range(1, num_epochs + 1), y=root_train_loss, x_label="Epoch", y_label='Root training Loss')
-        plot_over_epoch(x=range(1, num_epochs + 1), y=root_val_loss, x_label="Epoch", y_label='Root validation Loss')
+        plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss, x_label="Epoch", y_label='Training Loss')
+        plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss, x_label="Epoch", y_label='Validation Loss')
         plot_over_epoch(x=range(1, num_epochs + 1), y=train_mae, x_label="Epoch", y_label='Training MAE')
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae, x_label="Epoch", y_label='VAlidation MAE')
         # plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False)
@@ -166,7 +164,7 @@ class ViTMLPRegressor(nn.Module):
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = ViTMLPRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, regress = True, freeze_pretrained_model=True)
+model = ViTMLPRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, regress = True, freeze_pretrained_model=False)
 model = model.to(device)
 
 model.train_model(train_loader, val_loader, num_epochs=num_epochs)
