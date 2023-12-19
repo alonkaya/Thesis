@@ -55,7 +55,7 @@ class ViTMLPRegressor(nn.Module):
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
-        self.mlp = MLP(mlp_input_dim*3, mlp_hidden_sizes, num_output)
+        self.mlp = MLP(mlp_input_dim, mlp_hidden_sizes, num_output)
 
 
     def forward(self, x_original, x_rotated):
@@ -76,7 +76,7 @@ class ViTMLPRegressor(nn.Module):
         mul_embedding = original_embeddings.mul(rotated_embeddings)
 
         # Concatenate both original and rotated embedding vectors
-        embeddings = torch.cat([rotated_embeddings, original_embeddings, mul_embedding], dim=1)
+        embeddings = torch.cat([rotated_embeddings], dim=1)
 
         # Train MLP on embedding vectors
         output = self.mlp(embeddings)

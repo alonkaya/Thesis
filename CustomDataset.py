@@ -41,7 +41,7 @@ class CustomDataset(torch.utils.data.Dataset):
         shift_y = 0 if self.shift_y_range == 0 else abs(shift_y) / self.shift_y_range
         
         # Convert params to tensor
-        params = torch.tensor([shift_x, shift_y, angle], dtype=torch.float32)
+        params = torch.tensor([shift_x, shift_y], dtype=torch.float32)
 
         # TODO: normalize images
         return original_image, translated_image, params
