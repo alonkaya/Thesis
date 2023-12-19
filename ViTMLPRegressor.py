@@ -99,7 +99,6 @@ class ViTMLPRegressor(nn.Module):
 
             for original_image, translated_image, label in train_loader:
                 original_image, translated_image, label = original_image.to(self.device), translated_image.to(self.device), label.to(self.device)
-                # angle, shift_x, shift_y = params
 
                 # Foward pass
                 output, cosine_similarity = self.forward(original_image, translated_image)

@@ -26,23 +26,22 @@ class CustomDataset(torch.utils.data.Dataset):
         original_image = self.transform(original_image)
 
         # Generate random affine params
-        # angle = 0 if self.angle_range == 0 else random.uniform(-self.angle_range, self.angle_range)
+        angle = 0 if self.angle_range == 0 else random.uniform(-self.angle_range, self.angle_range)
         shift_x = 0 if self.shift_x_range == 0 else random.uniform(-self.shift_x_range, self.shift_x_range)
         shift_y = 0 if self.shift_y_range == 0 else random.uniform(-self.shift_y_range, self.shift_y_range)
 
-        translated_image = F.affine(original_image, angle=0, translate=(shift_x, shift_y), scale=1, shear=0)
+        translated_image = F.affine(original_image, angle=angle, translate=(shift_x, shift_y), scale=1, shear=0)
 
         # Convert both images to tensor and rescale [0,255] -> [0,1]
         translated_image, original_image  = F.to_tensor(translated_image), F.to_tensor(original_image)
 
         # Rescale params -> [0,1]
-        # angle = 0 if self.angle_range == 0 else abs(angle) / self.angle_range
+        angle = 0 if self.angle_range == 0 else abs(angle) / self.angle_range
         shift_x = 0 if self.shift_x_range == 0 else abs(shift_x) / self.shift_x_range
         shift_y = 0 if self.shift_y_range == 0 else abs(shift_y) / self.shift_y_range
         
         # Convert params to tensor
-        # angle = torch.tensor(angle, dtype=torch.float32).view(1,)
-        params = torch.tensor([shift_x, shift_y], dtype=torch.float32)
+        params = torch.tensor([shift_x, shift_y, angle], dtype=torch.float32)
 
         # TODO: normalize images
         return original_image, translated_image, params
@@ -62,8 +61,8 @@ train_dataset = dataset["train"].select(np.arange(num_of_training_images))
 val_dataset = dataset["validation"].select(np.arange(num_of_val_images))
 
 # Create an instance dataset
-custom_train_dataset = CustomDataset(train_dataset, transform=transform, angle_range=0, shift_x_range=shift_x_range, shift_y_range=shift_y_range)
-custom_val_dataset = CustomDataset(val_dataset, transform=transform,angle_range=0, shift_x_range=shift_x_range, shift_y_range=shift_y_range)
+custom_train_dataset = CustomDataset(train_dataset, transform=transform, angle_range=angle_range, shift_x_range=shift_x_range, shift_y_range=shift_y_range)
+custom_val_dataset = CustomDataset(val_dataset, transform=transform,angle_range=angle_range, shift_x_range=shift_x_range, shift_y_range=shift_y_range)
 
 # Create a DataLoader
 train_loader = DataLoader(custom_train_dataset, batch_size=32, shuffle=True, pin_memory=True)
