@@ -1,13 +1,12 @@
 from params import *
 from utils import *
-from CustomDataset import train_loader, val_loader
-import torch
+from Dataset import train_loader, val_loader
 import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPModel
 from sklearn.metrics import mean_absolute_error
 
 class ViTMLPRegressor(nn.Module):
-    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, device, regress=True, freeze_pretrained_model=True):
+    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, device, freeze_pretrained_model=True):
         """
         Initialize the ViTMLPRegressor model.
 
@@ -51,37 +50,40 @@ class ViTMLPRegressor(nn.Module):
                 param.requires_grad = False
 
         # Choose appropriate loss function based on regress parameter
-        self.criterion = nn.MSELoss() if regress else nn.CrossEntropyLoss()
+        self.criterion = nn.MSELoss()
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
-        self.mlp = MLP(mlp_input_dim, mlp_hidden_sizes, num_output)
+        self.mlp = MLP(mlp_input_dim * 3, mlp_hidden_sizes, num_output)
 
 
-    def forward(self, x_original, x_rotated):
+    def forward(self, x1, x2):
         if self.clip: # If using CLIP
-            x_original = self.clip_image_processor(images=x_original, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-            x_rotated = self.clip_image_processor(images=x_rotated, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+            x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+            x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
 
-            original_embeddings = self.pretrained_model.get_image_features(**x_original)
-            rotated_embeddings = self.pretrained_model.get_image_features(**x_rotated)
+            x1_embeddings = self.pretrained_model.get_image_features(**x1)
+            x2_embeddings = self.pretrained_model.get_image_features(**x2)
 
         else: # If using standard ViT
-             original_embeddings = self.pretrained_model(x_original).last_hidden_state[:,0,:] # (batch_size, CLS emebdding vector size)
-             rotated_embeddings = self.pretrained_model(x_rotated).last_hidden_state[:,0,:]
+             x1_embeddings = self.pretrained_model(x1).last_hidden_state[:,0,:] # (batch_size, CLS emebdding vector size)
+             x2_embeddings = self.pretrained_model(x2).last_hidden_state[:,0,:]
 
-        cosine_similarity = torch.nn.functional.cosine_similarity(original_embeddings, rotated_embeddings).detach().cpu() # (batch_size)
+        # cosine_similarity = torch.nn.functional.cosine_similarity(x1_embeddings, x2_embeddings).detach().cpu() # (batch_size)
 
         # Create another feature embedding of the element-wise mult between the two embedding vectors
-        mul_embedding = original_embeddings.mul(rotated_embeddings)
+        mul_embedding = x1_embeddings.mul(x2_embeddings)
 
         # Concatenate both original and rotated embedding vectors
-        embeddings = torch.cat([rotated_embeddings], dim=1)
+        embeddings = torch.cat([x1_embeddings, x2_embeddings, mul_embedding], dim=1)
 
         # Train MLP on embedding vectors
         output = self.mlp(embeddings)
+        
+        # Convert 9-vector output to 3x3 F-matrix
+        output = torch.stack([enforce_fundamental_constraints(F_matrix) for F_matrix in output])
 
-        return output, cosine_similarity
+        return output
 
 
     def train_model(self, train_loader, val_loader, num_epochs=10):
@@ -97,11 +99,11 @@ class ViTMLPRegressor(nn.Module):
             labels = []
             outputs = []
 
-            for original_image, translated_image, label in train_loader:
-                original_image, translated_image, label = original_image.to(self.device), translated_image.to(self.device), label.to(self.device)
-
+            for first_image, second_image, label in train_loader:
+                first_image, second_image, label = first_image.to(self.device), second_image.to(self.device), label.to(self.device) 
+                           
                 # Foward pass
-                output, cosine_similarity = self.forward(original_image, translated_image)
+                output = self.forward(first_image, second_image)
 
                 # Compute loss
                 loss = self.criterion(output, label)
@@ -135,7 +137,7 @@ class ViTMLPRegressor(nn.Module):
                 for original_image, translated_image, val_label in val_loader:
                     original_image, translated_image, val_label = original_image.to(self.device), translated_image.to(self.device), val_label.to(self.device)
  
-                    val_output, _ = self.forward(original_image, translated_image)
+                    val_output = self.forward(original_image, translated_image)
                     val_loss = self.criterion(val_output, val_label)
 
                     val_outputs.append(val_output.to(self.device))
@@ -157,13 +159,13 @@ class ViTMLPRegressor(nn.Module):
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae, x_label="Epoch", y_label='VAlidation MAE')
         # plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False)
 
-
         # Save
         # torch.save(self.state_dict(), 'vit_mlp_regressor.pth')
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.autograd.set_detect_anomaly(True)
 
-model = ViTMLPRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, regress = True, freeze_pretrained_model=False)
+model = ViTMLPRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, freeze_pretrained_model=False)
 model = model.to(device)
 
 model.train_model(train_loader, val_loader, num_epochs=num_epochs)
