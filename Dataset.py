@@ -50,9 +50,9 @@ transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=3),
 ])
 
-sequence_path = 'sequences\\00\\image_0'
-poses_path = 'poses\\00.txt'
-calib_path = 'sequences\\00\\calib.txt'
+sequence_path = 'sequences\\02\\image_0'
+poses_path = 'poses\\02.txt'
+calib_path = 'sequences\\002\calib.txt'
 
 poses, frame_numbers = generate_pose_and_frame_numbers(poses_path)
 
