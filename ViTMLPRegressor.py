@@ -2,7 +2,7 @@ from params import *
 from utils import *
 from Dataset import train_loader, val_loader
 import torch.optim as optim
-from transformers import ViTModel, CLIPImageProcessor, CLIPModel
+from transformers import ViTModel, CLIPImageProcessor, CLIPModel, CLIPVisionModel
 from sklearn.metrics import mean_absolute_error
 
 class ViTMLPRegressor(nn.Module):
@@ -30,9 +30,11 @@ class ViTMLPRegressor(nn.Module):
 
             # Initialize CLIP processor and pretrained model
             self.clip_image_processor = CLIPImageProcessor.from_pretrained(pretrained_model_name)
-            self.pretrained_model = CLIPModel.from_pretrained(pretrained_model_name)
+            # self.pretrained_model = CLIPVisionModel.from_pretrained(pretrained_model_name)
+            self.pretrained_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
 
             # Get input dimension for the MLP based on CLIP configuration
+            # mlp_input_dim = self.pretrained_model.config.hidden_size
             mlp_input_dim = self.pretrained_model.config.projection_dim
 
         else:
@@ -61,9 +63,12 @@ class ViTMLPRegressor(nn.Module):
         if self.clip: # If using CLIP
             x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
             x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-
+            
             x1_embeddings = self.pretrained_model.get_image_features(**x1)
             x2_embeddings = self.pretrained_model.get_image_features(**x2)
+
+            # x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,0,:]
+            # x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,0,:]
 
         else: # If using standard ViT
              x1_embeddings = self.pretrained_model(x1).last_hidden_state[:,0,:] # (batch_size, CLS emebdding vector size)
@@ -82,12 +87,12 @@ class ViTMLPRegressor(nn.Module):
         
         # Convert 9-vector output to 3x3 F-matrix
         # output = torch.stack([enforce_fundamental_constraints(F_matrix) for F_matrix in output])
-        output = torch.stack([F_matrix.view(3, 3) for F_matrix in output])
+        output = output.view(-1, 3, 3)
 
         return output
 
 
-    def train_model(self, train_loader, val_loader, num_epochs=10):
+    def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
         all_train_loss = []
         all_val_loss = []
@@ -108,6 +113,9 @@ class ViTMLPRegressor(nn.Module):
 
                 # Compute loss
                 loss = self.criterion(output, label)
+                
+                # Add a term to the loss that penalizes the smallest singular value being far from zero. This complies with the rank-2 constraint
+                # loss = add_last_sing_value_penalty(output, loss)
 
                 # Compute Backward pass and gradients
                 self.optimizer.zero_grad()

@@ -51,11 +51,21 @@ def enforce_fundamental_constraints(F_vector):
 
     return F
 
+def add_last_sing_value_penalty(output, loss):
+    # Compute the SVD of the output
+    _, S, _ = torch.svd(output)
+    
+    # Add a term to the loss that penalizes the smallest singular value being far from zero
+    rank_penalty = torch.sum(torch.abs(S[:,-1]))
+
+    loss = loss + rank_penalty
+
+    return loss
 
 def generate_pose_and_frame_numbers(poses_path):
     poses = read_poses(poses_path)
 
-    frame_numbers = [i for i in range(0, num_of_frames, jump_frames)]
+    frame_numbers = [i for i in range(num_of_frames)]
 
     poses = [poses[i] for i in frame_numbers]
 

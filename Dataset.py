@@ -19,19 +19,19 @@ class CustomDataset(torch.utils.data.Dataset):
         self.k = K
 
     def __len__(self):
-        return len(self.frame_numbers)-1
+        return len(self.frame_numbers) - jump_frames
 
     def __getitem__(self, idx):
         # Create PIL images
         first_image = Image.open(os.path.join(self.sequence_path, f'{self.frame_numbers[idx]:06}.png'))
-        second_image = Image.open(os.path.join(self.sequence_path, f'{self.frame_numbers[idx+1]:06}.png'))
+        second_image = Image.open(os.path.join(self.sequence_path, f'{self.frame_numbers[idx+jump_frames]:06}.png'))
 
         # Transform: Resize, center, grayscale
         first_image = self.transform(first_image)
         second_image = self.transform(second_image)
 
         # Compute relative rotation and translation matrices
-        R_relative, t_relative = compute_relative_transformations(self.poses[idx], self.poses[idx+1])
+        R_relative, t_relative = compute_relative_transformations(self.poses[idx], self.poses[idx+jump_frames])
 
         # # Compute the essential matrix E
         E = compute_essential(R_relative, t_relative)
