@@ -1,5 +1,6 @@
 from params import *
 from FunMatrix import *
+from utils import generate_pose_and_frame_numbers
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms, datasets
 import torch
@@ -37,10 +38,10 @@ class CustomDataset(torch.utils.data.Dataset):
 
         # Compute the fundamental matrix F
         F = compute_fundamental(E, self.k, self.k)
-        
+
         # Convert to tensor and rescale [0,255] -> [0,1]
         first_image, second_image, F  = T.to_tensor(first_image), T.to_tensor(second_image), torch.tensor(F / np.max(F), dtype=torch.float32)
-
+                
         # TODO: Normalize them
         return first_image, second_image, F
 
@@ -50,9 +51,9 @@ transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=3),
 ])
 
-sequence_path = 'sequences\\02\\image_0'
-poses_path = 'poses\\02.txt'
-calib_path = 'sequences\\002\calib.txt'
+sequence_path = 'sequences/02/image_0'
+poses_path = 'poses/02.txt'
+calib_path = 'sequences/02/calib.txt'
 
 poses, frame_numbers = generate_pose_and_frame_numbers(poses_path)
 
@@ -60,16 +61,23 @@ poses, frame_numbers = generate_pose_and_frame_numbers(poses_path)
 projection_matrix = process_calib(calib_path)
 K, _ = get_internal_param_matrix(projection_matrix)
 
-dataset = CustomDataset(sequence_path, poses, frame_numbers, transform, K)
+# dataset = CustomDataset(sequence_path, poses, frame_numbers, transform, K)
 
-train_len = int(0.8 * len(dataset))
-val_len = len(dataset) - train_len
+# train_len = int(0.8 * len(dataset))
+# val_len = len(dataset) - train_len
 
 # Split train validation sets
-train_dataset, val_dataset =  random_split(dataset, [train_len, val_len])
+# train_dataset, val_dataset =  random_split(dataset, [train_len, val_len])
+
+# Calculate the number of samples for training and validation
+train_samples = int(train_ratio * (len(frame_numbers)-1))
+
+# Split the dataset based on the calculated samples. Get first train_samples of data for training and the rest for validation
+train_dataset = CustomDataset(sequence_path, poses[:train_samples], frame_numbers[:train_samples], transform, K)
+val_dataset = CustomDataset(sequence_path, poses[train_samples:], frame_numbers[train_samples:], transform, K)
 
 # Create a DataLoader
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, pin_memory=True)
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=False, pin_memory=True)
 val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, pin_memory=True)
 
 # Visualize an image:

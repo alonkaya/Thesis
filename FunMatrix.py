@@ -21,14 +21,6 @@ def read_poses(poses_path):
 
     return np.stack(poses)
 
-def generate_pose_and_frame_numbers(poses_path):
-    poses = read_poses(poses_path)
-
-    frame_numbers = [i for i in range(0, num_of_frames, jump_frames)]
-
-    poses = [poses[i] for i in frame_numbers]
-
-    return poses, frame_numbers
 
 def compute_relative_transformations(pose1, pose2):
     t1 = pose1[:, 3]
@@ -39,6 +31,7 @@ def compute_relative_transformations(pose1, pose2):
     transposed_R1 = np.transpose(R1)
     R_relative = np.dot(R2, transposed_R1)
     t_relative = np.dot(transposed_R1, (t2 - t1))
+    # t_relative = t2 - np.dot(R_relative, t1)
 
     return R_relative, t_relative
 

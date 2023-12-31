@@ -1,3 +1,5 @@
+from params import *
+from FunMatrix import read_poses
 import matplotlib.pyplot as plt
 import torch.nn as nn
 import torch
@@ -41,10 +43,20 @@ def enforce_fundamental_constraints(F_vector):
     S_prime = S.clone()  # Create a copy of S
     S_prime[-1] = 0  # Set the smallest singular value to zero
     
-    F_rank2 = U @ torch.diag(S) @ V.t() 
+    F = U @ torch.diag(S) @ V.t() 
 
     # Normalize the matrix to ensure scale invariance
-    F_norm = F_rank2 / torch.norm(F_rank2, p='fro')
-    
-    return F_norm
+    # F = F_rank2 / torch.norm(F_rank2, p='fro')
+    # F = F /  torch.max(torch.abs(F))
 
+    return F
+
+
+def generate_pose_and_frame_numbers(poses_path):
+    poses = read_poses(poses_path)
+
+    frame_numbers = [i for i in range(0, num_of_frames, jump_frames)]
+
+    poses = [poses[i] for i in frame_numbers]
+
+    return poses, frame_numbers

@@ -81,7 +81,8 @@ class ViTMLPRegressor(nn.Module):
         output = self.mlp(embeddings)
         
         # Convert 9-vector output to 3x3 F-matrix
-        output = torch.stack([enforce_fundamental_constraints(F_matrix) for F_matrix in output])
+        # output = torch.stack([enforce_fundamental_constraints(F_matrix) for F_matrix in output])
+        output = torch.stack([F_matrix.view(3, 3) for F_matrix in output])
 
         return output
 
