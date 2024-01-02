@@ -5,7 +5,7 @@ import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPModel, CLIPVisionModel
 from sklearn.metrics import mean_absolute_error
 
-class ViTMLPRegressor(nn.Module):
+class FMatrixRegressor(nn.Module):
     def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, device, freeze_pretrained_model=True):
         """
         Initialize the ViTMLPRegressor model.
@@ -20,7 +20,7 @@ class ViTMLPRegressor(nn.Module):
         - freeze_pretrained_model (bool): If True, freeze the parameters of the pretrained model.
         """
 
-        super(ViTMLPRegressor, self).__init__()
+        super(FMatrixRegressor, self).__init__()
         self.device = device
         self.to(device)
 
