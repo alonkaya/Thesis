@@ -25,7 +25,8 @@ def append_to_remote_csv(hostname, port, username, password, remote_csv_path, ne
 
         # Check the condition in the first line
         if first_line.lower() == 'false':
-           command = "python3 /home/aviran/running/task.py"
+        #    command = "python3 /home/aviran/running/task.py"
+           command = 'cd /home/aviran/running/ && nohup python task.py &'
            ssh.exec_command(command)
     except Exception as e:
         print(f"Error: {e}")
