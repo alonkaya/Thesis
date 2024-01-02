@@ -30,12 +30,12 @@ class ViTMLPRegressor(nn.Module):
 
             # Initialize CLIP processor and pretrained model
             self.clip_image_processor = CLIPImageProcessor.from_pretrained(pretrained_model_name)
-            # self.pretrained_model = CLIPVisionModel.from_pretrained(pretrained_model_name)
-            self.pretrained_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+            self.pretrained_model = CLIPVisionModel.from_pretrained(pretrained_model_name)
+            # self.pretrained_model = CLIPModel.from_pretrained(pretrained_model_name)
 
             # Get input dimension for the MLP based on CLIP configuration
-            # mlp_input_dim = self.pretrained_model.config.hidden_size
-            mlp_input_dim = self.pretrained_model.config.projection_dim
+            mlp_input_dim = self.pretrained_model.config.hidden_size
+            # mlp_input_dim = self.pretrained_model.config.projection_dim
 
         else:
             self.clip = False
@@ -56,35 +56,36 @@ class ViTMLPRegressor(nn.Module):
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
-        self.mlp = MLP(mlp_input_dim * 3, mlp_hidden_sizes, num_output)
+        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes, num_output)
 
 
     def forward(self, x1, x2):
         if self.clip: # If using CLIP
             x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
             x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-            
-            x1_embeddings = self.pretrained_model.get_image_features(**x1)
-            x2_embeddings = self.pretrained_model.get_image_features(**x2)
 
-            # x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,0,:]
-            # x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,0,:]
+            x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768) 
+            x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768) 
+
+            # x1_embeddings = self.pretrained_model.get_image_features(**x1)
+            # x2_embeddings = self.pretrained_model.get_image_features(**x2)
+
 
         else: # If using standard ViT
-             x1_embeddings = self.pretrained_model(x1).last_hidden_state[:,0,:] # (batch_size, CLS emebdding vector size)
-             x2_embeddings = self.pretrained_model(x2).last_hidden_state[:,0,:]
+             x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768) 
+             x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768)
 
         # cosine_similarity = torch.nn.functional.cosine_similarity(x1_embeddings, x2_embeddings).detach().cpu() # (batch_size)
 
         # Create another feature embedding of the element-wise mult between the two embedding vectors
-        mul_embedding = x1_embeddings.mul(x2_embeddings)
+        # mul_embedding = x1_embeddings.mul(x2_embeddings)
 
         # Concatenate both original and rotated embedding vectors
-        embeddings = torch.cat([x1_embeddings, x2_embeddings, mul_embedding], dim=1)
+        embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
 
         # Train MLP on embedding vectors
         output = self.mlp(embeddings)
-        
+
         # Convert 9-vector output to 3x3 F-matrix
         # output = torch.stack([enforce_fundamental_constraints(F_matrix) for F_matrix in output])
         output = output.view(-1, 3, 3)
@@ -172,6 +173,7 @@ class ViTMLPRegressor(nn.Module):
         # torch.save(self.state_dict(), 'vit_mlp_regressor.pth')
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(device)
 torch.autograd.set_detect_anomaly(True)
 
 model = ViTMLPRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, freeze_pretrained_model=False)
