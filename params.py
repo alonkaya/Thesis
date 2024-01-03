@@ -10,6 +10,6 @@ shift_y_range = 140
 clip_model_name = "openai/clip-vit-base-patch32"
 vit_model_name = "google/vit-base-patch16-224-in21k"
 
-num_of_frames = 4600
+num_of_frames = 460
 jump_frames = 5
 train_ratio = 0.8

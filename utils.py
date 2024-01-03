@@ -87,12 +87,12 @@ def reconstruction_module(x):
                 [torch.cos(ry),    0.,    -torch.sin(ry)],
                 [0.,            1.,     0.],
                 [torch.sin(ry),    0.,     torch.cos(ry)]
-            ], requires_grad=True)
+            ])
             R_z = torch.tensor([
                 [torch.cos(rz),    -torch.sin(rz),    0.],
                 [torch.sin(rz),    torch.cos(rz),     0.],
                 [0.,            0.,             1.]
-            ], requires_grad=True)
+            ])
             R = torch.matmul(R_x, torch.matmul(R_y, R_z))
             return R
 
@@ -108,7 +108,7 @@ def reconstruction_module(x):
                 [0.,  -tz, ty],
                 [tz,  0,   -tx],
                 [-ty, tx,  0]
-            ], requires_grad=True)
+            ])
 
         def get_linear_comb(f0, f1, f2, f3, f4, f5, cf1, cf2):
             return torch.tensor([
