@@ -97,23 +97,21 @@ def reconstruction_module(x):
             return R
 
         def get_inv_intrinsic(f):
-            print(f)
-            a = -1 / f
-            return torch.stack([
+            return torch.tensor([
                 [-1/(f+1e-8),   0.,             0.],
                 [0.,            -1/(f+1e-8),    0.],
                 [0.,            0.,             1.]
             ])
 
         def get_translate(tx, ty, tz):
-            return torch.stack([
+            return torch.tensor([
                 [0.,  -tz, ty],
                 [tz,  0,   -tx],
                 [-ty, tx,  0]
             ])
 
         def get_linear_comb(f0, f1, f2, f3, f4, f5, cf1, cf2):
-            return torch.stack([
+            return torch.tensor([
                 [f0,            f1,            f2],
                 [f3,            f4,            f5],
                 [cf1*f0+cf2*f3, cf1*f1+cf2*f4, cf1*f2+cf2*f5]
