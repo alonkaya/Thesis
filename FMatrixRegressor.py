@@ -86,15 +86,18 @@ class FMatrixRegressor(nn.Module):
 
         # Train MLP on embedding vectors
         output = self.mlp(embeddings).to(self.device)
+        print("Output requires_grad:", output.requires_grad)
 
         # Convert 9-vector output to 3x3 F-matrix
         # output = torch.stack([enforce_fundamental_constraints(F_matrix) for F_matrix in output])
 
         # Apply reconstruction layer
         output = torch.stack([reconstruction_module(x) for x in output]).to(self.device)
+        print("Output requires_grad:", output.requires_grad)
 
         # Apply abs normalization layer
         output = torch.stack([normalize_F(x) for x in output]).to(self.device)
+        print("Output requires_grad:", output.requires_grad)
 
         return output
 
