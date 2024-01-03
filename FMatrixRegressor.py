@@ -91,7 +91,7 @@ class FMatrixRegressor(nn.Module):
         # output = torch.stack([enforce_fundamental_constraints(F_matrix) for F_matrix in output])
 
         # Apply reconstruction layer
-        output = torch.stack([reconstruction_module(x) for x in output]).to(self.device)
+        # output = torch.stack([reconstruction_module(x) for x in output]).to(self.device)
 
         # Apply abs normalization layer
         output = torch.stack([normalize_F(x) for x in output]).to(self.device)
@@ -117,7 +117,7 @@ class FMatrixRegressor(nn.Module):
                            
                 # Foward pass
                 output = self.forward(first_image, second_image)
-                
+
                 # Compute loss
                 loss = self.L2_loss(output, label)
                 
