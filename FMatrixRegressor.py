@@ -93,10 +93,10 @@ class FMatrixRegressor(nn.Module):
         # Apply reconstruction layer
         # output = torch.stack([reconstruction_module(x, self.device) for x in output]).to(self.device)
         output = torch.tensor([
-                [output[1],   0.,             0.],
-                [0.,            output[0],    0.],
-                [0.,            0.,             1.]
-            ])
+            [output[1].detach().cpu().item(), output[2].detach().cpu().item(), 0.],
+            [0., output[0].detach().cpu().item(), 0.],
+            [0., 0., 1.]
+        ])
         
 
         # Apply abs normalization layer
