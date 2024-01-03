@@ -95,7 +95,7 @@ class FMatrixRegressor(nn.Module):
 
         # Apply abs normalization layer
         output = torch.stack([normalize_F(x) for x in output]).to(self.device)
-
+        
         return output
 
 

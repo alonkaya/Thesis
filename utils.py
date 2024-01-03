@@ -82,17 +82,17 @@ def reconstruction_module(x):
                 [1.,    0.,             0.],
                 [0.,    torch.cos(rx),    -torch.sin(rx)],
                 [0.,    torch.sin(rx),     torch.cos(rx)]
-            ], requires_grad=True)
+            ])
             R_y = torch.tensor([
                 [torch.cos(ry),    0.,    -torch.sin(ry)],
                 [0.,            1.,     0.],
                 [torch.sin(ry),    0.,     torch.cos(ry)]
-            ], requires_grad=True)
+            ])
             R_z = torch.tensor([
                 [torch.cos(rz),    -torch.sin(rz),    0.],
                 [torch.sin(rz),    torch.cos(rz),     0.],
                 [0.,            0.,             1.]
-            ], requires_grad=True)
+            ])
             R = torch.matmul(R_x, torch.matmul(R_y, R_z))
             return R
 
@@ -101,14 +101,26 @@ def reconstruction_module(x):
                 [-1/(f+1e-8),   0.,             0.],
                 [0.,            -1/(f+1e-8),    0.],
                 [0.,            0.,             1.]
-            ], requires_grad=True)
+            ])
 
-        def get_translate(tx, ty, tz):
-            return torch.tensor([
-                [0.,  -tz, ty],
-                [tz,  0,   -tx],
-                [-ty, tx,  0]
-            ], requires_grad=True)
+        def get_translate(x):
+            out = x.clone()
+            # out[0][0] = 0
+            # out[0][1] = -x[7]
+            # out[0][2] = x[6]
+            # out[1][0] = x[7]
+            # out[1][1] = 0
+            # out[1][2] = -x[5]
+            # out[2][0] = -x[6]
+            # out[2][1] = x[5]
+            # out[2][2] = 0
+            out = torch.tensor([[0, -x[7], x[6]], [x[7], 0, -x[5]], [-x[6], x[5], 0]])
+            return out
+            # return torch.tensor([
+            #     [0.,  -tz, ty],
+            #     [tz,  0,   -tx],
+            #     [-ty, tx,  0]
+            # ])
 
         # def get_linear_comb(f0, f1, f2, f3, f4, f5, cf1, cf2):
         #     return torch.tensor([
@@ -133,7 +145,7 @@ def reconstruction_module(x):
             # flat = tf.reshape(new_F, [-1])
             return F
 
-        out = get_translate(x[5], x[6], x[7])
+        out = get_translate(x)
 
         return out
 
