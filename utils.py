@@ -120,7 +120,7 @@ def reconstruction_module(x):
         def get_fmat(x):
             # F = K2^(-T)*R*[t]x*K1^(-1)
             # Note: only need out-dim = 8
-            print(x.requires_grad)
+            print(x[0].requires_grad, x[1].requires_grad, x[2].requires_grad, x[3].requires_grad, x[4].requires_grad, x[5].requires_grad, x[6].requires_grad, x[7].requires_grad)
             
             K1_inv = get_inv_intrinsic(x[0])
             K2_inv = get_inv_intrinsic(x[1]) #TODO: K2 should be -t not just -1..
