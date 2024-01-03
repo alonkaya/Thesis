@@ -133,7 +133,7 @@ def reconstruction_module(x):
             # flat = tf.reshape(new_F, [-1])
             return F
 
-        out = get_fmat(x)
+        out = get_translate(x[5], x[6], x[7])
 
         return out
 
