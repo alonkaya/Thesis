@@ -110,16 +110,18 @@ def reconstruction_module(x):
                 [-ty, tx,  0]
             ])
 
-        def get_linear_comb(f0, f1, f2, f3, f4, f5, cf1, cf2):
-            return torch.tensor([
-                [f0,            f1,            f2],
-                [f3,            f4,            f5],
-                [cf1*f0+cf2*f3, cf1*f1+cf2*f4, cf1*f2+cf2*f5]
-            ])
+        # def get_linear_comb(f0, f1, f2, f3, f4, f5, cf1, cf2):
+        #     return torch.tensor([
+        #         [f0,            f1,            f2],
+        #         [f3,            f4,            f5],
+        #         [cf1*f0+cf2*f3, cf1*f1+cf2*f4, cf1*f2+cf2*f5]
+        #     ])
 
         def get_fmat(x):
             # F = K2^(-T)*R*[t]x*K1^(-1)
             # Note: only need out-dim = 8
+            print(x.requires_grad)
+            
             K1_inv = get_inv_intrinsic(x[0])
             K2_inv = get_inv_intrinsic(x[1]) #TODO: K2 should be -t not just -1..
             R  = get_rotation(x[2], x[3], x[4])
