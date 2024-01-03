@@ -89,7 +89,7 @@ class FMatrixRegressor(nn.Module):
 
         # Convert 9-vector output to 3x3 F-matrix
         # output = torch.stack([enforce_fundamental_constraints(F_matrix) for F_matrix in output])
-
+        print(output.detach().cpu().tolist())
         # Apply reconstruction layer
         # output = torch.stack([reconstruction_module(x, self.device) for x in output]).to(self.device)
         output = torch.tensor([
