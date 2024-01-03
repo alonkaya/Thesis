@@ -133,7 +133,7 @@ def reconstruction_module(x, device):
             # flat = tf.reshape(new_F, [-1])
             return F
 
-        out = get_fmat(x)
+        out = get_translate(x)
 
         return out
 
