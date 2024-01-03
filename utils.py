@@ -101,7 +101,7 @@ def reconstruction_module(x):
                 [-1/(f+1e-8),   0.,             0.],
                 [0.,            -1/(f+1e-8),    0.],
                 [0.,            0.,             1.]
-            ], requires_grad=True)
+            ])
 
         def get_translate(tx, ty, tz):
             return torch.tensor([
