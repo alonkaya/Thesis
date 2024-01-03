@@ -140,5 +140,5 @@ def reconstruction_module(x):
 
         return out
 
-def normalize_F(self, x):
+def normalize_F(x):
     return x / (torch.max(torch.abs(x)) + 1e-8)
