@@ -125,7 +125,7 @@ def reconstruction_module(x, device):
             R  = get_rotation(x[2], x[3], x[4])
             T  = get_translate(x[5], x[6], x[7])
             F  = torch.matmul(K2_inv,
-                    torch.matmul(R, torch.matmul(T, K1_inv))).reqires_grad_()
+                    torch.matmul(R, torch.matmul(T, K1_inv))).requires_grad_()
 
             # to get the last row as linear combination of first two rows
             # new_F = get_linear_comb(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])
