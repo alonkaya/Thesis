@@ -75,24 +75,24 @@ def generate_pose_and_frame_numbers(poses_path):
 
     return poses, frame_numbers
 
-def reconstruction_module(x):
+def reconstruction_module(x, device):
         def get_rotation(rx, ry, rz):
             # normalize input?
             R_x = torch.tensor([
                 [1.,    0.,             0.],
                 [0.,    torch.cos(rx),    -torch.sin(rx)],
                 [0.,    torch.sin(rx),     torch.cos(rx)]
-            ])
+            ]).to(device)
             R_y = torch.tensor([
                 [torch.cos(ry),    0.,    -torch.sin(ry)],
                 [0.,            1.,     0.],
                 [torch.sin(ry),    0.,     torch.cos(ry)]
-            ])
+            ]).to(device)
             R_z = torch.tensor([
                 [torch.cos(rz),    -torch.sin(rz),    0.],
                 [torch.sin(rz),    torch.cos(rz),     0.],
                 [0.,            0.,             1.]
-            ])
+            ]).to(device)
             R = torch.matmul(R_x, torch.matmul(R_y, R_z))
             return R
 
@@ -101,14 +101,14 @@ def reconstruction_module(x):
                 [-1/(f+1e-8),   0.,             0.],
                 [0.,            -1/(f+1e-8),    0.],
                 [0.,            0.,             1.]
-            ])
+            ]).to(device)
 
         def get_translate(tx, ty, tz):
             return torch.tensor([
                 [0.,  -tz, ty],
                 [tz,  0,   -tx],
                 [-ty, tx,  0]
-            ], requires_grad = True)
+            ]).to(device)
 
         # def get_linear_comb(f0, f1, f2, f3, f4, f5, cf1, cf2):
         #     return torch.tensor([
@@ -125,7 +125,7 @@ def reconstruction_module(x):
             R  = get_rotation(x[2], x[3], x[4])
             T  = get_translate(x[5], x[6], x[7])
             F  = torch.matmul(K2_inv,
-                    torch.matmul(R, torch.matmul(T, K1_inv)))
+                    torch.matmul(R, torch.matmul(T, K1_inv))).reqires_grad_()
 
             # to get the last row as linear combination of first two rows
             # new_F = get_linear_comb(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])
@@ -133,7 +133,7 @@ def reconstruction_module(x):
             # flat = tf.reshape(new_F, [-1])
             return F
 
-        out = get_translate(x[5], x[6], x[7])
+        out = get_fmat(x)
 
         return out
 
