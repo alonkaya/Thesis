@@ -41,7 +41,7 @@ class CustomDataset(torch.utils.data.Dataset):
 
         # Convert to tensor and rescale [0,255] -> [0,1]
         first_image, second_image, F  = T.to_tensor(first_image), T.to_tensor(second_image), normalize_F(torch.tensor(F, dtype=torch.float32))
-        print(f'ground-truth F shape: {F.shape}')
+
         # TODO: Normalize them
         return first_image, second_image, F
 
