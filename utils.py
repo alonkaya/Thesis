@@ -78,17 +78,17 @@ def generate_pose_and_frame_numbers(poses_path):
 def reconstruction_module(x):
         def get_rotation(rx, ry, rz):
             # normalize input?
-            R_x = torch.stack([
+            R_x = torch.tensor([
                 [1.,    0.,             0.],
                 [0.,    torch.cos(rx),    -torch.sin(rx)],
                 [0.,    torch.sin(rx),     torch.cos(rx)]
             ])
-            R_y = torch.stack([
+            R_y = torch.tensor([
                 [torch.cos(ry),    0.,    -torch.sin(ry)],
                 [0.,            1.,     0.],
                 [torch.sin(ry),    0.,     torch.cos(ry)]
             ])
-            R_z = torch.stack([
+            R_z = torch.tensor([
                 [torch.cos(rz),    -torch.sin(rz),    0.],
                 [torch.sin(rz),    torch.cos(rz),     0.],
                 [0.,            0.,             1.]
