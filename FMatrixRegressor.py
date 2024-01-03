@@ -92,7 +92,7 @@ class FMatrixRegressor(nn.Module):
         # output = torch.stack([enforce_fundamental_constraints(F_matrix) for F_matrix in output])
 
         # Apply reconstruction layer
-        output = torch.stack([reconstruction_module(x) for x in output]).to(self.device)
+        output = torch.stack([reconstruction_module(x) for x in output])
         print("Output requires_grad:", output.requires_grad)
 
         # Apply abs normalization layer
