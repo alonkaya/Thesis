@@ -65,16 +65,16 @@ class FMatrixRegressor(nn.Module):
             x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(self.device)
             x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(self.device)
 
-            x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768) 
-            x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768) 
+            x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
+            x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
 
             # x1_embeddings = self.pretrained_model.get_image_features(**x1)
             # x2_embeddings = self.pretrained_model.get_image_features(**x2)
 
 
         else: # If using standard ViT
-             x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768) 
-             x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768)
+             x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
+             x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
 
         # cosine_similarity = torch.nn.functional.cosine_similarity(x1_embeddings, x2_embeddings).detach().cpu() # (batch_size)
 
@@ -82,19 +82,19 @@ class FMatrixRegressor(nn.Module):
         # mul_embedding = x1_embeddings.mul(x2_embeddings)
 
         # Concatenate both original and rotated embedding vectors
-        embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
+        embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1).to(self.device)
 
         # Train MLP on embedding vectors
-        output = self.mlp(embeddings)
+        output = self.mlp(embeddings).to(self.device)
 
         # Convert 9-vector output to 3x3 F-matrix
         # output = torch.stack([enforce_fundamental_constraints(F_matrix) for F_matrix in output])
 
         # Apply reconstruction layer
-        output = torch.stack([reconstruction_module(x) for x in output])
+        output = torch.stack([reconstruction_module(x) for x in output]).to(self.device)
 
         # Apply abs normalization layer
-        output = torch.stack([normalize_F(x) for x in output])
+        output = torch.stack([normalize_F(x) for x in output]).to(self.device)
 
         return output
 
