@@ -75,7 +75,7 @@ def generate_pose_and_frame_numbers(poses_path):
 
     return poses, frame_numbers
 
-def reconstruction_module(x, device):
+def reconstruction_module(x):
         def get_rotation(rx, ry, rz):
             # normalize input?
             R_x = torch.tensor([
@@ -133,7 +133,7 @@ def reconstruction_module(x, device):
             # flat = tf.reshape(new_F, [-1])
             return F
 
-        out = get_translate(x)
+        out = get_translate(x[5], x[6], x[7])
 
         return out
 
