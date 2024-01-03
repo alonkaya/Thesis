@@ -53,7 +53,7 @@ class FMatrixRegressor(nn.Module):
 
         # Choose appropriate loss function based on regress parameter
         self.L2_loss = nn.MSELoss()
-        # self.L1_loss = nn.L1loss()
+        self.L1_loss = nn.L1Loss()
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
@@ -119,7 +119,9 @@ class FMatrixRegressor(nn.Module):
                 output = self.forward(first_image, second_image)
                 
                 # Compute loss
-                loss = self.L2_loss(output, label)
+                l1_loss = self.L1_loss(output, label)
+                l2_loss = self.L2_loss(output, label)
+                loss = l1_loss + l2_loss
                 
                 # Add a term to the loss that penalizes the smallest singular value being far from zero. This complies with the rank-2 constraint
                 # loss = add_last_sing_value_penalty(output, loss)
@@ -154,7 +156,10 @@ class FMatrixRegressor(nn.Module):
                     original_image, translated_image, val_label = original_image.to(self.device), translated_image.to(self.device), val_label.to(self.device)
  
                     val_output = self.forward(original_image, translated_image)
-                    val_loss = self.L2_loss(val_output, val_label)
+
+                    val_l1_loss = self.L1_loss(val_output, val_label)
+                    val_l2_loss = self.L2_loss(val_output, val_label)
+                    val_loss = val_l1_loss + val_l2_loss
 
                     val_outputs.append(val_output.to(self.device))
                     val_labels.append(val_label)
