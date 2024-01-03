@@ -53,7 +53,7 @@ class FMatrixRegressor(nn.Module):
 
         # Choose appropriate loss function based on regress parameter
         self.L2_loss = nn.MSELoss()
-        self.L1_loss = nn.L1loss()
+        # self.L1_loss = nn.L1loss()
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
