@@ -105,16 +105,16 @@ def reconstruction_module(x):
 
         def get_translate(x):
             out = x.clone()
-            # out[0][0] = 0
-            # out[0][1] = -x[7]
-            # out[0][2] = x[6]
-            # out[1][0] = x[7]
-            # out[1][1] = 0
-            # out[1][2] = -x[5]
-            # out[2][0] = -x[6]
-            # out[2][1] = x[5]
-            # out[2][2] = 0
-            out = torch.tensor([[0, -x[7], x[6]], [x[7], 0, -x[5]], [-x[6], x[5], 0]])
+            out[0][0] = 0
+            out[0][1] = -x[7]
+            out[0][2] = x[6]
+            out[1][0] = x[7]
+            out[1][1] = 0
+            out[1][2] = -x[5]
+            out[2][0] = -x[6]
+            out[2][1] = x[5]
+            out[2][2] = 0
+
             return out
             # return torch.tensor([
             #     [0.,  -tz, ty],
