@@ -98,6 +98,7 @@ def reconstruction_module(x):
 
         def get_inv_intrinsic(f):
             print(f)
+            a = -1 / f
             return torch.stack([
                 [-1/(f+1e-8),   0.,             0.],
                 [0.,            -1/(f+1e-8),    0.],
