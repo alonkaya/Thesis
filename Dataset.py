@@ -77,7 +77,7 @@ train_dataset = CustomDataset(sequence_path, poses[:train_samples], frame_number
 val_dataset = CustomDataset(sequence_path, poses[train_samples:], frame_numbers[train_samples:], transform, K)
 
 # Create a DataLoader
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=False, pin_memory=True)
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, pin_memory=True)
 val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, pin_memory=True)
 
 # Visualize an image:
