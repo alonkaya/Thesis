@@ -41,9 +41,9 @@ def enforce_fundamental_constraints(F_vector):
     U, S, V = torch.svd(F_matrix)  
 
     S_prime = S.clone()  # Create a copy of S
-    S_prime[-1] = 0  # Set the smallest singular value to zero
+    S_prime[-1] = 1e-9  # Set the smallest singular value to zero
     
-    F = U @ torch.diag(S) @ V.t() 
+    F = U @ torch.diag(S_prime) @ V.t() 
 
     # Normalize the matrix to ensure scale invariance
     # F = F_rank2 / torch.norm(F_rank2, p='fro')
@@ -149,5 +149,11 @@ def reconstruction_module(x):
 
         return out
 
-def normalize_F(x):
+def normalize_max(x):
     return x / (torch.max(torch.abs(x)) + 1e-8)
+
+def normalize_L1(x):
+    return x / torch.sum(torch.abs(x))
+
+def normalize_L2(x):
+    return x / torch.norm(x)

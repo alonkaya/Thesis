@@ -88,13 +88,16 @@ class FMatrixRegressor(nn.Module):
         output = self.mlp(embeddings)
 
         # Convert 9-vector output to 3x3 F-matrix
-        # output = torch.stack([enforce_fundamental_constraints(F_matrix) for F_matrix in output])
+        output = torch.stack([enforce_fundamental_constraints(x) for x in output])
 
         # Apply reconstruction layer
-        output = torch.stack([reconstruction_module(x) for x in output]).to(self.device)        
+        # output = torch.stack([reconstruction_module(x) for x in output]).to(self.device)        
 
-        # Apply abs normalization layer
-        output = torch.stack([normalize_F(x) for x in output]).to(self.device)
+        # Apply L2 norm on top of L1 norm 
+        output = torch.stack([normalize_L2(normalize_L1(x)) for x in output]).to(self.device)
+
+        # Apply max normalization layer
+        # output = torch.stack([normalize_max(x) for x in output]).to(self.device)
         
         return output
 
@@ -121,7 +124,7 @@ class FMatrixRegressor(nn.Module):
                 # Compute loss
                 l1_loss = self.L1_loss(output, label)
                 l2_loss = self.L2_loss(output, label)
-                loss = l1_loss + l2_loss
+                loss = l2_loss
                 
                 # Add a term to the loss that penalizes the smallest singular value being far from zero. This complies with the rank-2 constraint
                 # loss = add_last_sing_value_penalty(output, loss)
@@ -159,7 +162,7 @@ class FMatrixRegressor(nn.Module):
 
                     val_l1_loss = self.L1_loss(val_output, val_label)
                     val_l2_loss = self.L2_loss(val_output, val_label)
-                    val_loss = val_l1_loss + val_l2_loss
+                    val_loss = val_l2_loss
 
                     val_outputs.append(val_output.to(self.device))
                     val_labels.append(val_label)
