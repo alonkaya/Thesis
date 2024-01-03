@@ -56,7 +56,11 @@ def add_last_sing_value_penalty(output, loss):
     _, S, _ = torch.svd(output)
     
     # Add a term to the loss that penalizes the smallest singular value being far from zero
-    rank_penalty = torch.sum(torch.abs(S[:,-1]))
+    rank_penalty = torch.mean(torch.abs(S[:,-1]))
+
+    # TODO: add penatly for having less then 2 singular values
+    if torch.any(S[:, 1] == 0):
+        print("oops")
 
     loss = loss + rank_penalty
 
@@ -70,3 +74,71 @@ def generate_pose_and_frame_numbers(poses_path):
     poses = [poses[i] for i in frame_numbers]
 
     return poses, frame_numbers
+
+def reconstruction_module(x):
+        def get_rotation(rx, ry, rz):
+            # normalize input?
+            R_x = torch.stack([
+                [1.,    0.,             0.],
+                [0.,    torch.cos(rx),    -torch.sin(rx)],
+                [0.,    torch.sin(rx),     torch.cos(rx)]
+            ])
+            R_y = torch.stack([
+                [torch.cos(ry),    0.,    -torch.sin(ry)],
+                [0.,            1.,     0.],
+                [torch.sin(ry),    0.,     torch.cos(ry)]
+            ])
+            R_z = torch.stack([
+                [torch.cos(rz),    -torch.sin(rz),    0.],
+                [torch.sin(rz),    torch.cos(rz),     0.],
+                [0.,            0.,             1.]
+            ])
+            R = torch.matmul(R_x, torch.matmul(R_y, R_z))
+            return R
+
+        def get_inv_intrinsic(f):
+            return torch.stack([
+                [-1/(f+1e-8),   0.,             0.],
+                [0.,            -1/(f+1e-8),    0.],
+                [0.,            0.,             1.]
+            ])
+
+        def get_translate(tx, ty, tz):
+            return torch.stack([
+                [0.,  -tz, ty],
+                [tz,  0,   -tx],
+                [-ty, tx,  0]
+            ])
+
+        def get_linear_comb(f0, f1, f2, f3, f4, f5, cf1, cf2):
+            return torch.stack([
+                [f0,            f1,            f2],
+                [f3,            f4,            f5],
+                [cf1*f0+cf2*f3, cf1*f1+cf2*f4, cf1*f2+cf2*f5]
+            ])
+
+        def get_fmat(x):
+            # F = K2^(-T)*R*[t]x*K1^(-1)
+            # Note: only need out-dim = 8
+            K1_inv = get_inv_intrinsic(x[0])
+            K2_inv = get_inv_intrinsic(x[1]) #TODO: K2 should be -t not just -1..
+            R  = get_rotation(x[2], x[3], x[4])
+            T  = get_translate(x[5], x[6], x[7])
+            F  = torch.matmul(K2_inv,
+                    torch.matmul(R, torch.matmul(T, K1_inv)))
+            print(f'predicted F shape: {F.shape}')
+            flat = torch.reshape(F, [-1])
+
+            # to get the last row as linear combination of first two rows
+            # new_F = get_linear_comb(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])
+            # new_F = get_linear_comb(flat[0], flat[1], flat[2], flat[3], flat[4], flat[5], x[6], x[7])
+            # flat = tf.reshape(new_F, [-1])
+            print ("Using reconstruction layer")
+            return flat
+
+        out = get_fmat(x)
+
+        return out
+
+def normalize_F(self, x):
+    return x / (torch.max(torch.abs(x)) + 1e-8)

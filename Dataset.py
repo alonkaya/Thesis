@@ -1,6 +1,6 @@
 from params import *
 from FunMatrix import *
-from utils import generate_pose_and_frame_numbers
+from utils import generate_pose_and_frame_numbers, normalize_F
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms, datasets
 import torch
@@ -40,8 +40,8 @@ class CustomDataset(torch.utils.data.Dataset):
         F = compute_fundamental(E, self.k, self.k)
 
         # Convert to tensor and rescale [0,255] -> [0,1]
-        first_image, second_image, F  = T.to_tensor(first_image), T.to_tensor(second_image), torch.tensor(F / np.max(F), dtype=torch.float32)
-                
+        first_image, second_image, F  = T.to_tensor(first_image), T.to_tensor(second_image), normalize_F(torch.tensor(F, dtype=torch.float32))
+        print(f'ground-truth F shape: {F.shape}')
         # TODO: Normalize them
         return first_image, second_image, F
 

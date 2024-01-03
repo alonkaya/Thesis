@@ -38,7 +38,9 @@ def compute_relative_transformations(pose1, pose2):
 # Define a function to compute the essential matrix E from the relative pose matrix M
 def compute_essential(R, t):
     # Compute the skew-symmetric matrix of t
-    t_x = np.array([[0, -t[2], t[1]], [t[2], 0, -t[0]], [-t[1], t[0], 0]])
+    t_x = np.array([[0, -t[2], t[1]], 
+                    [t[2], 0, -t[0]], 
+                    [-t[1], t[0], 0]])
 
     # Compute the essential matrix E
     E = t_x @ R
@@ -52,8 +54,7 @@ def compute_fundamental(E, K1, K2):
     # Compute the Fundamental matrix 
     F = np.dot(K2_inv_T, np.dot(E, K1_inv))
 
-    # Rescale to be between [0,1]
-    F = F / np.max(F)
+    assert np.linalg.matrix_rank(F) == 2
 
     return F
 

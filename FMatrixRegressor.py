@@ -52,7 +52,8 @@ class FMatrixRegressor(nn.Module):
                 param.requires_grad = False
 
         # Choose appropriate loss function based on regress parameter
-        self.criterion = nn.MSELoss()
+        self.L2_loss = nn.MSELoss()
+        self.L1_loss = nn.L1loss()
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
@@ -88,7 +89,12 @@ class FMatrixRegressor(nn.Module):
 
         # Convert 9-vector output to 3x3 F-matrix
         # output = torch.stack([enforce_fundamental_constraints(F_matrix) for F_matrix in output])
-        output = output.view(-1, 3, 3)
+
+        # Apply reconstruction layer
+        output = torch.stack([reconstruction_module(x) for x in output])
+
+        # Apply abs normalization layer
+        output = torch.stack([normalize_F(x) for x in output])
 
         return output
 
@@ -113,7 +119,7 @@ class FMatrixRegressor(nn.Module):
                 output = self.forward(first_image, second_image)
 
                 # Compute loss
-                loss = self.criterion(output, label)
+                loss = self.L2_loss(output, label)
                 
                 # Add a term to the loss that penalizes the smallest singular value being far from zero. This complies with the rank-2 constraint
                 # loss = add_last_sing_value_penalty(output, loss)
@@ -148,7 +154,7 @@ class FMatrixRegressor(nn.Module):
                     original_image, translated_image, val_label = original_image.to(self.device), translated_image.to(self.device), val_label.to(self.device)
  
                     val_output = self.forward(original_image, translated_image)
-                    val_loss = self.criterion(val_output, val_label)
+                    val_loss = self.L2_loss(val_output, val_label)
 
                     val_outputs.append(val_output.to(self.device))
                     val_labels.append(val_label)
