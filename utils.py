@@ -126,7 +126,7 @@ def reconstruction_module(x):
             T  = get_translate(x[5], x[6], x[7])
             F  = torch.matmul(K2_inv,
                     torch.matmul(R, torch.matmul(T, K1_inv)))
-            print(F.requires_grad)
+            print(R.requires_grad, T.requires_grad, F.requires_grad)
             # to get the last row as linear combination of first two rows
             # new_F = get_linear_comb(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7])
             # new_F = get_linear_comb(flat[0], flat[1], flat[2], flat[3], flat[4], flat[5], x[6], x[7])
