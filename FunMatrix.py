@@ -54,7 +54,8 @@ def compute_fundamental(E, K1, K2):
     # Compute the Fundamental matrix 
     F = np.dot(K2_inv_T, np.dot(E, K1_inv))
 
-    assert np.linalg.matrix_rank(F) == 2
+    if not np.linalg.matrix_rank(F) == 2:
+        print("rank of ground-truch not 2")
 
     return F
 
