@@ -82,8 +82,8 @@ def check_epipolar_constraint(image1_tensor, image2_tensor, F):
     # Load the images
     # img1 = cv2.imread(image1_path, 0)
     # img2 = cv2.imread(image2_path, 0)
-    img1 = image1_tensor.numpy()
-    img2 = image2_tensor.numpy()
+    img1 = image1_tensor.detach().cpu().numpy()
+    img2 = image2_tensor.detach().cpu().numpy()
 
     # Initiate ORB detector
     orb = cv2.ORB_create()
