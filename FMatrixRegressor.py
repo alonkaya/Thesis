@@ -85,10 +85,11 @@ class FMatrixRegressor(nn.Module):
 
 
         if add_penalty_loss:
-            penalty = last_sing_value_penalty(output).to(self.device)
-            
             # Apply L2 norm on top of L1 norm 
             output = torch.stack([normalize_L2(normalize_L1(x)) for x in output]).to(self.device)
+            
+            penalty = last_sing_value_penalty(output).to(self.device)
+           
 
         elif enforce_fundamental_constraint:
             # Convert 9-vector output to 3x3 rank-2 F-matrix
@@ -130,9 +131,6 @@ class FMatrixRegressor(nn.Module):
                 l1_loss = self.L1_loss(output, label)
                 l2_loss = self.L2_loss(output, label)
                 loss = l2_loss + penalty
-                
-                # Add a term to the loss that penalizes the smallest singular value being far from zero. This complies with the rank-2 constraint
-                # loss = add_last_sing_value_penalty(output, loss)
 
                 # Compute Backward pass and gradients
                 self.optimizer.zero_grad()
@@ -164,7 +162,7 @@ class FMatrixRegressor(nn.Module):
                     original_image, translated_image, val_label = original_image.to(self.device), translated_image.to(self.device), val_label.to(self.device)
  
                     val_output, penalty = self.forward(original_image, translated_image)
-                    print(penalty)
+
                     val_l1_loss = self.L1_loss(val_output, val_label)
                     val_l2_loss = self.L2_loss(val_output, val_label)
                     val_loss = val_l2_loss 
