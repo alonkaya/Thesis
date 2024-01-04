@@ -1,15 +1,16 @@
 num_of_training_images = 1000
 num_of_val_images = 200
 learning_rate = 8e-5
-num_output = 9
-mlp_hidden_sizes=[512,256, 128]
+mlp_hidden_sizes=[512,256,128]
 num_epochs = 60
 angle_range = 90
 shift_x_range = 140
 shift_y_range = 140
 clip_model_name = "openai/clip-vit-base-patch32"
 vit_model_name = "google/vit-base-patch16-224-in21k"
-
 num_of_frames = 4600
 jump_frames = 5
 train_ratio = 0.8
+enforce_fundamental_constraint = False
+add_penalty_loss = True
+num_output = 9 

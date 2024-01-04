@@ -68,10 +68,6 @@ class FMatrixRegressor(nn.Module):
             x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
             x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
 
-            # x1_embeddings = self.pretrained_model.get_image_features(**x1)
-            # x2_embeddings = self.pretrained_model.get_image_features(**x2)
-
-
         else: # If using standard ViT
              x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
              x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
@@ -87,19 +83,27 @@ class FMatrixRegressor(nn.Module):
         # Train MLP on embedding vectors
         output = self.mlp(embeddings)
 
-        # Convert 9-vector output to 3x3 F-matrix
-        output = torch.stack([enforce_fundamental_constraints(x) for x in output])
+        if add_penalty_loss:
+            penalty = last_sing_value_penalty(output).to(self.device)
+            
+            # Apply L2 norm on top of L1 norm 
+            output = torch.stack([normalize_L2(normalize_L1(x)) for x in output]).to(self.device)
 
-        # Apply reconstruction layer
-        # output = torch.stack([reconstruction_module(x) for x in output]).to(self.device)        
+        elif enforce_fundamental_constraint:
+            # Convert 9-vector output to 3x3 rank-2 F-matrix
+            output = torch.stack([enforce_fundamental_constraints(x) for x in output]).to(self.device)
 
-        # Apply L2 norm on top of L1 norm 
-        output = torch.stack([normalize_L2(normalize_L1(x)) for x in output]).to(self.device)
-
-        # Apply max normalization layer
-        # output = torch.stack([normalize_max(x) for x in output]).to(self.device)
+            # Apply L2 norm on top of L1 norm 
+            output = torch.stack([normalize_L2(normalize_L1(x)) for x in output]).to(self.device)
         
-        return output
+        else:
+            # Apply reconstruction layer to 8-vector output
+            output = torch.stack([reconstruction_module(x) for x in output]).to(self.device)        
+
+            # Apply max normalization layer
+            output = torch.stack([normalize_max(x) for x in output]).to(self.device)
+        
+        return output, penalty
 
 
     def train_model(self, train_loader, val_loader, num_epochs):
@@ -119,12 +123,12 @@ class FMatrixRegressor(nn.Module):
                 first_image, second_image, label = first_image.to(self.device), second_image.to(self.device), label.to(self.device) 
                            
                 # Foward pass
-                output = self.forward(first_image, second_image)
+                output, penalty = self.forward(first_image, second_image)
                 
                 # Compute loss
                 l1_loss = self.L1_loss(output, label)
                 l2_loss = self.L2_loss(output, label)
-                loss = l2_loss
+                loss = l2_loss + penalty
                 
                 # Add a term to the loss that penalizes the smallest singular value being far from zero. This complies with the rank-2 constraint
                 # loss = add_last_sing_value_penalty(output, loss)
@@ -158,11 +162,11 @@ class FMatrixRegressor(nn.Module):
                 for original_image, translated_image, val_label in val_loader:
                     original_image, translated_image, val_label = original_image.to(self.device), translated_image.to(self.device), val_label.to(self.device)
  
-                    val_output = self.forward(original_image, translated_image)
-
+                    val_output, penalty = self.forward(original_image, translated_image)
+                    print(penalty)
                     val_l1_loss = self.L1_loss(val_output, val_label)
                     val_l2_loss = self.L2_loss(val_output, val_label)
-                    val_loss = val_l2_loss
+                    val_loss = val_l2_loss 
 
                     val_outputs.append(val_output.to(self.device))
                     val_labels.append(val_label)

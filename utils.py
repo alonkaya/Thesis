@@ -51,7 +51,7 @@ def enforce_fundamental_constraints(F_vector):
 
     return F
 
-def add_last_sing_value_penalty(output, loss):
+def last_sing_value_penalty(output):
     # Compute the SVD of the output
     _, S, _ = torch.svd(output)
     
@@ -61,10 +61,10 @@ def add_last_sing_value_penalty(output, loss):
     # TODO: add penatly for having less then 2 singular values
     if torch.any(S[:, 1] == 0):
         print("oops")
+# 
+    # loss = loss + rank_penalty
 
-    loss = loss + rank_penalty
-
-    return loss
+    return rank_penalty
 
 def generate_pose_and_frame_numbers(poses_path):
     poses = read_poses(poses_path)
@@ -103,31 +103,13 @@ def reconstruction_module(x):
                 [0.,            0.,             1.]
             ])
 
-        def get_translate(x):
-            out = x.clone()
-            out[0][0] = 0
-            out[0][1] = -x[7]
-            out[0][2] = x[6]
-            out[1][0] = x[7]
-            out[1][1] = 0
-            out[1][2] = -x[5]
-            out[2][0] = -x[6]
-            out[2][1] = x[5]
-            out[2][2] = 0
+        def get_translate(tx, ty, tz):
+            return torch.tensor([
+                [0.,  -tz, ty],
+                [tz,  0,   -tx],
+                [-ty, tx,  0]
+            ])
 
-            return out
-            # return torch.tensor([
-            #     [0.,  -tz, ty],
-            #     [tz,  0,   -tx],
-            #     [-ty, tx,  0]
-            # ])
-
-        # def get_linear_comb(f0, f1, f2, f3, f4, f5, cf1, cf2):
-        #     return torch.tensor([
-        #         [f0,            f1,            f2],
-        #         [f3,            f4,            f5],
-        #         [cf1*f0+cf2*f3, cf1*f1+cf2*f4, cf1*f2+cf2*f5]
-        #     ])
 
         def get_fmat(x):
             # F = K2^(-T)*R*[t]x*K1^(-1)
@@ -145,7 +127,7 @@ def reconstruction_module(x):
             # flat = tf.reshape(new_F, [-1])
             return F
 
-        out = get_translate(x)
+        out = get_fmat(x)
 
         return out
 
