@@ -115,8 +115,8 @@ class FMatrixRegressor(nn.Module):
         all_val_loss = []
         train_mae = []
         val_mae = []
-        train_all_avg_ec_err = []
-        val_all_avg_ec_err = []
+        # train_all_avg_ec_err = []
+        # val_all_avg_ec_err = []
         for epoch in range(num_epochs):
             self.train()
 
@@ -141,11 +141,11 @@ class FMatrixRegressor(nn.Module):
                 self.optimizer.step()
 
                 # Compute train mean epipolar constraint error 
-                avg_ec_err = 0
-                for img_1, img_2, F in zip(first_image, second_image, label):
-                    avg_ec_err += check_epipolar_constraint(img_1, img_2, F)
-                avg_ec_err /= len(first_image)
-                epoch_avg_ec_err += avg_ec_err
+                # avg_ec_err = 0
+                # for img_1, img_2, F in zip(first_image, second_image, label):
+                #     avg_ec_err += check_epipolar_constraint(img_1, img_2, F)
+                # avg_ec_err /= len(first_image)
+                # epoch_avg_ec_err += avg_ec_err
 
                 # Extend lists with batch statistics
                 labels.append(label)
@@ -161,7 +161,7 @@ class FMatrixRegressor(nn.Module):
             train_mae.append(mae.cpu())
             
             epoch_avg_ec_err /= len(train_loader)
-            train_all_avg_ec_err.append(epoch_avg_ec_err)
+            # train_all_avg_ec_err.append(epoch_avg_ec_err)
             # Extend list of all labels with current epoch's labels for cosine_similarity plot
             # all_labels.extend(labels)
 
@@ -169,7 +169,7 @@ class FMatrixRegressor(nn.Module):
             self.eval()
             val_labels = []
             val_outputs = []
-            val_epoch_avg_ec_err = 0
+            # val_epoch_avg_ec_err = 0
             with torch.no_grad():
                 for original_image, translated_image, val_label in val_loader:
                     original_image, translated_image, val_label = original_image.to(self.device), translated_image.to(self.device), val_label.to(self.device)
@@ -181,11 +181,11 @@ class FMatrixRegressor(nn.Module):
                     val_loss = val_l2_loss 
 
                     # Compute val mean epipolar constraint error 
-                    val_avg_ec_err = 0
-                    for img_1, img_2, F in zip(first_image, second_image, label):
-                        val_avg_ec_err += check_epipolar_constraint(img_1, img_2, F)
-                    val_avg_ec_err /= len(first_image)
-                    val_epoch_avg_ec_err += val_avg_ec_err
+                    # val_avg_ec_err = 0
+                    # for img_1, img_2, F in zip(first_image, second_image, label):
+                    #     val_avg_ec_err += check_epipolar_constraint(img_1, img_2, F)
+                    # val_avg_ec_err /= len(first_image)
+                    # val_epoch_avg_ec_err += val_avg_ec_err
 
                     val_outputs.append(val_output.to(self.device))
                     val_labels.append(val_label)
@@ -195,7 +195,7 @@ class FMatrixRegressor(nn.Module):
                 val_mae.append(mae.cpu())
 
                 val_epoch_avg_ec_err /= len(val_loader)
-                val_all_avg_ec_err.append(val_epoch_avg_ec_err)
+                # val_all_avg_ec_err.append(val_epoch_avg_ec_err)
 
             # Calculate and store root validation loss for the epoch
             val_loss = val_loss.detach().cpu().item()
@@ -207,8 +207,8 @@ class FMatrixRegressor(nn.Module):
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss, x_label="Epoch", y_label='Validation Loss')
         plot_over_epoch(x=range(1, num_epochs + 1), y=train_mae, x_label="Epoch", y_label='Training MAE')
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae, x_label="Epoch", y_label='VAlidation MAE')
-        plot_over_epoch(x=range(1, num_epochs + 1), y=train_all_avg_ec_err, x_label="Epoch", y_label='Training mean epipolar constraint err')
-        plot_over_epoch(x=range(1, num_epochs + 1), y=val_all_avg_ec_err, x_label="Epoch", y_label='Valdation mean epipolar constraint err')
+        # plot_over_epoch(x=range(1, num_epochs + 1), y=train_all_avg_ec_err, x_label="Epoch", y_label='Training mean epipolar constraint err')
+        # plot_over_epoch(x=range(1, num_epochs + 1), y=val_all_avg_ec_err, x_label="Epoch", y_label='Valdation mean epipolar constraint err')
         # plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False)
 
         # Save
