@@ -77,10 +77,13 @@ def get_internal_param_matrix(P):
 
     return K, R
 
-def check_epipolar_constraint(image1_path, image2_path, F):
+def check_epipolar_constraint(image1_tensor, image2_tensor, F):
+# def check_epipolar_constraint(image1_path, image2_path, F):
     # Load the images
-    img1 = cv2.imread(image1_path, 0)
-    img2 = cv2.imread(image2_path, 0)
+    # img1 = cv2.imread(image1_path, 0)
+    # img2 = cv2.imread(image2_path, 0)
+    img1 = image1_tensor.numpy()
+    img2 = image2_tensor.numpy()
 
     # Initiate ORB detector
     orb = cv2.ORB_create()
@@ -107,12 +110,13 @@ def check_epipolar_constraint(image1_path, image2_path, F):
     pts2 = np.concatenate((pts2, np.ones((pts2.shape[0], 1, 1))), axis=-1)
 
     # Check the epipolar constraint
+    error = 0
     for i in range(pts1.shape[0]):
         x = pts1[i, 0, :].reshape(3, 1)
         x_prime = pts2[i, 0, :].reshape(3, 1)
-        error = np.dot(np.dot(x_prime.T, F), x)
-        print(f'Error for point {i}: {error[0, 0]}')
-
+        error += np.dot(np.dot(x_prime.T, F), x)[0, 0]
+        # print(f'Error for point {i}: {error[0, 0]}')
+    return error / len(pts1.shape[0])
 
 # # Read the calib.txt file and get the projection matrices
 # left_projection_matrix = process_calib('sequences\\00')
