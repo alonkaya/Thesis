@@ -81,7 +81,8 @@ class FMatrixRegressor(nn.Module):
         embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1).to(self.device)
 
         # Train MLP on embedding vectors
-        output = self.mlp(embeddings)
+        output = self.mlp(embeddings).view(-1,3,3)
+
 
         if add_penalty_loss:
             penalty = last_sing_value_penalty(output).to(self.device)
