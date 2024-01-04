@@ -143,7 +143,7 @@ class FMatrixRegressor(nn.Module):
                 # Compute train mean epipolar constraint error 
                 avg_ec_err = 0
                 for img_1, img_2, F in zip(first_image, second_image, label):
-                    avg_ec_err += check_epipolar_constraint(img_1, img_2, F)
+                    avg_ec_err += check_epipolar_constraint(img_1.detach().cpu(), img_2.detach().cpu(), F.detach().cpu())
                 avg_ec_err /= len(first_image)
                 epoch_avg_ec_err += avg_ec_err
 
@@ -183,7 +183,7 @@ class FMatrixRegressor(nn.Module):
                     # Compute val mean epipolar constraint error 
                     val_avg_ec_err = 0
                     for img_1, img_2, F in zip(first_image, second_image, label):
-                        val_avg_ec_err += check_epipolar_constraint(img_1, img_2, F)
+                        val_avg_ec_err += check_epipolar_constraint(img_1.detach().cpu(), img_2.detach().cpu(), F.detach().cpu())
                     val_avg_ec_err /= len(first_image)
                     val_epoch_avg_ec_err += val_avg_ec_err
 
