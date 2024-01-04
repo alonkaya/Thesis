@@ -52,6 +52,9 @@ def enforce_fundamental_constraints(F_vector):
     return F
 
 def last_sing_value_penalty(output):
+    # convert 9-vector output to 3*3 
+    output = output.view(-1,3,3)
+
     # Compute the SVD of the output
     _, S, _ = torch.svd(output)
     
