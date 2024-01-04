@@ -194,7 +194,7 @@ class FMatrixRegressor(nn.Module):
                 mae = torch.mean(torch.abs(torch.cat(val_labels, dim=0) - torch.cat(val_outputs, dim=0)))
                 val_mae.append(mae.cpu())
 
-                val_epoch_avg_ec_err /= len(val_loader)
+                # val_epoch_avg_ec_err /= len(val_loader)
                 # val_all_avg_ec_err.append(val_epoch_avg_ec_err)
 
             # Calculate and store root validation loss for the epoch
