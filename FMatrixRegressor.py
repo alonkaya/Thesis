@@ -169,7 +169,7 @@ class FMatrixRegressor(nn.Module):
             self.eval()
             val_labels = []
             val_outputs = []
-            # val_epoch_avg_ec_err = 0
+            val_epoch_avg_ec_err = 0
             with torch.no_grad():
                 for original_image, translated_image, val_label in val_loader:
                     original_image, translated_image, val_label = original_image.to(self.device), translated_image.to(self.device), val_label.to(self.device)
