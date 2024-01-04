@@ -61,7 +61,7 @@ def last_sing_value_penalty(output):
     # TODO: add penatly for having less then 2 singular values
     if torch.any(S[:, 1] == 0):
         print("oops")
-# 
+
     # loss = loss + rank_penalty
 
     return rank_penalty

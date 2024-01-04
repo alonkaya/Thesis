@@ -1,6 +1,6 @@
 num_of_training_images = 1000
 num_of_val_images = 200
-learning_rate = 8e-4
+learning_rate = 1e-4
 mlp_hidden_sizes=[512,256]
 num_epochs = 60
 angle_range = 90

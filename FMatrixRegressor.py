@@ -175,7 +175,7 @@ class FMatrixRegressor(nn.Module):
                     original_image, translated_image, val_label = original_image.to(self.device), translated_image.to(self.device), val_label.to(self.device)
  
                     val_output, penalty = self.forward(original_image, translated_image)
-                    print(penalty)
+                    print(penalty.item())
                     val_l1_loss = self.L1_loss(val_output, val_label)
                     val_l2_loss = self.L2_loss(val_output, val_label)
                     val_loss = val_l2_loss 
