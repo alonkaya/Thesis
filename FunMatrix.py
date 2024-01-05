@@ -117,7 +117,7 @@ def check_epipolar_constraint(image1, image2, F):
     for i in range(pts1.shape[0]):
         x = pts1[i, 0, :].reshape(3, 1)
         x_prime = pts2[i, 0, :].reshape(3, 1)
-        error += np.dot(np.dot(x_prime.T, F), x)[0, 0]
+        error += np.abs(np.dot(np.dot(x_prime.T, F), x)[0, 0])
         # print(f'Error for point {i}: {error[0, 0]}')
     return error / pts1.shape[0]
 

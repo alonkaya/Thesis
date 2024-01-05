@@ -133,7 +133,7 @@ class FMatrixRegressor(nn.Module):
                 # Compute loss
                 l1_loss = self.L1_loss(output, label)
                 l2_loss = self.L2_loss(output, label)
-                loss = l2_loss + penalty
+                loss = l2_loss + 1.5*penalty
 
                 # Compute Backward pass and gradients
                 self.optimizer.zero_grad()
@@ -201,7 +201,7 @@ class FMatrixRegressor(nn.Module):
             val_loss = val_loss.detach().cpu().item()
             all_val_loss.append(val_loss)
 
-            print(f'Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} val_epoch_avg_ec_err: {val_epoch_avg_ec_err} epoch_avg_ec_err: {epoch_avg_ec_err}\n')
+            print(f'Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} Train avg epipolar constraint error: {epoch_avg_ec_err} Val avg epipolar constraint error: {val_epoch_avg_ec_err}\n')
 
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss, x_label="Epoch", y_label='Training Loss')
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss, x_label="Epoch", y_label='Validation Loss')
