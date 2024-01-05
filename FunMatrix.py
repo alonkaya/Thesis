@@ -96,17 +96,21 @@ def check_epipolar_constraint(image1, image2, F):
         return None
     
     # Create BFMatcher object
-    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
+    matches = bf.knnMatch(des1, des2, k=2)
 
-    # Match descriptors
-    matches = bf.match(des1, des2)
+    # Apply Lowe's ratio test
+    good = []
+    for m, n in matches:
+        if m.distance < 0.75 * n.distance:
+            good.append(m)
 
     # Sort them in the order of their distance
     matches = sorted(matches, key=lambda x: x.distance)
 
     # Extract the matched keypoints
-    pts1 = np.float32([kp1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
-    pts2 = np.float32([kp2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+    pts1 = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
+    pts2 = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
     # Convert points to homogeneous coordinates
     pts1 = np.concatenate((pts1, np.ones((pts1.shape[0], 1, 1))), axis=-1)

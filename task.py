@@ -46,6 +46,6 @@ if __name__ == '__main__':
     remote_csv_path = '/home/aviran/running/tasks.csv'
     new_commands = [
         # write the path of the project, the name of the environment, the name of the python file and your email
-        ['/home/aviran/Alon/Thesis', 'alon_env', 'ViTMLPRegressor.py', 'alonkay@post.bgu.ac.il']
+        ['/home/aviran/Alon/Thesis', 'alon_env', 'FMatrixRegressor.py.py', 'alonkay@post.bgu.ac.il']
     ]
     append_to_remote_csv(hostname, port, username, password, remote_csv_path, new_commands)
