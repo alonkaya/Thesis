@@ -106,7 +106,7 @@ def check_epipolar_constraint(image1, image2, F):
             good.append(m)
 
     # Sort them in the order of their distance
-    matches = sorted(matches, key=lambda x: x.distance)
+    # matches = sorted(matches, key=lambda x: x.distance)
 
     # Extract the matched keypoints
     pts1 = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
