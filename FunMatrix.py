@@ -142,7 +142,7 @@ def check_epipolar_constraint(image1, image2, F):
 # # Loop over the pairs of frames
 # for i in range(len(poses) - 1):
 #     # Compute relative rotation and translation matrices
-#     R_relative, t_relative = compute_relative_transformations(poses[i], poses[i+1])
+#     R_relative, t_relative = compute_relative_transformations(poses[i], poses[i+jump_frames])
 
 #     # # Compute the essential matrix E
 #     E = compute_essential(R_relative, t_relative)
@@ -151,7 +151,7 @@ def check_epipolar_constraint(image1, image2, F):
 #     F = compute_fundamental(E, K, K)
 
 #     first_image = Image.open(f'sequences\\02\\image_0\\{i:06}.png')
-#     second_image = Image.open(f'sequences\\02\\image_0\\{i+5:06}.png')
+#     second_image = Image.open(f'sequences\\02\\image_0\\{i+jump_frames:06}.png')
     
 #     img1 = T.to_tensor(first_image)
 #     img2 = T.to_tensor(second_image)
