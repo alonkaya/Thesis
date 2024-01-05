@@ -208,7 +208,7 @@ class FMatrixRegressor(nn.Module):
             val_loss = val_loss.detach().cpu().item()
             all_val_loss.append(val_loss)
 
-            print(f'Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {total_penalty}\n Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}\n')
+            print(f'Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {total_penalty}\n\t\t\t\t\t Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred}\n\t\t\t\t\t Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}\n')
 
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss, x_label="Epoch", y_label='Training Loss')
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss, x_label="Epoch", y_label='Validation Loss')

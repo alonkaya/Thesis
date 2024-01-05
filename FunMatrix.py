@@ -86,17 +86,20 @@ def check_epipolar_constraint(image1, image2, F):
     img1 = (image1.permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8)
     img2 = (image2.permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8)    
 
-    # Initiate ORB detector
-    orb = cv2.ORB_create()
+    # Initialize the SIFT detector
+    sift = cv2.SIFT_create()
 
-    # Find the keypoints and descriptors with ORB
-    kp1, des1 = orb.detectAndCompute(img1, None)
-    kp2, des2 = orb.detectAndCompute(img2, None)
+    # Detect keypoints and compute descriptors for both images
+    kp1, des1 = sift.detectAndCompute(img1, None)
+    kp2, des2 = sift.detectAndCompute(img2, None)
+
     if des1 is None or des2 is None:
+        print("no des")
         return None
     
     # Create BFMatcher object
-    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
+    bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=False)
+
     matches = bf.match(des1, des2)
 
     # # Apply Lowe's ratio test
