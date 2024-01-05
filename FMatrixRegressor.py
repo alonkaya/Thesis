@@ -123,7 +123,7 @@ class FMatrixRegressor(nn.Module):
             outputs = []
             epoch_avg_ec_err_truth = 0
             epoch_avg_ec_err_pred = 0
-            for first_image, second_image, label in train_loader:
+            for first_image, second_image, label, unormalized_label in train_loader:
                 first_image, second_image, label = first_image.to(self.device), second_image.to(self.device), label.to(self.device) 
                            
                 # Foward pass
@@ -142,7 +142,7 @@ class FMatrixRegressor(nn.Module):
                 # Compute train mean epipolar constraint error 
                 avg_ec_err_truth = 0
                 avg_ec_err_pred = 0
-                for img_1, img_2, F_truth, F_pred in zip(first_image, second_image, label, output):
+                for img_1, img_2, F_truth, F_pred in zip(first_image, second_image, unormalized_label, output):
                     avg_ec_err_truth += check_epipolar_constraint(img_1.detach().cpu(), img_2.detach().cpu(), F_truth.detach().cpu())
                     avg_ec_err_pred += check_epipolar_constraint(img_1.detach().cpu(), img_2.detach().cpu(), F_pred.detach().cpu())
                 avg_ec_err_truth, avg_ec_err_pred = avg_ec_err_truth/len(first_image), avg_ec_err_pred/len(first_image)
@@ -175,7 +175,7 @@ class FMatrixRegressor(nn.Module):
             val_epoch_avg_ec_err_pred = 0
             total_penalty = 0
             with torch.no_grad():
-                for original_image, translated_image, val_label in val_loader:
+                for original_image, translated_image, val_unormalized_label in val_loader:
                     original_image, translated_image, val_label = original_image.to(self.device), translated_image.to(self.device), val_label.to(self.device)
  
                     val_output, penalty = self.forward(original_image, translated_image)
@@ -187,7 +187,7 @@ class FMatrixRegressor(nn.Module):
                     # Compute val mean epipolar constraint error 
                     val_avg_ec_err_truth = 0
                     val_avg_ec_err_pred = 0
-                    for img_1, img_2, F_truth, F_pred in zip(first_image, second_image, label, output):
+                    for img_1, img_2, F_truth, F_pred in zip(first_image, second_image, val_unormalized_label, output):
                         val_avg_ec_err_truth += check_epipolar_constraint(img_1.detach().cpu(), img_2.detach().cpu(), F_truth.detach().cpu())
                         val_avg_ec_err_pred += check_epipolar_constraint(img_1.detach().cpu(), img_2.detach().cpu(), F_pred.detach().cpu())
                     val_avg_ec_err_truth, val_avg_ec_err_pred = val_avg_ec_err_truth/len(first_image), val_avg_ec_err_pred/len(first_image)
