@@ -175,7 +175,7 @@ class FMatrixRegressor(nn.Module):
             val_epoch_avg_ec_err_pred = 0
             total_penalty = 0
             with torch.no_grad():
-                for original_image, translated_image, val_unormalized_label in val_loader:
+                for original_image, translated_image, val_label, val_unormalized_label in val_loader:
                     original_image, translated_image, val_label = original_image.to(self.device), translated_image.to(self.device), val_label.to(self.device)
  
                     val_output, penalty = self.forward(original_image, translated_image)
