@@ -1,4 +1,4 @@
-# from FMatrixRegressor import FMatrixRegressor
+from FMatrixRegressor import FMatrixRegressor
 from params import *
 from Dataset import train_loader, val_loader
 import torch
