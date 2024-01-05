@@ -19,12 +19,8 @@ train_iter = iter(train_loader)
 first_image, second_image, label = next(train_iter)
 
 avg_ec_err = 0
-count = 0
 for img_1, img_2, F in zip(first_image, second_image, label):
     out =  check_epipolar_constraint(img_1, img_2, F)
-    if out is not None:
-        avg_ec_err += out
-        count  = count + 1
-avg_ec_err /= count
-print(count)
+    avg_ec_err += out
+avg_ec_err /= 32
 print(avg_ec_err)
