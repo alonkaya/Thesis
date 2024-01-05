@@ -27,8 +27,8 @@ class CustomDataset(torch.utils.data.Dataset):
         second_image = Image.open(os.path.join(self.sequence_path, f'{self.frame_numbers[idx+jump_frames]:06}.png'))
 
         # Transform: Resize, center, grayscale
-        first_image = self.transform(first_image)
-        second_image = self.transform(second_image)
+        # first_image = self.transform(first_image)
+        # second_image = self.transform(second_image)
 
         # Compute relative rotation and translation matrices
         R_relative, t_relative = compute_relative_transformations(self.poses[idx], self.poses[idx+jump_frames])
@@ -46,9 +46,9 @@ class CustomDataset(torch.utils.data.Dataset):
         return first_image, second_image, F
 
 transform = transforms.Compose([
-    # transforms.Resize(256),
-    # transforms.CenterCrop(224),
-    # transforms.Grayscale(num_output_channels=3),
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.Grayscale(num_output_channels=3),
 ])
 
 sequence_path = 'sequences/02/image_0'
