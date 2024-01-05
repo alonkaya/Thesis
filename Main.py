@@ -20,7 +20,6 @@ first_image, second_image, label = next(train_iter)
 
 avg_ec_err = 0
 for img_1, img_2, F in zip(first_image, second_image, label):
-    out =  check_epipolar_constraint(img_1, img_2, F)
-    avg_ec_err += out
-avg_ec_err /= 32
+    print(check_epipolar_constraint(img_1, img_2, F))
+    
 print(avg_ec_err)
