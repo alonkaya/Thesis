@@ -97,7 +97,7 @@ def check_epipolar_constraint(image1, image2, F):
     
     # Create BFMatcher object
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
-    matches = bf.match(des1, des2, k=2)
+    matches = bf.match(des1, des2)
 
     # # Apply Lowe's ratio test
     # good = []
