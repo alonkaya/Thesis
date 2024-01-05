@@ -133,7 +133,7 @@ class FMatrixRegressor(nn.Module):
                 # Compute loss
                 l1_loss = self.L1_loss(output, label)
                 l2_loss = self.L2_loss(output, label)
-                loss = l2_loss + 1.5*penalty
+                loss = l2_loss + penalty_coeff*penalty
 
                 # Compute Backward pass and gradients
                 self.optimizer.zero_grad()
@@ -170,12 +170,13 @@ class FMatrixRegressor(nn.Module):
             val_labels = []
             val_outputs = []
             val_epoch_avg_ec_err = 0
+            total_penalty = 0
             with torch.no_grad():
                 for original_image, translated_image, val_label in val_loader:
                     original_image, translated_image, val_label = original_image.to(self.device), translated_image.to(self.device), val_label.to(self.device)
  
                     val_output, penalty = self.forward(original_image, translated_image)
-                    print(penalty.item())
+                    total_penalty += penalty
                     val_l1_loss = self.L1_loss(val_output, val_label)
                     val_l2_loss = self.L2_loss(val_output, val_label)
                     val_loss = val_l2_loss 
@@ -197,11 +198,12 @@ class FMatrixRegressor(nn.Module):
                 val_epoch_avg_ec_err /= len(val_loader)
                 val_all_avg_ec_err.append(val_epoch_avg_ec_err)
 
+                total_penalty /= len(val_loader)
             # Calculate and store root validation loss for the epoch
             val_loss = val_loss.detach().cpu().item()
             all_val_loss.append(val_loss)
 
-            print(f'Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} Train avg epipolar constraint error: {epoch_avg_ec_err} Val avg epipolar constraint error: {val_epoch_avg_ec_err}\n')
+            print(f'Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} Train avg epipolar constraint error: {epoch_avg_ec_err} Val avg epipolar constraint error: {val_epoch_avg_ec_err} penalty: {total_penalty}\n')
 
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss, x_label="Epoch", y_label='Training Loss')
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss, x_label="Epoch", y_label='Validation Loss')
