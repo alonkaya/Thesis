@@ -168,8 +168,8 @@ class FMatrixRegressor(nn.Module):
             train_mae.append(mae.cpu())
             
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred = epoch_avg_ec_err_truth/len(train_loader), epoch_avg_ec_err_pred/len(train_loader)
-            ecc_err_truth.append(epoch_avg_ec_err_truth)
-            ecc_err_pred.append(epoch_avg_ec_err_pred)
+            ec_err_truth.append(epoch_avg_ec_err_truth)
+            ec_err_pred.append(epoch_avg_ec_err_pred)
 
             # Extend list of all labels with current epoch's labels for cosine_similarity plot
             # all_labels.extend(labels)
