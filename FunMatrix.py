@@ -93,10 +93,6 @@ def check_epipolar_constraint(image1, image2, F):
     # Detect keypoints and compute descriptors for both images
     kp1, des1 = sift.detectAndCompute(img1, None)
     kp2, des2 = sift.detectAndCompute(img2, None)
-
-    if des1 is None or des2 is None:
-        print("no des")
-        return None
     
     # Create BFMatcher object
     bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=False)
@@ -130,7 +126,7 @@ def check_epipolar_constraint(image1, image2, F):
     return error / pts1.shape[0]
 
 
-# # Read the calib.txt file and get the projection matrices
+# Read the calib.txt file and get the projection matrices
 # left_projection_matrix = process_calib('sequences\\02\\calib.txt')
 
 # # Compute intrinsic K

@@ -138,4 +138,4 @@ def normalize_L1(x):
     return x / torch.sum(torch.abs(x))
 
 def normalize_L2(x):
-    return x / torch.norm(x)
+    return x / torch.linalg.matrix_norm(x)

@@ -16,10 +16,10 @@ model.train_model(train_loader, val_loader, num_epochs=num_epochs)
 
 
 # train_iter = iter(train_loader)
-# first_image, second_image, label = next(train_iter)
+# first_image, second_image, label, unormalized_label = next(train_iter)
 
-# avg_ec_err = 0
-# for img_1, img_2, F in zip(first_image, second_image, label):
+# for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
 #     print(check_epipolar_constraint(img_1, img_2, F))
+#     print(check_epipolar_constraint(img_1, img_2, unormalized_F))
+#     print()
     
-# print(avg_ec_err)
