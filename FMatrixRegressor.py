@@ -209,8 +209,8 @@ class FMatrixRegressor(nn.Module):
                 val_mae.append(mae.cpu())
 
                 val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_truth/len(val_loader), val_epoch_avg_ec_err_pred/len(val_loader)
-                val_ecc_err_truth.append(val_epoch_avg_ec_err_truth)
-                val_ecc_err_pred.append(val_epoch_avg_ec_err_pred)
+                val_ec_err_truth.append(val_epoch_avg_ec_err_truth)
+                val_ec_err_pred.append(val_epoch_avg_ec_err_pred)
 
                 epoch_penalty /= len(val_loader)
                 penalty.append(epoch_penalty)
