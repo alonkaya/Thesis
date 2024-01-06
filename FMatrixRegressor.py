@@ -121,7 +121,7 @@ class FMatrixRegressor(nn.Module):
         val_ec_err_truth = []
         val_ec_err_pred = []
         val_ec_err_pred_unormalized = []
-        penalty = []
+        all_penalty = []
         for epoch in range(num_epochs):
             self.train()
 
@@ -225,7 +225,7 @@ class FMatrixRegressor(nn.Module):
                 val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized)
 
                 epoch_penalty /= len(val_loader)
-                penalty.append(epoch_penalty)
+                all_penalty.append(epoch_penalty)
 
             # Calculate and store root validation loss for the epoch
             val_loss = val_loss.detach().cpu().item()
@@ -243,7 +243,7 @@ class FMatrixRegressor(nn.Module):
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_truth, x_label="Epoch", y_label='Val epipolar constraint err for ground truth F')
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred, x_label="Epoch", y_label='Val epipolar constraint err for pred F')
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred_unormalized, x_label="Epoch", y_label='Val epipolar constraint err for pred F unormalized')
-        plot_over_epoch(x=range(1, num_epochs + 1), y=penalty, x_label="Epoch", y_label='Additional loss penalty for last singular value')                
+        plot_over_epoch(x=range(1, num_epochs + 1), y=all_penalty, x_label="Epoch", y_label='Additional loss penalty for last singular value')                
         # plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False)
 
         # Save
