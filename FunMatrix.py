@@ -95,22 +95,23 @@ def check_epipolar_constraint(image1, image2, F):
     kp2, des2 = sift.detectAndCompute(img2, None)
     
     # Create BFMatcher object
-    bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=False)
+    bf = cv2.BFMatcher()
 
-    matches = bf.match(des1, des2)
+    # matches = bf.match(des1, des2)
+    matches = bf.knnMatch(des1, des2, k=2)
 
-    # # Apply Lowe's ratio test
-    # good = []
-    # for m, n in matches:
-    #     if m.distance < 0.75 * n.distance:
-    #         good.append(m)
+    # Apply Lowe's ratio test
+    good = []
+    for m, n in matches:
+        if m.distance < 1 * n.distance:
+            good.append(m)
 
     # Sort them in the order of their distance
-    matches = sorted(matches, key=lambda x: x.distance)
+    # matches = sorted(matches, key=lambda x: x.distance)
 
     # Extract the matched keypoints
-    pts1 = np.float32([kp1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
-    pts2 = np.float32([kp2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+    pts1 = np.float32([kp1[m[0].queryIdx].pt for m in matches]).reshape(-1, 1, 2)
+    pts2 = np.float32([kp2[m[0].trainIdx].pt for m in matches]).reshape(-1, 1, 2)
 
     # Convert points to homogeneous coordinates
     pts1 = np.concatenate((pts1, np.ones((pts1.shape[0], 1, 1))), axis=-1)
@@ -127,31 +128,31 @@ def check_epipolar_constraint(image1, image2, F):
 
 
 # Read the calib.txt file and get the projection matrices
-# left_projection_matrix = process_calib('sequences\\02\\calib.txt')
+left_projection_matrix = process_calib('sequences\\02\\calib.txt')
 
-# # Compute intrinsic K
-# K, _ = get_internal_param_matrix(left_projection_matrix)
+# Compute intrinsic K
+K, _ = get_internal_param_matrix(left_projection_matrix)
 
-# # Read the pose files in the poses folder and get the list of pose matrices
-# poses = read_poses('poses\\02.txt')
+# Read the pose files in the poses folder and get the list of pose matrices
+poses = read_poses('poses\\02.txt')
 
-# # Loop over the pairs of frames
-# for i in range(len(poses) - 1):
-#     # Compute relative rotation and translation matrices
-#     R_relative, t_relative = compute_relative_transformations(poses[i], poses[i+jump_frames])
+# Loop over the pairs of frames
+for i in range(len(poses) - 1):
+    # Compute relative rotation and translation matrices
+    R_relative, t_relative = compute_relative_transformations(poses[i], poses[i+jump_frames])
 
-#     # # Compute the essential matrix E
-#     E = compute_essential(R_relative, t_relative)
+    # # Compute the essential matrix E
+    E = compute_essential(R_relative, t_relative)
 
-#     # Compute the fundamental matrix F
-#     F = compute_fundamental(E, K, K)
+    # Compute the fundamental matrix F
+    F = compute_fundamental(E, K, K)
 
-#     first_image = Image.open(f'sequences\\02\\image_0\\{i:06}.png')
-#     second_image = Image.open(f'sequences\\02\\image_0\\{i+jump_frames:06}.png')
+    first_image = Image.open(f'sequences\\02\\image_0\\{i:06}.png')
+    second_image = Image.open(f'sequences\\02\\image_0\\{i+jump_frames:06}.png')
     
-#     img1 = T.to_tensor(first_image)
-#     img2 = T.to_tensor(second_image)
+    img1 = T.to_tensor(first_image)
+    img2 = T.to_tensor(second_image)
 
-#     print(check_epipolar_constraint(img1, img2, F))
+    print(check_epipolar_constraint(img1, img2, F))
     
     

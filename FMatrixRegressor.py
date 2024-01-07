@@ -227,11 +227,15 @@ class FMatrixRegressor(nn.Module):
                 epoch_penalty /= len(val_loader)
                 all_penalty.append(epoch_penalty)
 
-            # Calculate and store root validation loss for the epoch
-            val_loss = val_loss.detach().cpu().item()
-            all_val_loss.append(val_loss)
+                # Calculate and store root validation loss for the epoch
+                val_loss = val_loss.detach().cpu().item()
+                all_val_loss.append(val_loss)
 
-            print(f'Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}\n\t\t Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred}\n\t\t Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}\n')
+            print(f'Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}\n\t 
+                  Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}\n\t 
+                  Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}\n\t 
+                  Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}'
+                  )
 
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss, x_label="Epoch", y_label='Training Loss')
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss, x_label="Epoch", y_label='Validation Loss')
@@ -239,7 +243,7 @@ class FMatrixRegressor(nn.Module):
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae, x_label="Epoch", y_label='VAlidation MAE')
         plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_truth, x_label="Epoch", y_label='Training epipolar constraint err for ground truth F')
         plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred, x_label="Epoch", y_label='Training epipolar constraint err for pred F')
-        plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred_unoramlized, x_label="Epoch", y_label='Val epipolar constraint err for pred F unormalized') 
+        plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred_unoramlized, x_label="Epoch", y_label='Train epipolar constraint err for pred F unormalized') 
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_truth, x_label="Epoch", y_label='Val epipolar constraint err for ground truth F')
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred, x_label="Epoch", y_label='Val epipolar constraint err for pred F')
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred_unormalized, x_label="Epoch", y_label='Val epipolar constraint err for pred F unormalized')
