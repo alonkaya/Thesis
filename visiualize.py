@@ -61,17 +61,17 @@ class EpipoLine:
         f_mat = compute_fundamental(E, K, K)        
 
         left_img = cv2.imread(self.leftImg)
-        left_imgG = cv2.cvtColor(left_img.copy(), cv2.COLOR_BGR2GRAY)
-        left_img_line = left_img.copy()
+        img1 = cv2.cvtColor(left_img.copy(), cv2.COLOR_BGR2GRAY)
+        left_img_line = img1.copy()
 
         right_img = cv2.imread(self.rightImg)
-        right_imgG = cv2.cvtColor(right_img.copy(), cv2.COLOR_BGR2GRAY)
-        right_img_line = right_img.copy()
+        img2 = cv2.cvtColor(right_img.copy(), cv2.COLOR_BGR2GRAY)
+        right_img_line = img2.copy()
 
-        (kp1, descs_left) = sift.detectAndCompute(left_imgG, None)
-        (kp2, descs_right) = sift.detectAndCompute(right_imgG, None)
+        (kp1, des1) = sift.detectAndCompute(img1, None)
+        (kp2, des2) = sift.detectAndCompute(img2, None)
 
-        matches = bf.knnMatch(descs_left, descs_right, k=2)
+        matches = bf.knnMatch(des1, des2, k=2)
         good = []
         for m, n in matches:
             if m.distance < THRESHOLD * n.distance:
