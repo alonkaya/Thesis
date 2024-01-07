@@ -105,12 +105,9 @@ def check_epipolar_constraint(image1, image2, F, threshold=0.3):
         if m.distance < threshold * n.distance:
             good.append(m)
     print(len(good))
-    # Sort them in the order of their distance
-    # matches = sorted(matches, key=lambda x: x.distance)
-
+    
     # Extract the matched keypoints
-    m[0].queryIdx
-    pts1 = np.float32([kp1[m[0].queryIdx].pt for m in good]).reshape(-1, 1, 2)
+    pts1 = np.float32([m[0].queryIdx for m in good]).reshape(-1, 1, 2)
     pts2 = np.float32([kp2[m[0].trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
     # Convert points to homogeneous coordinates
