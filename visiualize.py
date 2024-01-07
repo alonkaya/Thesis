@@ -52,25 +52,25 @@ class EpipoLine:
         return E
 
     def visualize(self, sqResultDir, img_idx, K, THRESHOLD=0.15):
-        left_img = cv2.imread(self.leftImg)
-        img1 = cv2.cvtColor(left_img.copy(), cv2.COLOR_BGR2GRAY)
-        left_img_line = img1.copy()
-
-        right_img = cv2.imread(self.rightImg)
-        img2 = cv2.cvtColor(right_img.copy(), cv2.COLOR_BGR2GRAY)
-        right_img_line = img2.copy()
-
-        # f_mat = self.EMat(R=self.R, T=self.T)
-        E = compute_essential(self.R, self.T)
-        f_mat = compute_fundamental(E, K, K)    
-
         sift = cv2.xfeatures2d.SIFT_create()
         bf = cv2.BFMatcher()
 
-        (kp1, des1) = sift.detectAndCompute(img1, None)
-        (kp2, des2) = sift.detectAndCompute(img2, None)
+        # f_mat = self.FMat(R=self.R, T=self.T)
+        E = compute_essential(self.R, self.T)
+        f_mat = compute_fundamental(E, K, K)  
 
-        matches = bf.knnMatch(des1, des2, k=2)
+        left_img = cv2.imread(self.leftImg)
+        left_imgG = cv2.cvtColor(left_img.copy(), cv2.COLOR_BGR2GRAY)
+        left_img_line = left_img.copy()
+
+        right_img = cv2.imread(self.rightImg)
+        right_imgG = cv2.cvtColor(right_img.copy(), cv2.COLOR_BGR2GRAY)
+        right_img_line = right_img.copy()
+
+        (kps_left, descs_left) = sift.detectAndCompute(left_imgG, None)
+        (kps_right, descs_right) = sift.detectAndCompute(right_imgG, None)
+
+        matches = bf.knnMatch(descs_left, descs_right, k=2)
         good = []
         for m, n in matches:
             if m.distance < THRESHOLD * n.distance:
@@ -82,8 +82,8 @@ class EpipoLine:
         img_W = left_img.shape[1] - 1
         for color_idx, m in enumerate(good):
             # get the feature points in both left and right images
-            x_l, y_l = kp1[m.queryIdx].pt
-            x_r, y_r = kp2[m.trainIdx].pt
+            x_l, y_l = kps_left[m.queryIdx].pt
+            x_r, y_r = kps_right[m.trainIdx].pt
 
             '''Color for line'''
             color = colors[color_idx % len(colors)]
@@ -156,19 +156,19 @@ class EpipoLine:
         # print(False, result)
         return (False, result)
 
-# left_projection_matrix = process_calib('sequences\\02\\calib.txt')
+left_projection_matrix = process_calib('sequences\\02\\calib.txt')
 
-# K, _ = get_internal_param_matrix(left_projection_matrix)
+K, _ = get_internal_param_matrix(left_projection_matrix)
 
-# poses = read_poses('poses\\02.txt')
+poses = read_poses('poses\\02.txt')
 
-# for i in range(len(poses) - 1):
-#     R_relative, t_relative = compute_relative_transformations(poses[i], poses[i+jump_frames])
+for i in range(len(poses) - 1):
+    R_relative, t_relative = compute_relative_transformations(poses[i], poses[i+jump_frames])
 
-#     lImg = f'sequences\\02\\image_0\\{i:06}.png'
-#     rImg = f'sequences\\02\\image_0\\{i+jump_frames:06}.png'
+    lImg = f'sequences\\02\\image_0\\{i:06}.png'
+    rImg = f'sequences\\02\\image_0\\{i+jump_frames:06}.png'
 
-#     a = EpipoLine(leftImg=lImg, rightImg=rImg, R=R_relative, T=t_relative)
+    a = EpipoLine(leftImg=lImg, rightImg=rImg, R=R_relative, T=t_relative)
 
-#     a.visualize(sqResultDir='epipoles', img_idx=i, K=K, THRESHOLD=0.2)
+    a.visualize(sqResultDir='epipoles', img_idx=i, K=K, THRESHOLD=0.15)
 
