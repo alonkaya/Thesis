@@ -128,31 +128,31 @@ def check_epipolar_constraint(image1, image2, F):
 
 
 # Read the calib.txt file and get the projection matrices
-left_projection_matrix = process_calib('sequences\\02\\calib.txt')
+# left_projection_matrix = process_calib('sequences\\02\\calib.txt')
 
-# Compute intrinsic K
-K, _ = get_internal_param_matrix(left_projection_matrix)
+# # Compute intrinsic K
+# K, _ = get_internal_param_matrix(left_projection_matrix)
 
-# Read the pose files in the poses folder and get the list of pose matrices
-poses = read_poses('poses\\02.txt')
+# # Read the pose files in the poses folder and get the list of pose matrices
+# poses = read_poses('poses\\02.txt')
 
-# Loop over the pairs of frames
-for i in range(len(poses) - 1):
-    # Compute relative rotation and translation matrices
-    R_relative, t_relative = compute_relative_transformations(poses[i], poses[i+jump_frames])
+# # Loop over the pairs of frames
+# for i in range(len(poses) - 1):
+#     # Compute relative rotation and translation matrices
+#     R_relative, t_relative = compute_relative_transformations(poses[i], poses[i+jump_frames])
 
-    # # Compute the essential matrix E
-    E = compute_essential(R_relative, t_relative)
+#     # # Compute the essential matrix E
+#     E = compute_essential(R_relative, t_relative)
 
-    # Compute the fundamental matrix F
-    F = compute_fundamental(E, K, K)
+#     # Compute the fundamental matrix F
+#     F = compute_fundamental(E, K, K)
 
-    first_image = Image.open(f'sequences\\02\\image_0\\{i:06}.png')
-    second_image = Image.open(f'sequences\\02\\image_0\\{i+jump_frames:06}.png')
+#     first_image = Image.open(f'sequences\\02\\image_0\\{i:06}.png')
+#     second_image = Image.open(f'sequences\\02\\image_0\\{i+jump_frames:06}.png')
     
-    img1 = T.to_tensor(first_image)
-    img2 = T.to_tensor(second_image)
+#     img1 = T.to_tensor(first_image)
+#     img2 = T.to_tensor(second_image)
 
-    print(check_epipolar_constraint(img1, img2, F))
+#     print(check_epipolar_constraint(img1, img2, F))
     
     
