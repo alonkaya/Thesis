@@ -227,7 +227,7 @@ class FMatrixRegressor(nn.Module):
                 val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized)
 
                 epoch_penalty /= len(val_loader)
-                all_penalty.append(epoch_penalty.detach.cpu())
+                all_penalty.append(epoch_penalty.detach().cpu())
 
                 # Calculate and store root validation loss for the epoch
                 val_loss = val_loss.detach().cpu().item()
