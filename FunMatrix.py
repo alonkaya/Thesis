@@ -87,19 +87,15 @@ def check_epipolar_constraint(image1, image2, F, threshold=0.3):
     img1 = (image1.permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8)
     img2 = (image2.permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8)    
 
-    # Initialize the SIFT detector
-    sift = cv2.SIFT_create()
+    sift = cv2.xfeatures2d.SIFT_create()
+    bf = cv2.BFMatcher()
 
     # Detect keypoints and compute descriptors for both images
     (kp1, des1) = sift.detectAndCompute(img1, None)
     (kp2, des2) = sift.detectAndCompute(img2, None)
-    
-    # Create BFMatcher object
-    bf = cv2.BFMatcher()
 
     # matches = bf.match(des1, des2)
     matches = bf.knnMatch(des1, des2, k=2)
-
     good = []
     for m, n in matches:
         if m.distance < threshold * n.distance:

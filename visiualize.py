@@ -52,14 +52,6 @@ class EpipoLine:
         return E
 
     def visualize(self, sqResultDir, img_idx, K, THRESHOLD=0.15):
-        sift = cv2.xfeatures2d.SIFT_create()
-        bf = cv2.BFMatcher()
-
-        # f_mat = self.EMat(R=self.R, T=self.T)
-
-        E = compute_essential(self.R, self.T)
-        f_mat = compute_fundamental(E, K, K)        
-
         left_img = cv2.imread(self.leftImg)
         img1 = cv2.cvtColor(left_img.copy(), cv2.COLOR_BGR2GRAY)
         left_img_line = img1.copy()
@@ -67,6 +59,13 @@ class EpipoLine:
         right_img = cv2.imread(self.rightImg)
         img2 = cv2.cvtColor(right_img.copy(), cv2.COLOR_BGR2GRAY)
         right_img_line = img2.copy()
+
+        # f_mat = self.EMat(R=self.R, T=self.T)
+        E = compute_essential(self.R, self.T)
+        f_mat = compute_fundamental(E, K, K)    
+
+        sift = cv2.xfeatures2d.SIFT_create()
+        bf = cv2.BFMatcher()
 
         (kp1, des1) = sift.detectAndCompute(img1, None)
         (kp2, des2) = sift.detectAndCompute(img2, None)
@@ -171,5 +170,5 @@ for i in range(len(poses) - 1):
 
     a = EpipoLine(leftImg=lImg, rightImg=rImg, R=R_relative, T=t_relative)
 
-    a.visualize(sqResultDir='epipoles', img_idx=i, K=K, THRESHOLD=0.15)
+    a.visualize(sqResultDir='epipoles', img_idx=i, K=K, THRESHOLD=0.2)
 
