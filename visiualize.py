@@ -68,8 +68,8 @@ class EpipoLine:
         right_imgG = cv2.cvtColor(right_img.copy(), cv2.COLOR_BGR2GRAY)
         right_img_line = right_img.copy()
 
-        (kps_left, descs_left) = sift.detectAndCompute(left_imgG, None)
-        (kps_right, descs_right) = sift.detectAndCompute(right_imgG, None)
+        (kp1, descs_left) = sift.detectAndCompute(left_imgG, None)
+        (kp2, descs_right) = sift.detectAndCompute(right_imgG, None)
 
         matches = bf.knnMatch(descs_left, descs_right, k=2)
         good = []
@@ -81,13 +81,10 @@ class EpipoLine:
         err_l = []
         err_r = []
         img_W = left_img.shape[1] - 1
-        for color_idx, g in enumerate(good):
-            # get the ids of matching feature points
-            id_l, id_r = g[0].queryIdx, g[0].trainIdx
-
+        for color_idx, m in enumerate(good):
             # get the feature points in both left and right images
-            x_l, y_l = kps_left[id_l].pt
-            x_r, y_r = kps_right[id_r].pt
+            x_l, y_l = kp1[m[0].queryIdx].pt
+            x_r, y_r = kp2[m[0].trainIdx].pt
 
             '''Color for line'''
             color = colors[color_idx % len(colors)]
