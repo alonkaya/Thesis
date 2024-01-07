@@ -87,7 +87,7 @@ def check_epipolar_constraint(image1, image2, F, threshold=0.3):
     img1 = (image1.permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8)
     img2 = (image2.permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8)    
 
-    sift = cv2.xfeatures2d.SIFT_create()
+    sift = cv2.SIFT_create()
     bf = cv2.BFMatcher()
 
     # Detect keypoints and compute descriptors for both images
@@ -103,8 +103,8 @@ def check_epipolar_constraint(image1, image2, F, threshold=0.3):
     print(len(good))
     
     # Extract the matched keypoints
-    pts1 = np.float32([kp1[m[0].queryIdx].pt for m in good]).reshape(-1, 1, 2)
-    pts2 = np.float32([kp2[m[0].trainIdx].pt for m in good]).reshape(-1, 1, 2)
+    pts1 = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
+    pts2 = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
     # Convert points to homogeneous coordinates
     pts1 = np.concatenate((pts1, np.ones((pts1.shape[0], 1, 1))), axis=-1)

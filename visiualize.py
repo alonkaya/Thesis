@@ -74,7 +74,7 @@ class EpipoLine:
         good = []
         for m, n in matches:
             if m.distance < THRESHOLD * n.distance:
-                good.append([m])
+                good.append(m)
 
         # drawing epipolar line
         err_l = []
@@ -82,8 +82,8 @@ class EpipoLine:
         img_W = left_img.shape[1] - 1
         for color_idx, m in enumerate(good):
             # get the feature points in both left and right images
-            x_l, y_l = kp1[m[0].queryIdx].pt
-            x_r, y_r = kp2[m[0].trainIdx].pt
+            x_l, y_l = kp1[m.queryIdx].pt
+            x_r, y_r = kp2[m.trainIdx].pt
 
             '''Color for line'''
             color = colors[color_idx % len(colors)]
