@@ -80,7 +80,7 @@ def get_internal_param_matrix(P):
 
     return K, R
 
-def check_epipolar_constraint(image1, image2, F, threshold=0.3):
+def check_epipolar_constraint(image1, image2, F, threshold=0.5):
     # Load the images
     # img1 = cv2.imread(image1, 0)
     # img2 = cv2.imread(image2, 0)
