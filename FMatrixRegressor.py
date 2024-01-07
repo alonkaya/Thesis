@@ -141,7 +141,7 @@ class FMatrixRegressor(nn.Module):
                 l1_loss = self.L1_loss(output, label)
                 l2_loss = self.L2_loss(output, label)
                 loss = l2_loss + penalty_coeff*penalty
-
+                print(loss.detach().cpu().item())
                 # Compute Backward pass and gradients
                 self.optimizer.zero_grad()
                 loss.backward()
@@ -169,84 +169,84 @@ class FMatrixRegressor(nn.Module):
             train_loss = loss.detach().cpu().item()
             all_train_loss.append(train_loss)
 
-            # Calculate and store mean absolute error for the epoch
-            mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
-            train_mae.append(mae.detach().cpu())
+            # # Calculate and store mean absolute error for the epoch
+            # mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
+            # train_mae.append(mae.detach().cpu())
             
-            # epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_truth/len(train_loader), epoch_avg_ec_err_pred/len(train_loader), epoch_avg_ec_err_pred_unormalized/len(train_loader)
-            epoch_avg_ec_err_truth, epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_truth/len(train_loader), epoch_avg_ec_err_pred_unormalized/len(train_loader)
-            ec_err_truth.append(epoch_avg_ec_err_truth)
-            # ec_err_pred.append(epoch_avg_ec_err_pred)
-            ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized)
+            # # epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_truth/len(train_loader), epoch_avg_ec_err_pred/len(train_loader), epoch_avg_ec_err_pred_unormalized/len(train_loader)
+            # epoch_avg_ec_err_truth, epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_truth/len(train_loader), epoch_avg_ec_err_pred_unormalized/len(train_loader)
+            # ec_err_truth.append(epoch_avg_ec_err_truth)
+            # # ec_err_pred.append(epoch_avg_ec_err_pred)
+            # ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized)
 
-            # Extend list of all labels with current epoch's labels for cosine_similarity plot
-            # all_labels.extend(labels)
+            # # Extend list of all labels with current epoch's labels for cosine_similarity plot
+            # # all_labels.extend(labels)
 
-            # Validation
-            self.eval()
-            val_labels = []
-            val_outputs = []
-            val_epoch_avg_ec_err_truth = 0
-            # val_epoch_avg_ec_err_pred = 0
-            val_epoch_avg_ec_err_pred_unormalized = 0
-            epoch_penalty = 0
-            with torch.no_grad():
-                for val_first_image, val_second_image, val_label, val_unormalized_label in val_loader:
-                    val_first_image, val_second_image, val_label = val_first_image.to(self.device), val_second_image.to(self.device), val_label.to(self.device)
+            # # Validation
+            # self.eval()
+            # val_labels = []
+            # val_outputs = []
+            # val_epoch_avg_ec_err_truth = 0
+            # # val_epoch_avg_ec_err_pred = 0
+            # val_epoch_avg_ec_err_pred_unormalized = 0
+            # epoch_penalty = 0
+            # with torch.no_grad():
+            #     for val_first_image, val_second_image, val_label, val_unormalized_label in val_loader:
+            #         val_first_image, val_second_image, val_label = val_first_image.to(self.device), val_second_image.to(self.device), val_label.to(self.device)
  
-                    unnormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
-                    epoch_penalty += penalty
-                    val_l1_loss = self.L1_loss(val_output, val_label)
-                    val_l2_loss = self.L2_loss(val_output, val_label)
-                    val_loss = val_l2_loss 
+            #         unnormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
+            #         epoch_penalty += penalty
+            #         val_l1_loss = self.L1_loss(val_output, val_label)
+            #         val_l2_loss = self.L2_loss(val_output, val_label)
+            #         val_loss = val_l2_loss 
 
-                    # Compute val mean epipolar constraint error 
-                    val_avg_ec_err_truth = 0
-                    val_avg_ec_err_pred = 0
-                    val_avg_ec_err_pred_unormalized = 0
-                    for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(val_first_image, val_second_image, val_unormalized_label, val_output, unnormalized_val_output):
-                        val_avg_ec_err_truth += check_epipolar_constraint(img_1.detach().cpu(), img_2.detach().cpu(), F_truth.detach().cpu())
-                        # val_avg_ec_err_pred += check_epipolar_constraint(img_1.detach().cpu(), img_2.detach().cpu(), F_pred.detach().cpu())
-                        val_avg_ec_err_pred_unormalized += check_epipolar_constraint(img_1.detach().cpu(), img_2.detach().cpu(), F_pred_unormalized.detach().cpu())
-                    val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = val_avg_ec_err_truth/len(val_first_image), val_avg_ec_err_pred/len(val_first_image), val_avg_ec_err_pred_unormalized/len(val_first_image)
-                    val_epoch_avg_ec_err_truth += val_avg_ec_err_truth
-                    # val_epoch_avg_ec_err_pred += val_avg_ec_err_pred
-                    val_epoch_avg_ec_err_pred_unormalized += val_avg_ec_err_pred_unormalized
+            #         # Compute val mean epipolar constraint error 
+            #         val_avg_ec_err_truth = 0
+            #         val_avg_ec_err_pred = 0
+            #         val_avg_ec_err_pred_unormalized = 0
+            #         for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(val_first_image, val_second_image, val_unormalized_label, val_output, unnormalized_val_output):
+            #             val_avg_ec_err_truth += check_epipolar_constraint(img_1.detach().cpu(), img_2.detach().cpu(), F_truth.detach().cpu())
+            #             # val_avg_ec_err_pred += check_epipolar_constraint(img_1.detach().cpu(), img_2.detach().cpu(), F_pred.detach().cpu())
+            #             val_avg_ec_err_pred_unormalized += check_epipolar_constraint(img_1.detach().cpu(), img_2.detach().cpu(), F_pred_unormalized.detach().cpu())
+            #         val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = val_avg_ec_err_truth/len(val_first_image), val_avg_ec_err_pred/len(val_first_image), val_avg_ec_err_pred_unormalized/len(val_first_image)
+            #         val_epoch_avg_ec_err_truth += val_avg_ec_err_truth
+            #         # val_epoch_avg_ec_err_pred += val_avg_ec_err_pred
+            #         val_epoch_avg_ec_err_pred_unormalized += val_avg_ec_err_pred_unormalized
 
-                    val_outputs.append(val_output.to(self.device))
-                    val_labels.append(val_label)
+            #         val_outputs.append(val_output.to(self.device))
+            #         val_labels.append(val_label)
 
-                # Calculate and store mean absolute error for the epoch
-                mae = torch.mean(torch.abs(torch.cat(val_labels, dim=0) - torch.cat(val_outputs, dim=0)))
-                val_mae.append(mae.detach().cpu())
+            #     # Calculate and store mean absolute error for the epoch
+            #     mae = torch.mean(torch.abs(torch.cat(val_labels, dim=0) - torch.cat(val_outputs, dim=0)))
+            #     val_mae.append(mae.detach().cpu())
 
-                # val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_truth/len(val_loader), val_epoch_avg_ec_err_pred/len(val_loader), val_epoch_avg_ec_err_pred_unormalized/len(val_loader)
-                val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_truth/len(val_loader), val_epoch_avg_ec_err_pred_unormalized/len(val_loader)
-                val_ec_err_truth.append(val_epoch_avg_ec_err_truth)
-                # val_ec_err_pred.append(val_epoch_avg_ec_err_pred)
-                val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized)
+            #     # val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_truth/len(val_loader), val_epoch_avg_ec_err_pred/len(val_loader), val_epoch_avg_ec_err_pred_unormalized/len(val_loader)
+            #     val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_truth/len(val_loader), val_epoch_avg_ec_err_pred_unormalized/len(val_loader)
+            #     val_ec_err_truth.append(val_epoch_avg_ec_err_truth)
+            #     # val_ec_err_pred.append(val_epoch_avg_ec_err_pred)
+            #     val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized)
 
-                epoch_penalty /= len(val_loader)
-                all_penalty.append(epoch_penalty.detach().cpu())
+            #     epoch_penalty /= len(val_loader)
+            #     all_penalty.append(epoch_penalty.detach().cpu())
 
-                # Calculate and store root validation loss for the epoch
-                val_loss = val_loss.detach().cpu().item()
-                all_val_loss.append(val_loss)
-
+            #     # Calculate and store root validation loss for the epoch
+            #     val_loss = val_loss.detach().cpu().item()
+            #     all_val_loss.append(val_loss)
+            print(f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss}""")
             #Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}
-            print(f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}
-            Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}
-            Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
-            )
+            # Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
+            # print(f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}
+            # Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}\n"""
+            # )
 
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss, x_label="Epoch", y_label='Training Loss')
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss, x_label="Epoch", y_label='Validation Loss')
         plot_over_epoch(x=range(1, num_epochs + 1), y=train_mae, x_label="Epoch", y_label='Training MAE')
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae, x_label="Epoch", y_label='VAlidation MAE')
-        plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_truth, x_label="Epoch", y_label='Training epipolar constraint err for ground truth F')
+        # plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_truth, x_label="Epoch", y_label='Training epipolar constraint err for ground truth F')
         # plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred, x_label="Epoch", y_label='Training epipolar constraint err for pred F')
         plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred_unoramlized, x_label="Epoch", y_label='Train epipolar constraint err for pred F unormalized') 
-        plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_truth, x_label="Epoch", y_label='Val epipolar constraint err for ground truth F')
+        # plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_truth, x_label="Epoch", y_label='Val epipolar constraint err for ground truth F')
         # plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred, x_label="Epoch", y_label='Val epipolar constraint err for pred F')
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred_unormalized, x_label="Epoch", y_label='Val epipolar constraint err for pred F unormalized')
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_penalty, x_label="Epoch", y_label='Additional loss penalty for last singular value')                
