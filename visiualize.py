@@ -38,7 +38,7 @@ class EpipoLine:
     #     # newT = np.dot(R1, T1-T2)
     #     return newR, newT
 
-    def FMat(self, R, T):
+    def EMat(self, R, T):
         # print(T)
         t = T
         T = np.array([
@@ -49,18 +49,16 @@ class EpipoLine:
 
 
         E = T.dot(R)
-        # return np.dot(np.linalg.inv(K0.T), np.dot(E, K0))
         return E
-        #
-        # A = np.dot(np.linalg.inv(K.T), E)
-        # B = np.linalg.inv(K)
-        # return np.dot(A, B)
 
-    def visualize(self, sqResultDir, img_idx, THRESHOLD=0.15):
+    def visualize(self, sqResultDir, img_idx, K, THRESHOLD=0.15):
         sift = cv2.xfeatures2d.SIFT_create()
         bf = cv2.BFMatcher()
 
-        f_mat = self.FMat(R=self.R, T=self.T)
+        # f_mat = self.EMat(R=self.R, T=self.T)
+
+        E = compute_essential(self.R, self.T)
+        f_mat = compute_fundamental(E, K, K)        
 
         left_img = cv2.imread(self.leftImg)
         left_imgG = cv2.cvtColor(left_img.copy(), cv2.COLOR_BGR2GRAY)
@@ -78,7 +76,7 @@ class EpipoLine:
         for m, n in matches:
             if m.distance < THRESHOLD * n.distance:
                 good.append([m])
-        print(len(good))
+
         # drawing epipolar line
         err_l = []
         err_r = []
@@ -149,7 +147,6 @@ class EpipoLine:
     def verify_xFx(point1, F, point2):
         return point2.T.dot(F).dot(point1)
 
-
     @staticmethod
     def verify_xfx(point, l):
         threshold = 2
@@ -177,5 +174,5 @@ for i in range(len(poses) - 1):
 
     a = EpipoLine(leftImg=lImg, rightImg=rImg, R=R_relative, T=t_relative)
 
-    a.visualize(sqResultDir='epipoles', img_idx=i, THRESHOLD=0.1)
+    a.visualize(sqResultDir='epipoles', img_idx=i, K=K, THRESHOLD=0.15)
 

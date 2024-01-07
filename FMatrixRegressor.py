@@ -171,7 +171,7 @@ class FMatrixRegressor(nn.Module):
 
             # Calculate and store mean absolute error for the epoch
             mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
-            train_mae.append(mae.cpu())
+            train_mae.append(mae.detach.cpu())
             
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_truth/len(train_loader), epoch_avg_ec_err_pred/len(train_loader), epoch_avg_ec_err_pred_unormalized/len(train_loader)
             ec_err_truth.append(epoch_avg_ec_err_truth)
@@ -217,7 +217,7 @@ class FMatrixRegressor(nn.Module):
 
                 # Calculate and store mean absolute error for the epoch
                 mae = torch.mean(torch.abs(torch.cat(val_labels, dim=0) - torch.cat(val_outputs, dim=0)))
-                val_mae.append(mae.cpu())
+                val_mae.append(mae.detach.cpu())
 
                 val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_truth/len(val_loader), val_epoch_avg_ec_err_pred/len(val_loader), val_epoch_avg_ec_err_pred_unormalized/len(val_loader)
                 val_ec_err_truth.append(val_epoch_avg_ec_err_truth)
@@ -225,17 +225,17 @@ class FMatrixRegressor(nn.Module):
                 val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized)
 
                 epoch_penalty /= len(val_loader)
-                all_penalty.append(epoch_penalty)
+                all_penalty.append(epoch_penalty.detach.cpu())
 
                 # Calculate and store root validation loss for the epoch
                 val_loss = val_loss.detach().cpu().item()
                 all_val_loss.append(val_loss)
 
             print(f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}
-                  Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}
-                  Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}
-                  Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}"""
-                  )
+            Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}
+            Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}
+            Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
+            )
 
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss, x_label="Epoch", y_label='Training Loss')
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss, x_label="Epoch", y_label='Validation Loss')

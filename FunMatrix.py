@@ -80,7 +80,7 @@ def get_internal_param_matrix(P):
 
     return K, R
 
-def check_epipolar_constraint(image1, image2, F):
+def check_epipolar_constraint(image1, image2, F, threshold=0.3):
     # Load the images
     # img1 = cv2.imread(image1, 0)
     # img2 = cv2.imread(image2, 0)
@@ -100,18 +100,17 @@ def check_epipolar_constraint(image1, image2, F):
     # matches = bf.match(des1, des2)
     matches = bf.knnMatch(des1, des2, k=2)
 
-    # Apply Lowe's ratio test
     good = []
     for m, n in matches:
-        if m.distance < 1 * n.distance:
+        if m.distance < threshold * n.distance:
             good.append(m)
-
+    print(len(good))
     # Sort them in the order of their distance
     # matches = sorted(matches, key=lambda x: x.distance)
 
     # Extract the matched keypoints
-    pts1 = np.float32([kp1[m[0].queryIdx].pt for m in matches]).reshape(-1, 1, 2)
-    pts2 = np.float32([kp2[m[0].trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+    pts1 = np.float32([kp1[m[0].queryIdx].pt for m in good]).reshape(-1, 1, 2)
+    pts2 = np.float32([kp2[m[0].trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
     # Convert points to homogeneous coordinates
     pts1 = np.concatenate((pts1, np.ones((pts1.shape[0], 1, 1))), axis=-1)
