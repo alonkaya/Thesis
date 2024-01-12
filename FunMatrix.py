@@ -80,7 +80,7 @@ def get_internal_param_matrix(P):
 
     return K, R
 
-def check_epipolar_constraint(image1, image2, F, threshold=0.55):
+def check_epipolar_constraint(image1, image2, F, threshold=epipolar_constraint_threshold):
     # Load the images
     # img1 = cv2.imread(image1, 0)
     # img2 = cv2.imread(image2, 0)
@@ -100,7 +100,7 @@ def check_epipolar_constraint(image1, image2, F, threshold=0.55):
     for m, n in matches:
         if m.distance < threshold * n.distance:
             good.append(m)
-    
+
     # Extract the matched keypoints
     pts1 = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
     pts2 = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
@@ -145,6 +145,6 @@ def check_epipolar_constraint(image1, image2, F, threshold=0.55):
 #     img1 = T.to_tensor(first_image)
 #     img2 = T.to_tensor(second_image)
 
-#     print(check_epipolar_constraint(img1, img2, F))
+#     print(check_epipolar_constraint(img1, img2, F, threshold=0.4))
     
     

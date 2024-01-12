@@ -15,3 +15,4 @@ enforce_fundamental_constraint = False
 add_penalty_loss = True
 num_output = 9 
 penalty_coeff = 2
+epipolar_constraint_threshold = 0.5
