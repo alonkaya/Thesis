@@ -20,7 +20,7 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.layers(x)
 
-def plot_over_epoch(x, y, x_label, y_label, connecting_lines=True):
+def plot_over_epoch(x, y, x_label, y_label, show=True, connecting_lines=True):
     
     if connecting_lines:
       plt.plot(x, y)
@@ -30,7 +30,11 @@ def plot_over_epoch(x, y, x_label, y_label, connecting_lines=True):
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.title(f'{y_label} over {x_label}')
+
+    plt.savefig(f'plots/{y}.png')  # Specify the filename and extension
+
     plt.show()
+
 
 
 def enforce_fundamental_constraints(F_vector):
