@@ -31,7 +31,7 @@ def plot_over_epoch(x, y, x_label, y_label, show=True, connecting_lines=True):
     plt.ylabel(y_label)
     plt.title(f'{y_label} over {x_label}')
 
-    plt.savefig(f'plots/{y}.png')  # Specify the filename and extension
+    plt.savefig(f'plots/{y_label}.png')  # Specify the filename and extension
 
     plt.show()
 
