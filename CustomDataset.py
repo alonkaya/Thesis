@@ -65,5 +65,5 @@ custom_train_dataset = CustomDataset(train_dataset, transform=transform, angle_r
 custom_val_dataset = CustomDataset(val_dataset, transform=transform,angle_range=angle_range, shift_x_range=shift_x_range, shift_y_range=shift_y_range)
 
 # Create a DataLoader
-train_loader = DataLoader(custom_train_dataset, batch_size=32, shuffle=True, pin_memory=True)
-val_loader = DataLoader(custom_val_dataset, batch_size=32, shuffle=False, pin_memory=True)
+train_loader = DataLoader(custom_train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+val_loader = DataLoader(custom_val_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
