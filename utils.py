@@ -21,7 +21,7 @@ class MLP(nn.Module):
         return self.layers(x)
 
 def plot_over_epoch(x, y, x_label, y_label, show=True, connecting_lines=True):
-    # plt.figure()
+    plt.figure()
     if connecting_lines:
       plt.plot(x, y)
     else:
