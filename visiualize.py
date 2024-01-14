@@ -80,6 +80,7 @@ class EpipoLine:
         err_l = []
         err_r = []
         img_W = left_img.shape[1] - 1
+        xfx = 0
         for color_idx, m in enumerate(good):
             # get the feature points in both left and right images
             x_l, y_l = kps_left[m.queryIdx].pt
@@ -117,27 +118,35 @@ class EpipoLine:
             y_0 = self.epipoline(0, line_r)
             y_1 = self.epipoline(img_W, line_r)
 
-            print("Point {}: ".format(color_idx), self.verify_xFx(point_l, f_mat, point_r))
+            xfx += self.verify_xFx(point_l, f_mat, point_r)
 
             # drawing the line on the right image
             right_img_line = cv2.circle(right_img_line, (int(x_r), int(y_r)), radius=4, color=color)
             right_img_line = cv2.line(right_img_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
             # displaying just feature points
             right_img = cv2.circle(right_img, (int(x_r), int(y_r)), radius=4, color=color)
+        
+        if(len(good) > 0):
+            xfx /= len(good)
+        print(f'xFx: {xfx}')
 
         l_avgErr = np.average(err_l) if err_l else 0
         r_avgErr = np.average(err_r) if err_r else 0
 
-        shape = left_img.shape
         vis = np.concatenate((left_img_line, right_img_line), axis=0)
         font = cv2.FONT_HERSHEY_SIMPLEX
 
         img_H = vis.shape[0]
-        cv2.putText(vis, str(l_avgErr), (10, 20), font, 0.5, color=(0, 255, 0), lineType=cv2.LINE_AA)
-        cv2.putText(vis, str(r_avgErr), (10, img_H - 10), font, 0.5, color=(0, 255, 0), lineType=cv2.LINE_AA)
+        cv2.putText(vis, str(l_avgErr), (10, 20), font, 0.6, color=(128, 0, 0), lineType=cv2.LINE_AA)
+        cv2.putText(vis, str(r_avgErr), (10, img_H - 10), font, 0.6, color=(128, 0, 0), lineType=cv2.LINE_AA)
+        cv2.putText(vis, str(xfx), (10, 360), font, 0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
 
-        cv2.imwrite(os.path.join(sqResultDir, 'epipoLine_sift_{}.png'.format(img_idx)), vis)
-        print(os.path.join(sqResultDir, 'epipoLine_sift_{}.png'.format(img_idx)))
+        if(l_avgErr > 7 or np.abs(xfx) > 0.1 or xfx == 0):
+            cv2.imwrite(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
+            print(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))
+        else:
+            cv2.imwrite(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
+            print(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))
 
     @staticmethod
     def verify_xFx(point1, F, point2):
@@ -147,14 +156,17 @@ class EpipoLine:
     def verify_xfx(point, l):
         threshold = 2
         l = l.flatten()
-        # K = EpiLine.d['P0'][0:3, 0:3]
         result = abs(np.dot(point, l.T) / np.sqrt(l[0] * l[0] + l[1] * l[1]))
 
         if result <= threshold:
-            # print(True, result)
             return (True, result)
-        # print(False, result)
         return (False, result)
+
+bad_frames_dir = os.path.join('epipole_lines', "bad_frames")
+good_frames_dir = os.path.join('epipole_lines', "good_frames")
+
+os.makedirs(bad_frames_dir, exist_ok=True)
+os.makedirs(good_frames_dir, exist_ok=True)
 
 left_projection_matrix = process_calib('sequences\\02\\calib.txt')
 
@@ -170,5 +182,6 @@ for i in range(len(poses) - 1):
 
     a = EpipoLine(leftImg=lImg, rightImg=rImg, R=R_relative, T=t_relative)
 
-    a.visualize(sqResultDir='epipoles', img_idx=i, K=K, THRESHOLD=0.15)
+    a.visualize(sqResultDir='epipole_lines', img_idx=i, K=K, THRESHOLD=0.15)
+
 

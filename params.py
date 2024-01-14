@@ -17,4 +17,4 @@ add_penalty_loss = True
 num_output = 9 
 penalty_coeff = 2
 epipolar_constraint_threshold = 0.5
-batch_size = 32
+batch_size = 1
