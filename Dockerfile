@@ -10,6 +10,6 @@ COPY . /home/alonkay/app/
 
 # USER <username>
 
-RUN cd /home/<username>/app/ && pip3 install -r requirements.txt
+RUN cd /home/alonkay/app/ && pip3 install -r requirements.txt
 
-WORKDIR /home/<username>/app
+WORKDIR /home/alonkay/app
