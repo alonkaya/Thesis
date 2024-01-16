@@ -11,7 +11,7 @@ COPY . /home/alonkay/app/
 # USER <username>
 
 RUN cd /home/alonkay/app/ && pip3 install -r requirements.txt
-
+RUN python3 --version
 WORKDIR /home/alonkay/app
 
-CMD ["python", "Main.py"]
+CMD ["python3", "Main.py"]
