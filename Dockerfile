@@ -9,6 +9,7 @@ RUN yum update -y && yum install -y python3 python3-pip sudo
 COPY . /home/alonkay/app/
 
 # USER <username>
+RUN python3 --version
 
 RUN cd /home/alonkay/app/ && pip3 install -r requirements.txt
 
