@@ -1,6 +1,6 @@
 FROM nvidia/cuda:12.3.1-base-rockylinux8
 
-RUN yum update -y && yum install -y python3.9 sudo 
+RUN yum update -y && yum install -y python3.9 sudo libglvnd-opengl
 
 # RUN useradd -m <username>
 
@@ -11,7 +11,7 @@ COPY . /home/alonkay/app/
 # USER <username>
 
 RUN cd /home/alonkay/app/ && pip3 install -r requirements.txt
-RUN python3 --version
+
 WORKDIR /home/alonkay/app
 
 CMD ["python3", "Main.py"]
