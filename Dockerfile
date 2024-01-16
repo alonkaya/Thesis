@@ -1,6 +1,8 @@
 FROM nvidia/cuda:12.3.1-base-rockylinux8
 
-RUN yum update -y && yum install -y python3.9 python3-pip sudo
+RUN yum update -y && yum install -y python3.9 python3-pip23.3.1 sudo \
+
+RUN pip3 install --upgrade pip==23.3.1
 
 # RUN useradd -m <username>
 
