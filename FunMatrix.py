@@ -38,6 +38,20 @@ def compute_relative_transformations(pose1, pose2):
 
     return R_relative, t_relative
 
+def transMatFrom(arr):
+    result = np.eye(4)
+    arr = np.array(arr).reshape((3,4))
+    result[:3,:4] = arr
+    return result
+
+def compute_relative_transformations2(pose1, pose2):
+    pose1 = transMatFrom(pose1)
+    pose2 = transMatFrom(pose2)
+    relative_pose =  np.linalg.inv(pose1).dot(pose2)
+    R_relative = relative_pose[:3, :3]
+    t_relative = relative_pose[:3, 3]
+    return R_relative, t_relative
+
 # Define a function to compute the essential matrix E from the relative pose matrix M
 def compute_essential(R, t):
     # Compute the skew-symmetric matrix of t

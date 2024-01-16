@@ -1,0 +1,15 @@
+FROM nvidia/cuda:12.3.1-base-rockylinux8
+
+RUN yum update -y && yum install -y python3 python3-pip sudo
+
+# RUN useradd -m <username>
+
+# RUN chown -R <username>:<username> /home/<username>/
+
+COPY . /home/alonkay/app/
+
+# USER <username>
+
+RUN cd /home/<username>/app/ && pip3 install -r requirements.txt
+
+WORKDIR /home/<username>/app

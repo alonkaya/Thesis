@@ -26,30 +26,6 @@ class EpipoLine:
         c = array[2]
         return int((-c - a * x) / b)
 
-    # @staticmethod
-    # def convertP(pose1, pose2):
-    #     R1, T1 = pose1
-    #     R2, T2 = pose2
-    #     # return R2, T2
-    #     newR = np.dot(np.linalg.inv(R2), R1)
-    #     newT = np.dot(np.dot(np.linalg.inv(R1), R2), T2) - T1
-    #     #
-    #     # newR = np.dot(R2, np.linalg.inv(R1))
-    #     # newT = np.dot(R1, T1-T2)
-    #     return newR, newT
-
-    def EMat(self, R, T):
-        # print(T)
-        t = T
-        T = np.array([
-            [0, -t[2], t[1]],
-            [t[2], 0, -t[0]],
-            [-t[1], t[0], 0]
-        ], dtype=float)
-
-
-        E = T.dot(R)
-        return E
 
     def visualize(self, sqResultDir, img_idx, K, THRESHOLD=0.15):
         sift = cv2.xfeatures2d.SIFT_create()

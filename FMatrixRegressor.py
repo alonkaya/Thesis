@@ -1,6 +1,7 @@
 from params import *
 from utils import *
 from FunMatrix import check_epipolar_constraint
+# from deepF_nocors import *
 from Dataset import train_loader, val_loader
 import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPModel, CLIPVisionModel
@@ -62,51 +63,59 @@ class FMatrixRegressor(nn.Module):
 
 
     def forward(self, x1, x2):
-        if self.clip: # If using CLIP
-            x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(self.device)
-            x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(self.device)
+        if use_deepf_nocors:
+            # net = HomographyNet(use_reconstruction_module=False).to(self.device)
 
-            x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
-            x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
+            # output = net.foward(x1, x2).to(self.device)
 
-        else: # If using standard ViT
-             x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
-             x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
-
-        # cosine_similarity = torch.nn.functional.cosine_similarity(x1_embeddings, x2_embeddings).detach().cpu() # (batch_size)
-
-        # Create another feature embedding of the element-wise mult between the two embedding vectors
-        # mul_embedding = x1_embeddings.mul(x2_embeddings)
-
-        # Concatenate both original and rotated embedding vectors
-        embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1).to(self.device)
-
-        # Train MLP on embedding vectors
-        unnormalized_output = self.mlp(embeddings).view(-1,3,3)
-
-
-        if add_penalty_loss:
-            # Compute penalty for last singular value 
-            penalty = last_sing_value_penalty(unnormalized_output).to(self.device)
-           
-            # Apply L2 norm on top of L1 norm 
-            output = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_output]).to(self.device)
-
-        elif enforce_fundamental_constraint:
-            # Convert 9-vector output to 3x3 rank-2 F-matrix
-            output = torch.stack([enforce_fundamental_constraints(x) for x in unnormalized_output]).to(self.device)
-
-            # Apply L2 norm on top of L1 norm 
-            output = torch.stack([normalize_L2(normalize_L1(x)) for x in output]).to(self.device)
-        
+            # return output
+            ""
         else:
-            # Apply reconstruction layer to 8-vector output
-            output = torch.stack([reconstruction_module(x) for x in unnormalized_output]).to(self.device)        
+            if self.clip: # If using CLIP
+                x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(self.device)
+                x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(self.device)
 
-            # Apply max normalization layer
-            output = torch.stack([normalize_max(x) for x in output]).to(self.device)
+                x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
+                x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
+
+            else: # If using standard ViT
+                x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
+                x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
+
+            # cosine_similarity = torch.nn.functional.cosine_similarity(x1_embeddings, x2_embeddings).detach().cpu() # (batch_size)
+
+            # Create another feature embedding of the element-wise mult between the two embedding vectors
+            # mul_embedding = x1_embeddings.mul(x2_embeddings)
+
+            # Concatenate both original and rotated embedding vectors
+            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1).to(self.device)
+
+            # Train MLP on embedding vectors
+            unnormalized_output = self.mlp(embeddings).view(-1,3,3)
+
+
+            if add_penalty_loss:
+                # Compute penalty for last singular value 
+                penalty = last_sing_value_penalty(unnormalized_output).to(self.device)
+            
+                # Apply L2 norm on top of L1 norm 
+                output = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_output]).to(self.device)
+
+            elif enforce_fundamental_constraint:
+                # Convert 9-vector output to 3x3 rank-2 F-matrix
+                output = torch.stack([enforce_fundamental_constraints(x) for x in unnormalized_output]).to(self.device)
+
+                # Apply L2 norm on top of L1 norm 
+                output = torch.stack([normalize_L2(normalize_L1(x)) for x in output]).to(self.device)
+            
+            else:
+                # Apply reconstruction layer to 8-vector output
+                output = torch.stack([reconstruction_module(x) for x in unnormalized_output]).to(self.device)        
+
+                # Apply max normalization layer
+                output = torch.stack([normalize_max(x) for x in output]).to(self.device)
         
-        return unnormalized_output, output, penalty
+            return unnormalized_output, output, penalty
 
 
     def train_model(self, train_loader, val_loader, num_epochs):
@@ -243,6 +252,7 @@ class FMatrixRegressor(nn.Module):
             Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}\n"""
             )
 
+        print(f'Train gorund truth error: {epoch_avg_ec_err_truth} val gorund truth error: {val_epoch_avg_ec_err_truth}\n')
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss, x_label="Epoch", y_label='Training Loss', show=show_plots)
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss, x_label="Epoch", y_label='Validation Loss', show=show_plots)
         plot_over_epoch(x=range(1, num_epochs + 1), y=train_mae, x_label="Epoch", y_label='Training MAE', show=show_plots)
@@ -254,6 +264,4 @@ class FMatrixRegressor(nn.Module):
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_penalty, x_label="Epoch", y_label='Additional loss penalty for last singular value', show=show_plots)                
         # plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False, show=show_plots)
 
-        # Save
-        # torch.save(self.state_dict(), 'vit_mlp_regressor.pth')
-
+        
