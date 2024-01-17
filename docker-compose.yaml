@@ -4,12 +4,14 @@ services:
     image: my_image
     volumes:
       - /home/alonkay/Thesis/sequences:/home/alonkay/app/sequences
+    runtime: nvidia
     deploy:
       resources:
         reservations:
           devices:
           - driver: nvidia
-            count: 2
+            # count: 1
+            device_ids: ['0']
             capabilities: [gpu]
     stdin_open: true
     tty: true
