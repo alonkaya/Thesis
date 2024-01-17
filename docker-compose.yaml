@@ -2,7 +2,8 @@ version: '3'
 services:
   my_container:
     image: my_image
-    runtime: nvidia
+    environment:
+      - CUDA_LAUNCH_BLOCKING=1
     volumes:
       - /home/alonkay/Thesis/sequences:/home/alonkay/app/sequences
     deploy:
