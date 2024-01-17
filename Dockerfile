@@ -15,5 +15,5 @@ RUN cd /home/alonkay/app/ && pip3 install -r requirements.txt
 
 WORKDIR /home/alonkay/app
 
-CMD ["python3", "Main.py"]
+# CMD ["python3", "Main.py"]
 
