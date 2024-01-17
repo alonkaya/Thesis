@@ -1,0 +1,22 @@
+version: '3'
+services: 
+  my_container:
+  image: my_image
+
+
+
+version: '3'
+services:
+  my_container:
+    image: my_image
+    volumes:
+      - /home/alonkay/Thesis/sequences:/home/alonkay/app/sequences
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 0
+            capabilities: [gpu]
+    stdin_open: true
+    tty: true
