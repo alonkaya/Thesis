@@ -1,7 +1,7 @@
 FROM pytorch/pytorch:2.1.2-cuda11.8-cudnn8-runtime
 
 # RUN apt-get update -y && apt-get install -y python3.9 sudo mesa-libGL
-RUN apt-get update -y && apt-get install -y python3.9 sudo libgl1-mesa-glx
+RUN apt-get update -y && apt-get install -y python3.9 sudo libgl1-mesa-glx libglib2.0-0
 
 
 # RUN useradd -m <username>
