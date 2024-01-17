@@ -2,8 +2,6 @@ version: '3'
 services:
   my_container:
     image: my_image
-    environment:
-      - CUDA_LAUNCH_BLOCKING=1
     volumes:
       - /home/alonkay/Thesis/sequences:/home/alonkay/app/sequences
     deploy:
@@ -11,7 +9,7 @@ services:
         reservations:
           devices:
           - driver: nvidia
-            count: 1
+            count: 2
             capabilities: [gpu]
     stdin_open: true
     tty: true
