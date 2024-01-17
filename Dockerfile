@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.3.1-devel-rockylinux8
+FROM pytorch/pytorch:2.1.2-cuda11.8-cudnn8-runtime
 
 RUN yum update -y && yum install -y python3.9 sudo mesa-libGL
 
