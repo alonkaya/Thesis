@@ -7,7 +7,7 @@ RUN apt-get update -y && apt-get install -y python3.9 libgl1-mesa-glx libglib2.0
 
 # RUN chown -R <username>:<username> /home/<username>/
 
-COPY utils.py task.py requirements.txt params.py Main.py FunMatrix.py  FMatrixRegressor.py Dockerfile docker-compose.yaml.yaml deepF_nocors.py Dataset.py CustomDataset.py /home/alonkay/app/
+COPY utils.py task.py requirements.txt params.py Main.py FunMatrix.py  FMatrixRegressor.py Dockerfile docker-compose.yaml deepF_nocors.py Dataset.py CustomDataset.py /home/alonkay/app/
 COPY poses /home/alonkay/app/poses
 # USER <username>
 
