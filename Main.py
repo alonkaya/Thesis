@@ -2,7 +2,7 @@ from FMatrixRegressor import FMatrixRegressor
 from params import *
 from Dataset import train_loader, val_loader
 import torch
-from FunMatrix import check_epipolar_constraint
+from FunMatrix import enforce_fundamental_constraint
 import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -15,11 +15,4 @@ print(f'learning_rate: {learning_rate}, mlp_hidden_sizes: {mlp_hidden_sizes}, nu
 model.train_model(train_loader, val_loader, num_epochs=num_epochs)
 
 
-# train_iter = iter(train_loader)
-# first_image, second_image, label, unormalized_label = next(train_iter)
 
-# for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
-#     print(check_epipolar_constraint(img_1, img_2, F))
-#     print(check_epipolar_constraint(img_1, img_2, unormalized_F))
-#     print()
-    

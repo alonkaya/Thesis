@@ -1,5 +1,7 @@
 from params import *
 from FunMatrix import *
+from utils import *
+from Dataset import train_loader, val_loader
 import os
 import numpy as np
 import cv2
@@ -128,6 +130,7 @@ class EpipoLine:
     def verify_xFx(point1, F, point2):
         return point2.T.dot(F).dot(point1)
 
+
     @staticmethod
     def verify_xfx(point, l):
         threshold = 2
@@ -144,9 +147,9 @@ good_frames_dir = os.path.join('epipole_lines', "good_frames")
 os.makedirs(bad_frames_dir, exist_ok=True)
 os.makedirs(good_frames_dir, exist_ok=True)
 
-left_projection_matrix = process_calib('sequences\\02\\calib.txt')
+left_projection_matrix = read_calib('sequences\\02\\calib.txt')
 
-K, _ = get_internal_param_matrix(left_projection_matrix)
+K, _ = get_intrinsic(left_projection_matrix)
 
 poses = read_poses('poses\\02.txt')
 
