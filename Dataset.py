@@ -20,9 +20,15 @@ class CustomDataset(torch.utils.data.Dataset):
         return len(self.poses) - jump_frames
 
     def __getitem__(self, idx):
+        # If one of the frames is "Bad"- skip 
+        img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
+        img2_path = os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png')
+        if not os.path.exists(img1_path) or not os.path.exists(img2_path):
+            return None, None, None, None
+
         # Create PIL images
-        original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.png'))
-        original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png'))
+        original_first_image = Image.open(img1_path)
+        original_second_image = Image.open(img2_path)
 
         # Transform: Resize, center, grayscale
         first_image = self.transform(original_first_image)
@@ -35,7 +41,7 @@ class CustomDataset(torch.utils.data.Dataset):
         # Convert to tensor and normalize F-Matrix 
         F, unnormalized_F  =  normalize_L2(normalize_L1(torch.tensor(F, dtype=torch.float32))), torch.tensor(F, dtype=torch.float32)
 
-        return first_image, second_image, F, unnormalized_F, idx, self.sequence_num
+        return first_image, second_image, F, unnormalized_F
     
 transform = transforms.Compose([
     transforms.Resize((256, 256)),
@@ -71,30 +77,30 @@ concat_train_dataset = ConcatDataset(train_datasets)
 concat_val_dataset = ConcatDataset(val_datasets)
 
 # Create a DataLoader
-train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
+train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
 
 
-bad_frames_dir = os.path.join('epipole_lines', "bad_frames")
-good_frames_dir = os.path.join('epipole_lines', "good_frames")
+# bad_frames_dir = os.path.join('epipole_lines', "bad_frames")
+# good_frames_dir = os.path.join('epipole_lines', "good_frames")
 
-os.makedirs(bad_frames_dir, exist_ok=True)
-os.makedirs(good_frames_dir, exist_ok=True)
+# os.makedirs(bad_frames_dir, exist_ok=True)
+# os.makedirs(good_frames_dir, exist_ok=True)
 
 
-for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
-    dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
-    os.makedirs(dst_dir, exist_ok=True)
+# for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
+#     dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
+#     os.makedirs(dst_dir, exist_ok=True)
 
-    epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
-    epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
-    # err += epipolar_geo.get_epipolar_err()
-    
-for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(train_loader):
-    dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
-    os.makedirs(dst_dir, exist_ok=True)
+#     epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
+#     epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
+#     # err += epipolar_geo.get_epipolar_err()
 
-    epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
-    epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
-# err /= len(train_loader) 
-# print(err)
+# for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(train_loader):
+#     dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
+#     os.makedirs(dst_dir, exist_ok=True)
+
+#     epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
+#     epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
+# # err /= len(train_loader) 
+# # print(err)
