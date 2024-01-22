@@ -4,7 +4,7 @@ from FunMatrix import *
 # from deepF_nocors import *
 from Dataset import train_loader, val_loader
 import torch.optim as optim
-from transformers import ViTModel, CLIPImageProcessor, CLIPModel, CLIPVisionModel
+from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 from sklearn.metrics import mean_absolute_error
 
 class FMatrixRegressor(nn.Module):
@@ -75,12 +75,8 @@ class FMatrixRegressor(nn.Module):
                 x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(self.device)
                 x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(self.device)
 
-                x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
-                x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
-
-            else: # If using standard ViT
-                x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
-                x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
+            x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
+            x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
 
             # cosine_similarity = torch.nn.functional.cosine_similarity(x1_embeddings, x2_embeddings).detach().cpu() # (batch_size)
 
@@ -93,20 +89,19 @@ class FMatrixRegressor(nn.Module):
             # Train MLP on embedding vectors
             unnormalized_output = self.mlp(embeddings).view(-1,3,3)
 
-
-            if add_penalty_loss:
-                # Compute penalty for last singular value 
-                penalty = last_sing_value_penalty(unnormalized_output).to(self.device)
-            
-                # Apply L2 norm on top of L1 norm 
-                output = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_output]).to(self.device)
-            
-            else:
+            if use_reconstruction_layer:
                 # Apply reconstruction layer to 8-vector output
                 output = torch.stack([reconstruction_module(x) for x in unnormalized_output]).to(self.device)        
 
                 # Apply max normalization layer
                 output = torch.stack([normalize_max(x) for x in output]).to(self.device)
+            
+            else:
+                # Compute penalty for last singular value 
+                penalty = last_sing_value_penalty(unnormalized_output).to(self.device)
+            
+                # Apply L2 norm on top of L1 norm 
+                output = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_output]).to(self.device)
         
             return unnormalized_output, output, penalty
         
@@ -146,9 +141,9 @@ class FMatrixRegressor(nn.Module):
                 unnormalized_output, output, penalty = self.forward(first_image, second_image)
                 
                 # Compute loss
-                l1_loss = self.L1_loss(output, label)
+                # l1_loss = self.L1_loss(output, label)
                 l2_loss = self.L2_loss(output, label)
-                loss = l2_loss + penalty
+                loss = l2_loss + penalty if not use_reconstruction_layer else l2_loss
                 avg_loss += loss.detach().cpu().item()
 
                 # Compute Backward pass and gradients
@@ -205,9 +200,10 @@ class FMatrixRegressor(nn.Module):
  
                     unnormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
                     epoch_penalty += penalty
-                    val_l1_loss = self.L1_loss(val_output, val_label)
+
+                    # val_l1_loss = self.L1_loss(val_output, val_label)
                     val_l2_loss = self.L2_loss(val_output, val_label)
-                    val_loss = val_l2_loss 
+                    val_loss = val_l2_loss if not use_reconstruction_layer else val_l2_loss
                     val_avg_loss += val_loss.detach().cpu().item()
 
                     # Compute val mean epipolar constraint error 
@@ -220,6 +216,7 @@ class FMatrixRegressor(nn.Module):
                     val_labels.append(val_label)
 
                     val_size += 1
+
                 # Calculate and store mean absolute error for the epoch
                 mae = torch.mean(torch.abs(torch.cat(val_labels, dim=0) - torch.cat(val_outputs, dim=0)))
                 val_mae.append(mae.detach().cpu())
@@ -256,15 +253,14 @@ class FMatrixRegressor(nn.Module):
         # plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False, show=show_plots)
 
 
-def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unnormalized_output):
+def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):
     # Compute mean epipolar constraint error 
-    avg_ec_err_truth = 0
-    avg_ec_err_pred = 0
-    avg_ec_err_pred_unormalized = 0
-    for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unnormalized_output):
-        avg_ec_err_truth = EpipolarGeometry(img_1.detach().cpu(), img_2.detach().cpu(), F_truth.detach().cpu()).get_epipolar_err()
-        avg_ec_err_pred = EpipolarGeometry(img_1.detach().cpu(), img_2.detach().cpu(), F_pred.detach().cpu()).get_epipolar_err()
-        avg_ec_err_pred_unormalized = EpipolarGeometry(img_1.detach().cpu(), img_2.detach().cpu(), F_pred_unormalized.detach().cpu()).get_epipolar_err()
+    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = 0, 0, 0
+
+    for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
+        avg_ec_err_truth += EpipolarGeometry(img_1.detach().cpu(), img_2.detach().cpu(), F_truth.detach().cpu()).get_epipolar_err()
+        avg_ec_err_pred += EpipolarGeometry(img_1.detach().cpu(), img_2.detach().cpu(), F_pred.detach().cpu()).get_epipolar_err()
+        avg_ec_err_pred_unormalized += EpipolarGeometry(img_1.detach().cpu(), img_2.detach().cpu(), F_pred_unormalized.detach().cpu()).get_epipolar_err()
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = avg_ec_err_truth/len(first_image), avg_ec_err_pred/len(first_image), avg_ec_err_pred_unormalized/len(first_image)      
     
     return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized 

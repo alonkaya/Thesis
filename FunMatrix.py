@@ -98,17 +98,17 @@ def reconstruction_module(x):
                 [1.,    0.,             0.],
                 [0.,    torch.cos(rx),    -torch.sin(rx)],
                 [0.,    torch.sin(rx),     torch.cos(rx)]
-            ])
+            ], requires_grad=True)
             R_y = torch.tensor([
                 [torch.cos(ry),    0.,    -torch.sin(ry)],
                 [0.,            1.,     0.],
                 [torch.sin(ry),    0.,     torch.cos(ry)]
-            ])
+            ], requires_grad=True)
             R_z = torch.tensor([
                 [torch.cos(rz),    -torch.sin(rz),    0.],
                 [torch.sin(rz),    torch.cos(rz),     0.],
                 [0.,            0.,             1.]
-            ])
+            ], requires_grad=True)
             R = torch.matmul(R_x, torch.matmul(R_y, R_z))
             return R
 
@@ -118,14 +118,14 @@ def reconstruction_module(x):
                 [-1/(f+1e-8),   0.,             0.],
                 [0.,            -1/(f+1e-8),    0.],
                 [0.,            0.,             1.]
-            ])
+            ], requires_grad=True)
 
         def get_translate(tx, ty, tz):
             return torch.tensor([
                 [0.,  -tz, ty],
                 [tz,  0,   -tx],
                 [-ty, tx,  0]
-            ])
+            ], requires_grad=True)
 
 
         def get_fmat(x):
@@ -149,14 +149,14 @@ def reconstruction_module(x):
         return out
 
 class EpipolarGeometry:
-    def __init__(self, image1_tensor, image2_tensor, F):
+    def __init__(self, image1_tensor, image2_tensor, F, sequence_num=None, idx=None):
         self.F = F.view(3, 3)
         # Recsale pixels to original size [0,1] -> [0,255]
         self.img1 = (image1_tensor.permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8)
         self.img2 = (image2_tensor.permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8) 
 
-        # self.sequence_path = os.path.join('sequences', sequence_num)
-        # self.file_name1 = f'{idx:06}.png'
+        self.sequence_path = os.path.join('sequences', sequence_num)
+        self.file_name1 = f'{idx:06}.png'
 
         self.colors = [
             (255, 102, 102),
@@ -232,54 +232,54 @@ class EpipolarGeometry:
             avg_distance_err_img2 += self.get_point_2_line_error(pt1, line_2)
             epip_test_err += self.epipolar_test_single_point(pt1, pt2)
 
-            # # calculating 2 points on the line
-            # y_0 = self.epipoline(0, line_1)
-            # y_1 = self.epipoline(img_W, line_1)
+            # calculating 2 points on the line
+            y_0 = self.epipoline(0, line_1)
+            y_1 = self.epipoline(img_W, line_1)
 
-            # y_0 = self.epipoline(0, line_2)
-            # y_1 = self.epipoline(img_W, line_2)
+            y_0 = self.epipoline(0, line_2)
+            y_1 = self.epipoline(img_W, line_2)
 
-            # # Set color for line
-            # color = self.colors[color_idx % len(self.colors)]
+            # Set color for line
+            color = self.colors[color_idx % len(self.colors)]
 
-            # # drawing the line and feature points on the left image
-            # img1_line = cv2.circle(img1_line, (int(x1), int(y1)), radius=4, color=color)
-            # img1_line = cv2.line(img1_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
-            # # displaying just feature points
-            # cv2.circle(self.img1.copy(), (int(x1), int(y1)), radius=4, color=color)
+            # drawing the line and feature points on the left image
+            img1_line = cv2.circle(img1_line, (int(x1), int(y1)), radius=4, color=color)
+            img1_line = cv2.line(img1_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
+            # displaying just feature points
+            cv2.circle(self.img1.copy(), (int(x1), int(y1)), radius=4, color=color)
 
-            # # drawing the line on the right image
-            # img2_line = cv2.circle(img2_line, (int(x2), int(y2)), radius=4, color=color)
-            # img2_line = cv2.line(img2_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
-            # # displaying just feature points
-            # cv2.circle(self.img2.copy(), (int(x2), int(y2)), radius=4, color=color)
+            # drawing the line on the right image
+            img2_line = cv2.circle(img2_line, (int(x2), int(y2)), radius=4, color=color)
+            img2_line = cv2.line(img2_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
+            # displaying just feature points
+            cv2.circle(self.img2.copy(), (int(x2), int(y2)), radius=4, color=color)
 
         avg_distance_err_img1 /=  pts1.shape[0]
         avg_distance_err_img2 /=  pts1.shape[0]
         epip_test_err /= pts1.shape[0]
 
-        # vis = np.concatenate((img1_line, img2_line), axis=0)
-        # font = cv2.FONT_HERSHEY_SIMPLEX
+        vis = np.concatenate((img1_line, img2_line), axis=0)
+        font = cv2.FONT_HERSHEY_SIMPLEX
 
-        # img_H = vis.shape[0]
-        # cv2.putText(vis, str(avg_distance_err_img1), (10, 20), font, 0.6, color=(128, 0, 0), lineType=cv2.LINE_AA)
-        # cv2.putText(vis, str(avg_distance_err_img2), (10, img_H - 10), font, 0.6, color=(0, 0, 128), lineType=cv2.LINE_AA)
-        # cv2.putText(vis, str(epip_test_err), (10, 210), font, 0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
+        img_H = vis.shape[0]
+        cv2.putText(vis, str(avg_distance_err_img1), (10, 20), font, 0.6, color=(128, 0, 0), lineType=cv2.LINE_AA)
+        cv2.putText(vis, str(avg_distance_err_img2), (10, img_H - 10), font, 0.6, color=(0, 0, 128), lineType=cv2.LINE_AA)
+        cv2.putText(vis, str(epip_test_err), (10, 210), font, 0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
 
         if(avg_distance_err_img1 > 13 or np.abs(epip_test_err) > 0.01):
-            # cv2.imwrite(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
-            src_path1 = os.path.join(self.sequence_path, "image_0", self.file_name1)
-            dst_path1 = os.path.join(self.sequence_path, "BadFrames", self.file_name1)
-            if os.path.exists(src_path1):  
-                print(f'moved {src_path1} to {dst_path1}')
-                os.rename(src_path1, dst_path1)         
-            # print(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))
+            if move_bad_images:
+                src_path1 = os.path.join(self.sequence_path, "image_0", self.file_name1)
+                dst_path1 = os.path.join(self.sequence_path, "BadFrames", self.file_name1)
+                if os.path.exists(src_path1):  
+                    print(f'moved {src_path1} to {dst_path1}')
+                    os.rename(src_path1, dst_path1)         
+            else:                
+                cv2.imwrite(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
+                print(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))
 
-        else:
-            # cv2.imwrite(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
-            ""
-
-            # print(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))
+        elif not move_bad_images:
+            cv2.imwrite(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
+            print(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))
 
 
     def epipolar_test_single_point(self, pt1, pt2): 
