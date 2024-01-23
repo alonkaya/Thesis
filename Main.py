@@ -2,7 +2,6 @@ from FMatrixRegressor import FMatrixRegressor
 from params import *
 from Dataset import train_loader, val_loader
 import torch
-import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)

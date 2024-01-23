@@ -152,8 +152,8 @@ class EpipolarGeometry:
     def __init__(self, image1_tensor, image2_tensor, F, sequence_num=None, idx=None):
         self.F = F.view(3, 3)
         # Recsale pixels to original size [0,1] -> [0,255]
-        self.img1 = (image1_tensor.permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8)
-        self.img2 = (image2_tensor.permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8) 
+        self.img1 = (image1_tensor.permute(1, 2, 0).detach().numpy() * 255).astype(np.uint8)
+        self.img2 = (image2_tensor.permute(1, 2, 0).detach().numpy() * 255).astype(np.uint8) 
 
         self.sequence_path = os.path.join('sequences', sequence_num) if sequence_num else None
         self.file_name1 = f'{idx:06}.png'if idx else None
