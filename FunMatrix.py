@@ -155,8 +155,8 @@ class EpipolarGeometry:
         self.img1 = (image1_tensor.permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8)
         self.img2 = (image2_tensor.permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8) 
 
-        self.sequence_path = os.path.join('sequences', sequence_num)
-        self.file_name1 = f'{idx:06}.png'
+        self.sequence_path = os.path.join('sequences', sequence_num) if sequence_num else None
+        self.file_name1 = f'{idx:06}.png'if idx else None
 
         self.colors = [
             (255, 102, 102),
