@@ -132,7 +132,7 @@ class FMatrixRegressor(nn.Module):
             avg_loss = 0
             train_size = 0
             for first_image, second_image, label, unormalized_label in train_loader:
-                print(first_image.shape)
+                print(first_image[0])
                 if first_image[0] is 0: 
                     print("0")
                     continue
