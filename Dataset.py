@@ -29,7 +29,7 @@ class CustomDataset(torch.utils.data.Dataset):
         # Create PIL images
         original_first_image = Image.open(img1_path)
         original_second_image = Image.open(img2_path)
-
+        
         # Transform: Resize, center, grayscale
         first_image = self.transform(original_first_image)
         second_image = self.transform(original_second_image)
@@ -87,7 +87,9 @@ val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False
 # os.makedirs(bad_frames_dir, exist_ok=True)
 # os.makedirs(good_frames_dir, exist_ok=True)
 
-
+# for first_image, second_image, label, unormalized_label in train_loader:
+#     print(first_image.shape)
+    # print(first_image.shape)
 # for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
 #     dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
 #     os.makedirs(dst_dir, exist_ok=True)
