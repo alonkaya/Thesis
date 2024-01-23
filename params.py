@@ -14,6 +14,6 @@ use_reconstruction_layer = False
 num_output = 9 
 penalty_coeff = 2
 epipolar_constraint_threshold = 0.15
-batch_size = 1
+batch_size = 1 # If increase batch size beware of zeros in batch!! 
 use_deepf_nocors = False
 move_bad_images = False

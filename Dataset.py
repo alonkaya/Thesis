@@ -87,10 +87,11 @@ val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False
 # os.makedirs(bad_frames_dir, exist_ok=True)
 # os.makedirs(good_frames_dir, exist_ok=True)
 
-for first_image, second_image, label, unormalized_label in train_loader:
-    if first_image is 0: 
-        continue    
-    print(first_image.shape)
+# for first_image, second_image, label, unormalized_label in train_loader:
+#     if first_image[0] is 0: 
+#         print("0")
+#         continue    
+#     print(first_image.shape)
     # print(first_image.shape)
 # for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
 #     dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
