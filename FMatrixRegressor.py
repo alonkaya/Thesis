@@ -4,7 +4,7 @@ from FunMatrix import *
 # from deepF_nocors import *
 from Dataset import train_loader, val_loader
 import torch.optim as optim
-from optimum.nvidia import ViTModel, CLIPImageProcessor, CLIPVisionModel
+from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 from sklearn.metrics import mean_absolute_error
 
 class FMatrixRegressor(nn.Module):
