@@ -214,7 +214,7 @@ class FMatrixRegressor(nn.Module):
 
                     val_outputs.append(val_output.to(self.device))
                     val_labels.append(val_label)
-
+                    print(val_size)
                     val_size += 1
 
                 # Calculate and store mean absolute error for the epoch
