@@ -133,7 +133,7 @@ class FMatrixRegressor(nn.Module):
             train_size = 0
             for first_image, second_image, label, unormalized_label in train_loader:
                 print(first_image[0])
-                if first_image[0] is 0: 
+                if first_image[0] == 0: 
                     print("0")
                     continue
                 
@@ -195,7 +195,7 @@ class FMatrixRegressor(nn.Module):
             val_size = 0
             with torch.no_grad():
                 for val_first_image, val_second_image, val_label, val_unormalized_label in val_loader:
-                    if val_first_image[0] is 0:
+                    if val_first_image[0] == 0:
                         continue
                     
                     val_first_image, val_second_image, val_label = val_first_image.to(self.device), val_second_image.to(self.device), val_label.to(self.device)
