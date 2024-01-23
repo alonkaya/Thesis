@@ -133,7 +133,7 @@ class FMatrixRegressor(nn.Module):
             train_size = 0
             for first_image, second_image, label, unormalized_label in train_loader:
                 # This condition denotes a 'bad' frame
-                if first_image[0].shape == ():  continue
+                if first_image[0].shape == (): continue
                 
                 first_image, second_image, label = first_image.to(self.device), second_image.to(self.device), label.to(self.device) 
 
