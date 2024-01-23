@@ -24,7 +24,7 @@ class CustomDataset(torch.utils.data.Dataset):
         img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
         img2_path = os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png')
         if not os.path.exists(img1_path) or not os.path.exists(img2_path):
-            return None, None, None, None
+            return 0, 0, 0, 0
 
         # Create PIL images
         original_first_image = Image.open(img1_path)
