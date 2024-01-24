@@ -24,7 +24,7 @@ def get_intrinsic(P):
     K, R = rq(M)
 
     # Enforce positive diagonal for K
-    T = torch.diag(torch.sign(torch.diag(K)))
+    T = torch.diag(torch.sign(torch.diag(torch.tensor(K))))
     if torch.det(T) < 0:
         T[1, 1] *= -1
 
