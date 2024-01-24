@@ -51,7 +51,7 @@ transform = transforms.Compose([
     # TODO: Normalize images?
 ])
 
-sequence_paths = [f'sequences/0{i}/image_0' for i in range(1)]
+sequence_paths = [f'sequences/0{i}/image_0' for i in range(3)]
 poses_paths = [f'poses/0{i}.txt' for i in range(1)]
 calib_paths = [f'sequences/0{i}/calib.txt' for i in range(1)]
 
