@@ -206,8 +206,8 @@ class EpipolarGeometry:
             self.good.append(matches[min_distance_index][0])
         
         # Extract the matched keypoints
-        pts1 = torch.FloatTensor([kp1[m.queryIdx].pt for m in self.good])
-        pts2 = torch.FloatTensor([kp2[m.trainIdx].pt for m in self.good])
+        pts1 = torch.FloatTensor([kp1[m.queryIdx].pt for m in self.good]).to(device)
+        pts2 = torch.FloatTensor([kp2[m.trainIdx].pt for m in self.good]).to(device)
 
         pts1 = torch.cat((pts1, torch.ones((pts1.shape[0], 1))), dim=-1)
         pts2 = torch.cat((pts2, torch.ones((pts2.shape[0], 1))), dim=-1)
