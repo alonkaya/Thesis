@@ -179,7 +179,7 @@ class EpipolarGeometry:
         c = array[2]
         return int((-c - a * x) / b)
 
-    def get_keypoints(self, threshold=epipolar_constraint_threshold):
+    def get_keypoints(self, device, threshold=epipolar_constraint_threshold):
         # sift = cv2.xfeatures2d.SIFT_create()
         sift = cv2.SIFT_create()
         bf = cv2.BFMatcher()
