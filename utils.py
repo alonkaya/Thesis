@@ -2,7 +2,6 @@ from params import *
 import matplotlib.pyplot as plt
 import torch.nn as nn
 import torch
-import numpy as np
 
 class MLP(nn.Module):
     def __init__(self, num_input, mlp_hidden_sizes, num_output):
@@ -39,7 +38,7 @@ def plot_over_epoch(x, y, x_label, y_label, show=True, connecting_lines=True):
 # Define a function to read the calib.txt file
 def read_calib(calib_path):
     with open(calib_path, 'r') as f:
-        p0_matrix = np.array([float(x) for x in f.readline().split()[1:]]).reshape(3, 4)
+        p0_matrix = torch.tensor([float(x) for x in f.readline().split()[1:]]).reshape(3, 4)
 
     return p0_matrix
 
@@ -48,10 +47,10 @@ def read_poses(poses_path):
     poses = []    
     with open(poses_path, 'r') as f:
         for line in f: 
-            pose = np.array([float(x) for x in line.strip().split()]).reshape(3, 4)
+            pose = torch.tensor([float(x) for x in line.strip().split()]).reshape(3, 4)
             poses.append(pose)
 
-    return np.stack(poses)
+    return torch.stack(poses)
 
 
 def normalize_max(x):

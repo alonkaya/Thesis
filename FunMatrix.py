@@ -1,4 +1,3 @@
-import numpy as np
 from params import *
 import cv2
 import os
@@ -12,9 +11,9 @@ def compute_relative_transformations(pose1, pose2):
     t2 = pose2[:, 3]
     R2 = pose2[:, :3]    
 
-    transposed_R1 = np.transpose(R1)
-    R_relative = np.dot(R2, transposed_R1)
-    t_relative = np.dot(transposed_R1, (t2 - t1))
+    transposed_R1 = torch.transpose(R1)
+    R_relative = torch.matmul(R2, transposed_R1)
+    t_relative = torch.matmul(transposed_R1, (t2 - t1))
     # t_relative = t2 - np.dot(R_relative, t1)
 
     return R_relative, t_relative
@@ -25,13 +24,13 @@ def get_intrinsic(P):
     K, R = rq(M)
 
     # Enforce positive diagonal for K
-    T = np.diag(np.sign(np.diag(K)))
-    if np.linalg.det(T) < 0:
+    T = torch.diag(torch.sign(torch.diag(K)))
+    if torch.det(T) < 0:
         T[1, 1] *= -1
 
     # Update K and R
-    K = np.dot(K, T)
-    R = np.dot(T, R)
+    K = torch.matmul(K, T)
+    R = torch.matmul(T, R)
 
     K /= K[2, 2]
 
@@ -54,7 +53,7 @@ def adjust_intrinsic(k, original_size, resized_size, ceter_crop_size):
 # Define a function to compute the essential matrix E from the relative pose matrix M
 def compute_essential(R, t):
     # Compute the skew-symmetric matrix of t
-    t_x = np.array([[0, -t[2], t[1]], 
+    t_x = torch.tensor([[0, -t[2], t[1]], 
                     [t[2], 0, -t[0]], 
                     [-t[1], t[0], 0]])
 
@@ -64,13 +63,13 @@ def compute_essential(R, t):
 
 # Define a function to compute the fundamental matrix F from the essential matrix E and the projection matrices P0 and P1
 def compute_fundamental(E, K1, K2):
-    K2_inv_T = np.linalg.inv(K2).T
-    K1_inv = np.linalg.inv(K1)
+    K2_inv_T = torch.linalg.inv(K2).T
+    K1_inv = torch.linalg.inv(K1)
     
     # Compute the Fundamental matrix 
-    F = np.dot(K2_inv_T, np.dot(E, K1_inv))
+    F = torch.matmul(K2_inv_T, torch.matmul(E, K1_inv))
 
-    if  np.linalg.matrix_rank(F) != 2:
+    if  torch.linalg.matrix_rank(F) != 2:
         print("rank of ground-truch not 2")
 
     return F
@@ -152,8 +151,11 @@ class EpipolarGeometry:
     def __init__(self, image1_tensor, image2_tensor, F, sequence_num=None, idx=None):
         self.F = F.view(3, 3)
         # Recsale pixels to original size [0,1] -> [0,255]
-        self.img1 = (image1_tensor.permute(1, 2, 0).detach().numpy() * 255).astype(np.uint8)
-        self.img2 = (image2_tensor.permute(1, 2, 0).detach().numpy() * 255).astype(np.uint8) 
+        # self.img1 = (image1_tensor.permute(1, 2, 0).detach().numpy() * 255).astype(np.uint8)
+        # self.img2 = (image2_tensor.permute(1, 2, 0).detach().numpy() * 255).astype(np.uint8) 
+        
+        self.img1 = (image1_tensor.permute(1, 2, 0) * 255).to(torch.uint8)
+        self.img2 = (image2_tensor.permute(1, 2, 0) * 255).to(torch.uint8)
 
         self.sequence_path = os.path.join('sequences', sequence_num) if sequence_num else None
         self.file_name1 = f'{idx:06}.png'if idx else None
@@ -198,13 +200,13 @@ class EpipolarGeometry:
         # If no point passed the threshold, add the smallest distance ratio point
         if len(self.good) == 0:
             self.good.append(matches[min_distance_index][0])
-            
+        
         # Extract the matched keypoints
-        pts1 = np.float32([kp1[m.queryIdx].pt for m in self.good])
-        pts2 = np.float32([kp2[m.trainIdx].pt for m in self.good])
+        pts1 = torch.FloatTensor([kp1[m.queryIdx].pt for m in self.good])
+        pts2 = torch.FloatTensor([kp2[m.trainIdx].pt for m in self.good])
 
-        pts1 = np.concatenate((pts1, np.ones((pts1.shape[0], 1))), axis=-1)
-        pts2 = np.concatenate((pts2, np.ones((pts2.shape[0], 1))), axis=-1)
+        pts1 = torch.cat((pts1, torch.ones((pts1.shape[0], 1))), dim=-1)
+        pts2 = torch.cat((pts2, torch.ones((pts2.shape[0], 1))), dim=-1)
 
         return pts1, pts2
        
@@ -224,8 +226,8 @@ class EpipolarGeometry:
             x1, y1, _ = pt1
             x2, y2, _ = pt2
 
-            line_1 = np.dot(self.F.T, pt2)
-            line_2 = np.dot(self.F, pt1)
+            line_1 = torch.matmul(self.F.T, pt2)
+            line_2 = torch.matmul(self.F, pt1)
 
             # Get ditance from point to line error
             avg_distance_err_img1 += self.get_point_2_line_error(pt2, line_1)
@@ -258,7 +260,7 @@ class EpipolarGeometry:
         avg_distance_err_img2 /=  pts1.shape[0]
         epip_test_err /= pts1.shape[0]
 
-        vis = np.concatenate((img1_line, img2_line), axis=0)
+        vis = torch.cat((img1_line, img2_line), axis=0)
         font = cv2.FONT_HERSHEY_SIMPLEX
 
         img_H = vis.shape[0]
@@ -266,7 +268,7 @@ class EpipolarGeometry:
         cv2.putText(vis, str(avg_distance_err_img2), (10, img_H - 10), font, 0.6, color=(0, 0, 128), lineType=cv2.LINE_AA)
         cv2.putText(vis, str(epip_test_err), (10, 210), font, 0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
 
-        if(avg_distance_err_img1 > 13 or np.abs(epip_test_err) > 0.01):
+        if(avg_distance_err_img1 > 13 or abs(epip_test_err) > 0.01):
             if move_bad_images:
                 src_path1 = os.path.join(self.sequence_path, "image_0", self.file_name1)
                 dst_path1 = os.path.join(self.sequence_path, "BadFrames", self.file_name1)
@@ -283,7 +285,7 @@ class EpipolarGeometry:
 
 
     def epipolar_test_single_point(self, pt1, pt2): 
-        return np.abs(pt2.T.dot(self.F).dot(pt1))
+        return abs(pt2.T.dot(self.F).dot(pt1))
     
     def epipolar_test_avg_points(self, pts1, pts2):
         # Iterates over all keypoints in 'good'
@@ -298,7 +300,7 @@ class EpipolarGeometry:
     
     def get_point_2_line_error(self, point, l):
         l = l.flatten()
-        result = abs(np.dot(point, l.T) / np.sqrt(l[0] * l[0] + l[1] * l[1]))
+        result = abs(torch.matmul(point, l.T) / torch.sqrt(l[0] * l[0] + l[1] * l[1]))
         
         return result 
     
