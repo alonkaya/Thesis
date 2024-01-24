@@ -4,6 +4,7 @@ import os
 from scipy.linalg import rq
 import torch
 import torchvision.transforms.functional as T
+import numpy as np
 
 def compute_relative_transformations(pose1, pose2):
     t1 = pose1[:, 3]
@@ -187,8 +188,8 @@ class EpipolarGeometry:
         # self.img1 = cv2.cvtColor(self.img1.copy(), cv2.COLOR_BGR2GRAY)
 
         # Detect keypoints and compute descriptors for both images
-        (kp1, des1) = sift.detectAndCompute(self.img1, None)
-        (kp2, des2) = sift.detectAndCompute(self.img2, None)
+        (kp1, des1) = sift.detectAndCompute(np.array(self.img1), None)
+        (kp2, des2) = sift.detectAndCompute(np.array(self.img2), None)
 
         # matches = bf.match(des1, des2)
         matches = bf.knnMatch(des1, des2, k=2)
