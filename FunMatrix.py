@@ -19,20 +19,23 @@ def compute_relative_transformations(pose1, pose2):
     return R_relative, t_relative
 
 def get_intrinsic(P):
+    # TODO: check this
     # Step 1: Decompose the projection matrix P into the form P = K [R | t]
     M = P[:, :3]
     K, R = rq(M)
+    K, R = torch.tensor(K), torch.tensor(R)
 
     # Enforce positive diagonal for K
-    T = torch.diag(torch.sign(torch.diag(torch.tensor(K))))
+    T = torch.diag(torch.sign(torch.diag(K)))
     if torch.det(T) < 0:
         T[1, 1] *= -1
 
     # Update K and R
-    K = torch.matmul(K, T)
+    K = torch.matmul(K.clone(), T)
     R = torch.matmul(T, R)
 
-    K /= K[2, 2]
+    last_elem = K[2, 2]
+    K /= last_elem.clone()
 
     return K, R
 
