@@ -11,7 +11,7 @@ def compute_relative_transformations(pose1, pose2):
     t2 = pose2[:, 3]
     R2 = pose2[:, :3]    
 
-    transposed_R1 = torch.transpose(R1)
+    transposed_R1 = torch.transpose(R1, 0, 1)
     R_relative = torch.matmul(R2, transposed_R1)
     t_relative = torch.matmul(transposed_R1, (t2 - t1))
     # t_relative = t2 - np.dot(R_relative, t1)
