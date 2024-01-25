@@ -55,9 +55,11 @@ class FMatrixRegressor(nn.Module):
         self.L2_loss = nn.MSELoss().to(device)
         self.L1_loss = nn.L1Loss().to(device)
 
+        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes, num_output).to(device)
+        
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
-        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes, num_output).to(device)
+        
 
 
     def forward(self, x1, x2):
