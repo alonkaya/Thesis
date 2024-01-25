@@ -215,7 +215,7 @@ class EpipolarGeometry:
         # Iterates over all keypoints in 'good'
         temp = torch.matmul(pts2.view(-1,1,3), self.F)
         print(temp.shape)
-        errs = torch.abs(torch.matmul(temp, pts1))
+        errs = torch.abs(torch.matmul(temp, pts1.view(-1, 3, 1)))
         # errs = torch.abs(torch.matmul(temp, pts1.view(-1, pts1.shape[-1], 1)))  
          
         avg_err = torch.mean(errs)
