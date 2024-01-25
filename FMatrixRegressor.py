@@ -55,11 +55,10 @@ class FMatrixRegressor(nn.Module):
         self.L2_loss = nn.MSELoss().to(device)
         self.L1_loss = nn.L1Loss().to(device)
 
-        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes, num_output).to(device)
+        self.mlp = MLP(mlp_input_dim*2, mlp_hidden_sizes, num_output).to(device)
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
         
-
 
     def forward(self, x1, x2):
         if use_deepf_nocors:
@@ -74,8 +73,8 @@ class FMatrixRegressor(nn.Module):
                 x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
                 x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
 
-            x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(device)
-            x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(device)
+            x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:1,:].view(-1, 768).to(device)
+            x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:1,:].view(-1, 768).to(device)
 
             # cosine_similarity = torch.nn.functional.cosine_similarity(x1_embeddings, x2_embeddings).detach().cpu() # (batch_size)
 
@@ -104,7 +103,6 @@ class FMatrixRegressor(nn.Module):
         
             return unnormalized_output, output, penalty
         
-
 
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
