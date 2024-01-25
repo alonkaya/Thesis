@@ -29,7 +29,7 @@ class FMatrixRegressor(nn.Module):
             self.clip = True
 
             # Initialize CLIP processor and pretrained model
-            self.clip_image_processor = CLIPImageProcessor.from_pretrained(pretrained_model_name).to(device)
+            self.clip_image_processor = CLIPImageProcessor.from_pretrained(pretrained_model_name)
             self.pretrained_model = CLIPVisionModel.from_pretrained(pretrained_model_name).to(device)
             # self.pretrained_model = CLIPModel.from_pretrained(pretrained_model_name)
 
