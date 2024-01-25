@@ -44,9 +44,9 @@ class CustomDataset(torch.utils.data.Dataset):
         return first_image, second_image, F, unnormalized_F
     
 transform = transforms.Compose([
-    transforms.Resize((256, 256)),
-    transforms.CenterCrop(224),
-    transforms.Grayscale(num_output_channels=3),
+    # transforms.Resize((256, 256)),
+    # transforms.CenterCrop(224),
+    # transforms.Grayscale(num_output_channels=3),
     transforms.ToTensor(), # Converts to tensor and rescales [0,255] -> [0,1] 
     # TODO: Normalize images?
 ])
