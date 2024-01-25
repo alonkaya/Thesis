@@ -264,12 +264,14 @@ class FMatrixRegressor(nn.Module):
 
 def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):
     # Compute mean epipolar constraint error 
-    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = 0, 0, 0
-
-    for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
-        avg_ec_err_truth += EpipolarGeometry(img_1.detach(), img_2.detach(), F_truth.detach()).get_epipolar_err()
-        avg_ec_err_pred += EpipolarGeometry(img_1.detach(), img_2.detach(), F_pred.detach()).get_epipolar_err()
-        avg_ec_err_pred_unormalized += EpipolarGeometry(img_1.detach(), img_2.detach(), F_pred_unormalized.detach()).get_epipolar_err()
+    avg_ec_err_truth += EpipolarGeometry(first_image.detach(), second_image.detach(), unormalized_label.detach()).get_epipolar_err()
+    avg_ec_err_pred += EpipolarGeometry(first_image.detach(), second_image.detach(), output.detach()).get_epipolar_err()
+    avg_ec_err_pred_unormalized += EpipolarGeometry(first_image.detach(), second_image.detach(), unormalized_output.detach()).get_epipolar_err()
+    
+    # for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
+    #     avg_ec_err_truth += EpipolarGeometry(img_1.detach(), img_2.detach(), F_truth.detach()).get_epipolar_err()
+    #     avg_ec_err_pred += EpipolarGeometry(img_1.detach(), img_2.detach(), F_pred.detach()).get_epipolar_err()
+    #     avg_ec_err_pred_unormalized += EpipolarGeometry(img_1.detach(), img_2.detach(), F_pred_unormalized.detach()).get_epipolar_err()
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = avg_ec_err_truth/len(first_image), avg_ec_err_pred/len(first_image), avg_ec_err_pred_unormalized/len(first_image)      
     
     return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized 
