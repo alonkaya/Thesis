@@ -157,8 +157,8 @@ class FMatrixRegressor(nn.Module):
                 epoch_avg_ec_err_pred_unormalized += avg_ec_err_pred_unormalized
 
                 # Extend lists with batch statistics
-                labels.append(label)
-                outputs.append(output.detach().cpu().to(device))
+                labels.append(label.detach())
+                outputs.append(output.detach())
                 # cosine_similarities.extend(cosine_similarity.tolist())
 
                 train_size += 1
@@ -169,7 +169,7 @@ class FMatrixRegressor(nn.Module):
 
             # Calculate and store mean absolute error for the epoch
             mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
-            train_mae.append(mae.detach().cpu())
+            train_mae.append(mae.detach())
             
             # epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_truth/train_size, epoch_avg_ec_err_pred/train_size, epoch_avg_ec_err_pred_unormalized/train_size
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_truth/train_size, epoch_avg_ec_err_pred_unormalized/train_size
