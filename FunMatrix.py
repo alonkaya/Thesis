@@ -213,9 +213,12 @@ class EpipolarGeometry:
     
     def epipolar_test_avg_points(self, pts1, pts2):
         # Iterates over all keypoints in 'good'
-        print(pts2.reshape(-1,1,3).shape)
-        a = torch.matmul(pts2.reshape(-1,1,3), self.F, keepdims=True)
-        errs = abs(torch.matmul(a, pts1))
+        print(pts2.shape)
+        # errs = abs(torch.matmul(torch.matmul(pts2, self.F), pts1.reshape(-1,)))
+        temp = torch.matmul(pts2.view(-1, 1, pts2.shape[-1]), self.F)
+
+        # Perform batch matrix multiplication with pts1 and take absolute value
+        errs = torch.abs(torch.matmul(temp, pts1.view(-1, pts1.shape[-1], 1)))        
         avg_err = torch.mean(errs)
         # return avg_err
 
