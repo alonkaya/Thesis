@@ -133,8 +133,7 @@ class FMatrixRegressor(nn.Module):
                 first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
 
                 # This condition denotes a 'bad' frame
-                for i in range(30):
-                    if first_image[i].shape == ():  continue
+                if torch.any(torch.tensor([torch.numel(x) for x in first_image]) == 0)[0] == True: continue
                 
                 # Foward pass
                 unnormalized_output, output, penalty = self.forward(first_image, second_image)
@@ -180,7 +179,7 @@ class FMatrixRegressor(nn.Module):
 
             # Extend list of all labels with current epoch's labels for cosine_similarity plot
             # all_labels.extend(labels)
-
+            print("o")
             # Validation
             self.eval()
             val_labels = []
