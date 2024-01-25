@@ -160,9 +160,7 @@ class FMatrixRegressor(nn.Module):
                 # Extend lists with batch statistics
                 labels.append(label.detach())
                 outputs.append(output.detach())
-
-                for name, param in self.named_parameters():
-                    print(f"Parameter {name}: Device {param.device}")                
+               
                 # cosine_similarities.extend(cosine_similarity.tolist())
 
                 train_size += 1
