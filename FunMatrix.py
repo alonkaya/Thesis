@@ -82,6 +82,7 @@ def compute_fundamental(E, K1, K2):
 
 def get_F(poses, idx, K):
     R_relative, t_relative = compute_relative_transformations(poses[idx], poses[idx+jump_frames])
+    print(R_relative.device, t_relative.device)
     E = compute_essential(R_relative, t_relative)
     F = compute_fundamental(E, K, K)
     
