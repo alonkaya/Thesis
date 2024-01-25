@@ -67,7 +67,7 @@ def compute_essential(R, t):
 
 # Define a function to compute the fundamental matrix F from the essential matrix E and the projection matrices P0 and P1
 def compute_fundamental(E, K1, K2):
-    K2_inv_T = torch.transpose(torch.linalg.inv(K2))
+    K2_inv_T = torch.transpose(torch.linalg.inv(K2), 0, 1)
     K1_inv = torch.linalg.inv(K1)
     
     # Compute the Fundamental matrix 
@@ -209,11 +209,11 @@ class EpipolarGeometry:
         return pts1, pts2
 
     def epipolar_test_single_point(self, pt1, pt2): 
-        return abs(torch.matmul(torch.matmul(torch.transpose(pt2), self.F), pt1))
+        return abs(torch.matmul(torch.matmul(torch.transpose(pt2, 0, 1), self.F), pt1))
     
     def epipolar_test_avg_points(self, pts1, pts2):
         # Iterates over all keypoints in 'good'
-        errs = abs(torch.matmul(torch.matmul(torch.transpose(pts2), self.F), pts1))
+        errs = abs(torch.matmul(torch.matmul(torch.transpose(pts2, 1, 2), self.F), pts1))
         avg_err = torch.mean(errs)
         # return avg_err
 
