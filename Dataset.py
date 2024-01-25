@@ -40,7 +40,7 @@ class CustomDataset(torch.utils.data.Dataset):
         # Convert to tensor and normalize F-Matrix 
         F = normalize_L2(normalize_L1(unnormalized_F))
 
-        return first_image, second_image, F, unnormalized_F
+        return first_image, second_image, F, unnormalized_F, idx, self.sequence_num
     
 transform = transforms.Compose([
     transforms.Resize((256, 256)),
