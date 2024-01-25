@@ -3,7 +3,6 @@ from utils import read_calib
 import cv2
 import os
 from scipy.linalg import rq
-import torchvision.transforms.functional as T
 import numpy as np
 
 def get_intrinsic(calib_path):
@@ -68,7 +67,7 @@ def compute_essential(R, t):
 
 # Define a function to compute the fundamental matrix F from the essential matrix E and the projection matrices P0 and P1
 def compute_fundamental(E, K1, K2):
-    K2_inv_T = torch.linalg.inv(K2).T
+    K2_inv_T = torch.transpose(torch.linalg.inv(K2))
     K1_inv = torch.linalg.inv(K1)
     
     # Compute the Fundamental matrix 
@@ -172,13 +171,7 @@ class EpipolarGeometry:
             (204, 229, 255),
             (0, 0, 204)
         ]
-    
-    def epipoline(self, x, formula):
-        array = formula.flatten()
-        a = array[0]
-        b = array[1]
-        c = array[2]
-        return int((-c - a * x) / b)
+
 
     def get_keypoints(self, threshold=epipolar_constraint_threshold):
         # sift = cv2.xfeatures2d.SIFT_create()
@@ -214,8 +207,40 @@ class EpipolarGeometry:
         pts2 = torch.cat((pts2, torch.ones((pts2.shape[0], 1))), dim=-1).to(device)
 
         return pts1, pts2
-       
 
+    def epipolar_test_single_point(self, pt1, pt2): 
+        return abs(torch.matmul(torch.matmul(torch.transpose(pt2), self.F), pt1))
+    
+    def epipolar_test_avg_points(self, pts1, pts2):
+        # Iterates over all keypoints in 'good'
+        errs = abs(torch.matmul(torch.matmul(torch.transpose(pts2), self.F), pts1))
+        avg_err = torch.mean(errs)
+        # return avg_err
+
+        error = 0
+        for (pt1, pt2) in zip(pts1, pts2):
+            error += self.epipolar_test_single_point(pt1, pt2)
+        avg_err2 = error / pts1.shape[0]
+        print(avg_err, avg_err2)
+        return avg_err, avg_err2
+
+    def get_epipolar_err(self):
+        pts1, pts2 = self.get_keypoints()
+        return self.epipolar_test_avg_points(pts1, pts2)
+    
+    def epipoline(self, x, formula):
+        array = formula.flatten()
+        a = array[0]
+        b = array[1]
+        c = array[2]
+        return int((-c - a * x) / b)
+        
+    def get_point_2_line_error(self, point, l):
+        l = l.flatten()
+        result = abs(torch.matmul(point, torch.transpose(l)) / torch.sqrt(l[0] * l[0] + l[1] * l[1]))
+        
+        return result 
+    
     def visualize(self, sqResultDir, img_idx):
         img1_line = self.img1.copy()
         img2_line = self.img2.copy()
@@ -231,7 +256,7 @@ class EpipolarGeometry:
             x1, y1, _ = pt1
             x2, y2, _ = pt2
 
-            line_1 = torch.matmul(self.F.T, pt2)
+            line_1 = torch.matmul(torch.transpose(self.F), pt2)
             line_2 = torch.matmul(self.F, pt1)
 
             # Get ditance from point to line error
@@ -286,26 +311,5 @@ class EpipolarGeometry:
 
         elif not move_bad_images:
             cv2.imwrite(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
-            print(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))
-
-
-    def epipolar_test_single_point(self, pt1, pt2): 
-        return abs(torch.matmul(torch.matmul(pt2.T, self.F), pt1))
-    
-    def epipolar_test_avg_points(self, pts1, pts2):
-        # Iterates over all keypoints in 'good'
-        error = 0
-        for (pt1, pt2) in zip(pts1, pts2):
-            error += self.epipolar_test_single_point(pt1, pt2)
-        return error / pts1.shape[0]
-
-    def get_epipolar_err(self):
-        pts1, pts2 = self.get_keypoints()
-        return self.epipolar_test_avg_points(pts1, pts2)
-    
-    def get_point_2_line_error(self, point, l):
-        l = l.flatten()
-        result = abs(torch.matmul(point, l.T) / torch.sqrt(l[0] * l[0] + l[1] * l[1]))
-        
-        return result 
+            print(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))    
     
