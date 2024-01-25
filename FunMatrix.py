@@ -155,18 +155,9 @@ def reconstruction_module(x):
 class EpipolarGeometry:
     def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):
         self.F = F.view(3, 3)
-        # Recsale pixels to original size [0,1] -> [0,255]
-        # self.img1 = (image1_tensor.permute(1, 2, 0).detach().numpy() * 255).astype(np.uint8)
-        # self.img2 = (image2_tensor.permute(1, 2, 0).detach().numpy() * 255).astype(np.uint8) 
-        
-        self.img1 = [(img1.permute(1, 2, 0) * 255).to(torch.uint8) for img1 in image1_tensors]
-        self.img2 = [(img2.permute(1, 2, 0) * 255).to(torch.uint8) for img2 in image2_tensors]
-
-        tensor_2_pil = transforms.ToPILImage()
-        self.imgs1 = [tensor_2_pil(img1) for img1 in image1_tensors]
-        self.imgs2 = [tensor_2_pil(img2) for img2 in image2_tensors]
-
-        print(self.img1[0] - self.imgs1[0])
+        # Convert to numpy and rescale pixels to original size [0,1] -> [0,255]
+        self.image1_numpy = (image1_tensors.permute(1,2,0).numpy().cpu() * 255).to(np.uint8)
+        self.image2_numpy = (image2_tensors.permute(1,2,0).numpy().cpu() * 255).to(np.uint8)
 
         self.sequence_path = os.path.join('sequences', sequence_num) if sequence_num else None
         self.file_name1 = f'{idx:06}.png'if idx else None
@@ -189,8 +180,8 @@ class EpipolarGeometry:
         # self.img1 = cv2.cvtColor(self.img1.copy(), cv2.COLOR_BGR2GRAY)
 
         # Detect keypoints and compute descriptors for both images
-        (kp1, des1) = sift.detectAndCompute(np.array(self.img1.cpu()), None)
-        (kp2, des2) = sift.detectAndCompute(np.array(self.img2.cpu()), None)
+        (kp1, des1) = sift.detectAndCompute(self.image1_numpy, None)
+        (kp2, des2) = sift.detectAndCompute(self.image2_numpy, None)
 
         # matches = bf.match(des1, des2)
         matches = bf.knnMatch(des1, des2, k=2)
@@ -207,11 +198,11 @@ class EpipolarGeometry:
             self.good.append(matches[min_distance_index][0])
         
         # Extract the matched keypoints
-        pts1 = torch.FloatTensor([kp1[m.queryIdx].pt for m in self.good])
-        pts2 = torch.FloatTensor([kp2[m.trainIdx].pt for m in self.good])
+        pts1 = torch.FloatTensor([kp1[m.queryIdx].pt for m in self.good]).to(device)
+        pts2 = torch.FloatTensor([kp2[m.trainIdx].pt for m in self.good]).to(device)
 
-        pts1 = torch.cat((pts1, torch.ones((pts1.shape[0], 1))), dim=-1).to(device)
-        pts2 = torch.cat((pts2, torch.ones((pts2.shape[0], 1))), dim=-1).to(device)
+        pts1 = torch.cat((pts1, torch.ones((pts1.shape[0], 1))), dim=-1)
+        pts2 = torch.cat((pts2, torch.ones((pts2.shape[0], 1))), dim=-1)
 
         return pts1, pts2
 
