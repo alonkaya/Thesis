@@ -218,8 +218,8 @@ class EpipolarGeometry:
 
         temp = torch.matmul(pts2.view(-1, 1, pts2.shape[-1]), self.F)
         # errs = torch.abs(torch.matmul(temp, pts1.view(-1, pts1.shape[-1], 1)))   
-        print(errs.shape, errs2.shape)
-        avg_err = torch.mean(errs)
+        print(temp2.shape, temp.shape)
+        avg_err = torch.mean(temp)
         # return avg_err
 
         error = 0
