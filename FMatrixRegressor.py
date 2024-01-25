@@ -143,7 +143,7 @@ class FMatrixRegressor(nn.Module):
                 l2_loss = self.L2_loss(output, label)
                 loss = l2_loss + penalty if not use_reconstruction_layer else l2_loss
                 avg_loss += loss.detach()
-                print(l2_loss.device, loss.device, avg_loss.device)
+
                 # Compute Backward pass and gradients
                 self.optimizer.zero_grad()
                 loss.backward()

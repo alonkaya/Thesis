@@ -52,9 +52,9 @@ transform = transforms.Compose([
 ])
 
 def get_data_loaders():
-    sequence_paths = [f'sequences/0{i}/image_0' for i in range(3)]
-    poses_paths = [f'poses/0{i}.txt' for i in range(3)]
-    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(3)]
+    sequence_paths = [f'sequences/0{i}/image_0' for i in range(1)]
+    poses_paths = [f'poses/0{i}.txt' for i in range(1)]
+    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(1)]
 
     train_datasets, val_datasets = [], []
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
@@ -65,10 +65,10 @@ def get_data_loaders():
         K = get_intrinsic(calib_path)
 
         # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
-        if i < 2:
-            val_datasets.append(CustomDataset(sequence_path, poses, transform, K))
-        else:
-            train_datasets.append(CustomDataset(sequence_path, poses, transform, K))
+        # if i < 2:
+        val_datasets.append(CustomDataset(sequence_path, poses, transform, K))
+        # else:
+            # train_datasets.append(CustomDataset(sequence_path, poses, transform, K))
         
 
     # Concatenate datasets
