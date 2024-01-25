@@ -3,6 +3,7 @@ from utils import read_calib
 import cv2
 import os
 from scipy.linalg import rq
+from torchvision import transforms
 import numpy as np
 
 def get_intrinsic(calib_path):
@@ -152,14 +153,20 @@ def reconstruction_module(x):
         return out
 
 class EpipolarGeometry:
-    def __init__(self, image1_tensor, image2_tensor, F, sequence_num=None, idx=None):
+    def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):
         self.F = F.view(3, 3)
         # Recsale pixels to original size [0,1] -> [0,255]
         # self.img1 = (image1_tensor.permute(1, 2, 0).detach().numpy() * 255).astype(np.uint8)
         # self.img2 = (image2_tensor.permute(1, 2, 0).detach().numpy() * 255).astype(np.uint8) 
         
-        self.img1 = (image1_tensor.permute(1, 2, 0) * 255).to(torch.uint8)
-        self.img2 = (image2_tensor.permute(1, 2, 0) * 255).to(torch.uint8)
+        self.img1 = [(img1.permute(1, 2, 0) * 255).to(torch.uint8) for img1 in image1_tensors]
+        self.img2 = [(img2.permute(1, 2, 0) * 255).to(torch.uint8) for img2 in image2_tensors]
+
+        tensor_2_pil = transforms.ToPILImage()
+        self.imgs1 = [tensor_2_pil(img1) for img1 in image1_tensors]
+        self.imgs2 = [tensor_2_pil(img2) for img2 in image2_tensors]
+
+        print(self.img1[0] - self.imgs1[0])
 
         self.sequence_path = os.path.join('sequences', sequence_num) if sequence_num else None
         self.file_name1 = f'{idx:06}.png'if idx else None
@@ -211,24 +218,15 @@ class EpipolarGeometry:
     def epipolar_test_single_point(self, pt1, pt2): 
         return abs(torch.matmul(torch.matmul(pt2.view(1,3), self.F), pt1))
     
-    def epipolar_test_avg_points(self, pts1, pts2):
-        # Iterates over all keypoints in 'good'
-        error = 0
-        for (pt1, pt2) in zip(pts1, pts2):
-            error += self.epipolar_test_single_point(pt1, pt2)
-        avg_err2 = error / pts1.shape[0]
-        
-
+    def epipolar_test_all_points(self, pts1, pts2):
+        # Iterates over all keypoints in 'good' 
         errs = torch.abs(torch.matmul(torch.matmul(pts2.view(-1,1,3), self.F), pts1.view(-1, 3, 1)))
          
-        avg_err = torch.mean(errs)
-
-        print(avg_err, avg_err2)
-        return avg_err
+        return torch.mean(errs)
 
     def get_epipolar_err(self):
         pts1, pts2 = self.get_keypoints()
-        return self.epipolar_test_avg_points(pts1, pts2)
+        return self.epipolar_test_all_points(pts1, pts2)
     
     def epipoline(self, x, formula):
         array = formula.flatten()
