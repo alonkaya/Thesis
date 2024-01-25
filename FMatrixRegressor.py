@@ -58,8 +58,6 @@ class FMatrixRegressor(nn.Module):
         self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes, num_output).to(device)
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
-        for name, param in self.named_parameters():
-            print(f"Parameter {name}: Device {param.device}")
         
 
 
@@ -162,6 +160,9 @@ class FMatrixRegressor(nn.Module):
                 # Extend lists with batch statistics
                 labels.append(label.detach())
                 outputs.append(output.detach())
+
+                for name, param in self.named_parameters():
+                    print(f"Parameter {name}: Device {param.device}")                
                 # cosine_similarities.extend(cosine_similarity.tolist())
 
                 train_size += 1
