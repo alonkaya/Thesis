@@ -123,13 +123,13 @@ class FMatrixRegressor(nn.Module):
             self.train()
 
             # Lists to store per-batch statistics
-            labels = []
-            outputs = []
-            epoch_avg_ec_err_truth = 0
-            epoch_avg_ec_err_pred = 0
-            epoch_avg_ec_err_pred_unormalized = 0
+            # labels = []
+            # outputs = []
+            # epoch_avg_ec_err_truth = 0
+            # epoch_avg_ec_err_pred = 0
+            # epoch_avg_ec_err_pred_unormalized = 0
             avg_loss = 0
-            train_size = 0
+            # train_size = 0
             for first_image, second_image, label, unormalized_label in train_loader:
                 first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
 
@@ -143,7 +143,7 @@ class FMatrixRegressor(nn.Module):
                 # l1_loss = self.L1_loss(output, label)
                 l2_loss = self.L2_loss(output, label)
                 loss = l2_loss + penalty if not use_reconstruction_layer else l2_loss
-                avg_loss += loss.detach()
+                # avg_loss += loss.detach()
 
                 # Compute Backward pass and gradients
                 self.optimizer.zero_grad()
@@ -152,18 +152,18 @@ class FMatrixRegressor(nn.Module):
 
                 # Compute train mean epipolar constraint error 
                 # avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized  = get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unnormalized_output, device)
-                avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized  =0,0,0
-                epoch_avg_ec_err_truth += avg_ec_err_truth
-                epoch_avg_ec_err_pred += avg_ec_err_pred
-                epoch_avg_ec_err_pred_unormalized += avg_ec_err_pred_unormalized
+                # avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized  =0,0,0
+                # epoch_avg_ec_err_truth += avg_ec_err_truth
+                # epoch_avg_ec_err_pred += avg_ec_err_pred
+                # epoch_avg_ec_err_pred_unormalized += avg_ec_err_pred_unormalized
 
                 # Extend lists with batch statistics
-                labels.append(label.detach())
-                outputs.append(output.detach())
+                # labels.append(label.detach())
+                # outputs.append(output.detach())
                
-                # cosine_similarities.extend(cosine_similarity.tolist())
+                # # cosine_similarities.extend(cosine_similarity.tolist())
 
-                train_size += 1
+                # train_size += 1
         #     print("o")
         #     # Calculate and store root training loss for the epoch
         #     avg_loss = avg_loss / train_size
