@@ -55,7 +55,7 @@ class FMatrixRegressor(nn.Module):
         self.L2_loss = nn.MSELoss().to(device)
         self.L1_loss = nn.L1Loss().to(device)
 
-        self.mlp = MLP(mlp_input_dim*2, mlp_hidden_sizes, num_output).to(device)
+        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes, num_output).to(device)
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
         
@@ -73,8 +73,8 @@ class FMatrixRegressor(nn.Module):
                 x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
                 x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
 
-            x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:1,:].view(-1, 768).to(device)
-            x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:1,:].view(-1, 768).to(device)
+            x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(device)
+            x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(device)
 
             # cosine_similarity = torch.nn.functional.cosine_similarity(x1_embeddings, x2_embeddings).detach().cpu() # (batch_size)
 
@@ -132,7 +132,9 @@ class FMatrixRegressor(nn.Module):
                 first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
 
                 # This condition denotes a 'bad' frame
-                if first_image.shape[0] == (): continue
+                if first_image.shape[0] == (): 
+                    print("ok")
+                    continue
                 # if torch.any(torch.all(first_image == 0, dim=1)) == True: 
                 #     print("a")
                 #     continue
