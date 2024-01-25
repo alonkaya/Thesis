@@ -52,12 +52,12 @@ class FMatrixRegressor(nn.Module):
                 param.requires_grad = False
 
         # Choose appropriate loss function based on regress parameter
-        self.L2_loss = nn.MSELoss()
-        self.L1_loss = nn.L1Loss()
+        self.L2_loss = nn.MSELoss().to(device)
+        self.L1_loss = nn.L1Loss().to(device)
 
-        self.optimizer = optim.Adam(self.parameters(), lr=lr)
+        self.optimizer = optim.Adam(self.parameters(), lr=lr).to(device)
 
-        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes, num_output)
+        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes, num_output).to(device)
 
 
     def forward(self, x1, x2):

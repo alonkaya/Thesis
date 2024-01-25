@@ -3,7 +3,6 @@ from utils import read_calib
 import cv2
 import os
 from scipy.linalg import rq
-import torch
 import torchvision.transforms.functional as T
 import numpy as np
 

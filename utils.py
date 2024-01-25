@@ -1,7 +1,6 @@
 from params import *
 import matplotlib.pyplot as plt
 import torch.nn as nn
-import torch
 
 class MLP(nn.Module):
     def __init__(self, num_input, mlp_hidden_sizes, num_output):
