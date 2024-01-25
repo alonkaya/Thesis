@@ -2,7 +2,6 @@ from params import *
 from utils import *
 from FunMatrix import *
 # from deepF_nocors import *
-from Dataset import train_loader, val_loader
 import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 from sklearn.metrics import mean_absolute_error
