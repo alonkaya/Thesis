@@ -31,15 +31,15 @@ class CustomDataset(torch.utils.data.Dataset):
         original_second_image = Image.open(img2_path)
         
         # Transform: Resize, center, grayscale
-        first_image = self.transform(original_first_image)
-        second_image = self.transform(original_second_image)
+        first_image = self.transform(original_first_image).to(device)
+        second_image = self.transform(original_second_image).to(device)
 
         # Adjust K according to resize and center crop transforms and compute ground-truth F matrix     
-        adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size), torch.tensor([256, 256]), torch.tensor([224, 224]))
-        F = get_F(self.poses, idx, adjusted_K)
+        adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
+        unnormalized_F = get_F(self.poses, idx, adjusted_K)
 
         # Convert to tensor and normalize F-Matrix 
-        F, unnormalized_F  =  normalize_L2(normalize_L1(torch.tensor(F, dtype=torch.float32))), torch.tensor(F, dtype=torch.float32)
+        F = normalize_L2(normalize_L1(F))
 
         return first_image, second_image, F, unnormalized_F
     
@@ -51,34 +51,35 @@ transform = transforms.Compose([
     # TODO: Normalize images?
 ])
 
-sequence_paths = [f'sequences/0{i}/image_0' for i in range(3)]
-poses_paths = [f'poses/0{i}.txt' for i in range(3)]
-calib_paths = [f'sequences/0{i}/calib.txt' for i in range(3)]
+def get_data_loaders():
+    sequence_paths = [f'sequences/0{i}/image_0' for i in range(9)]
+    poses_paths = [f'poses/0{i}.txt' for i in range(9)]
+    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(9)]
 
-train_datasets, val_datasets = [], []
-for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
-    # Get a list of all poses [R,t] in this sequence
-    poses = read_poses(poses_path)
+    train_datasets, val_datasets = [], []
+    for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
+        # Get a list of all poses [R,t] in this sequence
+        poses = read_poses(poses_path)
 
-    # Read the calib.txt file to get the projection matrix to compute intrinsic K
-    projection_matrix = read_calib(calib_path)
-    K, _ = get_intrinsic(projection_matrix)
+        # Read the calib.txt file to get the projection matrix to compute intrinsic K
+        K = get_intrinsic(calib_path)
 
+        # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
+        if i < 2:
+            val_datasets.append(CustomDataset(sequence_path, poses, transform, K))
+        else:
+            train_datasets.append(CustomDataset(sequence_path, poses, transform, K))
+        
 
-    # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
-    if i < 2:
-        val_datasets.append(CustomDataset(sequence_path, poses, transform, K))
-    else:
-        train_datasets.append(CustomDataset(sequence_path, poses, transform, K))
+    # Concatenate datasets
+    concat_train_dataset = ConcatDataset(train_datasets)
+    concat_val_dataset = ConcatDataset(val_datasets)
+
+    # Create a DataLoader
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
     
-
-# Concatenate datasets
-concat_train_dataset = ConcatDataset(train_datasets)
-concat_val_dataset = ConcatDataset(val_datasets)
-
-# Create a DataLoader
-train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
-val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
+    return train_loader, val_loader
 
 
 # bad_frames_dir = os.path.join('epipole_lines', "bad_frames")

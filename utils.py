@@ -36,11 +36,10 @@ def plot_over_epoch(x, y, x_label, y_label, show=True, connecting_lines=True):
         plt.show()
 
 # Define a function to read the calib.txt file
-def read_calib(calib_path):
+def read_calib(calib_path, device):
     with open(calib_path, 'r') as f:
-        p0_matrix = torch.tensor([float(x) for x in f.readline().split()[1:]]).reshape(3, 4)
+        return torch.tensor([float(x) for x in f.readline().split()[1:]]).reshape(3, 4).to(device)
 
-    return p0_matrix
 
 # Define a function to read the pose files in the poses folder
 def read_poses(poses_path):
@@ -50,7 +49,7 @@ def read_poses(poses_path):
             pose = torch.tensor([float(x) for x in line.strip().split()]).reshape(3, 4)
             poses.append(pose)
 
-    return torch.stack(poses)
+    return torch.stack(poses).to(device)
 
 
 def normalize_max(x):

@@ -1,3 +1,6 @@
+import torch
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 num_of_training_images = 1000
 num_of_val_images = 200
 learning_rate = 1e-4

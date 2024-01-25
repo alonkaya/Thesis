@@ -1,4 +1,5 @@
 from params import *
+from utils import read_calib
 import cv2
 import os
 from scipy.linalg import rq
@@ -6,25 +7,14 @@ import torch
 import torchvision.transforms.functional as T
 import numpy as np
 
-def compute_relative_transformations(pose1, pose2):
-    t1 = pose1[:, 3]
-    R1 = pose1[:, :3]
-    t2 = pose2[:, 3]
-    R2 = pose2[:, :3]    
+def get_intrinsic(calib_path):
+    projection_matrix = read_calib(calib_path)
 
-    transposed_R1 = torch.transpose(R1, 0, 1)
-    R_relative = torch.matmul(R2, transposed_R1)
-    t_relative = torch.matmul(transposed_R1, (t2 - t1))
-    # t_relative = t2 - np.dot(R_relative, t1)
-
-    return R_relative, t_relative
-
-def get_intrinsic(P):
-    # TODO: check this
+    # TODO: check if this func is correct
     # Step 1: Decompose the projection matrix P into the form P = K [R | t]
-    M = P[:, :3]
+    M = projection_matrix[:, :3]
     K, R = rq(M)
-    K, R = torch.tensor(K), torch.tensor(R)
+    K = torch.tensor(K).to(device)
 
     # Enforce positive diagonal for K
     T = torch.diag(torch.sign(torch.diag(K)))
@@ -33,12 +23,12 @@ def get_intrinsic(P):
 
     # Update K and R
     K = torch.matmul(K.clone(), T)
-    R = torch.matmul(T, R)
+    # R = torch.matmul(T, R)
 
     last_elem = K[2, 2]
     K /= last_elem.clone()
 
-    return K, R
+    return K
 
 def adjust_intrinsic(k, original_size, resized_size, ceter_crop_size):
     # Adjust the intrinsic matrix K according to the transformations resize and center crop
@@ -54,7 +44,19 @@ def adjust_intrinsic(k, original_size, resized_size, ceter_crop_size):
 
     return k
 
-# Define a function to compute the essential matrix E from the relative pose matrix M
+def compute_relative_transformations(pose1, pose2):
+    t1 = pose1[:, 3]
+    R1 = pose1[:, :3]
+    t2 = pose2[:, 3]
+    R2 = pose2[:, :3]    
+
+    transposed_R1 = torch.transpose(R1, 0, 1)
+    R_relative = torch.matmul(R2, transposed_R1)
+    t_relative = torch.matmul(transposed_R1, (t2 - t1))
+    # t_relative = t2 - np.dot(R_relative, t1)
+
+    return R_relative, t_relative
+
 def compute_essential(R, t):
     # Compute the skew-symmetric matrix of t
     t_x = torch.tensor([[0, -t[2], t[1]], 
@@ -62,7 +64,7 @@ def compute_essential(R, t):
                     [-t[1], t[0], 0]])
 
     # Compute the essential matrix E
-    E = t_x @ R
+    E = torch.matmul(t_x, R)
     return E
 
 # Define a function to compute the fundamental matrix F from the essential matrix E and the projection matrices P0 and P1
@@ -179,7 +181,7 @@ class EpipolarGeometry:
         c = array[2]
         return int((-c - a * x) / b)
 
-    def get_keypoints(self, device, threshold=epipolar_constraint_threshold):
+    def get_keypoints(self, threshold=epipolar_constraint_threshold):
         # sift = cv2.xfeatures2d.SIFT_create()
         sift = cv2.SIFT_create()
         bf = cv2.BFMatcher()
@@ -298,8 +300,8 @@ class EpipolarGeometry:
             error += self.epipolar_test_single_point(pt1, pt2)
         return error / pts1.shape[0]
 
-    def get_epipolar_err(self, device):
-        pts1, pts2 = self.get_keypoints(device)
+    def get_epipolar_err(self):
+        pts1, pts2 = self.get_keypoints()
         return self.epipolar_test_avg_points(pts1, pts2)
     
     def get_point_2_line_error(self, point, l):
