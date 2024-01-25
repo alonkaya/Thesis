@@ -172,7 +172,7 @@ class FMatrixRegressor(nn.Module):
             all_train_loss.append(avg_loss)
 
             # Calculate and store mean absolute error for the epoch
-            mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
+            mae = torch.mean(torch.abs(torch.cat(labels, dim=0).to(device) - torch.cat(outputs, dim=0).to(device)))
             train_mae.append(mae.detach())
             
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_truth/train_size, epoch_avg_ec_err_pred/train_size, epoch_avg_ec_err_pred_unormalized/train_size
@@ -222,7 +222,7 @@ class FMatrixRegressor(nn.Module):
                     val_size += 1
 
                 # Calculate and store mean absolute error for the epoch
-                mae = torch.mean(torch.abs(torch.cat(val_labels, dim=0) - torch.cat(val_outputs, dim=0)))
+                mae = torch.mean(torch.abs(torch.cat(val_labels, dim=0).to(device) - torch.cat(val_outputs, dim=0).to(device)))
                 val_mae.append(mae.detach())
 
                 val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_truth/val_size, val_epoch_avg_ec_err_pred/val_size, val_epoch_avg_ec_err_pred_unormalized/val_size
