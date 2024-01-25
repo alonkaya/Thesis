@@ -29,8 +29,8 @@ class FMatrixRegressor(nn.Module):
             self.clip = True
 
             # Initialize CLIP processor and pretrained model
-            self.clip_image_processor = CLIPImageProcessor.from_pretrained(pretrained_model_name)
-            self.pretrained_model = CLIPVisionModel.from_pretrained(pretrained_model_name)
+            self.clip_image_processor = CLIPImageProcessor.from_pretrained(pretrained_model_name).to(device)
+            self.pretrained_model = CLIPVisionModel.from_pretrained(pretrained_model_name).to(device)
             # self.pretrained_model = CLIPModel.from_pretrained(pretrained_model_name)
 
             # Get input dimension for the MLP based on CLIP configuration
@@ -41,7 +41,7 @@ class FMatrixRegressor(nn.Module):
             self.clip = False
 
             # Initialize ViT pretrained model
-            self.pretrained_model = ViTModel.from_pretrained(pretrained_model_name)
+            self.pretrained_model = ViTModel.from_pretrained(pretrained_model_name).to(device)
 
             # Get input dimension for the MLP based on ViT configuration
             mlp_input_dim = self.pretrained_model.config.hidden_size
