@@ -20,27 +20,32 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         # If one of the frames is "Bad"- skip 
-        img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
-        img2_path = os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png')
-        if not os.path.exists(img1_path) or not os.path.exists(img2_path):
-            return 0, 0, 0, 0
+        # img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
+        # img2_path = os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png')
+        # if not os.path.exists(img1_path) or not os.path.exists(img2_path):
+        #     return 0, 0, 0, 0
 
-        # Create PIL images
-        original_first_image = Image.open(img1_path)
-        original_second_image = Image.open(img2_path)
+        # # Create PIL images
+        # original_first_image = Image.open(img1_path)
+        # original_second_image = Image.open(img2_path)
         
-        # Transform: Resize, center, grayscale
-        first_image = self.transform(original_first_image).to(device)
-        second_image = self.transform(original_second_image).to(device)
+        # # Transform: Resize, center, grayscale
+        # first_image = self.transform(original_first_image).to(device)
+        # second_image = self.transform(original_second_image).to(device)
 
-        # Adjust K according to resize and center crop transforms and compute ground-truth F matrix     
-        adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
-        unnormalized_F = get_F(self.poses, idx, adjusted_K)
+        # # Adjust K according to resize and center crop transforms and compute ground-truth F matrix     
+        # adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
+        # unnormalized_F = get_F(self.poses, idx, adjusted_K)
 
-        # Convert to tensor and normalize F-Matrix 
-        F = normalize_L2(normalize_L1(unnormalized_F))
+        # # Convert to tensor and normalize F-Matrix 
+        # F = normalize_L2(normalize_L1(unnormalized_F))
 
-        return first_image, second_image, F, unnormalized_F
+        # return first_image, second_image, F, unnormalized_F
+        a = torch.rand(224,224).to(device)
+        b = torch.rand(224,224).to(device)
+        c = torch.rand(3,3).to(device)
+        d = torch.rand(3,3).to(device)
+        return a,b,c,d
     
 transform = transforms.Compose([
     transforms.Resize((256, 256)),
