@@ -231,6 +231,7 @@ class EpipolarGeometry:
         
     def get_point_2_line_error(self, point, l):
         l = l.flatten()
+        print(l.shape)
         result = abs(torch.matmul(point, torch.transpose(l)) / torch.sqrt(l[0] * l[0] + l[1] * l[1]))
         
         return result 
@@ -253,7 +254,7 @@ class EpipolarGeometry:
             x1, y1, _ = pt1
             x2, y2, _ = pt2
 
-            line_1 = torch.matmul(torch.transpose(self.F), pt2)
+            line_1 = torch.matmul(torch.transpose(self.F,0,1), pt2)
             line_2 = torch.matmul(self.F, pt1)
 
             # Get ditance from point to line error
