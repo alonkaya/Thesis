@@ -177,7 +177,7 @@ class EpipolarGeometry:
         bf = cv2.BFMatcher()
 
         # TODO: make sure img1,img2 are grayscale
-        # self.img1 = cv2.cvtColor(self.img1.copy(), cv2.COLOR_BGR2GRAY)
+        # self.img1 = cv2.cvtColor(self.img1.clone(), cv2.COLOR_BGR2GRAY)
 
         image1_numpy = (self.image1_tensors.permute(1,2,0).cpu().numpy() * 255).astype(np.uint8)
         image2_numpy = (self.image2_tensors.permute(1,2,0).cpu().numpy() * 255).astype(np.uint8)
@@ -239,8 +239,8 @@ class EpipolarGeometry:
         img1 = (self.image1_tensors.permute(1, 2, 0) * 255).to(torch.uint8) 
         img2 = (self.image2_tensors.permute(1, 2, 0) * 255).to(torch.uint8) 
 
-        img1_line = img1.copy()
-        img2_line = img2.copy()
+        img1_line = img1.clone()
+        img2_line = img2.clone()
 
         # drawing epipolar line
         avg_distance_err_img1 = 0
@@ -275,13 +275,13 @@ class EpipolarGeometry:
             img1_line = cv2.circle(img1_line, (int(x1), int(y1)), radius=4, color=color)
             img1_line = cv2.line(img1_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
             # displaying just feature points
-            cv2.circle(img1.copy(), (int(x1), int(y1)), radius=4, color=color)
+            cv2.circle(img1.clone(), (int(x1), int(y1)), radius=4, color=color)
 
             # drawing the line on the right image
             img2_line = cv2.circle(img2_line, (int(x2), int(y2)), radius=4, color=color)
             img2_line = cv2.line(img2_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
             # displaying just feature points
-            cv2.circle(img2.copy(), (int(x2), int(y2)), radius=4, color=color)
+            cv2.circle(img2.clone(), (int(x2), int(y2)), radius=4, color=color)
 
         avg_distance_err_img1 /=  pts1.shape[0]
         avg_distance_err_img2 /=  pts1.shape[0]
