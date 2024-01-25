@@ -156,8 +156,8 @@ class EpipolarGeometry:
     def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):
         self.F = F.view(3, 3)
         # Convert to numpy and rescale pixels to original size [0,1] -> [0,255]
-        self.image1_numpy = (image1_tensors.permute(1,2,0).cpu().numpy() * 255).astype(np.uint8)
-        self.image2_numpy = (image2_tensors.permute(1,2,0).cpu().numpy() * 255).astype(np.uint8)
+        self.image1_tensors = image1_tensors
+        self.image2_tensors = image2_tensors
 
         self.sequence_path = os.path.join('sequences', sequence_num) if sequence_num else None
         self.file_name1 = f'{idx:06}.png'if idx else None
@@ -179,9 +179,12 @@ class EpipolarGeometry:
         # TODO: make sure img1,img2 are grayscale
         # self.img1 = cv2.cvtColor(self.img1.copy(), cv2.COLOR_BGR2GRAY)
 
+        image1_numpy = (self.image1_tensors.permute(1,2,0).cpu().numpy() * 255).astype(np.uint8)
+        image2_numpy = (self.image2_tensors.permute(1,2,0).cpu().numpy() * 255).astype(np.uint8)
+
         # Detect keypoints and compute descriptors for both images
-        (kp1, des1) = sift.detectAndCompute(self.image1_numpy, None)
-        (kp2, des2) = sift.detectAndCompute(self.image2_numpy, None)
+        (kp1, des1) = sift.detectAndCompute(image1_numpy, None)
+        (kp2, des2) = sift.detectAndCompute(image2_numpy, None)
 
         # matches = bf.match(des1, des2)
         matches = bf.knnMatch(des1, des2, k=2)
@@ -233,14 +236,17 @@ class EpipolarGeometry:
         return result 
     
     def visualize(self, sqResultDir, img_idx):
-        img1_line = self.img1.copy()
-        img2_line = self.img2.copy()
+        img1 = (self.image1_tensors.permute(1, 2, 0) * 255).to(torch.uint8) 
+        img2 = (self.image2_tensors.permute(1, 2, 0) * 255).to(torch.uint8) 
+
+        img1_line = img1.copy()
+        img2_line = img2.copy()
 
         # drawing epipolar line
         avg_distance_err_img1 = 0
         avg_distance_err_img2 = 0
 
-        img_W = self.img1.shape[1] - 1
+        img_W = img1.shape[1] - 1
         epip_test_err = 0
         pts1, pts2 = self.get_keypoints()
         for color_idx, (pt1, pt2) in enumerate(zip(pts1, pts2)):
@@ -269,13 +275,13 @@ class EpipolarGeometry:
             img1_line = cv2.circle(img1_line, (int(x1), int(y1)), radius=4, color=color)
             img1_line = cv2.line(img1_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
             # displaying just feature points
-            cv2.circle(self.img1.copy(), (int(x1), int(y1)), radius=4, color=color)
+            cv2.circle(img1.copy(), (int(x1), int(y1)), radius=4, color=color)
 
             # drawing the line on the right image
             img2_line = cv2.circle(img2_line, (int(x2), int(y2)), radius=4, color=color)
             img2_line = cv2.line(img2_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
             # displaying just feature points
-            cv2.circle(self.img2.copy(), (int(x2), int(y2)), radius=4, color=color)
+            cv2.circle(img2.copy(), (int(x2), int(y2)), radius=4, color=color)
 
         avg_distance_err_img1 /=  pts1.shape[0]
         avg_distance_err_img2 /=  pts1.shape[0]

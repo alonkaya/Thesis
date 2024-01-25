@@ -19,4 +19,4 @@ penalty_coeff = 2
 epipolar_constraint_threshold = 0.15
 batch_size = 1 # If increase batch size beware of zeros in batch!! 
 use_deepf_nocors = False
-move_bad_images = False
+move_bad_images = True

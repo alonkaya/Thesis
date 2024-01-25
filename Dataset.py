@@ -87,26 +87,18 @@ def get_data_loaders():
 # os.makedirs(bad_frames_dir, exist_ok=True)
 # os.makedirs(good_frames_dir, exist_ok=True)
 
-# for first_image, second_image, label, unormalized_label in train_loader:
-    
-#     if first_image[0].shape == (): 
-#         print("jjjhjj")
-#         continue    
-#     print(first_image[0].shape)
-    # print(first_image.shape)
-# for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
-#     dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
-#     os.makedirs(dst_dir, exist_ok=True)
+train_loader, val_loader = get_data_loaders()
 
-#     epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
-#     epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
-#     # err += epipolar_geo.get_epipolar_err()
+for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
+    dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
+    os.makedirs(dst_dir, exist_ok=True)
 
-# for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(train_loader):
-#     dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
-#     os.makedirs(dst_dir, exist_ok=True)
+    epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
+    epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
 
-#     epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
-#     epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
-# # err /= len(train_loader) 
-# # print(err)
+for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(train_loader):
+    dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
+    os.makedirs(dst_dir, exist_ok=True)
+
+    epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
+    epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
