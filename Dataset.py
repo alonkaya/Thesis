@@ -41,8 +41,8 @@ class CustomDataset(torch.utils.data.Dataset):
         # F = normalize_L2(normalize_L1(unnormalized_F))
 
         # return first_image, second_image, F, unnormalized_F
-        a = torch.rand(224,224).to(device)
-        b = torch.rand(224,224).to(device)
+        a = torch.rand(3,224,224).to(device)
+        b = torch.rand(3,224,224).to(device)
         c = torch.rand(3,3).to(device)
         d = torch.rand(3,3).to(device)
         return a,b,c,d
