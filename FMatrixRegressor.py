@@ -137,7 +137,7 @@ class FMatrixRegressor(nn.Module):
                 
                 # Foward pass
                 unnormalized_output, output, penalty = self.forward(first_image, second_image)
-                
+                print(unnormalized_output.device, output.device, penalty.device)
                 # Compute loss
                 # l1_loss = self.L1_loss(output, label)
                 l2_loss = self.L2_loss(output, label)
