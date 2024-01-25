@@ -143,7 +143,7 @@ class FMatrixRegressor(nn.Module):
                 l2_loss = self.L2_loss(output, label)
                 loss = l2_loss + penalty if not use_reconstruction_layer else l2_loss
                 avg_loss += loss.detach().item()
-
+                print(l2_loss.device, loss.device, avg_loss.device)
                 # Compute Backward pass and gradients
                 self.optimizer.zero_grad()
                 loss.backward()
@@ -162,7 +162,7 @@ class FMatrixRegressor(nn.Module):
                 # cosine_similarities.extend(cosine_similarity.tolist())
 
                 train_size += 1
-      
+            print("o")
             # Calculate and store root training loss for the epoch
             avg_loss = avg_loss / train_size
             all_train_loss.append(avg_loss)
@@ -179,7 +179,7 @@ class FMatrixRegressor(nn.Module):
 
             # Extend list of all labels with current epoch's labels for cosine_similarity plot
             # all_labels.extend(labels)
-            print("o")
+            print(mae.device, avg_loss.device)
             # Validation
             self.eval()
             val_labels = []
@@ -195,8 +195,7 @@ class FMatrixRegressor(nn.Module):
                     val_first_image, val_second_image, val_label, val_unormalized_label = val_first_image.to(device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device)
 
                     # This condition denotes a 'bad' frame
-                    for i in range(30):
-                        if val_first_image[i].shape == ():  continue
+                    if torch.any(torch.all(val_first_image == 0, dim=1)) == True: continue
                      
                     unnormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
                     epoch_penalty += penalty
