@@ -61,7 +61,7 @@ def compute_essential(R, t):
     # Compute the skew-symmetric matrix of t
     t_x = torch.tensor([[0, -t[2], t[1]], 
                     [t[2], 0, -t[0]], 
-                    [-t[1], t[0], 0]])
+                    [-t[1], t[0], 0]]).to(device)
 
     # Compute the essential matrix E
     E = torch.matmul(t_x, R)
@@ -82,7 +82,6 @@ def compute_fundamental(E, K1, K2):
 
 def get_F(poses, idx, K):
     R_relative, t_relative = compute_relative_transformations(poses[idx], poses[idx+jump_frames])
-    print(R_relative.device, t_relative.device)
     E = compute_essential(R_relative, t_relative)
     F = compute_fundamental(E, K, K)
     
@@ -104,17 +103,17 @@ def reconstruction_module(x):
                 [1.,    0.,             0.],
                 [0.,    torch.cos(rx),    -torch.sin(rx)],
                 [0.,    torch.sin(rx),     torch.cos(rx)]
-            ], requires_grad=True)
+            ], requires_grad=True).to(device)
             R_y = torch.tensor([
                 [torch.cos(ry),    0.,    -torch.sin(ry)],
                 [0.,            1.,     0.],
                 [torch.sin(ry),    0.,     torch.cos(ry)]
-            ], requires_grad=True)
+            ], requires_grad=True).to(device)
             R_z = torch.tensor([
                 [torch.cos(rz),    -torch.sin(rz),    0.],
                 [torch.sin(rz),    torch.cos(rz),     0.],
                 [0.,            0.,             1.]
-            ], requires_grad=True)
+            ], requires_grad=True).to(device)
             R = torch.matmul(R_x, torch.matmul(R_y, R_z))
             return R
 
@@ -124,14 +123,14 @@ def reconstruction_module(x):
                 [-1/(f+1e-8),   0.,             0.],
                 [0.,            -1/(f+1e-8),    0.],
                 [0.,            0.,             1.]
-            ], requires_grad=True)
+            ], requires_grad=True).to(device)
 
         def get_translate(tx, ty, tz):
             return torch.tensor([
                 [0.,  -tz, ty],
                 [tz,  0,   -tx],
                 [-ty, tx,  0]
-            ], requires_grad=True)
+            ], requires_grad=True).to(device)
 
 
         def get_fmat(x):
