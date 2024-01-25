@@ -213,7 +213,7 @@ class EpipolarGeometry:
     
     def epipolar_test_avg_points(self, pts1, pts2):
         # Iterates over all keypoints in 'good'
-        print(pts2.shape)
+        print(pts2.reshape(-1,1,3).shape)
         errs = abs(torch.matmul(torch.matmul(pts2.reshape(-1,1,3), self.F), pts1))
         avg_err = torch.mean(errs)
         # return avg_err
