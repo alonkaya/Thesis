@@ -242,9 +242,12 @@ class FMatrixRegressor(nn.Module):
 
             #Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}
             # Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
-            print(f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}
+            epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}
             Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}\n"""
-            )
+            
+            with open("output.txt", "a") as f:
+                f.write(epoch_output)
+                print(epoch_output)
 
         print(f'Train gorund truth error: {epoch_avg_ec_err_truth} val gorund truth error: {val_epoch_avg_ec_err_truth}\n')
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss, x_label="Epoch", y_label='Training Loss', show=show_plots)
