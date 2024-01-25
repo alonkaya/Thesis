@@ -142,7 +142,7 @@ class FMatrixRegressor(nn.Module):
                 # l1_loss = self.L1_loss(output, label)
                 l2_loss = self.L2_loss(output, label)
                 loss = l2_loss + penalty if not use_reconstruction_layer else l2_loss
-                avg_loss += loss.detach().cpu().item()
+                avg_loss += loss.detach().item()
 
                 # Compute Backward pass and gradients
                 self.optimizer.zero_grad()
@@ -203,7 +203,7 @@ class FMatrixRegressor(nn.Module):
                     # val_l1_loss = self.L1_loss(val_output, val_label)
                     val_l2_loss = self.L2_loss(val_output, val_label)
                     val_loss = val_l2_loss if not use_reconstruction_layer else val_l2_loss
-                    val_avg_loss += val_loss.detach().cpu().item()
+                    val_avg_loss += val_loss.detach().item()
 
                     # Compute val mean epipolar constraint error 
                     # val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(val_first_image, val_second_image, val_unormalized_label, val_output, unnormalized_val_output, device)                    
@@ -219,7 +219,7 @@ class FMatrixRegressor(nn.Module):
 
                 # Calculate and store mean absolute error for the epoch
                 mae = torch.mean(torch.abs(torch.cat(val_labels, dim=0) - torch.cat(val_outputs, dim=0)))
-                val_mae.append(mae.detach().cpu())
+                val_mae.append(mae.detach())
 
                 # val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_truth/val_size, val_epoch_avg_ec_err_pred/val_size, val_epoch_avg_ec_err_pred_unormalized/val_size
                 val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_truth/val_size, val_epoch_avg_ec_err_pred_unormalized/val_size
@@ -228,7 +228,7 @@ class FMatrixRegressor(nn.Module):
                 val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized)
 
                 epoch_penalty /= val_size
-                all_penalty.append(epoch_penalty.detach().cpu())
+                all_penalty.append(epoch_penalty.detach())
 
                 # Calculate and store root validation loss for the epoch
                 val_avg_loss /= val_size
