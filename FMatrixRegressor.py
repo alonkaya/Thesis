@@ -248,6 +248,7 @@ class FMatrixRegressor(nn.Module):
             with open("/home/aviran/Alon/Thesis/output.txt", "w") as f:
                 f.write(epoch_output)
                 print(epoch_output)
+                f.close()
 
         print(f'Train gorund truth error: {epoch_avg_ec_err_truth} val gorund truth error: {val_epoch_avg_ec_err_truth}\n')
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss, x_label="Epoch", y_label='Training Loss', show=show_plots)
