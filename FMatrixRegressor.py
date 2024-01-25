@@ -245,7 +245,7 @@ class FMatrixRegressor(nn.Module):
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}
             Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}\n"""
             
-            with open("output.txt", "w") as f:
+            with open("/home/aviran/Alon/Thesis/output.txt", "w") as f:
                 f.write(epoch_output)
                 print(epoch_output)
 
