@@ -231,8 +231,8 @@ class EpipolarGeometry:
         
     def get_point_2_line_error(self, point, l):
         l = l.flatten()
-        print(l.shape)
-        result = abs(torch.matmul(point, torch.transpose(l)) / torch.sqrt(l[0] * l[0] + l[1] * l[1]))
+        print(l.T.shape)
+        result = abs(torch.matmul(point, l.view(1,3)) / torch.sqrt(l[0] * l[0] + l[1] * l[1]))
         
         return result 
     
