@@ -222,7 +222,7 @@ class EpipolarGeometry:
             error += self.epipolar_test_single_point(pt1, pt2)
         avg_err2 = error / pts1.shape[0]
         print(avg_err, avg_err2)
-        return avg_err, avg_err2
+        return avg_err
 
     def get_epipolar_err(self):
         pts1, pts2 = self.get_keypoints()
