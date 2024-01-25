@@ -154,8 +154,8 @@ class FMatrixRegressor(nn.Module):
                 self.optimizer.step()
 
                 # Compute train mean epipolar constraint error 
-                # avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized  = get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unnormalized_output, device)
-                avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized  =0,0,0
+                avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized  = get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unnormalized_output, device)
+                # avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized  =0,0,0
                 epoch_avg_ec_err_truth += avg_ec_err_truth
                 epoch_avg_ec_err_pred += avg_ec_err_pred
                 epoch_avg_ec_err_pred_unormalized += avg_ec_err_pred_unormalized
@@ -167,7 +167,7 @@ class FMatrixRegressor(nn.Module):
                 # cosine_similarities.extend(cosine_similarity.tolist())
 
                 train_size += 1
-            print("o")
+
             # Calculate and store root training loss for the epoch
             avg_loss = avg_loss / train_size
             all_train_loss.append(avg_loss)
@@ -176,15 +176,15 @@ class FMatrixRegressor(nn.Module):
             mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
             train_mae.append(mae.detach())
             
-            # epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_truth/train_size, epoch_avg_ec_err_pred/train_size, epoch_avg_ec_err_pred_unormalized/train_size
-            epoch_avg_ec_err_truth, epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_truth/train_size, epoch_avg_ec_err_pred_unormalized/train_size
+            epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_truth/train_size, epoch_avg_ec_err_pred/train_size, epoch_avg_ec_err_pred_unormalized/train_size
+            # epoch_avg_ec_err_truth, epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_truth/train_size, epoch_avg_ec_err_pred_unormalized/train_size
             ec_err_truth.append(epoch_avg_ec_err_truth)
             ec_err_pred.append(epoch_avg_ec_err_pred)
             ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized)
 
             # Extend list of all labels with current epoch's labels for cosine_similarity plot
             # all_labels.extend(labels)
-            print(mae.device, avg_loss.device)
+
             # Validation
             self.eval()
             val_labels = []
@@ -212,8 +212,8 @@ class FMatrixRegressor(nn.Module):
                     val_avg_loss += val_loss.detach().item()
 
                     # Compute val mean epipolar constraint error 
-                    # val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(val_first_image, val_second_image, val_unormalized_label, val_output, unnormalized_val_output, device)                    
-                    val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = 0,0,0
+                    val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(val_first_image, val_second_image, val_unormalized_label, val_output, unnormalized_val_output, device)                    
+                    # val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = 0,0,0
                     val_epoch_avg_ec_err_truth += val_avg_ec_err_truth
                     val_epoch_avg_ec_err_pred += val_avg_ec_err_pred
                     val_epoch_avg_ec_err_pred_unormalized += val_avg_ec_err_pred_unormalized
@@ -227,8 +227,8 @@ class FMatrixRegressor(nn.Module):
                 mae = torch.mean(torch.abs(torch.cat(val_labels, dim=0) - torch.cat(val_outputs, dim=0)))
                 val_mae.append(mae.detach())
 
-                # val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_truth/val_size, val_epoch_avg_ec_err_pred/val_size, val_epoch_avg_ec_err_pred_unormalized/val_size
-                val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_truth/val_size, val_epoch_avg_ec_err_pred_unormalized/val_size
+                val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_truth/val_size, val_epoch_avg_ec_err_pred/val_size, val_epoch_avg_ec_err_pred_unormalized/val_size
+                # val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_truth/val_size, val_epoch_avg_ec_err_pred_unormalized/val_size
                 val_ec_err_truth.append(val_epoch_avg_ec_err_truth)
                 val_ec_err_pred.append(val_epoch_avg_ec_err_pred)
                 val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized)
@@ -245,10 +245,9 @@ class FMatrixRegressor(nn.Module):
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}
             Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}\n"""
             
-            with open("/home/aviran/Alon/Thesis/output.txt", "w") as f:
+            with open("output.txt", "a") as f:
                 f.write(epoch_output)
                 print(epoch_output)
-                f.close()
 
         print(f'Train gorund truth error: {epoch_avg_ec_err_truth} val gorund truth error: {val_epoch_avg_ec_err_truth}\n')
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss, x_label="Epoch", y_label='Training Loss', show=show_plots)
