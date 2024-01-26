@@ -206,9 +206,6 @@ class EpipolarGeometry:
         pts2 = np.concatenate((pts2, np.ones((pts2.shape[0], 1))), axis=-1)
 
         return pts1, pts2
-
-    def epipolar_test_single_point(self, pt1, pt2): 
-        return abs(torch.matmul(torch.matmul(pt2.view(1,3), self.F), pt1))
     
     def epipolar_test_all_points(self, pts1, pts2):
         # Iterates over all keypoints in 'good' 
@@ -221,6 +218,13 @@ class EpipolarGeometry:
         pts1, pts2 = pts1.to(device), pts2.to(device)
 
         return self.epipolar_test_all_points(pts1, pts2)
+    
+
+
+
+
+
+
     
     def epipoline(self, x, formula):
         array = formula.flatten()
@@ -235,9 +239,12 @@ class EpipolarGeometry:
         
         return result 
     
+    def epipolar_test_single_point(self, pt1, pt2): 
+        return abs(np.dot(np.dot(pt2.reshape(1,3), self.F), pt1))
+    
     def visualize(self, sqResultDir, img_idx):
         self.F = self.F.cpu().numpy()
-        
+
         img1_line = self.image1_numpy.copy()
         img2_line = self.image2_numpy.copy()
 
