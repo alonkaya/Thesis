@@ -215,7 +215,7 @@ class EpipolarGeometry:
 
     def get_epipolar_err(self):
         pts1, pts2 = self.get_keypoints()
-        pts1, pts2 = torch.tensor(pts1).to(device), torch.tensor(pts2).to(device)
+        pts1, pts2 = torch.tensor(pts1, dtype=float32).to(device), torch.tensor(pts2, dtype=float32).to(device)
 
         return self.epipolar_test_all_points(pts1, pts2)
     
