@@ -91,6 +91,7 @@ train_loader, val_loader = get_data_loaders()
 
 for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
     if first_image.shape[0] == (): continue
+    print(type(sequence_num[0]))
     dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
     os.makedirs(dst_dir, exist_ok=True)
 
