@@ -75,7 +75,7 @@ def get_data_loaders():
     concat_val_dataset = ConcatDataset(val_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False)
     
     return train_loader, val_loader

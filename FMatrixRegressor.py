@@ -132,7 +132,7 @@ class FMatrixRegressor(nn.Module):
                 first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
 
                 # This condition denotes a 'bad' frame
-                if first_image.shape[0] == (): 
+                if first_image[0].shape == (): 
                     print("ok")
                     continue
                 # if torch.any(torch.all(first_image == 0, dim=1)) == True: 
@@ -199,7 +199,7 @@ class FMatrixRegressor(nn.Module):
                     val_first_image, val_second_image, val_label, val_unormalized_label = val_first_image.to(device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device)
 
                     # This condition denotes a 'bad' frame
-                    if val_first_image.shape[0] == (): continue
+                    if val_first_image[0].shape == (): continue
                     # if torch.any(torch.all(val_first_image == 0, dim=1)) == True: continue
                      
                     unnormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
