@@ -202,8 +202,8 @@ class EpipolarGeometry:
         pts1 = np.array([kp1[m.queryIdx].pt for m in self.good], dtype=float)
         pts2 = np.array([kp2[m.trainIdx].pt for m in self.good], dtype=float)
 
-        pts1 = np.concatenate((pts1, np.ones((pts1.shape[0], 1))), dim=-1)
-        pts2 = np.concatenate((pts2, np.ones((pts2.shape[0], 1))), dim=-1)
+        pts1 = np.concatenate((pts1, np.ones((pts1.shape[0], 1))), axis=-1)
+        pts2 = np.concatenate((pts2, np.ones((pts2.shape[0], 1))), axis=-1)
 
         return pts1, pts2
 
@@ -219,7 +219,7 @@ class EpipolarGeometry:
     def get_epipolar_err(self):
         pts1, pts2 = self.get_keypoints()
         pts1, pts2 = pts1.to(device), pts2.to(device)
-        
+
         return self.epipolar_test_all_points(pts1, pts2)
     
     def epipoline(self, x, formula):
