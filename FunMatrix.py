@@ -236,6 +236,8 @@ class EpipolarGeometry:
         return result 
     
     def visualize(self, sqResultDir, img_idx):
+        self.F = self.F.cpu().numpy()
+        
         img1_line = self.image1_numpy.copy()
         img2_line = self.image2_numpy.copy()
 
