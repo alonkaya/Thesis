@@ -11,7 +11,6 @@ class CustomDataset(torch.utils.data.Dataset):
     def __init__(self, sequence_path, poses, transform, K):
         self.sequence_path = sequence_path
         self.sequence_num = sequence_path.split('/')[1]
-        print(type(self.sequence_num))
         self.poses = poses
         self.transform = transform
         self.k = K
@@ -92,6 +91,7 @@ train_loader, val_loader = get_data_loaders()
 
 for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
     if first_image.shape[0] == (): continue
+    print(sequence_num)
     dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
     os.makedirs(dst_dir, exist_ok=True)
 
