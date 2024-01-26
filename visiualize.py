@@ -141,26 +141,26 @@ class EpipoLine:
             return (True, result)
         return (False, result)
 
-bad_frames_dir = os.path.join('epipole_lines', "bad_frames")
-good_frames_dir = os.path.join('epipole_lines', "good_frames")
+# bad_frames_dir = os.path.join('epipole_lines', "bad_frames")
+# good_frames_dir = os.path.join('epipole_lines', "good_frames")
 
-os.makedirs(bad_frames_dir, exist_ok=True)
-os.makedirs(good_frames_dir, exist_ok=True)
+# os.makedirs(bad_frames_dir, exist_ok=True)
+# os.makedirs(good_frames_dir, exist_ok=True)
 
-left_projection_matrix = read_calib('sequences\\02\\calib.txt')
+# left_projection_matrix = read_calib('sequences\\02\\calib.txt')
 
-K, _ = get_intrinsic(left_projection_matrix)
+# K, _ = get_intrinsic(left_projection_matrix)
 
-poses = read_poses('poses\\02.txt')
+# poses = read_poses('poses\\02.txt')
 
-for i in range(len(poses) - 1):
-    R_relative, t_relative = compute_relative_transformations(poses[i], poses[i+jump_frames])
+# for i in range(len(poses) - 1):
+#     R_relative, t_relative = compute_relative_transformations(poses[i], poses[i+jump_frames])
 
-    lImg = f'sequences\\02\\image_0\\{i:06}.png'
-    rImg = f'sequences\\02\\image_0\\{i+jump_frames:06}.png'
+#     lImg = f'sequences\\02\\image_0\\{i:06}.png'
+#     rImg = f'sequences\\02\\image_0\\{i+jump_frames:06}.png'
 
-    a = EpipoLine(leftImg=lImg, rightImg=rImg, R=R_relative, T=t_relative)
+#     a = EpipoLine(leftImg=lImg, rightImg=rImg, R=R_relative, T=t_relative)
 
-    a.visualize(sqResultDir='epipole_lines', img_idx=i, K=K, THRESHOLD=0.15)
+#     a.visualize(sqResultDir='epipole_lines', img_idx=i, K=K, THRESHOLD=0.15)
 
 
