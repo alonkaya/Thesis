@@ -161,7 +161,7 @@ class EpipolarGeometry:
 
         self.sequence_path = os.path.join('sequences', sequence_num) if sequence_num else None
         self.file_name1 = f'{idx:06}.png'if idx else None
-
+        print(self.sequence_path, self.file_name1)
         self.colors = [
             (255, 102, 102),
             (102, 255, 255),
