@@ -75,7 +75,7 @@ def get_data_loaders():
     concat_val_dataset = ConcatDataset(val_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=False)
     val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False)
     
     return train_loader, val_loader
@@ -89,13 +89,13 @@ def get_data_loaders():
 
 train_loader, val_loader = get_data_loaders()
 
-for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
-    if first_image.shape[0] == (): continue
-    dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
-    os.makedirs(dst_dir, exist_ok=True)
+# for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
+#     if first_image.shape[0] == (): continue
+#     dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
+#     os.makedirs(dst_dir, exist_ok=True)
 
-    epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
-    epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
+#     epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
+#     epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
 
 for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(train_loader):
     if first_image.shape[0] == (): continue
