@@ -291,7 +291,7 @@ class EpipolarGeometry:
 
         avg_distance_err_img1 /=  pts1.shape[0]
         # avg_distance_err_img2 /=  pts1.shape[0]
-        # epip_test_err /= pts1.shape[0]
+        epip_test_err /= pts1.shape[0]
 
         # vis = np.concatenate((img1_line, img2_line), axis=0)
         # font = cv2.FONT_HERSHEY_SIMPLEX
