@@ -22,7 +22,7 @@ class CustomDataset(torch.utils.data.Dataset):
         # If one of the frames is "Bad"- skip 
         img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
         img2_path = os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png')
-        if not os.path.exists(img1_path) or not os.path.exists(img2_path):
+        if (not os.path.exists(img1_path) or not os.path.exists(img2_path)) and not move_bad_images:
             return 0, 0, 0, 0
 
         # Create PIL images
