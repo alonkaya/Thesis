@@ -156,8 +156,8 @@ class EpipolarGeometry:
     def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):
         self.F = F.view(3, 3)
         # Convert to numpy and rescale pixels to original size [0,1] -> [0,255]
-        self.image1_tensors = image1_tensors
-        self.image2_tensors = image2_tensors
+        self.image1_numpy = (image1_tensors.permute(1,2,0).cpu().numpy() * 255).astype(np.uint8)
+        self.image2_numpy = (image2_tensors.permute(1,2,0).cpu().numpy() * 255).astype(np.uint8)
 
         self.sequence_path = os.path.join('sequences', sequence_num) if sequence_num else None
         self.file_name1 = f'{idx:06}.png'if idx else None
@@ -172,19 +172,17 @@ class EpipolarGeometry:
 
 
     def get_keypoints(self, threshold=epipolar_constraint_threshold):
+        """Recives numpy images and returns numpy points"""
         # sift = cv2.xfeatures2d.SIFT_create()
         sift = cv2.SIFT_create()
         bf = cv2.BFMatcher()
 
         # TODO: make sure img1,img2 are grayscale
-        # self.img1 = cv2.cvtColor(self.img1.clone(), cv2.COLOR_BGR2GRAY)
-
-        image1_numpy = (self.image1_tensors.permute(1,2,0).cpu().numpy() * 255).astype(np.uint8)
-        image2_numpy = (self.image2_tensors.permute(1,2,0).cpu().numpy() * 255).astype(np.uint8)
-
+        # self.img1 = cv2.cvtColor(self.img1.copy(), cv2.COLOR_BGR2GRAY)
+        
         # Detect keypoints and compute descriptors for both images
-        (kp1, des1) = sift.detectAndCompute(image1_numpy, None)
-        (kp2, des2) = sift.detectAndCompute(image2_numpy, None)
+        (kp1, des1) = sift.detectAndCompute(self.image1_numpy, None)
+        (kp2, des2) = sift.detectAndCompute(self.image2_numpy, None)
 
         # matches = bf.match(des1, des2)
         matches = bf.knnMatch(des1, des2, k=2)
@@ -201,11 +199,11 @@ class EpipolarGeometry:
             self.good.append(matches[min_distance_index][0])
         
         # Extract the matched keypoints
-        pts1 = torch.FloatTensor([kp1[m.queryIdx].pt for m in self.good]).to(device)
-        pts2 = torch.FloatTensor([kp2[m.trainIdx].pt for m in self.good]).to(device)
+        pts1 = np.array([kp1[m.queryIdx].pt for m in self.good], dtype=float)
+        pts2 = np.array([kp2[m.trainIdx].pt for m in self.good], dtype=float)
 
-        pts1 = torch.cat((pts1, torch.ones((pts1.shape[0], 1)).to(device)), dim=-1)
-        pts2 = torch.cat((pts2, torch.ones((pts2.shape[0], 1)).to(device)), dim=-1)
+        pts1 = np.concatenate((pts1, np.ones((pts1.shape[0], 1))), dim=-1)
+        pts2 = np.concatenate((pts2, np.ones((pts2.shape[0], 1))), dim=-1)
 
         return pts1, pts2
 
@@ -220,6 +218,8 @@ class EpipolarGeometry:
 
     def get_epipolar_err(self):
         pts1, pts2 = self.get_keypoints()
+        pts1, pts2 = pts1.to(device), pts2.to(device)
+        
         return self.epipolar_test_all_points(pts1, pts2)
     
     def epipoline(self, x, formula):
@@ -231,31 +231,27 @@ class EpipolarGeometry:
         
     def get_point_2_line_error(self, point, l):
         l = l.flatten()
-        print(l.shape)
-        result = abs(torch.matmul(point, l.view(3,1)) / torch.sqrt(l[0] * l[0] + l[1] * l[1]))
+        result = abs(np.dot(point, np.transpose(l)) / np.sqrt(l[0] * l[0] + l[1] * l[1]))
         
         return result 
     
     def visualize(self, sqResultDir, img_idx):
-        img1 = (self.image1_tensors.permute(1, 2, 0) * 255).to(torch.uint8) 
-        img2 = (self.image2_tensors.permute(1, 2, 0) * 255).to(torch.uint8) 
-
-        img1_line = img1.clone()
-        img2_line = img2.clone()
+        img1_line = self.image1_numpy.copy()
+        img2_line = self.image2_numpy.copy()
 
         # drawing epipolar line
         avg_distance_err_img1 = 0
         avg_distance_err_img2 = 0
 
-        img_W = img1.shape[1] - 1
+        img_W = self.image1_numpy.shape[1] - 1
         epip_test_err = 0
         pts1, pts2 = self.get_keypoints()
         for color_idx, (pt1, pt2) in enumerate(zip(pts1, pts2)):
             x1, y1, _ = pt1
             x2, y2, _ = pt2
 
-            line_1 = torch.matmul(torch.transpose(self.F,0,1), pt2)
-            line_2 = torch.matmul(self.F, pt1)
+            line_1 = np.dot(np.transpose(self.F), pt2)
+            line_2 = np.dot(self.F, pt1)
 
             # Get ditance from point to line error
             avg_distance_err_img1 += self.get_point_2_line_error(pt2, line_1)
@@ -276,19 +272,19 @@ class EpipolarGeometry:
             img1_line = cv2.circle(img1_line, (int(x1), int(y1)), radius=4, color=color)
             img1_line = cv2.line(img1_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
             # displaying just feature points
-            cv2.circle(img1.clone(), (int(x1), int(y1)), radius=4, color=color)
+            cv2.circle(self.image1_numpy.copy(), (int(x1), int(y1)), radius=4, color=color)
 
             # drawing the line on the right image
             img2_line = cv2.circle(img2_line, (int(x2), int(y2)), radius=4, color=color)
             img2_line = cv2.line(img2_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
             # displaying just feature points
-            cv2.circle(img2.clone(), (int(x2), int(y2)), radius=4, color=color)
+            cv2.circle(self.image2_numpy.copy(), (int(x2), int(y2)), radius=4, color=color)
 
         avg_distance_err_img1 /=  pts1.shape[0]
         avg_distance_err_img2 /=  pts1.shape[0]
         epip_test_err /= pts1.shape[0]
 
-        vis = torch.cat((img1_line, img2_line), axis=0)
+        vis = np.concatenate((img1_line, img2_line), axis=0)
         font = cv2.FONT_HERSHEY_SIMPLEX
 
         img_H = vis.shape[0]
