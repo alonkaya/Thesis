@@ -23,7 +23,7 @@ class CustomDataset(torch.utils.data.Dataset):
         img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
         img2_path = os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png')
         if not os.path.exists(img1_path) or not os.path.exists(img2_path):
-            return 0, 0, 0, 0, 0, 0
+            return 0, 0, 0, 0
 
         # Create PIL images
         original_first_image = Image.open(img1_path)
@@ -40,7 +40,7 @@ class CustomDataset(torch.utils.data.Dataset):
         # Convert to tensor and normalize F-Matrix 
         F = normalize_L2(normalize_L1(unnormalized_F))
 
-        return first_image, second_image, F, unnormalized_F, idx, self.sequence_num
+        return first_image, second_image, F, unnormalized_F
     
 transform = transforms.Compose([
     transforms.Resize((256, 256)),
@@ -81,26 +81,30 @@ def get_data_loaders():
     return train_loader, val_loader
 
 
-# bad_frames_dir = os.path.join('epipole_lines', "bad_frames")
-# good_frames_dir = os.path.join('epipole_lines', "good_frames")
+def visualize_bad_images():
+    bad_frames_dir = os.path.join('epipole_lines', "bad_frames")
+    good_frames_dir = os.path.join('epipole_lines', "good_frames")
 
-# os.makedirs(bad_frames_dir, exist_ok=True)
-# os.makedirs(good_frames_dir, exist_ok=True)
+    os.makedirs(bad_frames_dir, exist_ok=True)
+    os.makedirs(good_frames_dir, exist_ok=True)
+    
 
-train_loader, val_loader = get_data_loaders()
+def move_bad_images():
+    # change dataset returns 6 params instead of 4. comment unnecessary lines in visualize
+    train_loader, val_loader = get_data_loaders()
 
-# for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
-#     if first_image.shape[0] == (): continue
-#     dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
-#     os.makedirs(dst_dir, exist_ok=True)
+    for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
+        if first_image.shape[0] == (): continue
+        dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
+        os.makedirs(dst_dir, exist_ok=True)
 
-#     epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
-#     epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
+        epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
+        epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
 
-for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(train_loader):
-    if first_image.shape[0] == (): continue
-    dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
-    os.makedirs(dst_dir, exist_ok=True)
+    for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(train_loader):
+        if first_image.shape[0] == (): continue
+        dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
+        os.makedirs(dst_dir, exist_ok=True)
 
-    epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
-    epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
+        epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
+        epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)

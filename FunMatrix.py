@@ -268,38 +268,38 @@ class EpipolarGeometry:
             epip_test_err += self.epipolar_test_single_point(pt1, pt2)
 
             # calculating 2 points on the line
-            # x_0 = self.epipoline(0, line_1)
-            # x_1 = self.epipoline(img_W, line_1)
+            x_0 = self.epipoline(0, line_1)
+            x_1 = self.epipoline(img_W, line_1)
 
-            # y_0 = self.epipoline(0, line_2)
-            # y_1 = self.epipoline(img_W, line_2)
+            y_0 = self.epipoline(0, line_2)
+            y_1 = self.epipoline(img_W, line_2)
 
-            # # Set color for line
-            # color = self.colors[color_idx % len(self.colors)]
+            # Set color for line
+            color = self.colors[color_idx % len(self.colors)]
 
-            # # drawing the line and feature points on the left image
-            # img1_line = cv2.circle(img1_line, (int(x1), int(y1)), radius=4, color=color)
-            # img1_line = cv2.line(img1_line, (0, x_0), (img_W, x_1), color=color, lineType=cv2.LINE_AA)
-            # # displaying just feature points
-            # cv2.circle(self.image1_numpy.copy(), (int(x1), int(y1)), radius=4, color=color)
+            # drawing the line and feature points on the left image
+            img1_line = cv2.circle(img1_line, (int(x1), int(y1)), radius=4, color=color)
+            img1_line = cv2.line(img1_line, (0, x_0), (img_W, x_1), color=color, lineType=cv2.LINE_AA)
+            # displaying just feature points
+            cv2.circle(self.image1_numpy.copy(), (int(x1), int(y1)), radius=4, color=color)
 
-            # # drawing the line on the right image
-            # img2_line = cv2.circle(img2_line, (int(x2), int(y2)), radius=4, color=color)
-            # img2_line = cv2.line(img2_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
-            # # displaying just feature points
-            # cv2.circle(self.image2_numpy.copy(), (int(x2), int(y2)), radius=4, color=color)
+            # drawing the line on the right image
+            img2_line = cv2.circle(img2_line, (int(x2), int(y2)), radius=4, color=color)
+            img2_line = cv2.line(img2_line, (0, y_0), (img_W, y_1), color=color, lineType=cv2.LINE_AA)
+            # displaying just feature points
+            cv2.circle(self.image2_numpy.copy(), (int(x2), int(y2)), radius=4, color=color)
 
         avg_distance_err_img1 /=  pts1.shape[0]
-        # avg_distance_err_img2 /=  pts1.shape[0]
+        avg_distance_err_img2 /=  pts1.shape[0]
         epip_test_err /= pts1.shape[0]
 
-        # vis = np.concatenate((img1_line, img2_line), axis=0)
-        # font = cv2.FONT_HERSHEY_SIMPLEX
+        vis = np.concatenate((img1_line, img2_line), axis=0)
+        font = cv2.FONT_HERSHEY_SIMPLEX
 
-        # img_H = vis.shape[0]
-        # cv2.putText(vis, str(avg_distance_err_img1), (10, 20), font, 0.6, color=(128, 0, 0), lineType=cv2.LINE_AA)
-        # cv2.putText(vis, str(avg_distance_err_img2), (10, img_H - 10), font, 0.6, color=(0, 0, 128), lineType=cv2.LINE_AA)
-        # cv2.putText(vis, str(epip_test_err), (10, 210), font, 0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
+        img_H = vis.shape[0]
+        cv2.putText(vis, str(avg_distance_err_img1), (10, 20), font, 0.6, color=(128, 0, 0), lineType=cv2.LINE_AA)
+        cv2.putText(vis, str(avg_distance_err_img2), (10, img_H - 10), font, 0.6, color=(0, 0, 128), lineType=cv2.LINE_AA)
+        cv2.putText(vis, str(epip_test_err), (10, 210), font, 0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
 
         if(avg_distance_err_img1 > 13 or abs(epip_test_err) > 0.01):
             if move_bad_images:
@@ -308,11 +308,11 @@ class EpipolarGeometry:
                 if os.path.exists(src_path1):  
                     print(f'moved {src_path1} to {dst_path1}')
                     os.rename(src_path1, dst_path1)         
-            # else:                
-            #     cv2.imwrite(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
-            #     print(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))
+            else:                
+                cv2.imwrite(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
+                print(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))
 
-        # elif not move_bad_images:
-            # cv2.imwrite(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
-            # print(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))    
+        elif not move_bad_images:
+            cv2.imwrite(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
+            print(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))    
     
