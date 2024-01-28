@@ -135,7 +135,3 @@ def move_bad_images():
         epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
 
 
-train_loader, val_loader = get_data_loaders()
-it = iter(train_loader)
-batch = next(it)
-print(batch.shape)
