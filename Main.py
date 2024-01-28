@@ -7,7 +7,7 @@ model = FMatrixRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=cli
                          lr=learning_rate, freeze_pretrained_model=False)
 model = model.to(device)
 
-mp.set_start_method('spawn', force=True)
+# mp.set_start_method('spawn', force=True)
 
 train_loader, val_loader = get_data_loaders()
 
