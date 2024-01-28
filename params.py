@@ -2,10 +2,10 @@ import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 num_of_training_images = 1000
-num_of_val_images = 2
+num_of_val_images = 200
 learning_rate = 1e-4
 mlp_hidden_sizes = [512, 256]
-num_epochs = 100
+num_epochs = 2
 angle_range = 90
 shift_x_range = 140
 shift_y_range = 140
@@ -20,4 +20,4 @@ epipolar_constraint_threshold = 0.15
 batch_size = 1  # If increase batch size beware of zeros in batch!!
 use_deepf_nocors = False
 move_bad_images = True
-sequence_nums = [0,1]
+sequence_nums = 2
