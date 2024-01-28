@@ -98,7 +98,7 @@ class FMatrixRegressor(nn.Module):
 
             unnormalized_output = torch.stack([reconstruction_module(x)for x in output]).to(device) if use_reconstruction_layer else output.view(-1,3,3)
             
-            penalty = 0 if use_reconstruction_layer else last_sing_value_penalty(unnormalized_output).to(device)
+            penalty = torch.tensor(0) if use_reconstruction_layer else last_sing_value_penalty(unnormalized_output).to(device)
 
             output = norm_layer(unnormalized_output.view(-1, 9))
 
@@ -146,7 +146,6 @@ class FMatrixRegressor(nn.Module):
 
                 # cosine_similarities.extend(cosine_similarity.tolist())
 
-
             # Calculate and store mean absolute error for the epoch
             mae = torch.mean(torch.abs(labels - outputs))
 
@@ -176,7 +175,7 @@ class FMatrixRegressor(nn.Module):
                         val_first_image, val_second_image)
                     epoch_penalty += penalty
 
-                    val_avg_loss += self.L2_loss(val_output, val_label).item()
+                    val_avg_loss += self.L2_loss(val_output, val_label)
 
                     # Compute val mean epipolar constraint error
                     val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
@@ -199,8 +198,9 @@ class FMatrixRegressor(nn.Module):
                 val_ec_err_truth.append(val_epoch_avg_ec_err_truth.cpu())
                 val_ec_err_pred.append(val_epoch_avg_ec_err_pred.cpu())
                 val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized.cpu())
+                all_val_loss.append(val_avg_loss.cpu())
                 all_penalty.append(epoch_penalty.cpu())
-                all_val_loss.append(val_avg_loss)
+                
 
             # Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}
             # Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
