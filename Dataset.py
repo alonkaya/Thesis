@@ -57,9 +57,10 @@ class CustomDataset(torch.utils.data.Dataset):
         return first_image, second_image, F, unnormalized_F
 
 
-mp.set_start_method('spawn', force=True)
 
 def get_data_loaders():
+    mp.set_start_method('spawn', force=True)
+
     transform = transforms.Compose([
         transforms.Resize((256, 256)),
         transforms.CenterCrop(224),
