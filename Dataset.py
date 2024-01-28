@@ -67,9 +67,9 @@ def get_data_loaders():
         # TODO: Normalize images?
     ])    
     
-    sequence_paths = [f'sequences/0{i}/image_0' for i in range(sequence_nums)]
-    poses_paths = [f'poses/0{i}.txt' for i in range(sequence_nums)]
-    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(sequence_nums)]
+    sequence_paths = [f'sequences/0{i}/image_0' for i in range(9)]
+    poses_paths = [f'poses/0{i}.txt' for i in range(9)]
+    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(9)]
 
     train_datasets, val_datasets = [], []
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
@@ -80,12 +80,13 @@ def get_data_loaders():
         K = get_intrinsic(calib_path)
 
         # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
-        if i == 1:
+        if i in train_seqeunces:
+            train_datasets.append(CustomDataset(
+                sequence_path, poses, transform, K))        
+        elif i in val_sequences:
             val_datasets.append(CustomDataset(
                 sequence_path, poses, transform, K))
-        else:
-            train_datasets.append(CustomDataset(
-                sequence_path, poses, transform, K))
+
 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
