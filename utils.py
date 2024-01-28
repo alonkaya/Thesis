@@ -70,7 +70,9 @@ def normalize_max2(x):
     return x / (torch.max(torch.abs(x), dim=1, keepdim=True) + 1e-8)
 
 def normalize_L12(x):
-    return x / torch.sum(torch.abs(x), dim=1, keepdim=True)
+    a =  x / torch.sum(torch.abs(x), dim=1, keepdim=True)
+    print(a.shape)
+    return a
 
 def normalize_L22(x):
     return x / torch.linalg.matrix_norm(x, dim=1, keepdim=True)
