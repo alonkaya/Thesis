@@ -31,6 +31,7 @@ class CustomDataset(torch.utils.data.Dataset):
         return valid_indices
 
     def __getitem__(self, idx):
+        print(idx)
         # If one of the frames is "Bad"- skip
         idx = self.valid_indices[idx]
         img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
