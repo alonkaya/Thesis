@@ -16,7 +16,7 @@ class CustomDataset(torch.utils.data.Dataset):
         self.transform = transform
         self.k = K
         self.valid_indices = self.get_valid_indices()
-        print(len(self.valid_indices))
+        print(self.valid_indices)
     def __len__(self):
         return len(self.poses) - jump_frames
         # Preprocess the dataset to remove invalid entries
