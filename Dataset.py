@@ -6,6 +6,7 @@ import os
 from PIL import Image
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as T
+import torch.multiprocessing as mp
 
 
 class CustomDataset(torch.utils.data.Dataset):
@@ -56,6 +57,7 @@ class CustomDataset(torch.utils.data.Dataset):
         return first_image, second_image, F, unnormalized_F
 
 
+mp.set_start_method('spawn', force=True)
 
 def get_data_loaders():
     transform = transforms.Compose([
@@ -93,9 +95,9 @@ def get_data_loaders():
 
     # Create a DataLoader
     train_loader = DataLoader(concat_train_dataset,
-                              batch_size=batch_size, shuffle=True)
+                              batch_size=batch_size, shuffle=True, num_workers=1)
     val_loader = DataLoader(
-        concat_val_dataset, batch_size=batch_size, shuffle=False)
+        concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
 
     return train_loader, val_loader
 
@@ -133,3 +135,6 @@ def move_bad_images():
         epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
 
 
+if __name__ == "__main__":
+    train_loader, val_loader = get_data_loaders()
+    print(train_loader)
