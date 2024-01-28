@@ -131,8 +131,8 @@ class FMatrixRegressor(nn.Module):
         all_penalty = []
         for epoch in range(num_epochs):
             self.train()
-            labels = torch.tensor([])
-            outputs = torch.tensor([])
+            labels = torch.tensor([]).to(device)
+            outputs = torch.tensor([]).to(device)
             epoch_avg_ec_err_truth = 0
             epoch_avg_ec_err_pred = 0
             epoch_avg_ec_err_pred_unormalized = 0
@@ -191,8 +191,8 @@ class FMatrixRegressor(nn.Module):
 
             # Validation
             self.eval()
-            val_labels = torch.tensor([])
-            val_outputs = torch.tensor([])
+            val_labels = torch.tensor([]).to(device)
+            val_outputs = torch.tensor([]).to(device)
             val_epoch_avg_ec_err_truth = 0
             val_epoch_avg_ec_err_pred = 0
             val_epoch_avg_ec_err_pred_unormalized = 0
