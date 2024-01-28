@@ -70,9 +70,7 @@ def normalize_max2(x):
     return x / (torch.max(torch.abs(x), dim=1, keepdim=True) + 1e-8)
 
 def normalize_L12(x):
-    a =  x / torch.sum(torch.abs(x), dim=1, keepdim=True)
-    print(a.shape)
-    return a
+    return x / torch.sum(torch.abs(x), dim=1, keepdim=True) 
 
 def normalize_L22(x):
     return x / torch.linalg.norm(x, dim=1, keepdim=True)
@@ -89,5 +87,7 @@ def norm_layer(unnormalized_x):
     else:
         output = normalize_L22(normalize_L12(unnormalized_x))
         output2 = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_x])
-        print(output, output2)
+        print(output)
+        print(output2)
+        print()
         return output

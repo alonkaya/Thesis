@@ -107,7 +107,7 @@ class FMatrixRegressor(nn.Module):
                 # Compute penalty for last singular value
                 penalty = last_sing_value_penalty(unnormalized_output).to(device)
             
-            output = norm_layer(unnormalized_output)
+            output = norm_layer(unnormalized_output.view(-1, 9))
 
 
             return unnormalized_output, output, penalty
