@@ -56,7 +56,9 @@ def read_poses(poses_path):
     return torch.stack(poses).to(device)
 
 def normalize_max(x):
-    return x / (torch.max(torch.abs(x), dim=1, keepdim=True) + 1e-8)
+    a = (torch.max(torch.abs(x), dim=1, keepdim=True))
+    print(a)
+    return x /  (a + 1e-8)
 
 def normalize_L1(x):
     return x / torch.sum(torch.abs(x), dim=1, keepdim=True) 
