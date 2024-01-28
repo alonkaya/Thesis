@@ -131,8 +131,8 @@ class FMatrixRegressor(nn.Module):
         all_penalty = []
         for epoch in range(num_epochs):
             self.train()
-            labels = []
-            outputs = []
+            labels = torch.tensor([])
+            outputs = torch.tensor([])
             epoch_avg_ec_err_truth = 0
             epoch_avg_ec_err_pred = 0
             epoch_avg_ec_err_pred_unormalized = 0
@@ -166,8 +166,8 @@ class FMatrixRegressor(nn.Module):
                 epoch_avg_ec_err_pred_unormalized += avg_ec_err_pred_unormalized
 
                 # Extend lists with batch statistics
-                labels.append(label.detach())
-                outputs.append(output.detach())
+                labels.cat((labels, label.detach().unsqueeze(0)))
+                outputs.cat((outputs, output.detach().unsqueeze(0)))
 
                 # cosine_similarities.extend(cosine_similarity.tolist())
 
@@ -176,11 +176,11 @@ class FMatrixRegressor(nn.Module):
             # Calculate and store mean absolute error for the epoch
             mae = torch.mean(
                 torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
-            train_mae.append(mae)
-
+            
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = (
                 v / train_size for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss))
 
+            train_mae.append(mae)
             ec_err_truth.append(epoch_avg_ec_err_truth)
             ec_err_pred.append(epoch_avg_ec_err_pred)
             ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized)
@@ -191,8 +191,8 @@ class FMatrixRegressor(nn.Module):
 
             # Validation
             self.eval()
-            val_labels = []
-            val_outputs = []
+            val_labels = torch.tensor([])
+            val_outputs = torch.tensor([])
             val_epoch_avg_ec_err_truth = 0
             val_epoch_avg_ec_err_pred = 0
             val_epoch_avg_ec_err_pred_unormalized = 0
@@ -221,19 +221,18 @@ class FMatrixRegressor(nn.Module):
                     val_epoch_avg_ec_err_pred += val_avg_ec_err_pred
                     val_epoch_avg_ec_err_pred_unormalized += val_avg_ec_err_pred_unormalized
 
-                    val_outputs.append(val_output)
-                    val_labels.append(val_label)
-
+                    val_outputs.cat((val_outputs, val_output.unsqueeze(0)))
+                    val_labels.cat((val_labels, val_label.unsqueeze(0)))
+                    print(val_labels.shape)
                     val_size += 1
 
                 # Calculate and store mean absolute error for the epoch
-                mae = torch.mean(
-                    torch.abs(torch.cat(val_labels, dim=0) - torch.cat(val_outputs, dim=0)))
-                val_mae.append(mae)
+                mae = torch.mean(torch.abs(val_labels - val_outputs))
 
                 val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss = (
                     v / val_size for v in (val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss))
 
+                val_mae.append(mae)
                 val_ec_err_truth.append(val_epoch_avg_ec_err_truth)
                 val_ec_err_pred.append(val_epoch_avg_ec_err_pred)
                 val_ec_err_pred_unormalized.append(
@@ -246,11 +245,11 @@ class FMatrixRegressor(nn.Module):
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}
             Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}\n"""
 
-            with open("output.txt", "w") as f:
+            with open("output.txt", "a") as f:
                 f.write(epoch_output)
                 print(epoch_output)
 
-        with open("output.txt", "2") as f:
+        with open("output.txt", "a") as f:
             output = f'Train gorund truth error: {epoch_avg_ec_err_truth} val gorund truth error: {val_epoch_avg_ec_err_truth}\n'
             f.write(output)
             print(output)
