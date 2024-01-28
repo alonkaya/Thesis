@@ -3,11 +3,12 @@ from params import *
 from Dataset import get_data_loaders
 import torch.multiprocessing as mp
 
+mp.set_start_method('spawn', force=True)
+
 model = FMatrixRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name,
                          lr=learning_rate, freeze_pretrained_model=False)
 model = model.to(device)
 
-# mp.set_start_method('spawn', force=True)
 
 train_loader, val_loader = get_data_loaders()
 
