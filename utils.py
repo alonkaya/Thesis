@@ -75,7 +75,7 @@ def normalize_L12(x):
     return a
 
 def normalize_L22(x):
-    return x / torch.linalg.matrix_norm(x, dim=1, keepdim=True)
+    return x / torch.linalg.norm(x, dim=1, keepdim=True)
 
 
 def norm_layer(unnormalized_x):
