@@ -16,6 +16,7 @@ class CustomDataset(torch.utils.data.Dataset):
         self.transform = transform
         self.k = K
         self.valid_indices = self.get_valid_indices()
+        print(self.sequence_num)
         print(self.valid_indices)
     def __len__(self):
         return len(self.poses) - jump_frames
