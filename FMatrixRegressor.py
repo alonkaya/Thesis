@@ -199,7 +199,9 @@ class FMatrixRegressor(nn.Module):
 
                     torch.cat((val_outputs, val_output.unsqueeze(0)))
                     torch.cat((val_labels, val_label.unsqueeze(0)))
-                    print(val_output, val_label)
+                    print(val_output.shape, val_label.shape)
+                    print(val_outputs.shape, val_labels.shape)
+                    print()
                     val_size += 1
 
                 # Calculate and store mean absolute error for the epoch
@@ -229,21 +231,21 @@ class FMatrixRegressor(nn.Module):
             f.write(output)
             print(output)
 
-        plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss.cpu(),
+        plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss,
                         x_label="Epoch", y_label='Training Loss', show=show_plots)
-        plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss.cpu(),
+        plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss,
                         x_label="Epoch", y_label='Validation Loss', show=show_plots)
-        plot_over_epoch(x=range(1, num_epochs + 1), y=train_mae.cpu(),
+        plot_over_epoch(x=range(1, num_epochs + 1), y=train_mae,
                         x_label="Epoch", y_label='Training MAE', show=show_plots)
-        plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae.cpu(),
+        plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae,
                         x_label="Epoch", y_label='VAlidation MAE', show=show_plots)
         # plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred, x_label="Epoch", y_label='Training epipolar constraint err for pred F', show=show_plots)
-        plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred_unoramlized.cpu(), x_label="Epoch",
+        plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred_unoramlized, x_label="Epoch",
                         y_label='Train epipolar constraint err for pred F unormalized', show=show_plots)
         # plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred, x_label="Epoch", y_label='Val epipolar constraint err for pred F', show=show_plots)
-        plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred_unormalized.cpu(), x_label="Epoch",
+        plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred_unormalized, x_label="Epoch",
                         y_label='Val epipolar constraint err for pred F unormalized', show=show_plots)
-        plot_over_epoch(x=range(1, num_epochs + 1), y=all_penalty.cpu(), x_label="Epoch",
+        plot_over_epoch(x=range(1, num_epochs + 1), y=all_penalty, x_label="Epoch",
                         y_label='Additional loss penalty for last singular value', show=show_plots)
         # plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False, show=show_plots)
 
