@@ -16,8 +16,7 @@ class CustomDataset(torch.utils.data.Dataset):
         self.transform = transform
         self.k = K
         self.valid_indices = self.get_valid_indices()
-        print(self.sequence_num)
-        print(self.valid_indices)
+        print(len(self.valid_indices))
     def __len__(self):
         return len(self.poses) - jump_frames
         # Preprocess the dataset to remove invalid entries
@@ -26,8 +25,7 @@ class CustomDataset(torch.utils.data.Dataset):
         valid_indices = []
         for idx in range(len(self.poses) - jump_frames):
             img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
-            img2_path = os.path.join(
-                self.sequence_path, f'{idx+jump_frames:06}.png')
+            img2_path = os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png')
             if os.path.exists(img1_path) and os.path.exists(img2_path):
                 valid_indices.append(idx)
         return valid_indices
