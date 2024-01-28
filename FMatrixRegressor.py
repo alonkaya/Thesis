@@ -166,8 +166,8 @@ class FMatrixRegressor(nn.Module):
                 epoch_avg_ec_err_pred_unormalized += avg_ec_err_pred_unormalized
 
                 # Extend lists with batch statistics
-                labels.cat((labels, label.detach().unsqueeze(0)))
-                outputs.cat((outputs, output.detach().unsqueeze(0)))
+                torch.cat((labels, label.detach().unsqueeze(0)))
+                torch.cat((outputs, output.detach().unsqueeze(0)))
 
                 # cosine_similarities.extend(cosine_similarity.tolist())
 
@@ -221,8 +221,8 @@ class FMatrixRegressor(nn.Module):
                     val_epoch_avg_ec_err_pred += val_avg_ec_err_pred
                     val_epoch_avg_ec_err_pred_unormalized += val_avg_ec_err_pred_unormalized
 
-                    val_outputs.cat((val_outputs, val_output.unsqueeze(0)))
-                    val_labels.cat((val_labels, val_label.unsqueeze(0)))
+                    torch.cat((val_outputs, val_output.unsqueeze(0)))
+                    torch.cat((val_labels, val_label.unsqueeze(0)))
                     print(val_labels.shape)
                     val_size += 1
 
