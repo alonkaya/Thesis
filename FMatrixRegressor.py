@@ -118,31 +118,17 @@ class FMatrixRegressor(nn.Module):
 
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
-        all_train_loss = []
-        all_val_loss = []
-        train_mae = []
-        val_mae = []
-        ec_err_truth = []
-        ec_err_pred = []
-        ec_err_pred_unoramlized = []
-        val_ec_err_truth = []
-        val_ec_err_pred = []
-        val_ec_err_pred_unormalized = []
-        all_penalty = []
+        all_train_loss, all_val_loss, train_mae, val_mae, ec_err_truth, ec_err_pred, ec_err_pred_unoramlized, val_ec_err_truth, \
+            val_ec_err_pred, val_ec_err_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], []
+
         for epoch in range(num_epochs):
             self.train()
             labels = torch.tensor([]).to(device)
             outputs = torch.tensor([]).to(device)
-            epoch_avg_ec_err_truth = 0
-            epoch_avg_ec_err_pred = 0
-            epoch_avg_ec_err_pred_unormalized = 0
-            avg_loss = 0
-            train_size = 0
+            epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, train_size = 0, 0, 0, 0, 0
             for first_image, second_image, label, unormalized_label in train_loader:
                 first_image, second_image, label, unormalized_label = first_image.to(
                     device), second_image.to(device), label.to(device), unormalized_label.to(device)
-                # if first_image[0].shape == (): continue
-                # if torch.any(torch.all(first_image == 0, dim=1)) == True: continue
 
                 # Forward pass
                 unnormalized_output, output, penalty = self.forward(
@@ -175,7 +161,7 @@ class FMatrixRegressor(nn.Module):
 
             # Calculate and store mean absolute error for the epoch
             mae = torch.mean(torch.abs(labels - outputs))
-            
+
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = (
                 v / train_size for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss))
 
@@ -192,26 +178,17 @@ class FMatrixRegressor(nn.Module):
             self.eval()
             val_labels = torch.tensor([]).to(device)
             val_outputs = torch.tensor([]).to(device)
-            val_epoch_avg_ec_err_truth = 0
-            val_epoch_avg_ec_err_pred = 0
-            val_epoch_avg_ec_err_pred_unormalized = 0
-            epoch_penalty = 0
-            val_avg_loss = 0
-            val_size = 0
+            val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized, epoch_penalty, val_avg_loss, val_size = 0, 0, 0, 0, 0, 0
             with torch.no_grad():
                 for val_first_image, val_second_image, val_label, val_unormalized_label in val_loader:
                     val_first_image, val_second_image, val_label, val_unormalized_label = val_first_image.to(
                         device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device)
 
-                    # if val_first_image[0].shape == (): continue
-                    # if torch.any(torch.all(val_first_image == 0, dim=1)) == True: continue
-
                     unnormalized_val_output, val_output, penalty = self.forward(
                         val_first_image, val_second_image)
                     epoch_penalty += penalty
 
-                    val_l2_loss = self.L2_loss(val_output, val_label)
-                    val_avg_loss += val_l2_loss.item()
+                    val_avg_loss += self.L2_loss(val_output, val_label).item()
 
                     # Compute val mean epipolar constraint error
                     val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
@@ -222,7 +199,7 @@ class FMatrixRegressor(nn.Module):
 
                     torch.cat((val_outputs, val_output.unsqueeze(0)))
                     torch.cat((val_labels, val_label.unsqueeze(0)))
-                    print(val_labels.shape)
+                    print(val_output, val_label)
                     val_size += 1
 
                 # Calculate and store mean absolute error for the epoch
@@ -234,8 +211,7 @@ class FMatrixRegressor(nn.Module):
                 val_mae.append(mae)
                 val_ec_err_truth.append(val_epoch_avg_ec_err_truth)
                 val_ec_err_pred.append(val_epoch_avg_ec_err_pred)
-                val_ec_err_pred_unormalized.append(
-                    val_epoch_avg_ec_err_pred_unormalized)
+                val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized)
                 all_penalty.append(epoch_penalty)
                 all_val_loss.append(val_avg_loss)
 
