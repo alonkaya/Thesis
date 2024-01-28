@@ -59,10 +59,31 @@ def read_poses(poses_path):
 def normalize_max(x):
     return x / (torch.max(torch.abs(x)) + 1e-8)
 
-
 def normalize_L1(x):
     return x / torch.sum(torch.abs(x))
 
-
 def normalize_L2(x):
     return x / torch.linalg.matrix_norm(x)
+
+
+def normalize_max2(x):
+    return x / (torch.max(torch.abs(x), dim=1, keepdim=True) + 1e-8)
+
+def normalize_L12(x):
+    return x / torch.sum(torch.abs(x), dim=1, keepdim=True)
+
+def normalize_L22(x):
+    return x / torch.linalg.matrix_norm(x, dim=1, keepdim=True)
+
+
+def norm_layer(unnormalized_x):
+     # Apply max normalization layer
+    if use_reconstruction_layer:
+        output = normalize_max2(unnormalized_x)
+        output2 = torch.stack([normalize_max(x) for x in output])
+        print(output, output2)
+    # Apply L2 norm on top of L1 norm
+    else:
+        output = normalize_L22(normalize_L12(unnormalized_x))
+        output2 = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_x])
+        print(output, output2)

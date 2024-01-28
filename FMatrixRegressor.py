@@ -93,26 +93,23 @@ class FMatrixRegressor(nn.Module):
             embeddings = torch.cat(
                 [x1_embeddings, x2_embeddings], dim=1).to(device)
 
-            # Train MLP on embedding vectors
-            unnormalized_output = self.mlp(
-                embeddings).view(-1, 3, 3).to(device)
+            # Train MLP on embedding vectors            
+            output = self.mlp(embeddings).to(device)
 
             if use_reconstruction_layer:
                 # Apply reconstruction layer to 8-vector output
-                output = torch.stack([reconstruction_module(x)
-                                     for x in unnormalized_output]).to(device)
-
-                # Apply max normalization layer
-                output = torch.stack([normalize_max(x) for x in output])
+                unnormalized_output = torch.stack([reconstruction_module(x)
+                                     for x in output]).to(device)
 
             else:
-                # Compute penalty for last singular value
-                penalty = last_sing_value_penalty(
-                    unnormalized_output).to(device)
+                unnormalized_output = output.view(-1,3,3)
 
-                # Apply L2 norm on top of L1 norm
-                output = torch.stack([normalize_L2(normalize_L1(x))
-                                     for x in unnormalized_output])
+                # Compute penalty for last singular value
+                penalty = last_sing_value_penalty(unnormalized_output).to(device)
+            
+            output = norm_layer(unnormalized_output)
+
+           
 
             return unnormalized_output, output, penalty
 
