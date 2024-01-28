@@ -174,8 +174,7 @@ class FMatrixRegressor(nn.Module):
                 train_size += 1
 
             # Calculate and store mean absolute error for the epoch
-            mae = torch.mean(
-                torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
+            mae = torch.mean(torch.abs(labels - outputs))
             
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = (
                 v / train_size for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss))
