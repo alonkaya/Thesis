@@ -109,7 +109,6 @@ class FMatrixRegressor(nn.Module):
             
             output = norm_layer(unnormalized_output)
 
-           
 
             return unnormalized_output, output, penalty
 

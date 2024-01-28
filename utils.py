@@ -82,8 +82,10 @@ def norm_layer(unnormalized_x):
         output = normalize_max2(unnormalized_x)
         output2 = torch.stack([normalize_max(x) for x in output])
         print(output, output2)
+        return output
     # Apply L2 norm on top of L1 norm
     else:
         output = normalize_L22(normalize_L12(unnormalized_x))
         output2 = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_x])
         print(output, output2)
+        return output
