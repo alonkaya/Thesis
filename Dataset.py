@@ -45,17 +45,15 @@ class CustomDataset(torch.utils.data.Dataset):
         first_image = self.transform(original_first_image).to(device)
         second_image = self.transform(original_second_image).to(device)
 
-        return first_image, second_image, torch.rand(3,3).to(device), torch.rand(3,3).to(device)
         # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-        # adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(
-        #     device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
-        # unnormalized_F = get_F(self.poses, idx, adjusted_K)
+        adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(
+            device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
+        unnormalized_F = get_F(self.poses, idx, adjusted_K)
 
-        # # Convert to tensor and normalize F-Matrix
-        # F = normalize_L2(normalize_L1(unnormalized_F))
+        # Convert to tensor and normalize F-Matrix
+        F = normalize_L2(normalize_L1(unnormalized_F))
 
-        
-        # return first_image, second_image, F, unnormalized_F
+        return first_image, second_image, F, unnormalized_F
 
 
 
