@@ -66,9 +66,9 @@ def get_data_loaders():
         # TODO: Normalize images?
     ])    
     
-    sequence_paths = [f'sequences/0{i}/image_0' for i in sequence_nums]
-    poses_paths = [f'poses/0{i}.txt' for i in sequence_nums]
-    calib_paths = [f'sequences/0{i}/calib.txt' for i in sequence_nums]
+    sequence_paths = [f'sequences/0{i}/image_0' for i in range(sequence_nums)]
+    poses_paths = [f'poses/0{i}.txt' for i in range(sequence_nums)]
+    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(sequence_nums)]
 
     train_datasets, val_datasets = [], []
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
