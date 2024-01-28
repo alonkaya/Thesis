@@ -211,7 +211,7 @@ class FMatrixRegressor(nn.Module):
                 val_ec_err_pred.append(val_epoch_avg_ec_err_pred.cpu())
                 val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized.cpu())
                 all_penalty.append(epoch_penalty.cpu())
-                all_val_loss.append(val_avg_loss.cpu())
+                all_val_loss.append(val_avg_loss)
 
             # Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}
             # Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
