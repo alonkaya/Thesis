@@ -96,21 +96,14 @@ class FMatrixRegressor(nn.Module):
             # Train MLP on embedding vectors            
             output = self.mlp(embeddings).to(device)
 
-            if use_reconstruction_layer:
-                # Apply reconstruction layer to 8-vector output
-                unnormalized_output = torch.stack([reconstruction_module(x)
-                                     for x in output]).to(device)
-
-            else:
-                unnormalized_output = output.view(-1,3,3)
-
-                # Compute penalty for last singular value
-                penalty = last_sing_value_penalty(unnormalized_output).to(device)
+            unnormalized_output = torch.stack([reconstruction_module(x)for x in output]).to(device) if use_reconstruction_layer else output.view(-1,3,3)
             
+            penalty = 0 if use_reconstruction_layer else last_sing_value_penalty(unnormalized_output).to(device)
+
             output = norm_layer(unnormalized_output.view(-1, 9))
 
-
             return unnormalized_output, output, penalty
+
 
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
@@ -132,7 +125,7 @@ class FMatrixRegressor(nn.Module):
 
                 # Compute loss
                 l2_loss = self.L2_loss(output, label)
-                loss = l2_loss + penalty if not use_reconstruction_layer else l2_loss
+                loss = l2_loss + penalty 
                 avg_loss += loss.detach()
 
                 # Compute Backward pass and gradients
