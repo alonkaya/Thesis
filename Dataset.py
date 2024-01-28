@@ -6,7 +6,6 @@ import os
 from PIL import Image
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as T
-import torch.multiprocessing as mp
 
 
 class CustomDataset(torch.utils.data.Dataset):
@@ -59,7 +58,6 @@ class CustomDataset(torch.utils.data.Dataset):
 
 
 def get_data_loaders():
-    mp.set_start_method('spawn', force=True)
 
     transform = transforms.Compose([
         transforms.Resize((256, 256)),
