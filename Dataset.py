@@ -94,9 +94,9 @@ def get_data_loaders():
 
     # Create a DataLoader
     train_loader = DataLoader(concat_train_dataset,
-                              batch_size=batch_size, shuffle=True)
+                              batch_size=batch_size, shuffle=True, num_workers=1)
     val_loader = DataLoader(
-        concat_val_dataset, batch_size=batch_size, shuffle=False)
+        concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
 
     return train_loader, val_loader
 
