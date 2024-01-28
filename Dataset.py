@@ -16,10 +16,9 @@ class CustomDataset(torch.utils.data.Dataset):
         self.transform = transform
         self.k = K
         self.valid_indices = self.get_valid_indices()
-        print(self.valid_indices)
+
     def __len__(self):
-        return len(self.poses) - jump_frames
-        # Preprocess the dataset to remove invalid entries
+        return len(self.valid_indices) - jump_frames
 
     def get_valid_indices(self):
         valid_indices = []
@@ -35,8 +34,7 @@ class CustomDataset(torch.utils.data.Dataset):
         # If one of the frames is "Bad"- skip
         idx = self.valid_indices[idx]
         img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
-        img2_path = os.path.join(
-            self.sequence_path, f'{idx+jump_frames:06}.png')
+        img2_path = os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png')
         # if not os.path.exists(img1_path) or not os.path.exists(img2_path):
         #     return None  # Return None if images don't exist
 
