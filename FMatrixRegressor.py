@@ -331,7 +331,7 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
 
     S1[:, -1] = 0
     S2[:, -1] = 0
-    print(U1.device)
+
     output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2))
     unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), V2.transpose(1, 2))
     
