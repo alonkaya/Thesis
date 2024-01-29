@@ -96,7 +96,7 @@ class FMatrixRegressor(nn.Module):
             # Train MLP on embedding vectors            
             output = self.mlp(embeddings).to(device)
 
-            unnormalized_output = torch.stack([reconstruction_module(x)for x in output]).to(device) if use_reconstruction_layer else output.view(-1,3,3)
+            unnormalized_output = torch.stack([self.get_fmat(x)for x in output]) if use_reconstruction_layer else output.view(-1,3,3)
             
             penalty = torch.tensor(0).to(device) if use_reconstruction_layer else last_sing_value_penalty(unnormalized_output).to(device)
 
@@ -235,6 +235,56 @@ class FMatrixRegressor(nn.Module):
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_penalty, x_label="Epoch",
                         y_label='Additional loss penalty for last singular value', show=show_plots)
         # plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False, show=show_plots)
+
+    
+    def get_rotation(self, rx, ry, rz):
+        # normalize input?
+        R_x = nn.parameter(torch.tensor([
+            [1.,    0.,             0.],
+            [0.,    torch.cos(rx),    -torch.sin(rx)],
+            [0.,    torch.sin(rx),     torch.cos(rx)]
+        ]).to(device))
+
+        R_y = nn.parameter(torch.tensor([
+            [torch.cos(ry),    0.,    -torch.sin(ry)],
+            [0.,            1.,     0.],
+            [torch.sin(ry),    0.,     torch.cos(ry)]
+        ]).to(device))
+
+        R_z = nn.parameter(torch.tensor([
+            [torch.cos(rz),    -torch.sin(rz),    0.],
+            [torch.sin(rz),    torch.cos(rz),     0.],
+            [0.,            0.,             1.]
+        ].to(device)))
+        R = torch.matmul(R_x, torch.matmul(R_y, R_z))
+        return R
+
+    def get_inv_intrinsic(self, f):
+        # TODO: What about the proncipal points?
+        return nn.parameter(torch.tensor([
+            [-1/(f+1e-8),   0.,             0.],
+            [0.,            -1/(f+1e-8),    0.],
+            [0.,            0.,             1.]
+        ]).to(device))
+
+    def get_translate(self, tx, ty, tz):
+        return nn.parameter(torch.tensor([
+            [0.,  -tz, ty],
+            [tz,  0,   -tx],
+            [-ty, tx,  0]
+        ]).to(device))
+
+    def get_fmat(self, x):
+        # F = K2^(-T)*R*[t]x*K1^(-1)
+        # Note: only need out-dim = 8
+        K1_inv = self.get_inv_intrinsic(x[0])
+        K2_inv = self.get_inv_intrinsic(x[1])  # TODO: K2 should be -t not just -1..
+        R = self.get_rotation(x[2], x[3], x[4])
+        T = self.get_translate(x[5], x[6], x[7])
+        F = torch.matmul(K2_inv,
+                        torch.matmul(R, torch.matmul(T, K1_inv)))
+
+        return F
 
 
 def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):
