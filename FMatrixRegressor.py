@@ -328,13 +328,10 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
     # Compute mean epipolar constraint error
     U1, S1, V1 = torch.svd(output)
     U2, S2, V2 = torch.svd(unormalized_output)
-    print(S1.shape)
-    print(torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2)))
-    print(output)
-    print()
+    print(S1)
     S1[:, -1] = 0
     S2[:, -1] = 0
-
+    print(S1)
     output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2))
     unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), V2.transpose(1, 2))
     
