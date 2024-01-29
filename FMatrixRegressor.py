@@ -326,12 +326,12 @@ class FMatrixRegressor(nn.Module):
 
 def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):
     # Compute mean epipolar constraint error
-    U1, S1, V1 = torch.svd(output).to(device)
-    U2, S2, V2 = torch.svd(unormalized_output).to(device)
+    U1, S1, V1 = torch.svd(output)
+    U2, S2, V2 = torch.svd(unormalized_output)
 
     S1[:, -1] = 0
     S2[:, -1] = 0
-
+    print(U1.device)
     output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2))
     unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), V2.transpose(1, 2))
     
