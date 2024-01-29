@@ -122,11 +122,7 @@ class FMatrixRegressor(nn.Module):
                 # Forward pass
                 unnormalized_output, output, penalty = self.forward(
                     first_image, second_image)
-                
-                _, S1, _ = torch.svd(output)
-                _, S2, _ = torch.svd(unnormalized_output)
-                print(torch.mean(torch.abs(S1[:, -1])), torch.mean(torch.abs(S2[:, -1])))
-                
+
                 # Compute loss
                 l2_loss = self.L2_loss(output, label)
                 loss = l2_loss + penalty 
@@ -208,10 +204,11 @@ class FMatrixRegressor(nn.Module):
                 all_penalty.append(epoch_penalty.cpu())
                 
 
-            # Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}
+            # 
             # Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}
-            Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}\n"""
+            Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}
+            Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}\n"""
 
             with open("output.txt", "a") as f:
                 f.write(epoch_output)
@@ -230,7 +227,7 @@ class FMatrixRegressor(nn.Module):
                         x_label="Epoch", y_label='Training MAE', show=show_plots)
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae,
                         x_label="Epoch", y_label='VAlidation MAE', show=show_plots)
-        # plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred, x_label="Epoch", y_label='Training epipolar constraint err for pred F', show=show_plots)
+        plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred, x_label="Epoch", y_label='Training epipolar constraint err for pred F', show=show_plots)
         plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred_unoramlized, x_label="Epoch",
                         y_label='Train epipolar constraint err for pred F unormalized', show=show_plots)
         # plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred, x_label="Epoch", y_label='Val epipolar constraint err for pred F', show=show_plots)
@@ -329,6 +326,18 @@ class FMatrixRegressor(nn.Module):
 
 def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):
     # Compute mean epipolar constraint error
+    U1, S1, V1 = torch.svd(output)
+    U2, S2, V2 = torch.svd(unormalized_output)
+    print(S1.shape)
+    print(torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2)))
+    print(output)
+    print()
+    S1[:, -1] = 0
+    S2[:, -1] = 0
+
+    output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2))
+    unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), V2.transpose(1, 2))
+    
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = 0, 0, 0
     for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
         avg_ec_err_truth += EpipolarGeometry(img_1,
