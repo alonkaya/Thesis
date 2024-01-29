@@ -19,7 +19,7 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         # return len(self.valid_indices) - jump_frames
-        return 10
+        return 100
 
     def get_valid_indices(self):
         valid_indices = []
@@ -31,7 +31,6 @@ class CustomDataset(torch.utils.data.Dataset):
         return valid_indices
 
     def __getitem__(self, idx):
-        # If one of the frames is "Bad"- skip
         idx = self.valid_indices[idx]
         img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
         img2_path = os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png')
@@ -48,10 +47,11 @@ class CustomDataset(torch.utils.data.Dataset):
 
         # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
         adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
-        unnormalized_F = get_F(self.poses, idx, self.k)
+        
+        unnormalized_F = get_F(self.poses, idx, adjusted_K)
 
-        # Convert to tensor and normalize F-Matrix
-        F = normalize_L2(normalize_L1(unnormalized_F))
+        # Normalize F-Matrix
+        F = normalize_L2(normalize_L1(unnormalized_F.view(9).unsqueeze(0))).view(3,3)
 
         return first_image, second_image, F, unnormalized_F
 
@@ -134,7 +134,7 @@ def move_bad_images():
     train_loader, val_loader = get_data_loaders()
 
     for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
-        if first_image.shape[0] == ():
+        if first_image[0].shape == ():
             continue
         dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
         os.makedirs(dst_dir, exist_ok=True)
@@ -144,7 +144,7 @@ def move_bad_images():
         epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
 
     for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(train_loader):
-        if first_image.shape[0] == ():
+        if first_image[0].shape == ():
             continue
         dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
         os.makedirs(dst_dir, exist_ok=True)
@@ -153,7 +153,25 @@ def move_bad_images():
             first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
         epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
 
+def test_epip_err():
+    train_loader, val_loader = get_data_loaders()
+    
+    avg_ep_err_unnormalized, avg_ep_err = 0, 0
+    for first_image, second_image, label, unormalized_label in train_loader:
+        # Get a batch:
+
+        ep_err_unnormalized, ep_err = 0, 0
+        for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
+            ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F).get_epipolar_err()
+            ep_err += EpipolarGeometry(img_1, img_2, F).get_epipolar_err()
+
+        ep_err_unnormalized, ep_err = ep_err_unnormalized/len(first_image), ep_err/len(first_image)
+        avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + ep_err_unnormalized, avg_ep_err + ep_err
+
+    avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized/len(train_loader), avg_ep_err/len(train_loader)
+    return avg_ep_err_unnormalized, avg_ep_err
 
 if __name__ == "__main__":
-    train_loader, val_loader = get_data_loaders()
-    print(train_loader)
+    print(test_epip_err())
+    # train_loader, val_loader = get_data_loaders()
+    # print(train_loader)
