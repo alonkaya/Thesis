@@ -239,19 +239,19 @@ class FMatrixRegressor(nn.Module):
     
     def get_rotation(self, rx, ry, rz):
         # normalize input?
-        R_x = nn.parameter(torch.tensor([
+        R_x = nn.Parameter(torch.tensor([
             [1.,    0.,             0.],
             [0.,    torch.cos(rx),    -torch.sin(rx)],
             [0.,    torch.sin(rx),     torch.cos(rx)]
         ]).to(device))
 
-        R_y = nn.parameter(torch.tensor([
+        R_y = nn.Parameter(torch.tensor([
             [torch.cos(ry),    0.,    -torch.sin(ry)],
             [0.,            1.,     0.],
             [torch.sin(ry),    0.,     torch.cos(ry)]
         ]).to(device))
 
-        R_z = nn.parameter(torch.tensor([
+        R_z = nn.Parameter(torch.tensor([
             [torch.cos(rz),    -torch.sin(rz),    0.],
             [torch.sin(rz),    torch.cos(rz),     0.],
             [0.,            0.,             1.]
@@ -261,14 +261,14 @@ class FMatrixRegressor(nn.Module):
 
     def get_inv_intrinsic(self, f):
         # TODO: What about the proncipal points?
-        return nn.parameter(torch.tensor([
+        return nn.Parameter(torch.tensor([
             [-1/(f+1e-8),   0.,             0.],
             [0.,            -1/(f+1e-8),    0.],
             [0.,            0.,             1.]
         ]).to(device))
 
     def get_translate(self, tx, ty, tz):
-        return nn.parameter(torch.tensor([
+        return nn.Parameter(torch.tensor([
             [0.,  -tz, ty],
             [tz,  0,   -tx],
             [-ty, tx,  0]
