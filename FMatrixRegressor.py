@@ -238,90 +238,90 @@ class FMatrixRegressor(nn.Module):
         # plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False, show=show_plots)
 
     
-    def get_rotation(self, rx, ry, rz):
-        # normalize input?
-        R_x = nn.Parameter(torch.tensor([
-            [1.,    0.,             0.],
-            [0.,    torch.cos(rx),    -torch.sin(rx)],
-            [0.,    torch.sin(rx),     torch.cos(rx)]
-        ]).to(device))
+    # def get_rotation(self, rx, ry, rz):
+    #     # normalize input?
+    #     R_x = nn.Parameter(torch.tensor([
+    #         [1.,    0.,             0.],
+    #         [0.,    torch.cos(rx),    -torch.sin(rx)],
+    #         [0.,    torch.sin(rx),     torch.cos(rx)]
+    #     ]).to(device))
 
-        R_y = nn.Parameter(torch.tensor([
-            [torch.cos(ry),    0.,    -torch.sin(ry)],
-            [0.,            1.,     0.],
-            [torch.sin(ry),    0.,     torch.cos(ry)]
-        ]).to(device))
+    #     R_y = nn.Parameter(torch.tensor([
+    #         [torch.cos(ry),    0.,    -torch.sin(ry)],
+    #         [0.,            1.,     0.],
+    #         [torch.sin(ry),    0.,     torch.cos(ry)]
+    #     ]).to(device))
 
-        R_z = nn.Parameter(torch.tensor([
-            [torch.cos(rz),    -torch.sin(rz),    0.],
-            [torch.sin(rz),    torch.cos(rz),     0.],
-            [0.,            0.,             1.]
-        ]).to(device))
-        R = torch.matmul(R_x, torch.matmul(R_y, R_z))
-        return R
+    #     R_z = nn.Parameter(torch.tensor([
+    #         [torch.cos(rz),    -torch.sin(rz),    0.],
+    #         [torch.sin(rz),    torch.cos(rz),     0.],
+    #         [0.,            0.,             1.]
+    #     ]).to(device))
+    #     R = torch.matmul(R_x, torch.matmul(R_y, R_z))
+    #     return R
 
-    def get_inv_intrinsic(self, f):
-        # TODO: What about the proncipal points?
-        return nn.Parameter(torch.tensor([
-            [-1/(f+1e-8),   0.,             0.],
-            [0.,            -1/(f+1e-8),    0.],
-            [0.,            0.,             1.]
-        ]).to(device))
+    # def get_inv_intrinsic(self, f):
+    #     # TODO: What about the proncipal points?
+    #     return nn.Parameter(torch.tensor([
+    #         [-1/(f+1e-8),   0.,             0.],
+    #         [0.,            -1/(f+1e-8),    0.],
+    #         [0.,            0.,             1.]
+    #     ]).to(device))
 
-    def get_translate(self, tx, ty, tz):
-        return nn.Parameter(torch.tensor([
-            [0.,  -tz, ty],
-            [tz,  0,   -tx],
-            [-ty, tx,  0]
-        ]).to(device))
+    # def get_translate(self, tx, ty, tz):
+    #     return nn.Parameter(torch.tensor([
+    #         [0.,  -tz, ty],
+    #         [tz,  0,   -tx],
+    #         [-ty, tx,  0]
+    #     ]).to(device))
 
-    def get_fmat(self, x):
-        # F = K2^(-T)*R*[t]x*K1^(-1)
-        # Note: only need out-dim = 8
-        R_x = nn.Parameter(torch.tensor([
-            [1.,    0.,             0.],
-            [0.,    torch.cos(x[2]),    -torch.sin(x[2])],
-            [0.,    torch.sin(x[2]),     torch.cos(x[2])]
-        ]).to(device))
+    # def get_fmat(self, x):
+    #     # F = K2^(-T)*R*[t]x*K1^(-1)
+    #     # Note: only need out-dim = 8
+    #     R_x = nn.Parameter(torch.tensor([
+    #         [1.,    0.,             0.],
+    #         [0.,    torch.cos(x[2]),    -torch.sin(x[2])],
+    #         [0.,    torch.sin(x[2]),     torch.cos(x[2])]
+    #     ]).to(device))
 
-        R_y = nn.Parameter(torch.tensor([
-            [torch.cos(x[3]),    0.,    -torch.sin(x[3])],
-            [0.,            1.,     0.],
-            [torch.sin(x[3]),    0.,     torch.cos(x[3])]
-        ]).to(device))
+    #     R_y = nn.Parameter(torch.tensor([
+    #         [torch.cos(x[3]),    0.,    -torch.sin(x[3])],
+    #         [0.,            1.,     0.],
+    #         [torch.sin(x[3]),    0.,     torch.cos(x[3])]
+    #     ]).to(device))
 
-        R_z = nn.Parameter(torch.tensor([
-            [torch.cos(x[4]),    -torch.sin(x[4]),    0.],
-            [torch.sin(x[4]),    torch.cos(x[4]),     0.],
-            [0.,            0.,             1.]
-        ]).to(device))
-        R = torch.matmul(R_x, torch.matmul(R_y, R_z))
+    #     R_z = nn.Parameter(torch.tensor([
+    #         [torch.cos(x[4]),    -torch.sin(x[4]),    0.],
+    #         [torch.sin(x[4]),    torch.cos(x[4]),     0.],
+    #         [0.,            0.,             1.]
+    #     ]).to(device))
+    #     R = torch.matmul(R_x, torch.matmul(R_y, R_z))
 
-        K1_inv = nn.Parameter(torch.tensor([
-                    [-1/(x[0]+1e-8),   0.,             0.],
-                    [0.,            -1/(x[0]+1e-8),    0.],
-                    [0.,            0.,             1.]
-                ]).to(device))
+    #     K1_inv = nn.Parameter(torch.tensor([
+    #                 [-1/(x[0]+1e-8),   0.,             0.],
+    #                 [0.,            -1/(x[0]+1e-8),    0.],
+    #                 [0.,            0.,             1.]
+    #             ]).to(device))
 
-        K2_inv = nn.Parameter(torch.tensor([
-                    [-1/(x[1]+1e-8),   0.,             0.],
-                    [0.,            -1/(x[1]+1e-8),    0.],
-                    [0.,            0.,             1.]
-                ]).to(device))
+    #     K2_inv = nn.Parameter(torch.tensor([
+    #                 [-1/(x[1]+1e-8),   0.,             0.],
+    #                 [0.,            -1/(x[1]+1e-8),    0.],
+    #                 [0.,            0.,             1.]
+    #             ]).to(device))
 
-        T = nn.Parameter(torch.tensor([
-                    [0.,  -x[7], x[6]],
-                    [x[7],  0,   -x[5]],
-                    [-x[6], x[5],  0]
-                ]).to(device))
+    #     T = nn.Parameter(torch.tensor([
+    #                 [0.,  -x[7], x[6]],
+    #                 [x[7],  0,   -x[5]],
+    #                 [-x[6], x[5],  0]
+    #             ]).to(device))
 
-        # K1_inv = self.get_inv_intrinsic(x[0])
-        # K2_inv = self.get_inv_intrinsic(x[1])  # TODO: K2 should be -t not just -1..
-        # R = self.get_rotation(x[2], x[3], x[4])
-        # T = self.get_translate(x[5], x[6], x[7])
-        F = torch.matmul(K2_inv,torch.matmul(R, torch.matmul(T, K1_inv)))
+    #     # K1_inv = self.get_inv_intrinsic(x[0])
+    #     # K2_inv = self.get_inv_intrinsic(x[1])  # TODO: K2 should be -t not just -1..
+    #     # R = self.get_rotation(x[2], x[3], x[4])
+    #     # T = self.get_translate(x[5], x[6], x[7])
+    #     F = torch.matmul(K2_inv,torch.matmul(R, torch.matmul(T, K1_inv)))
 
-        return F
+    #     return F
 
 
 def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):

@@ -18,8 +18,7 @@ class CustomDataset(torch.utils.data.Dataset):
         self.valid_indices = self.get_valid_indices()
 
     def __len__(self):
-        # return len(self.valid_indices) - jump_frames
-        return 5
+        return len(self.valid_indices) - jump_frames
 
     def get_valid_indices(self):
         valid_indices = []
@@ -67,56 +66,36 @@ def get_data_loaders():
         # TODO: Normalize images?
     ])    
     
-    # sequence_paths = [f'sequences/0{i}/image_0' for i in range(9)]
-    # poses_paths = [f'poses/0{i}.txt' for i in range(9)]
-    # calib_paths = [f'sequences/0{i}/calib.txt' for i in range(9)]
+    sequence_paths = [f'sequences/0{i}/image_0' for i in range(9)]
+    poses_paths = [f'poses/0{i}.txt' for i in range(9)]
+    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(9)]
 
-    # train_datasets, val_datasets = [], []
-    # for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
-    #     # Get a list of all poses [R,t] in this sequence
-    #     poses = read_poses(poses_path)
+    train_datasets, val_datasets = [], []
+    for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
+        # Get a list of all poses [R,t] in this sequence
+        poses = read_poses(poses_path)
 
-    #     # Read the calib.txt file to get the projection matrix to compute intrinsic K
-    #     K = get_intrinsic(calib_path)
+        # Read the calib.txt file to get the projection matrix to compute intrinsic K
+        K = get_intrinsic(calib_path)
 
-    #     # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
-    #     if i in train_seqeunces:
-    #         train_datasets.append(CustomDataset(
-    #             sequence_path, poses, transform, K))        
-    #     elif i in val_sequences:
-    #         val_datasets.append(CustomDataset(
-    #             sequence_path, poses, transform, K))
-
-
-    # # Concatenate datasets
-    # concat_train_dataset = ConcatDataset(train_datasets)
-    # concat_val_dataset = ConcatDataset(val_datasets)
-
-    # # Create a DataLoader
-    # train_loader = DataLoader(concat_train_dataset,
-    #                           batch_size=batch_size, shuffle=False, num_workers=1)
-    # val_loader = DataLoader(
-    #     concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
-
-    sequence_paths = f'sequences/00/image_0' 
-    poses_paths = f'poses/00.txt' 
-    calib_paths = f'sequences/00/calib.txt' 
-    poses = read_poses(poses_paths)
-    K = get_intrinsic(calib_paths)
-    train_dataset = CustomDataset(sequence_paths, poses, transform, K)  
+        # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
+        if i in train_seqeunces:
+            train_datasets.append(CustomDataset(
+                sequence_path, poses, transform, K))        
+        elif i in val_sequences:
+            val_datasets.append(CustomDataset(
+                sequence_path, poses, transform, K))
 
 
+    # Concatenate datasets
+    concat_train_dataset = ConcatDataset(train_datasets)
+    concat_val_dataset = ConcatDataset(val_datasets)
 
-    val_sequence_paths = f'sequences/01/image_0' 
-    val_poses_paths = f'poses/01.txt' 
-    val_calib_paths = f'sequences/01/calib.txt' 
-    poses = read_poses(val_poses_paths)
-    K = get_intrinsic(val_calib_paths)
-    val_dataset = CustomDataset(val_sequence_paths, poses, transform, K)
-    
     # Create a DataLoader
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
+    train_loader = DataLoader(concat_train_dataset,
+                              batch_size=batch_size, shuffle=True, num_workers=1)
+    val_loader = DataLoader(
+        concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
 
     return train_loader, val_loader
 
