@@ -100,7 +100,7 @@ class FMatrixRegressor(nn.Module):
             
             penalty = torch.tensor(0).to(device) if use_reconstruction_layer else last_sing_value_penalty(unnormalized_output).to(device)
 
-            output = norm_layer(unnormalized_output.view(-1, 9))
+            output = norm_layer(unnormalized_output.view(-1, 9)).view(-1,3,3)
 
             return unnormalized_output, output, penalty
 

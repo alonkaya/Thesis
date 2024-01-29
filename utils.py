@@ -67,8 +67,8 @@ def normalize_L2(x):
 
 def norm_layer(unnormalized_x):
     if use_reconstruction_layer:
-        return normalize_max(unnormalized_x).view(-1,3,3)
+        return normalize_max(unnormalized_x)
 
     else:
-        return normalize_L2(normalize_L1(unnormalized_x)).view(-1,3,3)
+        return normalize_L2(normalize_L1(unnormalized_x))
 
