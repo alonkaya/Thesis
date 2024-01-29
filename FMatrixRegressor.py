@@ -122,7 +122,7 @@ class FMatrixRegressor(nn.Module):
                 # Forward pass
                 unnormalized_output, output, penalty = self.forward(
                     first_image, second_image)
-
+                print(torch.linalg.matrix_rank(output), torch.linalg.matrix_rank(unnormalized_output))
                 # Compute loss
                 l2_loss = self.L2_loss(output, label)
                 loss = l2_loss + penalty 
