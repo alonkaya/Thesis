@@ -32,11 +32,11 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         # If one of the frames is "Bad"- skip
-        # idx = self.valid_indices[idx]
+        idx = self.valid_indices[idx]
         img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
         img2_path = os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png')
-        if not os.path.exists(img1_path) or not os.path.exists(img2_path):
-            return 0,0,0,0  
+        # if not os.path.exists(img1_path) or not os.path.exists(img2_path):
+        #     return None  # Return None if images don't exist
 
         # Create PIL images
         original_first_image = Image.open(img1_path)
@@ -48,7 +48,7 @@ class CustomDataset(torch.utils.data.Dataset):
 
         # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
         adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
-        unnormalized_F = get_F(self.poses, idx, adjusted_K)
+        unnormalized_F = get_F(self.poses, idx, self.k)
 
         # Convert to tensor and normalize F-Matrix
         F = normalize_L2(normalize_L1(unnormalized_F))
