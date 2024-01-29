@@ -96,7 +96,52 @@ class FMatrixRegressor(nn.Module):
             # Train MLP on embedding vectors            
             output = self.mlp(embeddings).to(device)
 
-            unnormalized_output = torch.stack([self.get_fmat(x)for x in output]) if use_reconstruction_layer else output.view(-1,3,3)
+            outputs = []
+            for x in output:
+                R_x = torch.tensor([
+                    [1.,    0.,             0.],
+                    [0.,    torch.cos(x[2]),    -torch.sin(x[2])],
+                    [0.,    torch.sin(x[2]),     torch.cos(x[2])]
+                ], requires_grad=True).to(device)
+
+                R_y = torch.tensor([
+                    [torch.cos(x[3]),    0.,    -torch.sin(x[3])],
+                    [0.,            1.,     0.],
+                    [torch.sin(x[3]),    0.,     torch.cos(x[3])]
+                ], requires_grad=True).to(device)
+
+                R_z = torch.tensor([
+                    [torch.cos(x[4]),    -torch.sin(x[4]),    0.],
+                    [torch.sin(x[4]),    torch.cos(x[4]),     0.],
+                    [0.,            0.,             1.]
+                ], requires_grad=True).to(device)
+
+                R = torch.matmul(R_x, torch.matmul(R_y, R_z))
+
+                K1_inv = torch.tensor([
+                            [-1/(x[0]+1e-8),   0.,             0.],
+                            [0.,            -1/(x[0]+1e-8),    0.],
+                            [0.,            0.,             1.]
+                ], requires_grad=True).to(device)
+
+                K2_inv = torch.tensor([
+                            [-1/(x[1]+1e-8),   0.,             0.],
+                            [0.,            -1/(x[1]+1e-8),    0.],
+                            [0.,            0.,             1.]
+                ], requires_grad=True).to(device)
+
+                T = torch.tensor([
+                            [0.,  -x[7], x[6]],
+                            [x[7],  0,   -x[5]],
+                            [-x[6], x[5],  0]
+                ], requires_grad=True).to(device)
+
+                F = torch.matmul(K2_inv,torch.matmul(R, torch.matmul(T, K1_inv)))
+
+                outputs.append(F)
+            
+            unnormalized_output = torch.stack(outputs)
+            # unnormalized_output = torch.stack([self.get_fmat(x)for x in output]) if use_reconstruction_layer else output.view(-1,3,3)
             
             penalty = torch.tensor(0).to(device) if use_reconstruction_layer else last_sing_value_penalty(unnormalized_output).to(device)
 
@@ -277,12 +322,48 @@ class FMatrixRegressor(nn.Module):
     def get_fmat(self, x):
         # F = K2^(-T)*R*[t]x*K1^(-1)
         # Note: only need out-dim = 8
-        K1_inv = self.get_inv_intrinsic(x[0])
-        K2_inv = self.get_inv_intrinsic(x[1])  # TODO: K2 should be -t not just -1..
-        R = self.get_rotation(x[2], x[3], x[4])
-        T = self.get_translate(x[5], x[6], x[7])
-        F = torch.matmul(K2_inv,
-                        torch.matmul(R, torch.matmul(T, K1_inv)))
+        R_x = nn.Parameter(torch.tensor([
+            [1.,    0.,             0.],
+            [0.,    torch.cos(x[2]),    -torch.sin(x[2])],
+            [0.,    torch.sin(x[2]),     torch.cos(x[2])]
+        ]).to(device))
+
+        R_y = nn.Parameter(torch.tensor([
+            [torch.cos(x[3]),    0.,    -torch.sin(x[3])],
+            [0.,            1.,     0.],
+            [torch.sin(x[3]),    0.,     torch.cos(x[3])]
+        ]).to(device))
+
+        R_z = nn.Parameter(torch.tensor([
+            [torch.cos(x[4]),    -torch.sin(x[4]),    0.],
+            [torch.sin(x[4]),    torch.cos(x[4]),     0.],
+            [0.,            0.,             1.]
+        ]).to(device))
+        R = torch.matmul(R_x, torch.matmul(R_y, R_z))
+
+        K1_inv = nn.Parameter(torch.tensor([
+                    [-1/(x[0]+1e-8),   0.,             0.],
+                    [0.,            -1/(x[0]+1e-8),    0.],
+                    [0.,            0.,             1.]
+                ]).to(device))
+
+        K2_inv = nn.Parameter(torch.tensor([
+                    [-1/(x[1]+1e-8),   0.,             0.],
+                    [0.,            -1/(x[1]+1e-8),    0.],
+                    [0.,            0.,             1.]
+                ]).to(device))
+
+        T = nn.Parameter(torch.tensor([
+                    [0.,  -x[7], x[6]],
+                    [x[7],  0,   -x[5]],
+                    [-x[6], x[5],  0]
+                ]).to(device))
+
+        # K1_inv = self.get_inv_intrinsic(x[0])
+        # K2_inv = self.get_inv_intrinsic(x[1])  # TODO: K2 should be -t not just -1..
+        # R = self.get_rotation(x[2], x[3], x[4])
+        # T = self.get_translate(x[5], x[6], x[7])
+        F = torch.matmul(K2_inv,torch.matmul(R, torch.matmul(T, K1_inv)))
 
         return F
 
