@@ -255,7 +255,7 @@ class FMatrixRegressor(nn.Module):
             [torch.cos(rz),    -torch.sin(rz),    0.],
             [torch.sin(rz),    torch.cos(rz),     0.],
             [0.,            0.,             1.]
-        ].to(device)))
+        ]).to(device))
         R = torch.matmul(R_x, torch.matmul(R_y, R_z))
         return R
 
