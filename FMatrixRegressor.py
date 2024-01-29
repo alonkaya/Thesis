@@ -118,6 +118,7 @@ class FMatrixRegressor(nn.Module):
             for first_image, second_image, label, unormalized_label in train_loader:
                 first_image, second_image, label, unormalized_label = first_image.to(
                     device), second_image.to(device), label.to(device), unormalized_label.to(device)
+                if first_image[0].shape == (): continue
 
                 # Forward pass
                 unnormalized_output, output, penalty = self.forward(
@@ -169,6 +170,7 @@ class FMatrixRegressor(nn.Module):
 
             with torch.no_grad():
                 for val_first_image, val_second_image, val_label, val_unormalized_label in val_loader:
+                    if val_first_image[0].shape == (): continue
                     val_first_image, val_second_image, val_label, val_unormalized_label = val_first_image.to(
                         device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device)
 
