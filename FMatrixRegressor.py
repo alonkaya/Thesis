@@ -96,52 +96,7 @@ class FMatrixRegressor(nn.Module):
             # Train MLP on embedding vectors            
             output = self.mlp(embeddings).to(device)
 
-            outputs = []
-            for x in output:
-                R_x = torch.tensor([
-                    [1.,    0.,             0.],
-                    [0.,    torch.cos(x[2]),    -torch.sin(x[2])],
-                    [0.,    torch.sin(x[2]),     torch.cos(x[2])]
-                ], requires_grad=True).to(device)
-
-                R_y = torch.tensor([
-                    [torch.cos(x[3]),    0.,    -torch.sin(x[3])],
-                    [0.,            1.,     0.],
-                    [torch.sin(x[3]),    0.,     torch.cos(x[3])]
-                ], requires_grad=True).to(device)
-
-                R_z = torch.tensor([
-                    [torch.cos(x[4]),    -torch.sin(x[4]),    0.],
-                    [torch.sin(x[4]),    torch.cos(x[4]),     0.],
-                    [0.,            0.,             1.]
-                ], requires_grad=True).to(device)
-
-                R = torch.matmul(R_x, torch.matmul(R_y, R_z))
-
-                K1_inv = torch.tensor([
-                            [-1/(x[0]+1e-8),   0.,             0.],
-                            [0.,            -1/(x[0]+1e-8),    0.],
-                            [0.,            0.,             1.]
-                ], requires_grad=True).to(device)
-
-                K2_inv = torch.tensor([
-                            [-1/(x[1]+1e-8),   0.,             0.],
-                            [0.,            -1/(x[1]+1e-8),    0.],
-                            [0.,            0.,             1.]
-                ], requires_grad=True).to(device)
-
-                T = torch.tensor([
-                            [0.,  -x[7], x[6]],
-                            [x[7],  0,   -x[5]],
-                            [-x[6], x[5],  0]
-                ], requires_grad=True).to(device)
-
-                F = torch.matmul(K2_inv,torch.matmul(R, torch.matmul(T, K1_inv)))
-
-                outputs.append(F)
-            
-            unnormalized_output = torch.stack(outputs)
-            # unnormalized_output = torch.stack([self.get_fmat(x)for x in output]) if use_reconstruction_layer else output.view(-1,3,3)
+            unnormalized_output = torch.stack([self.get_fmat(x)for x in output]) if use_reconstruction_layer else output.view(-1,3,3)
             
             penalty = torch.tensor(0).to(device) if use_reconstruction_layer else last_sing_value_penalty(unnormalized_output).to(device)
 
