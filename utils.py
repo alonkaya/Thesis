@@ -71,5 +71,5 @@ def norm_layer(unnormalized_x):
         return normalize_max(unnormalized_x)
 
     else:
-        return normalize_L2(normalize_L1(unnormalized_x))
+        return normalize_L1(unnormalized_x)
 
