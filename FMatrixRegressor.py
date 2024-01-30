@@ -98,10 +98,12 @@ class FMatrixRegressor(nn.Module):
 
             unnormalized_output = torch.stack([self.get_fmat(x)for x in output]) if use_reconstruction_layer else output.view(-1,3,3)
             
-            penalty = torch.tensor(0).to(device) if use_reconstruction_layer else last_sing_value_penalty(unnormalized_output).to(device)
+            
 
             output = norm_layer(unnormalized_output.view(-1, 9)).view(-1,3,3)
 
+            penalty = torch.tensor(0).to(device) if use_reconstruction_layer else last_sing_value_penalty(output).to(device)
+            
             return unnormalized_output, output, penalty
 
 
