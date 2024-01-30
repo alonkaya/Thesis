@@ -76,6 +76,14 @@ def compute_fundamental(E, K1, K2):
 
     return F
 
+def get_F(poses, idx, K):
+    R_relative, t_relative = compute_relative_transformations(
+        poses[idx], poses[idx+jump_frames])
+    E = compute_essential(R_relative, t_relative)
+    F = compute_fundamental(E, K, K)
+
+    return F
+
 def get_internal_param_matrix(P):
     # Step 1: Decompose the projection matrix P into the form P = K [R | t]
     M = P[:, :3]

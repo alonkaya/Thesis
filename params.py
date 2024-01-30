@@ -22,5 +22,5 @@ penalty_coeff = 2
 epipolar_constraint_threshold = 0.5
 batch_size = 1
 use_deepf_nocors = False
-train_seqeunces = [0,2]
-val_sequences = [1,3,4]
+train_seqeunces = [2]
+val_sequences = [8]

@@ -135,7 +135,7 @@ class CustomDataset(torch.utils.data.Dataset):
         unnormalized_F = get_F(self.poses, idx, adjusted_K)
 
         # Normalize F-Matrix
-        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
+        F = normalize_L2(normalize_L1(unnormalized_F))
 
         return first_image, second_image, F, unnormalized_F
 
@@ -195,44 +195,44 @@ def visualize_bad_images():
     os.makedirs(good_frames_dir, exist_ok=True)
 
 
-def move_bad_images():
-    # change dataset returns 6 params instead of 4. comment unnecessary lines in visualize
-    train_loader, val_loader = get_data_loaders()
+# def move_bad_images():
+#     # change dataset returns 6 params instead of 4. comment unnecessary lines in visualize
+#     train_loader, val_loader = get_data_loaders()
 
-    for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
-        if first_image[0].shape == ():
-            continue
-        dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
-        os.makedirs(dst_dir, exist_ok=True)
+#     for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
+#         if first_image[0].shape == ():
+#             continue
+#         dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
+#         os.makedirs(dst_dir, exist_ok=True)
 
-        epipolar_geo = EpipolarGeometry(
-            first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
-        epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
+#         epipolar_geo = EpipolarGeometry(
+#             first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
+#         epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
 
-    for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(train_loader):
-        if first_image[0].shape == ():
-            continue
-        dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
-        os.makedirs(dst_dir, exist_ok=True)
+#     for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(train_loader):
+#         if first_image[0].shape == ():
+#             continue
+#         dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
+#         os.makedirs(dst_dir, exist_ok=True)
 
-        epipolar_geo = EpipolarGeometry(
-            first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
-        epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
+#         epipolar_geo = EpipolarGeometry(
+#             first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
+#         epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
 
-def test_ground_truth_epipolar_err():
-    """computes average epipolar error for both normalized ground truth and unnormalized ground truth """
+# def test_ground_truth_epipolar_err():
+#     """computes average epipolar error for both normalized ground truth and unnormalized ground truth """
 
-    train_loader, val_loader = get_data_loaders()
+#     train_loader, val_loader = get_data_loaders()
     
-    avg_ep_err_unnormalized, avg_ep_err = 0, 0
-    for first_image, second_image, label, unormalized_label in train_loader:
-        ep_err_unnormalized, ep_err = 0, 0
-        for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
-            ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F).get_epipolar_err()
-            ep_err += EpipolarGeometry(img_1, img_2, F).get_epipolar_err()
+#     avg_ep_err_unnormalized, avg_ep_err = 0, 0
+#     for first_image, second_image, label, unormalized_label in train_loader:
+#         ep_err_unnormalized, ep_err = 0, 0
+#         for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
+#             ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F).get_epipolar_err()
+#             ep_err += EpipolarGeometry(img_1, img_2, F).get_epipolar_err()
 
-        ep_err_unnormalized, ep_err = ep_err_unnormalized/len(first_image), ep_err/len(first_image)
-        avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + ep_err_unnormalized, avg_ep_err + ep_err
+#         ep_err_unnormalized, ep_err = ep_err_unnormalized/len(first_image), ep_err/len(first_image)
+#         avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + ep_err_unnormalized, avg_ep_err + ep_err
 
-    avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized/len(train_loader), avg_ep_err/len(train_loader)
-    return avg_ep_err_unnormalized, avg_ep_err
+#     avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized/len(train_loader), avg_ep_err/len(train_loader)
+#     return avg_ep_err_unnormalized, avg_ep_err
