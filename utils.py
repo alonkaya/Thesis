@@ -66,6 +66,7 @@ def normalize_L2(x):
 
 
 def norm_layer(unnormalized_x):
+    # Normalizes a batch of flattend 9-long vectors (i.e shape [-1, 9])
     if use_reconstruction_layer:
         return normalize_max(unnormalized_x)
 

@@ -18,7 +18,8 @@ class CustomDataset(torch.utils.data.Dataset):
         self.valid_indices = self.get_valid_indices()
 
     def __len__(self):
-        return len(self.valid_indices) - jump_frames
+        # return len(self.valid_indices) - jump_frames
+        return 2
 
     def get_valid_indices(self):
         valid_indices = []
@@ -31,14 +32,10 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
-        img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
-        img2_path = os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png')
+        original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.png'))
+        original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png'))
         # if not os.path.exists(img1_path) or not os.path.exists(img2_path):
         #     return None  # Return None if images don't exist
-
-        # Create PIL images
-        original_first_image = Image.open(img1_path)
-        original_second_image = Image.open(img2_path)
 
         # Transform: Resize, center, grayscale
         first_image = self.transform(original_first_image).to(device)
@@ -50,7 +47,7 @@ class CustomDataset(torch.utils.data.Dataset):
         unnormalized_F = get_F(self.poses, idx, adjusted_K)
 
         # Normalize F-Matrix
-        F = normalize_L2(normalize_L1(unnormalized_F.view(9).unsqueeze(0))).view(3,3)
+        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
         return first_image, second_image, F, unnormalized_F
 
@@ -93,7 +90,7 @@ def get_data_loaders():
 
     # Create a DataLoader
     train_loader = DataLoader(concat_train_dataset,
-                              batch_size=batch_size, shuffle=True, num_workers=1)
+                              batch_size=batch_size, shuffle=False, num_workers=1)
     val_loader = DataLoader(
         concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
 
@@ -132,13 +129,13 @@ def move_bad_images():
             first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
         epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
 
-def test_epip_err():
+def test_ground_truth_epipolar_err():
+    """computes average epipolar error for both normalized ground truth and unnormalized ground truth """
+
     train_loader, val_loader = get_data_loaders()
     
     avg_ep_err_unnormalized, avg_ep_err = 0, 0
     for first_image, second_image, label, unormalized_label in train_loader:
-        # Get a batch:
-
         ep_err_unnormalized, ep_err = 0, 0
         for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
             ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F).get_epipolar_err()
@@ -151,6 +148,6 @@ def test_epip_err():
     return avg_ep_err_unnormalized, avg_ep_err
 
 if __name__ == "__main__":
-    print(test_epip_err())
+    print(test_ground_truth_epipolar_err())
     # train_loader, val_loader = get_data_loaders()
     # print(train_loader)

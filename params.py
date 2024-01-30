@@ -20,5 +20,5 @@ epipolar_constraint_threshold = 0.15
 batch_size = 1  
 use_deepf_nocors = False
 move_bad_images = False
-train_seqeunces = [0,2]
-val_sequences = [1,3,4]
+train_seqeunces = [0]
+val_sequences = [1]
