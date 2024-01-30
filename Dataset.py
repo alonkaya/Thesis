@@ -18,8 +18,7 @@ class CustomDataset(torch.utils.data.Dataset):
         self.valid_indices = self.get_valid_indices()
 
     def __len__(self):
-        # return len(self.valid_indices) - jump_frames
-        return 2
+        return len(self.valid_indices) - jump_frames
 
     def get_valid_indices(self):
         valid_indices = []
@@ -90,7 +89,7 @@ def get_data_loaders():
 
     # Create a DataLoader
     train_loader = DataLoader(concat_train_dataset,
-                              batch_size=batch_size, shuffle=False, num_workers=1)
+                              batch_size=batch_size, shuffle=True, num_workers=1)
     val_loader = DataLoader(
         concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
 
