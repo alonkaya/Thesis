@@ -134,6 +134,7 @@ class FMatrixRegressor(nn.Module):
                 self.optimizer.step()
                 
             avg_loss /= len(train_loader)
+            print(avg_loss)
                 # Compute train mean epipolar constraint error
         #         avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
         #             first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unnormalized_output.detach())
