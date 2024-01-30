@@ -94,6 +94,21 @@ def get_internal_param_matrix(P):
 
     return K, R
 
+
+def adjust_intrinsic(k, original_size, resized_size, ceter_crop_size):
+    # Adjust the intrinsic matrix K according to the transformations resize and center crop
+    scale_factor = resized_size / original_size
+    k[0, 0] *= scale_factor[0]  # fx
+    k[1, 1] *= scale_factor[1]  # fy
+    k[0, 2] *= scale_factor[0]  # cx
+    k[1, 2] *= scale_factor[1]  # cy
+
+    crop_offset = (resized_size - ceter_crop_size) / 2
+    k[0, 2] -= crop_offset[0]  # cx
+    k[1, 2] -= crop_offset[1]  # cy
+
+    return k
+
 def check_epipolar_constraint(image1, image2, F, threshold=epipolar_constraint_threshold):
     # Load the images
     # img1 = cv2.imread(image1, 0)
