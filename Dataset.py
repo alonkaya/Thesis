@@ -44,7 +44,7 @@ class CustomDataset(torch.utils.data.Dataset):
         # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
         adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
         
-        unnormalized_F = get_F(self.poses, idx, adjusted_K)
+        unnormalized_F = get_F(self.poses, idx, self.k)
 
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
