@@ -1,25 +1,18 @@
 from FMatrixRegressor import FMatrixRegressor
 from params import *
-from Dataset import train_loader, val_loader
-import torch
-from FunMatrix import check_epipolar_constraint
-import matplotlib.pyplot as plt
+from Dataset import get_data_loaders
+import torch.multiprocessing as mp
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(device)
+if __name__ == "__main__":
 
-model = FMatrixRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, freeze_pretrained_model=False)
-model = model.to(device)
+    mp.set_start_method('spawn', force=True)
 
-print(f'learning_rate: {learning_rate}, mlp_hidden_sizes: {mlp_hidden_sizes}, num_of_frames: {num_of_frames}, jump_frames: {jump_frames},  add_penalty_loss: {add_penalty_loss}, enforce_fundamental_constraint: {enforce_fundamental_constraint}')
-model.train_model(train_loader, val_loader, num_epochs=num_epochs)
+    model = FMatrixRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name,
+                            lr=learning_rate, freeze_pretrained_model=False,device=device)
+    model = model.to(device)
 
 
-# train_iter = iter(train_loader)
-# first_image, second_image, label, unormalized_label = next(train_iter)
+    train_loader, val_loader = get_data_loaders()
 
-# for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
-#     print(check_epipolar_constraint(img_1, img_2, F))
-#     print(check_epipolar_constraint(img_1, img_2, unormalized_F))
-#     print()
-    
+    print(f'learning_rate: {learning_rate}, mlp_hidden_sizes: {mlp_hidden_sizes}, jump_frames: {jump_frames}, batch_size: {batch_size}')
+    model.train_model(train_loader, val_loader, num_epochs=num_epochs)

@@ -8,7 +8,7 @@
 # from PIL import Image
 # import matplotlib.pyplot as plt
 # import torchvision.transforms.functional as T
-
+import torch
 
 # class CustomDataset(torch.utils.data.Dataset):
 #     def __init__(self, sequence_path, poses, frame_numbers, transform, K):
@@ -107,7 +107,8 @@ class CustomDataset(torch.utils.data.Dataset):
         self.valid_indices = self.get_valid_indices()
 
     def __len__(self):
-        return len(self.valid_indices) - jump_frames
+        # return len(self.valid_indices) - jump_frames
+        return 1
 
     def get_valid_indices(self):
         valid_indices = []
@@ -130,12 +131,12 @@ class CustomDataset(torch.utils.data.Dataset):
         second_image = self.transform(original_second_image).to(device)
 
         # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-        adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
+        adjusted_K = adjust_intrinsic(self.k, torch.tensor(original_first_image.size).to(device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
         
         unnormalized_F = get_F(self.poses, idx, adjusted_K)
 
         # Normalize F-Matrix
-        F = normalize_L2(normalize_L1(unnormalized_F))
+        F = normalize_L2(normalize_L1(torch.tensor(unnormalized_F, dtype=torch.float32)))
 
         return first_image, second_image, F, unnormalized_F
 
@@ -157,6 +158,7 @@ def get_data_loaders():
 
     train_datasets, val_datasets = [], []
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
+        if i not in train_seqeunces: continue
         # Get a list of all poses [R,t] in this sequence
         poses = read_poses(poses_path)
 
@@ -169,7 +171,7 @@ def get_data_loaders():
         if i in train_seqeunces:
             train_datasets.append(CustomDataset(
                 sequence_path, poses, transform, K))        
-        elif i in val_sequences:
+        if i in val_sequences:
             val_datasets.append(CustomDataset(
                 sequence_path, poses, transform, K))
 
@@ -180,7 +182,7 @@ def get_data_loaders():
 
     # Create a DataLoader
     train_loader = DataLoader(concat_train_dataset,
-                              batch_size=batch_size, shuffle=True, num_workers=1)
+                              batch_size=batch_size, shuffle=False, num_workers=1)
     val_loader = DataLoader(
         concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
 

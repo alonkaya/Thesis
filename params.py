@@ -23,4 +23,4 @@ epipolar_constraint_threshold = 0.5
 batch_size = 1
 use_deepf_nocors = False
 train_seqeunces = [2]
-val_sequences = [8]
+val_sequences = [2]
