@@ -84,11 +84,11 @@ class FMatrixRegressor(nn.Module):
         embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1).to(device)
 
         # Train MLP on embedding vectors            
-        unnormalized_output = self.mlp(embeddings).to(device).view(-1,3,3)
+        unnormalized_output = self.mlp(embeddings).view(-1,3,3).to(device)
 
-        output = normalize_L2(normalize_L1(unnormalized_output.view(-1,9))).view(-1,3,3)
+        output = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_output]).to(self.device)
 
-        penalty = last_sing_value_penalty(output).to(device) 
+        penalty = last_sing_value_penalty(unnormalized_output).to(device) 
 
         return unnormalized_output, output, penalty
     
@@ -131,21 +131,6 @@ class FMatrixRegressor(nn.Module):
             print(f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Training MAE: {train_mae[-1]}""")
 
 
-def normalize_L1(x):
-    return x / torch.sum(torch.abs(x), dim=1, keepdim=True) 
-
-def normalize_L2(x):
-    return x / torch.linalg.norm(x, dim=1, keepdim=True)
-
-def last_sing_value_penalty(output):
-    # Compute the SVD of the output
-    _, S, _ = torch.svd(output)
-
-    # Add a term to the loss that penalizes the smallest singular value being far from zero
-    rank_penalty = torch.mean(torch.abs(S[:, -1]))
-
-    return rank_penalty
-
 class MLP(nn.Module):
     def __init__(self, num_input, mlp_hidden_sizes, num_output):
         super(MLP, self).__init__()
@@ -161,47 +146,103 @@ class MLP(nn.Module):
 
     def forward(self, x):
         return self.layers(x)
+    
 
-def read_calib(calib_path):
+def normalize_L1(x):
+    return x / torch.sum(torch.abs(x))
+
+def normalize_L2(x):
+    return x / torch.linalg.matrix_norm(x)
+
+
+def last_sing_value_penalty(output):
+    # Compute the SVD of the output
+    _, S, _ = torch.svd(output)
+    
+    # Add a term to the loss that penalizes the smallest singular value being far from zero
+    rank_penalty = torch.mean(torch.abs(S[:,-1]))
+
+    # TODO: add penatly for having less then 2 singular values
+    if torch.any(S[:, 1] == 0):
+        print("oops")
+
+    # loss = loss + rank_penalty
+
+    return rank_penalty
+
+# Define a function to read the calib.txt file
+def process_calib(calib_path):
     with open(calib_path, 'r') as f:
-        return torch.tensor([float(x) for x in f.readline().split()[1:]]).reshape(3, 4)
+        p0_matrix = np.array([float(x) for x in f.readline().split()[1:]]).reshape(3, 4)
+
+    return p0_matrix
 
 
 # Define a function to read the pose files in the poses folder
 def read_poses(poses_path):
-    poses = []
+    poses = []    
     with open(poses_path, 'r') as f:
-        for line in f:
-            pose = torch.tensor([float(x)
-                                for x in line.strip().split()]).reshape(3, 4)
+        for line in f: 
+            pose = np.array([float(x) for x in line.strip().split()]).reshape(3, 4)
             poses.append(pose)
 
-    return torch.stack(poses).to(device)
+    return np.stack(poses)
 
 
-def get_intrinsic(calib_path):
-    projection_matrix = read_calib(calib_path)
+def compute_relative_transformations(pose1, pose2):
+    t1 = pose1[:, 3]
+    R1 = pose1[:, :3]
+    t2 = pose2[:, 3]
+    R2 = pose2[:, :3]    
 
-    # TODO: check if this func is correct
+    transposed_R1 = np.transpose(R1)
+    R_relative = np.dot(R2, transposed_R1)
+    t_relative = np.dot(transposed_R1, (t2 - t1))
+    # t_relative = t2 - np.dot(R_relative, t1)
+
+    return R_relative, t_relative
+
+def transMatFrom(arr):
+    result = np.eye(4)
+    arr = np.array(arr).reshape((3,4))
+    result[:3,:4] = arr
+    return result
+
+def compute_relative_transformations2(pose1, pose2):
+    pose1 = transMatFrom(pose1)
+    pose2 = transMatFrom(pose2)
+    relative_pose =  np.linalg.inv(pose1).dot(pose2)
+    R_relative = relative_pose[:3, :3]
+    t_relative = relative_pose[:3, 3]
+    return R_relative, t_relative
+
+# Define a function to compute the essential matrix E from the relative pose matrix M
+def compute_essential(R, t):
+    # Compute the skew-symmetric matrix of t
+    t_x = np.array([[0, -t[2], t[1]], 
+                    [t[2], 0, -t[0]], 
+                    [-t[1], t[0], 0]])
+
+    # Compute the essential matrix E
+    E = t_x @ R
+    return E
+
+# Define a function to compute the fundamental matrix F from the essential matrix E and the projection matrices P0 and P1
+def compute_fundamental(E, K1, K2):
+    K2_inv_T = np.linalg.inv(K2).T
+    K1_inv = np.linalg.inv(K1)
+    
+    # Compute the Fundamental matrix 
+    F = np.dot(K2_inv_T, np.dot(E, K1_inv))
+
+    if not np.linalg.matrix_rank(F) == 2:
+        print("rank of ground-truch not 2")
+
+    return F
+
+def get_internal_param_matrix(P):
     # Step 1: Decompose the projection matrix P into the form P = K [R | t]
-    # M = projection_matrix[:, :3]
-    # K, _ = rq(M)
-    # K = torch.tensor(K).to(device)
-
-    # # Enforce positive diagonal for K
-    # T = torch.diag(torch.sign(torch.diag(K)))
-    # if torch.det(T) < 0:
-    #     T[1, 1] *= -1
-
-    # # Update K and R
-    # K = torch.matmul(K.clone(), T)
-    # # R = torch.matmul(T, R)
-
-    # last_elem = K[2, 2]
-    # K /= last_elem.clone()
-
-    # return K
-    M = projection_matrix[:, :3]
+    M = P[:, :3]
     K, R = rq(M)
 
     # Enforce positive diagonal for K
@@ -215,73 +256,11 @@ def get_intrinsic(calib_path):
 
     K /= K[2, 2]
 
-    return torch.tensor(K).to(device)
-
-
-def adjust_intrinsic(k, original_size, resized_size, ceter_crop_size):
-    # Adjust the intrinsic matrix K according to the transformations resize and center crop
-    scale_factor = resized_size / original_size
-    k[0, 0] *= scale_factor[0]  # fx
-    k[1, 1] *= scale_factor[1]  # fy
-    k[0, 2] *= scale_factor[0]  # cx
-    k[1, 2] *= scale_factor[1]  # cy
-
-    crop_offset = (resized_size - ceter_crop_size) / 2
-    k[0, 2] -= crop_offset[0]  # cx
-    k[1, 2] -= crop_offset[1]  # cy
-
-    return k
-
-
-
-def compute_relative_transformations(pose1, pose2):
-    t1 = pose1[:, 3]
-    R1 = pose1[:, :3]
-    t2 = pose2[:, 3]
-    R2 = pose2[:, :3]
-
-    transposed_R1 = torch.transpose(R1, 0, 1)
-    R_relative = torch.matmul(R2, transposed_R1)
-    t_relative = torch.matmul(transposed_R1, (t2 - t1))
-    # t_relative = t2 - np.dot(R_relative, t1)
-
-    return R_relative, t_relative
-
-
-def compute_essential(R, t):
-    # Compute the skew-symmetric matrix of t
-    t_x = torch.tensor([[0, -t[2], t[1]],
-                        [t[2], 0, -t[0]],
-                        [-t[1], t[0], 0]]).to(device)
-
-    # Compute the essential matrix E
-    E = torch.matmul(t_x, R)
-    return E
-
-def compute_fundamental(E, K1, K2):
-    K2_inv_T = torch.transpose(torch.linalg.inv(K2), 0, 1)
-    K1_inv = torch.linalg.inv(K1)
-
-    # Compute the Fundamental matrix
-    F = torch.matmul(K2_inv_T, torch.matmul(E, K1_inv))
-
-    if torch.linalg.matrix_rank(F) != 2:
-        print("rank of ground-truch not 2")
-
-    return F
-
-def get_F(poses, idx, K):
-    R_relative, t_relative = compute_relative_transformations(poses[idx], poses[idx+jump_frames])
-    E = compute_essential(R_relative, t_relative)
-    F = compute_fundamental(E, K, K)
-
-    return F
-
+    return K, R
 
 class CustomDataset(torch.utils.data.Dataset):
     def __init__(self, sequence_path, poses, transform, K):
         self.sequence_path = sequence_path
-        self.sequence_num = sequence_path.split('/')[1]
         self.poses = poses
         self.transform = transform
         self.k = K
@@ -292,53 +271,54 @@ class CustomDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.png'))
         original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png'))
-        # if not os.path.exists(img1_path) or not os.path.exists(img2_path):
-        #     return None  # Return None if images don't exist
 
-        # Transform: Resize, center, grayscale
         first_image = self.transform(original_first_image).to(device)
         second_image = self.transform(original_second_image).to(device)
 
-        # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-        adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
+        # Compute relative rotation and translation matrices
+        R_relative, t_relative = compute_relative_transformations(self.poses[idx], self.poses[idx+jump_frames])
+
+        # # Compute the essential matrix E
+        E = compute_essential(R_relative, t_relative)
+
+        # Compute the fundamental matrix F
+        F = compute_fundamental(E, self.k, self.k)
+
+        # Convert to tensor and rescale [0,255] -> [0,1]
+        first_image, second_image, F, unnormalized_F  = T.to_tensor(first_image), T.to_tensor(second_image), normalize_L2(normalize_L1(torch.tensor(F, dtype=torch.float32))), torch.tensor(F, dtype=torch.float32)
         
-        unnormalized_F = get_F(self.poses, idx, adjusted_K)
-
-        # Normalize F-Matrix
-        F = normalize_L2(normalize_L1(unnormalized_F.view(-1,9))).view(3,3)
-
-        return first_image, second_image, F, unnormalized_F
-    
-def get_data_loaders():
-    transform = transforms.Compose([
-        transforms.Resize((256, 256)),
-        transforms.CenterCrop(224),
-        transforms.Grayscale(num_output_channels=3),
-        transforms.ToTensor(),  # Converts to tensor and rescales [0,255] -> [0,1]
         # TODO: Normalize images?
-    ])    
+        return first_image, second_image, F, unnormalized_F
+
+transform = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.Grayscale(num_output_channels=3),
+])  
     
-    sequence_paths1 = f'sequences/00/image_0'
-    poses_paths1 = f'poses/00.txt'
-    calib_paths1 = f'sequences/00/calib.txt'
+sequence_paths1 = f'sequences/00/image_0'
+poses_paths1 = f'poses/00.txt'
+calib_paths1 = f'sequences/00/calib.txt'
 
-    sequence_paths2 = f'sequences/01/image_0'
-    poses_paths2 = f'poses/01.txt'
-    calib_paths2 = f'sequences/01/calib.txt'
+sequence_paths2 = f'sequences/01/image_0'
+poses_paths2 = f'poses/01.txt'
+calib_paths2 = f'sequences/01/calib.txt'
 
-    poses1 = read_poses(poses_paths1)
-    poses2 = read_poses(poses_paths2)
-    
-    K1 = get_intrinsic(calib_paths1)
-    K2 = get_intrinsic(calib_paths2)
+poses1 = read_poses(poses_paths1)
+poses2 = read_poses(poses_paths2)
 
-    train_dataset = CustomDataset(sequence_paths1, poses1, transform, K1)     
-    val_dataset = CustomDataset(sequence_paths2, poses2, transform, K2)
+projection_matrix1 = process_calib(calib_paths1)
+K1, _ = get_internal_param_matrix(projection_matrix1)
 
-    train_loader = DataLoader(train_dataset,batch_size=batch_size, shuffle=True, num_workers=1)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
+projection_matrix2 = process_calib(calib_paths2)
+K2, _ = get_internal_param_matrix(projection_matrix2)
 
-    return train_loader, val_loader
+train_dataset = CustomDataset(sequence_paths1, poses1, transform, K1)     
+val_dataset = CustomDataset(sequence_paths2, poses2, transform, K2)
+
+train_loader = DataLoader(train_dataset,batch_size=batch_size, shuffle=True, num_workers=1)
+val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
+
 
 
 if __name__ == "__main__":
@@ -347,7 +327,6 @@ if __name__ == "__main__":
     model = FMatrixRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name,lr=learning_rate, freeze_pretrained_model=False).to(device)
 
 
-    train_loader, val_loader = get_data_loaders()
 
     print(f'learning_rate: {learning_rate}, mlp_hidden_sizes: {mlp_hidden_sizes}, jump_frames: {jump_frames}, batch_size: {batch_size}')
 
