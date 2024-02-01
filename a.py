@@ -86,7 +86,7 @@ class FMatrixRegressor(nn.Module):
         # Train MLP on embedding vectors            
         unnormalized_output = self.mlp(embeddings).view(-1,3,3).to(device)
 
-        output = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_output]).to(self.device)
+        output = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_output]).to(device)
 
         penalty = last_sing_value_penalty(unnormalized_output).to(device) 
 
