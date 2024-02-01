@@ -305,7 +305,7 @@ class CustomDataset(torch.utils.data.Dataset):
         unnormalized_F = get_F(self.poses, idx, adjusted_K)
 
         # Normalize F-Matrix
-        F = normalize_L2(normalize_L1(unnormalized_F.view(-1,9))).view(-1,3,3)
+        F = normalize_L2(normalize_L1(unnormalized_F.view(-1,9))).view(3,3)
 
         return first_image, second_image, F, unnormalized_F
     
