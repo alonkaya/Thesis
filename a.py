@@ -118,8 +118,8 @@ class FMatrixRegressor(nn.Module):
                 self.optimizer.step()
 
                 # Extend lists with batch statistics
-                labels = labels.append(label)
-                outputs = outputs.append(output)
+                labels.append(label)
+                outputs.append(output)
 
             # Calculate and store mean absolute error for the epoch
             mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
