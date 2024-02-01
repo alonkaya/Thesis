@@ -307,6 +307,7 @@ class CustomDataset(torch.utils.data.Dataset):
 
         # Normalize F-Matrix
         F = normalize_L2(normalize_L1(unnormalized_F.view(-1,9))).view(-1,3,3)
+
         return first_image, second_image, F, unnormalized_F
     
 def get_data_loaders():
@@ -318,13 +319,13 @@ def get_data_loaders():
         # TODO: Normalize images?
     ])    
     
-    sequence_paths1 = [f'sequences/00/image_0']
-    poses_paths1 = [f'poses/00.txt']
-    calib_paths1 = [f'sequences/00/calib.txt']
+    sequence_paths1 = f'sequences/00/image_0'
+    poses_paths1 = f'poses/00.txt'
+    calib_paths1 = f'sequences/00/calib.txt'
 
-    sequence_paths2 = [f'sequences/01/image_0']
-    poses_paths2 = [f'poses/01.txt']
-    calib_paths2 = [f'sequences/01/calib.txt']    
+    sequence_paths2 = f'sequences/01/image_0'
+    poses_paths2 = f'poses/01.txt'
+    calib_paths2 = f'sequences/01/calib.txt'
 
     poses1 = read_poses(poses_paths1)
     poses2 = read_poses(poses_paths2)
