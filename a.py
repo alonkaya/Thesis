@@ -285,7 +285,7 @@ class CustomDataset(torch.utils.data.Dataset):
         F = compute_fundamental(E, self.k, self.k)
 
         # Convert to tensor and rescale [0,255] -> [0,1]
-        first_image, second_image, F, unnormalized_F  = T.to_tensor(first_image), T.to_tensor(second_image), normalize_L2(normalize_L1(torch.tensor(F, dtype=torch.float32))), torch.tensor(F, dtype=torch.float32)
+        first_image, second_image, F, unnormalized_F  = T.to_tensor(first_image).to(device), T.to_tensor(second_image).to(device), normalize_L2(normalize_L1(torch.tensor(F, dtype=torch.float32))).to(device), torch.tensor(F, dtype=torch.float32).to(device)
         
         # TODO: Normalize images?
         return first_image, second_image, F, unnormalized_F
