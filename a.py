@@ -86,7 +86,7 @@ class FMatrixRegressor(nn.Module):
         # Train MLP on embedding vectors            
         unnormalized_output = self.mlp(embeddings).to(device).view(-1,3,3)
 
-        output = normalize_L2(normalize_L1(output.view(-1,9))).view(-1,3,3)
+        output = normalize_L2(normalize_L1(unnormalized_output.view(-1,9))).view(-1,3,3)
 
         penalty = last_sing_value_penalty(output).to(device) 
 
@@ -285,7 +285,6 @@ class CustomDataset(torch.utils.data.Dataset):
         self.poses = poses
         self.transform = transform
         self.k = K
-        self.valid_indices = self.get_valid_indices()
 
     def __len__(self):
         return len(self.poses) - jump_frames
