@@ -272,8 +272,8 @@ class CustomDataset(torch.utils.data.Dataset):
         original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.png'))
         original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png'))
 
-        first_image = self.transform(original_first_image).to(device)
-        second_image = self.transform(original_second_image).to(device)
+        first_image = self.transform(original_first_image)
+        second_image = self.transform(original_second_image)
 
         # Compute relative rotation and translation matrices
         R_relative, t_relative = compute_relative_transformations(self.poses[idx], self.poses[idx+jump_frames])
@@ -285,7 +285,7 @@ class CustomDataset(torch.utils.data.Dataset):
         F = compute_fundamental(E, self.k, self.k)
 
         # Convert to tensor and rescale [0,255] -> [0,1]
-        first_image, second_image, F, unnormalized_F  = T.to_tensor(first_image).to(device), T.to_tensor(second_image).to(device), normalize_L2(normalize_L1(torch.tensor(F, dtype=torch.float32))).to(device), torch.tensor(F, dtype=torch.float32).to(device)
+        first_image, second_image, F, unnormalized_F  = T.to_tensor(first_image), T.to_tensor(second_image), normalize_L2(normalize_L1(torch.tensor(F, dtype=torch.float32))), torch.tensor(F, dtype=torch.float32)
         
         # TODO: Normalize images?
         return first_image, second_image, F, unnormalized_F
