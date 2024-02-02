@@ -24,6 +24,8 @@ num_output = 9
 penalty_coeff = 2
 batch_size = 1
 penalty_coeff = 2
+batch_size = 32
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, device, freeze_pretrained_model=True):
@@ -41,13 +43,12 @@ class FMatrixRegressor(nn.Module):
         """
 
         super(FMatrixRegressor, self).__init__()
-        self.device = device
         self.to(device)
 
         self.clip = True
         # Initialize CLIP processor and pretrained model
         self.clip_image_processor = CLIPImageProcessor.from_pretrained(pretrained_model_name)
-        self.pretrained_model = CLIPVisionModel.from_pretrained(pretrained_model_name)
+        self.pretrained_model = CLIPVisionModel.from_pretrained(pretrained_model_name).to(device)
 
         # Get input dimension for the MLP based on CLIP configuration
         mlp_input_dim = self.pretrained_model.config.hidden_size
@@ -59,33 +60,33 @@ class FMatrixRegressor(nn.Module):
                 param.requires_grad = False
 
         # Choose appropriate loss function based on regress parameter
-        self.L2_loss = nn.MSELoss()
-        self.L1_loss = nn.L1Loss()
+        self.L2_loss = nn.MSELoss().to(device)
+        self.L1_loss = nn.L1Loss().to(device)
 
-        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes, num_output)
+        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes, num_output).to(device)
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
 
 
     def forward(self, x1, x2):
-        x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(self.device)
-        x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(self.device)
+        x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+        x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
 
-        x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
-        x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(self.device)
+        x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(device)
+        x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(device)
 
         # Concatenate both original and rotated embedding vectors
-        embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1).to(self.device)
+        embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1).to(device)
 
         # Train MLP on embedding vectors
-        unnormalized_output = self.mlp(embeddings).view(-1,3,3)
+        unnormalized_output = self.mlp(embeddings).view(-1,3,3).to(device)
 
         # Compute penalty for last singular value 
-        penalty = last_sing_value_penalty(unnormalized_output).to(self.device)
+        penalty = last_sing_value_penalty(unnormalized_output).to(device)
     
         # Apply L2 norm on top of L1 norm 
-        output = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_output]).to(self.device)
+        output = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_output]).to(device)
     
         return unnormalized_output, output, penalty
         
@@ -102,7 +103,7 @@ class FMatrixRegressor(nn.Module):
             outputs = []
             avg_loss = 0
             for first_image, second_image, label, unormalized_label in train_loader:
-                first_image, second_image, label = first_image.to(self.device), second_image.to(self.device), label.to(self.device) 
+                first_image, second_image, label = first_image.to(device), second_image.to(device), label.to(device) 
                            
                 # Foward pass
                 unnormalized_output, output, penalty = self.forward(first_image, second_image)
@@ -300,8 +301,8 @@ K, _ = get_internal_param_matrix(projection_matrix)
 train_dataset = CustomDataset(sequence_path, poses, transform, K)
 
 # Create a DataLoader
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, pin_memory=True)
-val_loader = DataLoader(train_dataset, batch_size=32, shuffle=False, pin_memory=True)
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+val_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
 
 
 
@@ -313,7 +314,7 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = FMatrixRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, freeze_pretrained_model=False)
+    model = FMatrixRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, freeze_pretrained_model=False).to(device)
 
     print(f'learning_rate: {learning_rate}, mlp_hidden_sizes: {mlp_hidden_sizes}, jump_frames: {jump_frames}')
     
