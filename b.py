@@ -15,27 +15,15 @@ import torchvision.transforms.functional as T
 import torch.multiprocessing as mp
 
 
-num_of_training_images = 1000
-num_of_val_images = 200
 learning_rate = 1e-4
 mlp_hidden_sizes=[512,256]
 num_epochs = 70
-angle_range = 90
-shift_x_range = 140
-shift_y_range = 140
 clip_model_name = "openai/clip-vit-base-patch32"
-vit_model_name = "google/vit-base-patch16-224-in21k"
-show_plots = False
-num_of_frames = 4600
 jump_frames = 2
-train_ratio = 0.8
-enforce_fundamental_constraint = False
-add_penalty_loss = True
 num_output = 9 
 penalty_coeff = 2
-epipolar_constraint_threshold = 0.5
 batch_size = 1
-use_deepf_nocors = False
+penalty_coeff = 2
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, device, freeze_pretrained_model=True):
@@ -74,9 +62,10 @@ class FMatrixRegressor(nn.Module):
         self.L2_loss = nn.MSELoss()
         self.L1_loss = nn.L1Loss()
 
+        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes, num_output)
+
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
-        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes, num_output)
 
 
     def forward(self, x1, x2):
@@ -119,9 +108,8 @@ class FMatrixRegressor(nn.Module):
                 unnormalized_output, output, penalty = self.forward(first_image, second_image)
                 
                 # Compute loss
-                l1_loss = self.L1_loss(output, label)
                 l2_loss = self.L2_loss(output, label)
-                loss = l2_loss + penalty
+                loss = l2_loss + penalty_coeff * penalty
                 avg_loss += loss.detach().cpu().item()
 
                 # Compute Backward pass and gradients
@@ -130,18 +118,50 @@ class FMatrixRegressor(nn.Module):
                 self.optimizer.step()
 
                 # Extend lists with batch statistics
-                labels.append(label)
-                outputs.append(output.detach().cpu().to(self.device))
+                labels.append(label.detach().cpu())
+                outputs.append(output.detach().cpu())
                 # cosine_similarities.extend(cosine_similarity.tolist())
       
             # Calculate and store root training loss for the epoch
-            avg_loss = avg_loss / len(train_loader)
+            mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
+            avg_loss /= len(train_loader)
+
+            train_mae.append(mae)
             all_train_loss.append(avg_loss)
 
-            # Calculate and store mean absolute error for the epoch
-            mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
-            train_mae.append(mae.detach().cpu())
+class MLP(nn.Module):
+    def __init__(self, num_input, mlp_hidden_sizes, num_output):
+        super(MLP, self).__init__()
+        mlp_layers = []
+        prev_size = num_input
+        for hidden_size in mlp_hidden_sizes:
+            mlp_layers.append(nn.Linear(prev_size, hidden_size))
+            mlp_layers.append(nn.ReLU())
+            prev_size = hidden_size
+        mlp_layers.append(nn.Linear(prev_size, num_output))
 
+        self.layers = nn.Sequential(*mlp_layers)
+
+    def forward(self, x):
+        return self.layers(x)
+
+def normalize_L1(x):
+    return x / torch.sum(torch.abs(x))
+
+def normalize_L2(x):
+    return x / torch.linalg.matrix_norm(x)
+
+
+def last_sing_value_penalty(output):
+    _, S, _ = torch.svd(output)
+    
+    rank_penalty = torch.mean(torch.abs(S[:,-1]))
+
+    # TODO: add penatly for having less then 2 singular values
+    if torch.any(S[:, 1] == 0):
+        print("oops")
+
+    return rank_penalty
 
 # Define a function to read the calib.txt file
 def process_calib(calib_path):
@@ -175,19 +195,6 @@ def compute_relative_transformations(pose1, pose2):
 
     return R_relative, t_relative
 
-def transMatFrom(arr):
-    result = np.eye(4)
-    arr = np.array(arr).reshape((3,4))
-    result[:3,:4] = arr
-    return result
-
-def compute_relative_transformations2(pose1, pose2):
-    pose1 = transMatFrom(pose1)
-    pose2 = transMatFrom(pose2)
-    relative_pose =  np.linalg.inv(pose1).dot(pose2)
-    R_relative = relative_pose[:3, :3]
-    t_relative = relative_pose[:3, 3]
-    return R_relative, t_relative
 
 # Define a function to compute the essential matrix E from the relative pose matrix M
 def compute_essential(R, t):
@@ -242,7 +249,7 @@ class CustomDataset(torch.utils.data.Dataset):
         self.k = K
 
     def __len__(self):
-        return len(self.frame_numbers) - jump_frames
+        return len(self.poses) - jump_frames
 
     def __getitem__(self, idx):
         # Create PIL images
@@ -274,16 +281,15 @@ transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=3),
 ])
 
-sequence_path = 'sequences/02/image_0'
-poses_path = 'poses/02.txt'
-calib_path = 'sequences/02/calib.txt'
+sequence_path = 'sequences/00/image_0'
+poses_path = 'poses/00.txt'
+calib_path = 'sequences/00/calib.txt'
 
 poses = read_poses(poses_path)
 
 # Read the calib.txt file to get the projection matricx and compute intrinsic K
 projection_matrix = process_calib(calib_path)
 K, _ = get_internal_param_matrix(projection_matrix)
-
 
 # Split the dataset based on the calculated samples. Get first train_samples of data for training and the rest for validation
 train_dataset = CustomDataset(sequence_path, poses, transform, K)
@@ -293,50 +299,17 @@ train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, pin_memory
 val_loader = DataLoader(train_dataset, batch_size=32, shuffle=False, pin_memory=True)
 
 
-class MLP(nn.Module):
-    def __init__(self, num_input, mlp_hidden_sizes, num_output):
-        super(MLP, self).__init__()
-        mlp_layers = []
-        prev_size = num_input
-        for hidden_size in mlp_hidden_sizes:
-            mlp_layers.append(nn.Linear(prev_size, hidden_size))
-            mlp_layers.append(nn.ReLU())
-            prev_size = hidden_size
-        mlp_layers.append(nn.Linear(prev_size, num_output))
-
-        self.layers = nn.Sequential(*mlp_layers)
-
-    def forward(self, x):
-        return self.layers(x)
-    
-    
-def last_sing_value_penalty(output):
-    # Compute the SVD of the output
-    _, S, _ = torch.svd(output)
-    
-    # Add a term to the loss that penalizes the smallest singular value being far from zero
-    rank_penalty = torch.mean(torch.abs(S[:,-1]))
-
-    # TODO: add penatly for having less then 2 singular values
-    if torch.any(S[:, 1] == 0):
-        print("oops")
 
 
-    return rank_penalty
 
-
-def normalize_L1(x):
-    return x / torch.sum(torch.abs(x))
-
-def normalize_L2(x):
-    return x / torch.linalg.matrix_norm(x)
 
 if __name__ == "__main__":
+    mp.set_start_method('spawn', force=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = FMatrixRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, freeze_pretrained_model=False)
-    model = model.to(device)
 
-    print(f'learning_rate: {learning_rate}, mlp_hidden_sizes: {mlp_hidden_sizes}, num_of_frames: {num_of_frames}, jump_frames: {jump_frames},  add_penalty_loss: {add_penalty_loss}, enforce_fundamental_constraint: {enforce_fundamental_constraint}')
+    print(f'learning_rate: {learning_rate}, mlp_hidden_sizes: {mlp_hidden_sizes}, jump_frames: {jump_frames}, enforce_fundamental_constraint: {enforce_fundamental_constraint}')
+    
     model.train_model(train_loader, val_loader, num_epochs=num_epochs)
