@@ -37,8 +37,6 @@ def plot_over_epoch(x, y, x_label, y_label, show=True, connecting_lines=True):
         plt.show()
 
 # Define a function to read the calib.txt file
-
-
 def read_calib(calib_path):
     with open(calib_path, 'r') as f:
         return torch.tensor([float(x) for x in f.readline().split()[1:]]).reshape(3, 4)

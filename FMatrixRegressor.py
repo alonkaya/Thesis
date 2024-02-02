@@ -79,10 +79,12 @@ class FMatrixRegressor(nn.Module):
                 x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
 
-            x1_embeddings = self.pretrained_model(
-                **x1).last_hidden_state[:, :49, :].view(-1, 7*7*768).to(device)
-            x2_embeddings = self.pretrained_model(
-                **x2).last_hidden_state[:, :49, :].view(-1, 7*7*768).to(device)
+
+            # x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, :49, :].view(-1, 7*7*768).to(device)
+            # x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, :49, :].view(-1, 7*7*768).to(device)
+
+            x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1,  7*7*768).to(device)
+            x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1,  7*7*768).to(device)
 
             # cosine_similarity = torch.nn.functional.cosine_similarity(x1_embeddings, x2_embeddings).detach().cpu() # (batch_size)
 
@@ -125,7 +127,7 @@ class FMatrixRegressor(nn.Module):
 
                 # Compute loss
                 l2_loss = self.L2_loss(output, label)
-                loss = l2_loss + penalty 
+                loss = l2_loss + penalty_coeff*penalty 
                 avg_loss += loss.detach()
 
                 # Compute Backward pass and gradients
@@ -204,8 +206,6 @@ class FMatrixRegressor(nn.Module):
                 all_val_loss.append(val_avg_loss.cpu())
                 all_penalty.append(epoch_penalty.cpu())
                 
-
-            # 
             # Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}
             Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}
@@ -325,27 +325,3 @@ class FMatrixRegressor(nn.Module):
     #     return F
 
 
-def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):
-    # Compute mean epipolar constraint error
-    U1, S1, V1 = torch.svd(output)
-    U2, S2, V2 = torch.svd(unormalized_output)
-
-    S1[:, -1] = 0
-    S2[:, -1] = 0
-
-    output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2))
-    unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), V2.transpose(1, 2))
-    
-    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = 0, 0, 0
-    for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
-        avg_ec_err_truth += EpipolarGeometry(img_1,
-                                             img_2, F_truth).get_epipolar_err()
-        avg_ec_err_pred += EpipolarGeometry(img_1,
-                                            img_2, F_pred).get_epipolar_err()
-        avg_ec_err_pred_unormalized += EpipolarGeometry(
-            img_1, img_2, F_pred_unormalized).get_epipolar_err()
-
-    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = (
-        v / len(first_image) for v in (avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized))
-
-    return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized

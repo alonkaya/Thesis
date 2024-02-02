@@ -25,8 +25,6 @@ num_output = 9
 clip_model_name = "openai/clip-vit-base-patch32"
 
 
-
-
 class FMatrixRegressor(nn.Module):
     def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, freeze_pretrained_model=True):
         """
@@ -48,11 +46,8 @@ class FMatrixRegressor(nn.Module):
         self.clip = True
 
         # Initialize CLIP processor and pretrained model
-        self.clip_image_processor = CLIPImageProcessor.from_pretrained(
-            pretrained_model_name)
-        self.pretrained_model = CLIPVisionModel.from_pretrained(
-            pretrained_model_name).to(device)
-        # self.pretrained_model = CLIPModel.from_pretrained(pretrained_model_name)
+        self.clip_image_processor = CLIPImageProcessor.from_pretrained(pretrained_model_name)
+        self.pretrained_model = CLIPVisionModel.from_pretrained(pretrained_model_name).to(device)
 
         # Get input dimension for the MLP based on CLIP configuration
         mlp_input_dim = self.pretrained_model.config.hidden_size
@@ -68,8 +63,7 @@ class FMatrixRegressor(nn.Module):
         self.L2_loss = nn.MSELoss().to(device)
         self.L1_loss = nn.L1Loss().to(device)
 
-        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes,
-                       num_output).to(device)
+        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes,num_output).to(device)
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
@@ -86,9 +80,9 @@ class FMatrixRegressor(nn.Module):
         # Train MLP on embedding vectors            
         unnormalized_output = self.mlp(embeddings).view(-1,3,3).to(device)
 
-        output = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_output]).to(device)
-
         penalty = last_sing_value_penalty(unnormalized_output).to(device) 
+
+        output = torch.stack([normalize_L2(normalize_L1(x)) for x in unnormalized_output]).to(device)
 
         return unnormalized_output, output, penalty
     
@@ -109,7 +103,7 @@ class FMatrixRegressor(nn.Module):
 
                 # Compute loss
                 l2_loss = self.L2_loss(output, label)
-                loss = l2_loss + penalty_coeff *penalty 
+                loss = l2_loss + penalty 
                 avg_loss += loss.detach()
 
                 # Compute Backward pass and gradients
@@ -118,18 +112,20 @@ class FMatrixRegressor(nn.Module):
                 self.optimizer.step()
 
                 # Extend lists with batch statistics
-                labels.append(label)
-                outputs.append(output)
+                labels.append(label.detach().cpu())
+                outputs.append(output.detach().cpu())
 
             # Calculate and store mean absolute error for the epoch
             mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
             avg_loss /= len(train_loader)
 
-            train_mae.append(mae.cpu())
-            all_train_loss.append(avg_loss.cpu())    
+            train_mae.append(mae)
+            all_train_loss.append(avg_loss)    
 
-            print(f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Training MAE: {train_mae[-1]}""")
-
+            epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Training MAE: {train_mae[-1]}"""
+            with open("output.txt", "a") as f:
+                f.write(epoch_output)
+                print(epoch_output)
 
 class MLP(nn.Module):
     def __init__(self, num_input, mlp_hidden_sizes, num_output):
@@ -156,17 +152,13 @@ def normalize_L2(x):
 
 
 def last_sing_value_penalty(output):
-    # Compute the SVD of the output
     _, S, _ = torch.svd(output)
     
-    # Add a term to the loss that penalizes the smallest singular value being far from zero
     rank_penalty = torch.mean(torch.abs(S[:,-1]))
 
     # TODO: add penatly for having less then 2 singular values
     if torch.any(S[:, 1] == 0):
         print("oops")
-
-    # loss = loss + rank_penalty
 
     return rank_penalty
 
@@ -202,19 +194,6 @@ def compute_relative_transformations(pose1, pose2):
 
     return R_relative, t_relative
 
-def transMatFrom(arr):
-    result = np.eye(4)
-    arr = np.array(arr).reshape((3,4))
-    result[:3,:4] = arr
-    return result
-
-def compute_relative_transformations2(pose1, pose2):
-    pose1 = transMatFrom(pose1)
-    pose2 = transMatFrom(pose2)
-    relative_pose =  np.linalg.inv(pose1).dot(pose2)
-    R_relative = relative_pose[:3, :3]
-    t_relative = relative_pose[:3, 3]
-    return R_relative, t_relative
 
 # Define a function to compute the essential matrix E from the relative pose matrix M
 def compute_essential(R, t):
@@ -296,28 +275,19 @@ transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=3),
 ])  
     
-sequence_paths1 = f'sequences/00/image_0'
-poses_paths1 = f'poses/00.txt'
-calib_paths1 = f'sequences/00/calib.txt'
+sequence_paths = f'sequences/00/image_0'
+poses_paths = f'poses/00.txt'
+calib_paths = f'sequences/00/calib.txt'
 
-sequence_paths2 = f'sequences/01/image_0'
-poses_paths2 = f'poses/01.txt'
-calib_paths2 = f'sequences/01/calib.txt'
+poses = read_poses(poses_paths)
 
-poses1 = read_poses(poses_paths1)
-poses2 = read_poses(poses_paths2)
+projection_matrix = process_calib(calib_paths)
+K, _ = get_internal_param_matrix(projection_matrix)
 
-projection_matrix1 = process_calib(calib_paths1)
-K1, _ = get_internal_param_matrix(projection_matrix1)
-
-projection_matrix2 = process_calib(calib_paths2)
-K2, _ = get_internal_param_matrix(projection_matrix2)
-
-train_dataset = CustomDataset(sequence_paths1, poses1, transform, K1)     
-val_dataset = CustomDataset(sequence_paths2, poses2, transform, K2)
+train_dataset = CustomDataset(sequence_paths, poses, transform, K)     
 
 train_loader = DataLoader(train_dataset,batch_size=batch_size, shuffle=True, num_workers=1)
-val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
+val_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
 
 
 
@@ -325,8 +295,6 @@ if __name__ == "__main__":
     mp.set_start_method('spawn', force=True)
 
     model = FMatrixRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name,lr=learning_rate, freeze_pretrained_model=False).to(device)
-
-
 
     print(f'learning_rate: {learning_rate}, mlp_hidden_sizes: {mlp_hidden_sizes}, jump_frames: {jump_frames}, batch_size: {batch_size}')
 

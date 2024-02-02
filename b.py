@@ -15,18 +15,18 @@ import torchvision.transforms.functional as T
 import torch.multiprocessing as mp
 
 
-learning_rate = 1e-4
-mlp_hidden_sizes=[512,256]
-num_epochs = 70
-clip_model_name = "openai/clip-vit-base-patch32"
-jump_frames = 2
-num_output = 9 
-penalty_coeff = 2
-batch_size = 1
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+batch_size = 1  
+penalty_coeff = 2
+jump_frames = 2
+num_epochs = 50
+learning_rate = 1e-4
+mlp_hidden_sizes = [512, 256]
+num_output = 9
+clip_model_name = "openai/clip-vit-base-patch32"
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, device, freeze_pretrained_model=True):
+    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, freeze_pretrained_model=True):
         """
         Initialize the ViTMLPRegressor model.
 
@@ -71,8 +71,8 @@ class FMatrixRegressor(nn.Module):
         x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
         x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
 
-        x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(device)
-        x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,:49,:].view(-1, 7*7*768).to(device)
+        x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:,1:,:].view(-1, 7*7*768).to(device)
+        x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:,1:,:].view(-1, 7*7*768).to(device)
 
         # Concatenate both original and rotated embedding vectors
         embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1).to(device)
@@ -91,15 +91,13 @@ class FMatrixRegressor(nn.Module):
         
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
-        all_train_loss = []
-        train_mae = []
+        all_train_loss, train_mae = [], []
+
         for epoch in range(num_epochs):
             self.train()
-
-            # Lists to store per-batch statistics
-            labels = []
-            outputs = []
+            labels, outputs = [], []
             avg_loss = 0
+            
             for first_image, second_image, label, unormalized_label in train_loader:
                 first_image, second_image, label = first_image.to(device), second_image.to(device), label.to(device) 
                            
