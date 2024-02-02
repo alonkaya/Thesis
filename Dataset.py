@@ -52,7 +52,7 @@ class CustomDataset(torch.utils.data.Dataset):
 
 
 
-def get_data_loaders():
+def get_data_loaders(batch_size):
 
     transform = transforms.Compose([
         transforms.Resize((256, 256)),

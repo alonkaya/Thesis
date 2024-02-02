@@ -107,7 +107,7 @@ class FMatrixRegressor(nn.Module):
             return unnormalized_output, output, penalty
 
 
-    def train_model(self, train_loader, val_loader, num_epochs):
+    def train_model(self, train_loader, val_loader, num_epochs, penalty_coeff, batch_size):
         # Lists to store training statistics
         all_train_loss, all_val_loss, train_mae, val_mae, ec_err_truth, ec_err_pred, ec_err_pred_unoramlized, val_ec_err_truth, \
             val_ec_err_pred, val_ec_err_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], []
@@ -209,7 +209,8 @@ class FMatrixRegressor(nn.Module):
             # Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}
             Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}
-            Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}\n"""
+            Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}
+            penalty_coeff: {penalty_coeff}, batch_size: {batch_size}\n"""
 
             with open("output.txt", "a") as f:
                 f.write(epoch_output)
@@ -221,22 +222,29 @@ class FMatrixRegressor(nn.Module):
             print(output)
 
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss,
-                        x_label="Epoch", y_label='Training Loss', show=show_plots)
+                        x_label="Epoch", y_label='Training Loss', 
+                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss,
-                        x_label="Epoch", y_label='Validation Loss', show=show_plots)
+                        x_label="Epoch", y_label='Validation Loss', 
+                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
         plot_over_epoch(x=range(1, num_epochs + 1), y=train_mae,
-                        x_label="Epoch", y_label='Training MAE', show=show_plots)
+                        x_label="Epoch", y_label='Training MAE', 
+                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae,
-                        x_label="Epoch", y_label='VAlidation MAE', show=show_plots)
-        plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred, x_label="Epoch", y_label='Training epipolar constraint err for pred F', show=show_plots)
+                        x_label="Epoch", y_label='VAlidation MAE', 
+                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
+        plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred, 
+                        x_label="Epoch", y_label='Training epipolar constraint err for pred F', 
+                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
         plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred_unoramlized, x_label="Epoch",
-                        y_label='Train epipolar constraint err for pred F unormalized', show=show_plots)
-        # plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred, x_label="Epoch", y_label='Val epipolar constraint err for pred F', show=show_plots)
+                        y_label='Train epipolar constraint err for pred F unormalized', 
+                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred_unormalized, x_label="Epoch",
-                        y_label='Val epipolar constraint err for pred F unormalized', show=show_plots)
+                        y_label='Val epipolar constraint err for pred F unormalized', 
+                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_penalty, x_label="Epoch",
-                        y_label='Additional loss penalty for last singular value', show=show_plots)
-        # plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False, show=show_plots)
+                        y_label='Additional loss penalty for last singular value', 
+                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
 
     
     # def get_rotation(self, rx, ry, rz):
