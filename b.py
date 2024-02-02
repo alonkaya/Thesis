@@ -128,6 +128,11 @@ class FMatrixRegressor(nn.Module):
 
             train_mae.append(mae)
             all_train_loss.append(avg_loss)
+            
+            epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Training MAE: {train_mae[-1]}"""
+            with open("output.txt", "a") as f:
+                f.write(epoch_output)
+                print(epoch_output)            
 
 class MLP(nn.Module):
     def __init__(self, num_input, mlp_hidden_sizes, num_output):
@@ -310,6 +315,6 @@ if __name__ == "__main__":
 
     model = FMatrixRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, freeze_pretrained_model=False)
 
-    print(f'learning_rate: {learning_rate}, mlp_hidden_sizes: {mlp_hidden_sizes}, jump_frames: {jump_frames}, enforce_fundamental_constraint: {enforce_fundamental_constraint}')
+    print(f'learning_rate: {learning_rate}, mlp_hidden_sizes: {mlp_hidden_sizes}, jump_frames: {jump_frames}')
     
     model.train_model(train_loader, val_loader, num_epochs=num_epochs)
