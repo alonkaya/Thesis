@@ -23,8 +23,6 @@ jump_frames = 2
 num_output = 9 
 penalty_coeff = 2
 batch_size = 1
-penalty_coeff = 2
-batch_size = 32
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class FMatrixRegressor(nn.Module):
@@ -110,7 +108,7 @@ class FMatrixRegressor(nn.Module):
                 
                 # Compute loss
                 l2_loss = self.L2_loss(output, label)
-                loss = l2_loss + penalty_coeff * penalty
+                loss = l2_loss + penalty
                 avg_loss += loss.detach().cpu().item()
 
                 # Compute Backward pass and gradients
@@ -133,7 +131,8 @@ class FMatrixRegressor(nn.Module):
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Training MAE: {train_mae[-1]}"""
             with open("output.txt", "a") as f:
                 f.write(epoch_output)
-                print(epoch_output)            
+                print(epoch_output)     
+                f.close()       
 
 class MLP(nn.Module):
     def __init__(self, num_input, mlp_hidden_sizes, num_output):
@@ -301,8 +300,8 @@ K, _ = get_internal_param_matrix(projection_matrix)
 train_dataset = CustomDataset(sequence_path, poses, transform, K)
 
 # Create a DataLoader
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
-val_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=1)
+val_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False, pin_memory=True, num_workers=1)
 
 
 
@@ -316,6 +315,6 @@ if __name__ == "__main__":
 
     model = FMatrixRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, freeze_pretrained_model=False).to(device)
 
-    print(f'learning_rate: {learning_rate}, mlp_hidden_sizes: {mlp_hidden_sizes}, jump_frames: {jump_frames}')
+    print(f'learning_rate: {learning_rate}, mlp_hidden_sizes: {mlp_hidden_sizes}, jump_frames: {jump_frames}, batch size = {batch_size}')
     
     model.train_model(train_loader, val_loader, num_epochs=num_epochs)
