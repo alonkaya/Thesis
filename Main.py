@@ -3,11 +3,11 @@ from params import *
 from Dataset import get_data_loaders
 import torch.multiprocessing as mp
 import itertools
-
+import os
 if __name__ == "__main__":
 
     mp.set_start_method('spawn', force=True)
-    
+    os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
     # Iterate over each combination
     param_combinations = itertools.product(batch_sizes, penalty_coeffs, penaltize_normalized_options)
     
