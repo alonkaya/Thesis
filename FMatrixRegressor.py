@@ -207,12 +207,12 @@ class FMatrixRegressor(nn.Module):
             Train epipolar error pred: {epoch_avg_ec_err_pred} Val epipolar error pred:  {val_epoch_avg_ec_err_pred}
             penalty_coeff: {self.penalty_coeff}, batch_size: {self.batch_size} penalty: {epoch_penalty}\n"""
 
-            with open("output.txt", "a") as f:
+            with open("output.txt", "w") as f:
                 f.write(epoch_output)
                 print(epoch_output)
 
-        with open("output.txt", "a") as f:
-            output = f'Train ground truth error: {epoch_avg_ec_err_truth} val ground truth error: {val_epoch_avg_ec_err_truth}\n\n'
+        with open("output.txt", "w") as f:
+            output = f'Train ground truth error: {epoch_avg_ec_err_truth} val ground truth error: {val_epoch_avg_ec_err_truth}\n\n\n'
             f.write(output)
             print(output)
 
