@@ -146,6 +146,8 @@ class FMatrixRegressor(nn.Module):
                 labels = torch.cat((labels, label.detach()), dim=0)
                 outputs = torch.cat((outputs, output.detach()), dim=0)
 
+                del first_image, second_image, label, unormalized_label
+
             # Calculate and store mean absolute error for the epoch
             mae = torch.mean(torch.abs(labels - outputs))
 
@@ -153,11 +155,14 @@ class FMatrixRegressor(nn.Module):
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = (
                 v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss))
 
-            train_mae.append(mae.cpu())
-            ec_err_truth.append(epoch_avg_ec_err_truth.cpu())
-            ec_err_pred.append(epoch_avg_ec_err_pred.cpu())
-            ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized.cpu())
-            all_train_loss.append(avg_loss.cpu())
+            train_mae.append(mae.cpu().item())
+            ec_err_truth.append(epoch_avg_ec_err_truth.cpu().item())
+            ec_err_pred.append(epoch_avg_ec_err_pred.cpu().item())
+            ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized.cpu().item())
+            all_train_loss.append(avg_loss.cpu().item())
+
+            del labels, outputs, mae, epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, unnormalized_output, output, penalty, l2_loss, loss, avg_loss
+            torch.cuda.empty_cache()
 
             # Validation
             self.eval()
@@ -172,7 +177,6 @@ class FMatrixRegressor(nn.Module):
                     unnormalized_val_output, val_output, penalty = self.forward(
                         val_first_image, val_second_image)
                     epoch_penalty += penalty
-
                     val_avg_loss += self.L2_loss(val_output, val_label)
 
                     # Compute val mean epipolar constraint error
@@ -186,6 +190,7 @@ class FMatrixRegressor(nn.Module):
                     val_outputs = torch.cat((val_outputs, val_output), dim=0)
                     val_labels = torch.cat((val_labels, val_label), dim=0)
 
+                    del val_first_image, val_second_image, val_label, val_unormalized_label
 
                 # Calculate and store mean absolute error for the epoch
                 mae = torch.mean(torch.abs(val_labels - val_outputs))
@@ -193,13 +198,16 @@ class FMatrixRegressor(nn.Module):
                 val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss = (
                     v / len(val_loader) for v in (val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss))
 
-                val_mae.append(mae.cpu())
-                val_ec_err_truth.append(val_epoch_avg_ec_err_truth.cpu())
-                val_ec_err_pred.append(val_epoch_avg_ec_err_pred.cpu())
-                val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized.cpu())
-                all_val_loss.append(val_avg_loss.cpu())
-                all_penalty.append(epoch_penalty.cpu())
+                val_mae.append(mae.cpu().item())
+                val_ec_err_truth.append(val_epoch_avg_ec_err_truth.cpu().item())
+                val_ec_err_pred.append(val_epoch_avg_ec_err_pred.cpu().item())
+                val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized.cpu().item())
+                all_val_loss.append(val_avg_loss.cpu().item())
+                all_penalty.append(epoch_penalty.cpu().item())
                 
+                del val_labels, val_outputs, val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss, unnormalized_val_output, val_output, penalty, epoch_penalty
+                torch.cuda.empty_cache()
+
             # Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
             epoch_output = f"""Epoch {epoch+1}/{num_epochs},  Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
             Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
