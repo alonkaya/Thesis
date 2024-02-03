@@ -216,6 +216,7 @@ class FMatrixRegressor(nn.Module):
             f.write(output)
             print(output)
 
+
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss,
                         x_label="Epoch", y_label='Training Loss', 
                         penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
