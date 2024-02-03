@@ -7,5 +7,7 @@ num_epochs = 16
 angle_range = 90
 shift_x_range = 140
 shift_y_range = 140
+batch_size = 32
+embedding_tokens = 2
 clip_model_name = "openai/clip-vit-base-patch32"
 vit_model_name = "google/vit-base-patch16-224-in21k"

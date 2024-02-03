@@ -41,29 +41,29 @@ class CustomDataset(torch.utils.data.Dataset):
         shift_y = 0 if self.shift_y_range == 0 else abs(shift_y) / self.shift_y_range
         
         # Convert params to tensor
-        params = torch.tensor([shift_x, shift_y, angle], dtype=torch.float32)
+        params = torch.tensor([angle, shift_x, shift_y], dtype=torch.float32)
 
         # TODO: normalize images
         return original_image, translated_image, params
 
-transform = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
-    transforms.Grayscale(num_output_channels=3),
-])
-# Load the dataset
-# image_paths = ["/content/drive/MyDrive/Thesis/image.jpg", "/content/drive/MyDrive/Thesis/image2.jpg", "/content/drive/MyDrive/Thesis/image3.jpg", "/content/drive/MyDrive/Thesis/image4.jpg", "/content/drive/MyDrive/Thesis/image5.jpg"]
-# dataset = Dataset.from_dict({"image": image_paths}).cast_column("image", Image())
+def get_dataloaders():
+    transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.Grayscale(num_output_channels=3),
+    ])
 
-# Load and display the image
-dataset = load_dataset("frgfm/imagenette", 'full_size')
-train_dataset = dataset["train"].select(np.arange(num_of_training_images))
-val_dataset = dataset["validation"].select(np.arange(num_of_val_images))
+    # Load and display the image
+    dataset = load_dataset("frgfm/imagenette", 'full_size')
+    train_dataset = dataset["train"].select(np.arange(num_of_training_images))
+    val_dataset = dataset["validation"].select(np.arange(num_of_val_images))
 
-# Create an instance dataset
-custom_train_dataset = CustomDataset(train_dataset, transform=transform, angle_range=angle_range, shift_x_range=shift_x_range, shift_y_range=shift_y_range)
-custom_val_dataset = CustomDataset(val_dataset, transform=transform,angle_range=angle_range, shift_x_range=shift_x_range, shift_y_range=shift_y_range)
+    # Create an instance dataset
+    custom_train_dataset = CustomDataset(train_dataset, transform=transform, angle_range=angle_range, shift_x_range=shift_x_range, shift_y_range=shift_y_range)
+    custom_val_dataset = CustomDataset(val_dataset, transform=transform,angle_range=angle_range, shift_x_range=shift_x_range, shift_y_range=shift_y_range)
 
-# Create a DataLoader
-train_loader = DataLoader(custom_train_dataset, batch_size=32, shuffle=True, pin_memory=True)
-val_loader = DataLoader(custom_val_dataset, batch_size=32, shuffle=False, pin_memory=True)
+    # Create a DataLoader
+    train_loader = DataLoader(custom_train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+    val_loader = DataLoader(custom_val_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
+    
+    return train_loader, val_loader

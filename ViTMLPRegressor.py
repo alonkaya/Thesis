@@ -1,10 +1,10 @@
 from params import *
 from utils import *
-from CustomDataset import train_loader, val_loader
 import torch
 import torch.optim as optim
-from transformers import ViTModel, CLIPImageProcessor, CLIPModel
+from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 from sklearn.metrics import mean_absolute_error
+
 
 class ViTMLPRegressor(nn.Module):
     def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, device, regress=True, freeze_pretrained_model=True):
@@ -31,19 +31,21 @@ class ViTMLPRegressor(nn.Module):
 
             # Initialize CLIP processor and pretrained model
             self.clip_image_processor = CLIPImageProcessor.from_pretrained(pretrained_model_name)
-            self.pretrained_model = CLIPModel.from_pretrained(pretrained_model_name)
-
-            # Get input dimension for the MLP based on CLIP configuration
-            mlp_input_dim = self.pretrained_model.config.projection_dim
+            self.pretrained_model = CLIPVisionModel.from_pretrained(pretrained_model_name).to(device)
 
         else:
             self.clip = False
 
             # Initialize ViT pretrained model
-            self.pretrained_model = ViTModel.from_pretrained(pretrained_model_name)
+            self.pretrained_model = ViTModel.from_pretrained(pretrained_model_name).to(self.device)
 
-            # Get input dimension for the MLP based on ViT configuration
-            mlp_input_dim = self.pretrained_model.config.hidden_size
+        # Get input dimension for the MLP based on ViT configuration
+        self.hidden_size = self.pretrained_model.config.hidden_size
+        mlp_input_dim = self.hidden_size
+        if embedding_tokens == 2:
+            mlp_input_dim = self.hidden_size * 2
+        elif embedding_tokens == 3:
+            mlp_input_dim = self.hidden_size * 3
 
         # Freeze the parameters of the pretrained model if specified
         if freeze_pretrained_model:
@@ -55,28 +57,30 @@ class ViTMLPRegressor(nn.Module):
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
-        self.mlp = MLP(mlp_input_dim*3, mlp_hidden_sizes, num_output)
+        self.mlp = MLP(mlp_input_dim, mlp_hidden_sizes, num_output).to(self.device)
 
 
     def forward(self, x_original, x_rotated):
         if self.clip: # If using CLIP
-            x_original = self.clip_image_processor(images=x_original, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-            x_rotated = self.clip_image_processor(images=x_rotated, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+            x_original = self.clip_image_processor(images=x_original, return_tensors="pt", do_resize=False, do_normalize=False, 
+                                                   do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(self.device)
+            x_rotated = self.clip_image_processor(images=x_rotated, return_tensors="pt", do_resize=False, do_normalize=False, 
+                                                  do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(self.device)
 
-            original_embeddings = self.pretrained_model.get_image_features(**x_original)
-            rotated_embeddings = self.pretrained_model.get_image_features(**x_rotated)
+        original_embeddings = self.pretrained_model(x_original).last_hidden_state[:,0,:].view(-1,self.hidden_size).to(self.device)
+        rotated_embeddings = self.pretrained_model(x_original).last_hidden_state[:,0,:].view(-1,self.hidden_size).to(self.device)
 
-        else: # If using standard ViT
-             original_embeddings = self.pretrained_model(x_original).last_hidden_state[:,0,:] # (batch_size, CLS emebdding vector size)
-             rotated_embeddings = self.pretrained_model(x_rotated).last_hidden_state[:,0,:]
+        cosine_similarity = torch.nn.functional.cosine_similarity(original_embeddings, rotated_embeddings) # (batch_size)
 
-        cosine_similarity = torch.nn.functional.cosine_similarity(original_embeddings, rotated_embeddings).detach().cpu() # (batch_size)
-
-        # Create another feature embedding of the element-wise mult between the two embedding vectors
+         # Create another feature embedding of the element-wise mult between the two embedding vectors
         mul_embedding = original_embeddings.mul(rotated_embeddings)
 
-        # Concatenate both original and rotated embedding vectors
-        embeddings = torch.cat([rotated_embeddings, original_embeddings, mul_embedding], dim=1)
+        if embedding_tokens == 1:
+            embeddings = rotated_embeddings
+        elif embedding_tokens == 2:
+            embeddings = torch.cat([original_embeddings, rotated_embeddings], dim=1)
+        elif embedding_tokens == 3:
+            embeddings = torch.cat([original_embeddings, rotated_embeddings, mul_embedding], dim=1)
 
         # Train MLP on embedding vectors
         output = self.mlp(embeddings)
@@ -90,10 +94,10 @@ class ViTMLPRegressor(nn.Module):
         all_val_loss = []
         train_mae = []
         val_mae = []
+        cosine_similarities = []
+        all_angles = []        
         for epoch in range(num_epochs):
             self.train()
-
-            # Lists to store per-batch statistics
             labels = []
             outputs = []
 
@@ -112,20 +116,18 @@ class ViTMLPRegressor(nn.Module):
                 self.optimizer.step()
 
                 # Extend lists with batch statistics
-                labels.append(label)
-                outputs.append(output.detach().cpu().to(self.device))
-                # cosine_similarities.extend(cosine_similarity.tolist())
-      
+                labels.append(label.detach().cpu())
+                outputs.append(output.detach().cpu())
+                
+                cosine_similarities.extend(cosine_similarity.detach().cpu().tolist())
+                all_angles.extend(label[:,0].detach().cpu().tolist())
+
             # Calculate and store root training loss for the epoch
-            train_loss = loss.detach().cpu().item()
-            all_train_loss.append(train_loss)
+            all_train_loss.append(loss.detach().cpu().item())
 
             # Calculate and store mean absolute error for the epoch
             mae = torch.mean(torch.abs(torch.cat(labels, dim=0) - torch.cat(outputs, dim=0)))
-            train_mae.append(mae.cpu())
-
-            # Extend list of all labels with current epoch's labels for cosine_similarity plot
-            # all_labels.extend(labels)
+            train_mae.append(mae)
 
             # Validation
             self.eval()
@@ -138,32 +140,21 @@ class ViTMLPRegressor(nn.Module):
                     val_output, _ = self.forward(original_image, translated_image)
                     val_loss = self.criterion(val_output, val_label)
 
-                    val_outputs.append(val_output.to(self.device))
-                    val_labels.append(val_label)
+                    val_outputs.append(val_output.cpu())
+                    val_labels.append(val_label.cpu())
+                
+                # Calculate and store root validation loss for the epoch
+                all_val_loss.append(val_loss.cpu().item())
 
                 # Calculate and store mean absolute error for the epoch
                 mae = torch.mean(torch.abs(torch.cat(val_labels, dim=0) - torch.cat(val_outputs, dim=0)))
                 val_mae.append(mae.cpu())
 
-            # Calculate and store root validation loss for the epoch
-            val_loss = val_loss.detach().cpu().item()
-            all_val_loss.append(val_loss)
-
-            print(f'Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss} Val Loss: {val_loss} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]}\n')
+            print(f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]}
+                   Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]}\n""")
 
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss, x_label="Epoch", y_label='Training Loss')
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss, x_label="Epoch", y_label='Validation Loss')
         plot_over_epoch(x=range(1, num_epochs + 1), y=train_mae, x_label="Epoch", y_label='Training MAE')
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae, x_label="Epoch", y_label='VAlidation MAE')
-        # plot_over_epoch(x=[angle * angle_range for angle in all_labels], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False)
-
-
-        # Save
-        # torch.save(self.state_dict(), 'vit_mlp_regressor.pth')
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-model = ViTMLPRegressor(mlp_hidden_sizes, num_output, pretrained_model_name=clip_model_name, lr=learning_rate, device=device, regress = True, freeze_pretrained_model=False)
-model = model.to(device)
-
-model.train_model(train_loader, val_loader, num_epochs=num_epochs)
+        plot_over_epoch(x=[angle * angle_range for angle in all_angles], y=cosine_similarities, x_label="Angle degrees", y_label='Cosine similarity', connecting_lines=False)
