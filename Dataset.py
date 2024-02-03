@@ -18,7 +18,8 @@ class CustomDataset(torch.utils.data.Dataset):
         self.valid_indices = self.get_valid_indices()
 
     def __len__(self):
-        return len(self.valid_indices) - jump_frames
+        # return len(self.valid_indices) - jump_frames
+        return 5
 
     def get_valid_indices(self):
         valid_indices = []
@@ -31,10 +32,9 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
+        
         original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.png'))
         original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png'))
-        # if not os.path.exists(img1_path) or not os.path.exists(img2_path):
-        #     return None  # Return None if images don't exist
 
         # Transform: Resize, center, grayscale
         first_image = self.transform(original_first_image).to(device)
@@ -53,7 +53,6 @@ class CustomDataset(torch.utils.data.Dataset):
 
 
 def get_data_loaders(batch_size):
-
     transform = transforms.Compose([
         transforms.Resize((256, 256)),
         transforms.CenterCrop(224),
@@ -68,6 +67,7 @@ def get_data_loaders(batch_size):
 
     train_datasets, val_datasets = [], []
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
+        if i not in train_seqeunces and i not in val_sequences: continue
         # Get a list of all poses [R,t] in this sequence
         poses = read_poses(poses_path)
 
@@ -88,10 +88,8 @@ def get_data_loaders(batch_size):
     concat_val_dataset = ConcatDataset(val_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset,
-                              batch_size=batch_size, shuffle=True, num_workers=1)
-    val_loader = DataLoader(
-        concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
+    train_loader = DataLoader(concat_train_dataset,batch_size=batch_size, shuffle=True, num_workers=1)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
 
     return train_loader, val_loader
 
@@ -106,7 +104,7 @@ def visualize_bad_images():
 
 def move_bad_images():
     # change dataset returns 6 params instead of 4. comment unnecessary lines in visualize
-    train_loader, val_loader = get_data_loaders()
+    train_loader, val_loader = get_data_loaders(batch_size=1)
 
     for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
         if first_image[0].shape == ():
@@ -131,10 +129,10 @@ def move_bad_images():
 def test_ground_truth_epipolar_err():
     """computes average epipolar error for both normalized ground truth and unnormalized ground truth """
 
-    train_loader, val_loader = get_data_loaders()
+    train_loader, val_loader = get_data_loaders(batch_size=1)
     
     avg_ep_err_unnormalized, avg_ep_err = 0, 0
-    for first_image, second_image, label, unormalized_label in train_loader:
+    for first_image, second_image, label, unormalized_label in val_loader:
         ep_err_unnormalized, ep_err = 0, 0
         for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
             ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F).get_epipolar_err()
@@ -143,10 +141,8 @@ def test_ground_truth_epipolar_err():
         ep_err_unnormalized, ep_err = ep_err_unnormalized/len(first_image), ep_err/len(first_image)
         avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + ep_err_unnormalized, avg_ep_err + ep_err
 
-    avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized/len(train_loader), avg_ep_err/len(train_loader)
+    avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized/len(val_loader), avg_ep_err/len(val_loader)
     return avg_ep_err_unnormalized, avg_ep_err
 
-if __name__ == "__main__":
-    print(test_ground_truth_epipolar_err())
-    # train_loader, val_loader = get_data_loaders()
-    # print(train_loader)
+# if __name__ == "__main__":
+    # print(test_ground_truth_epipolar_err())

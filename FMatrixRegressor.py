@@ -8,7 +8,7 @@ from sklearn.metrics import mean_absolute_error
 
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, freeze_pretrained_model=True):
+    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, penalty_coeff, batch_size, penaltize_normalized, freeze_pretrained_model=False):
         """
         Initialize the ViTMLPRegressor model.
 
@@ -24,6 +24,9 @@ class FMatrixRegressor(nn.Module):
 
         super(FMatrixRegressor, self).__init__()
         self.to(device)
+        self.penalty_coeff = penalty_coeff
+        self.batch_size = batch_size
+        self.penaltize_normalized = penaltize_normalized
 
         # Check if CLIP model is specified
         if pretrained_model_name == "openai/clip-vit-base-patch32":
@@ -79,35 +82,32 @@ class FMatrixRegressor(nn.Module):
                 x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
 
-
-            # x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, :49, :].view(-1, 7*7*768).to(device)
-            # x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, :49, :].view(-1, 7*7*768).to(device)
-
             x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1,  7*7*768).to(device)
             x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1,  7*7*768).to(device)
 
-            # cosine_similarity = torch.nn.functional.cosine_similarity(x1_embeddings, x2_embeddings).detach().cpu() # (batch_size)
 
             # Create another feature embedding of the element-wise mult between the two embedding vectors
             # mul_embedding = x1_embeddings.mul(x2_embeddings)
 
             # Concatenate both original and rotated embedding vectors
-            embeddings = torch.cat(
-                [x1_embeddings, x2_embeddings], dim=1).to(device)
+            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1).to(device)
 
             # Train MLP on embedding vectors            
             output = self.mlp(embeddings).to(device)
 
-            unnormalized_output = torch.stack([self.get_fmat(x)for x in output]) if use_reconstruction_layer else output.view(-1,3,3)
+            unnormalized_output = output.view(-1,3,3) if not use_reconstruction_layer else torch.stack([self.get_fmat(x)for x in output])
             
             output = norm_layer(unnormalized_output.view(-1, 9)).view(-1,3,3)
-
-            penalty = torch.tensor(0).to(device) if use_reconstruction_layer else last_sing_value_penalty(output).to(device)            
+            
+            if self.penaltize_normalized:
+                penalty = last_sing_value_penalty(output).to(device) if not use_reconstruction_layer else torch.tensor(0).to(device)    
+            else:
+                penalty = last_sing_value_penalty(unnormalized_output).to(device) if not use_reconstruction_layer else torch.tensor(0).to(device)    
             
             return unnormalized_output, output, penalty
 
 
-    def train_model(self, train_loader, val_loader, num_epochs, penalty_coeff, batch_size):
+    def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
         all_train_loss, all_val_loss, train_mae, val_mae, ec_err_truth, ec_err_pred, ec_err_pred_unoramlized, val_ec_err_truth, \
             val_ec_err_pred, val_ec_err_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], []
@@ -122,12 +122,11 @@ class FMatrixRegressor(nn.Module):
                     device), second_image.to(device), label.to(device), unormalized_label.to(device)
 
                 # Forward pass
-                unnormalized_output, output, penalty = self.forward(
-                    first_image, second_image)
+                unnormalized_output, output, penalty = self.forward(first_image, second_image)
 
                 # Compute loss
                 l2_loss = self.L2_loss(output, label)
-                loss = l2_loss + penalty_coeff*penalty 
+                loss = l2_loss + self.penalty_coeff*penalty 
                 avg_loss += loss.detach()
 
                 # Compute Backward pass and gradients
@@ -147,8 +146,6 @@ class FMatrixRegressor(nn.Module):
                 labels = torch.cat((labels, label.detach()), dim=0)
                 outputs = torch.cat((outputs, output.detach()), dim=0)
 
-                # cosine_similarities.extend(cosine_similarity.tolist())
-
             # Calculate and store mean absolute error for the epoch
             mae = torch.mean(torch.abs(labels - outputs))
 
@@ -161,9 +158,6 @@ class FMatrixRegressor(nn.Module):
             ec_err_pred.append(epoch_avg_ec_err_pred.cpu())
             ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized.cpu())
             all_train_loss.append(avg_loss.cpu())
-
-            # Extend list of all labels with current epoch's labels for cosine_similarity plot
-            # all_labels.extend(labels)
 
             # Validation
             self.eval()
@@ -207,44 +201,60 @@ class FMatrixRegressor(nn.Module):
                 all_penalty.append(epoch_penalty.cpu())
                 
             # Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
-            epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} penalty: {epoch_penalty}
-            Train avg epipolar constraint error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val avg epipolar constraint error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}
-            Train avg epipolar constraint error pred: {epoch_avg_ec_err_pred} Val avg epipolar constraint error pred:  {val_epoch_avg_ec_err_pred}
-            penalty_coeff: {penalty_coeff}, batch_size: {batch_size}\n"""
+            epoch_output = f"""Epoch {epoch+1}/{num_epochs},  Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
+            Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
+            Train epipolar error pred unormalized: {epoch_avg_ec_err_pred_unormalized} Val epipolar error pred unormalized: {val_epoch_avg_ec_err_pred_unormalized}
+            Train epipolar error pred: {epoch_avg_ec_err_pred} Val epipolar error pred:  {val_epoch_avg_ec_err_pred}
+            penalty_coeff: {self.penalty_coeff}, batch_size: {self.batch_size} penalty: {epoch_penalty}\n"""
 
             with open("output.txt", "a") as f:
                 f.write(epoch_output)
                 print(epoch_output)
 
         with open("output.txt", "a") as f:
-            output = f'Train gorund truth error: {epoch_avg_ec_err_truth} val gorund truth error: {val_epoch_avg_ec_err_truth}\n'
+            output = f'Train ground truth error: {epoch_avg_ec_err_truth} val ground truth error: {val_epoch_avg_ec_err_truth}\n\n'
             f.write(output)
             print(output)
 
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss,
                         x_label="Epoch", y_label='Training Loss', 
-                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
+                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
+                        penaltize_normalized=self.penaltize_normalized, show=show_plots)
+        
         plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss,
                         x_label="Epoch", y_label='Validation Loss', 
-                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
+                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
+                        penaltize_normalized=self.penaltize_normalized, show=show_plots)
+        
         plot_over_epoch(x=range(1, num_epochs + 1), y=train_mae,
                         x_label="Epoch", y_label='Training MAE', 
-                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
+                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
+                        penaltize_normalized=self.penaltize_normalized, show=show_plots)
+        
         plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae,
                         x_label="Epoch", y_label='VAlidation MAE', 
-                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
+                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
+                        penaltize_normalized=self.penaltize_normalized, show=show_plots)
+        
         plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred, 
                         x_label="Epoch", y_label='Training epipolar constraint err for pred F', 
-                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
-        plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred_unoramlized, x_label="Epoch",
-                        y_label='Train epipolar constraint err for pred F unormalized', 
-                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
-        plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred_unormalized, x_label="Epoch",
-                        y_label='Val epipolar constraint err for pred F unormalized', 
-                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
-        plot_over_epoch(x=range(1, num_epochs + 1), y=all_penalty, x_label="Epoch",
-                        y_label='Additional loss penalty for last singular value', 
-                        penalty_coeff=penalty_coeff, batch_size=batch_size, show=show_plots)
+                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
+                        penaltize_normalized=self.penaltize_normalized, show=show_plots)
+        
+        plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred_unoramlized, 
+                        x_label="Epoch",y_label='Train epipolar constraint err for pred F unormalized', 
+                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
+                        penaltize_normalized=self.penaltize_normalized, show=show_plots)
+        
+        plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred_unormalized, 
+                        x_label="Epoch", y_label='Val epipolar constraint err for pred F unormalized', 
+                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
+                        penaltize_normalized=self.penaltize_normalized, show=show_plots)
+        
+        plot_over_epoch(x=range(1, num_epochs + 1), y=all_penalty,
+                         x_label="Epoch", y_label='Additional loss penalty for last singular value', 
+                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
+                        penaltize_normalized=self.penaltize_normalized, show=show_plots)
 
     
     # def get_rotation(self, rx, ry, rz):
