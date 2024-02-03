@@ -2,12 +2,16 @@ from FMatrixRegressor import FMatrixRegressor
 from params import *
 from Dataset import get_data_loaders
 import torch.multiprocessing as mp
+import itertools
 
 if __name__ == "__main__":
 
     mp.set_start_method('spawn', force=True)
     
-    for penalty_coeff, batch_size, penaltize_normalized in zip(penalty_coeffs, batch_sizes, penaltize_normalized_options):
+    # Iterate over each combination
+    param_combinations = itertools.product(batch_sizes, penalty_coeffs, penaltize_normalized_options)
+    
+    for batch_size, penalty_coeff, penaltize_normalized in param_combinations:
         model = FMatrixRegressor(mlp_hidden_sizes, num_output, 
                                 pretrained_model_name=clip_model_name, lr=learning_rate, 
                                 penalty_coeff=penalty_coeff, batch_size=batch_size, penaltize_normalized=penaltize_normalized, 
