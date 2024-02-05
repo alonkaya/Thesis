@@ -3,12 +3,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 batch_sizes = [1,16,32]  
 num_epochs = 15
-learning_rate = 1e-4
+learning_rates = [1e-4, 5e-5]
 penalty_coeffs = [1,2]
 jump_frames = 2
 train_seqeunces = [0,2]
 val_sequences = [1,3,4]
-penaltize_normalized_options = [True, False]
+penaltize_normalized_options = [False]
 mlp_hidden_sizes = [512, 256]
 
 clip_model_name = "openai/clip-vit-base-patch32"

@@ -36,12 +36,12 @@ class CustomDataset(torch.utils.data.Dataset):
         original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png'))
 
         # Transform: Resize, center, grayscale
-        first_image = self.transform(original_first_image).to(device)
-        second_image = self.transform(original_second_image).to(device)
+        first_image = self.transform(original_first_image)
+        second_image = self.transform(original_second_image)
 
         # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-        adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
-        
+        adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size), torch.tensor([256, 256]), torch.tensor([224, 224]))
+
         unnormalized_F = get_F(self.poses, idx, adjusted_K)
 
         # Normalize F-Matrix

@@ -20,7 +20,7 @@ class MLP(nn.Module):
         return self.layers(x)
 
 
-def plot_over_epoch(x, y, x_label, y_label, penalty_coeff, batch_size, penaltize_normalized, show=True, connecting_lines=True,):
+def plot_over_epoch(x, y, x_label, y_label, penalty_coeff, batch_size, penaltize_normalized, learning_rate, show=True, connecting_lines=True,):
     plt.figure()
     if connecting_lines:
         plt.plot(x, y)
@@ -29,9 +29,9 @@ def plot_over_epoch(x, y, x_label, y_label, penalty_coeff, batch_size, penaltize
 
     plt.xlabel(x_label)
     plt.ylabel(y_label)
-    plt.title(f'{y_label} coeff {penalty_coeff} batch size {batch_size} penaltize_normalized {penaltize_normalized}')
+    plt.title(f'{y_label} coeff {penalty_coeff} batch size {batch_size} penaltize_normalized {penaltize_normalized} lr: {learning_rate}')
 
-    plt.savefig(f'plots/{y_label} coeff {penalty_coeff} batch size {batch_size} penaltize_normalized {penaltize_normalized}.png')  # Specify the filename and extension
+    plt.savefig(f'plots/{y_label} coeff: {penalty_coeff} batch size: {batch_size} penaltize_normalized: {penaltize_normalized} lr: {learning_rate}.png')  # Specify the filename and extension
 
     if show:
         plt.show()
