@@ -14,7 +14,7 @@ def get_intrinsic(calib_path):
     # Step 1: Decompose the projection matrix P into the form P = K [R | t]
     M = projection_matrix[:, :3]
     K, _ = rq(M)
-    K = torch.tensor(K)
+    K = torch.tensor(K).to(device)
 
     # Enforce positive diagonal for K
     T = torch.diag(torch.sign(torch.diag(K)))

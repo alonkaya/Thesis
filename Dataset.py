@@ -36,11 +36,11 @@ class CustomDataset(torch.utils.data.Dataset):
         original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png'))
 
         # Transform: Resize, center, grayscale
-        first_image = self.transform(original_first_image)
-        second_image = self.transform(original_second_image)
+        first_image = self.transform(original_first_image).to(device)
+        second_image = self.transform(original_second_image).to(device)
 
         # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-        adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size), torch.tensor([256, 256]), torch.tensor([224, 224]))
+        adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
 
         unnormalized_F = get_F(self.poses, idx, adjusted_K)
 
@@ -68,7 +68,7 @@ def get_data_loaders(batch_size):
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
         if i not in train_seqeunces and i not in val_sequences: continue
         # Get a list of all poses [R,t] in this sequence
-        poses = read_poses(poses_path)
+        poses = read_poses(poses_path).to(device)
 
         # Read the calib.txt file to get the projection matrix to compute intrinsic K
         K = get_intrinsic(calib_path)
