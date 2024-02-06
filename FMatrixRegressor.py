@@ -5,7 +5,7 @@ from FunMatrix import *
 import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 from sklearn.metrics import mean_absolute_error
-
+import math
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, penalty_coeff, batch_size, penaltize_normalized, freeze_pretrained_model=False):
@@ -208,7 +208,9 @@ class FMatrixRegressor(nn.Module):
 
             # del val_labels, val_outputs, val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss, unnormalized_val_output, val_output, penalty
             # torch.cuda.empty_cache()
-
+            if math.isnan(all_train_loss[-1]) or  math.isnan(all_val_loss[-1]) or math.isnan(train_mae[-1]) or math.isnan(val_mae[-1]) or math.isnan(ec_err_pred_unoramlized[-1]) or math.isnan(val_ec_err_pred_unormalized[-1]) or math.isnan(ec_err_pred[-1]) or math.isnan(all_penalty[-1]):
+                print("Found nan\n")
+                return
             # Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
             epoch_output = f"""Epoch {epoch+1}/{num_epochs},  Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
             Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
