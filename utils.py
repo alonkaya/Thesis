@@ -63,7 +63,7 @@ def read_poses(poses_path):
             pose = torch.tensor([float(x) for x in line.strip().split()]).reshape(3, 4)
             poses.append(pose)
 
-    return torch.stack(poses).to(device)
+    return torch.stack(poses)
 
 def normalize_max(x):
     return x / (torch.max(torch.abs(x), dim=1, keepdim=True)[0] + 1e-8)

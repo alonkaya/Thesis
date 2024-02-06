@@ -14,7 +14,7 @@ def get_intrinsic(calib_path):
     # Step 1: Decompose the projection matrix P into the form P = K [R | t]
     M = projection_matrix[:, :3]
     K, _ = rq(M)
-    K = torch.tensor(K).to(device)
+    K = torch.tensor(K)
 
     # Enforce positive diagonal for K
     T = torch.diag(torch.sign(torch.diag(K)))
@@ -64,7 +64,7 @@ def compute_essential(R, t):
     # Compute the skew-symmetric matrix of t
     t_x = torch.tensor([[0, -t[2], t[1]],
                         [t[2], 0, -t[0]],
-                        [-t[1], t[0], 0]]).to(device)
+                        [-t[1], t[0], 0]])
 
     # Compute the essential matrix E
     E = torch.matmul(t_x, R)

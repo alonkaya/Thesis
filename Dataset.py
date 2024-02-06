@@ -88,8 +88,8 @@ def get_data_loaders(batch_size):
     concat_val_dataset = ConcatDataset(val_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset,batch_size=batch_size, shuffle=True, num_workers=1)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
+    train_loader = DataLoader(concat_train_dataset,batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1, pin_memory=True)    
 
     return train_loader, val_loader
 
