@@ -1,7 +1,7 @@
 from params import *
 import matplotlib.pyplot as plt
 import torch.nn as nn
-
+import os
 
 class MLP(nn.Module):
     def __init__(self, num_input, mlp_hidden_sizes, num_output):
@@ -43,6 +43,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, learning_rate, 
         ax.grid(True)
         ax.legend()
 
+    os.makedirs('plots', exist_ok=True)
     plt.savefig(f'plots/{title}  coeff {penalty_coeff} batch size {batch_size} lr {learning_rate}.png')  # Specify the filename and extension
     if show:
         plt.show()
