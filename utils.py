@@ -19,22 +19,34 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.layers(x)
 
+def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, learning_rate, x_label="Epochs", show=False):
 
-def plot_over_epoch(x, y, x_label, y_label, penalty_coeff, batch_size, penaltize_normalized, learning_rate, show=True, connecting_lines=True,):
-    plt.figure()
-    if connecting_lines:
-        plt.plot(x, y)
-    else:
-        plt.plot(x, y, marker='o', linestyle='')
+    fig, axs = plt.subplots(1, 2, figsize=(16, 6))  # 1 row, 2 columns
+    
+    for ax, y_scale in zip(axs, ['linear', 'log']):
+        ax.plot(x, y1, color='blue', label="Train")
+        ax.plot(x, y2, color='orange', label="Val")
 
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-    plt.title(f'{y_label} coeff {penalty_coeff} batch size {batch_size} penaltize_normalized {penaltize_normalized} lr: {learning_rate}')
+        for i, txt in enumerate(y1):
+            ax.text(x[i], y1[i], f'{txt:.2f}', fontsize=8, color='blue', ha='center', va='bottom')
 
-    plt.savefig(f'plots/{y_label} coeff: {penalty_coeff} batch size: {batch_size} penaltize_normalized: {penaltize_normalized} lr: {learning_rate}.png')  # Specify the filename and extension
+        # Annotate each point on the Val line
+        for i, txt in enumerate(y2):
+            ax.text(x[i], y2[i], f'{txt:.2f}', fontsize=8, color='orange', ha='center', va='top')
 
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
+        ax.set_title(f'{title} - coeff: {penalty_coeff}, batch size: {batch_size}, lr: {learning_rate}, scale: {y_scale}')
+    
+        ax.set_yscale(y_scale)
+        ax.set_xticks(x)
+        ax.grid(True)
+        ax.legend()
+
+    plt.savefig(f'plots/{title}  coeff {penalty_coeff} batch size {batch_size} lr {learning_rate}.png')  # Specify the filename and extension
     if show:
         plt.show()
+
 
 # Define a function to read the calib.txt file
 def read_calib(calib_path):

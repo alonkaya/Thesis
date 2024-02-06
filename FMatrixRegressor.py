@@ -38,11 +38,6 @@ class FMatrixRegressor(nn.Module):
                 pretrained_model_name)
             self.pretrained_model = CLIPVisionModel.from_pretrained(
                 pretrained_model_name).to(device)
-            # self.pretrained_model = CLIPModel.from_pretrained(pretrained_model_name)
-
-            # Get input dimension for the MLP based on CLIP configuration
-            mlp_input_dim = self.pretrained_model.config.hidden_size
-            # mlp_input_dim = self.pretrained_model.config.projection_dim
 
         else:
             self.clip = False
@@ -51,8 +46,8 @@ class FMatrixRegressor(nn.Module):
             self.pretrained_model = ViTModel.from_pretrained(
                 pretrained_model_name).to(device)
 
-            # Get input dimension for the MLP based on ViT configuration
-            mlp_input_dim = self.pretrained_model.config.hidden_size
+        # Get input dimension for the MLP based on ViT configuration
+        mlp_input_dim = self.pretrained_model.config.hidden_size
 
         # Freeze the parameters of the pretrained model if specified
         if freeze_pretrained_model:
@@ -63,7 +58,7 @@ class FMatrixRegressor(nn.Module):
         self.L2_loss = nn.MSELoss().to(device)
         self.L1_loss = nn.L1Loss().to(device)
 
-        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes,
+        self.mlp = MLP(mlp_input_dim*7*7*3, mlp_hidden_sizes,
                        num_output).to(device)
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
@@ -88,10 +83,10 @@ class FMatrixRegressor(nn.Module):
 
 
             # Create another feature embedding of the element-wise mult between the two embedding vectors
-            # mul_embedding = x1_embeddings.mul(x2_embeddings)
+            mul_embedding = x1_embeddings.mul(x2_embeddings)
 
             # Concatenate both original and rotated embedding vectors
-            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1).to(device)
+            embeddings = torch.cat([x1_embeddings, x2_embeddings, mul_embedding], dim=1).to(device)
 
             # Train MLP on embedding vectors            
             output = self.mlp(embeddings).to(device)
@@ -211,6 +206,7 @@ class FMatrixRegressor(nn.Module):
             if math.isnan(all_train_loss[-1]) or  math.isnan(all_val_loss[-1]) or math.isnan(train_mae[-1]) or math.isnan(val_mae[-1]) or math.isnan(ec_err_pred_unoramlized[-1]) or math.isnan(val_ec_err_pred_unormalized[-1]) or math.isnan(ec_err_pred[-1]) or math.isnan(all_penalty[-1]):
                 print("Found nan\n")
                 return
+            
             # Train avg epipolar constraint error truth: {epoch_avg_ec_err_truth} Val avg epipolar constraint error truth: {val_epoch_avg_ec_err_truth}\n"""
             epoch_output = f"""Epoch {epoch+1}/{num_epochs},  Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
             Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
@@ -227,48 +223,21 @@ class FMatrixRegressor(nn.Module):
             f.write(output)
             print(output)
 
+        plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
+                        title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, learning_rate=self.lr)
+        
+        plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
+                        title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, learning_rate=self.lr)
+        
+        plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
+                        title="Epipolar error unnormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, learning_rate=self.lr)
+        
+        plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred, y2=val_ec_err_pred, 
+                        title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, learning_rate=self.lr)
+                       
 
-        plot_over_epoch(x=range(1, num_epochs + 1), y=all_train_loss,
-                        x_label="Epoch", y_label='Training Loss', 
-                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
-                        penaltize_normalized=self.penaltize_normalized, learning_rate=self.lr, show=show_plots)
-        
-        plot_over_epoch(x=range(1, num_epochs + 1), y=all_val_loss,
-                        x_label="Epoch", y_label='Validation Loss', 
-                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
-                        penaltize_normalized=self.penaltize_normalized, learning_rate=self.lr, show=show_plots)
-        
-        plot_over_epoch(x=range(1, num_epochs + 1), y=train_mae,
-                        x_label="Epoch", y_label='Training MAE', 
-                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
-                        penaltize_normalized=self.penaltize_normalized, learning_rate=self.lr, show=show_plots)
-        
-        plot_over_epoch(x=range(1, num_epochs + 1), y=val_mae,
-                        x_label="Epoch", y_label='VAlidation MAE', 
-                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
-                        penaltize_normalized=self.penaltize_normalized, learning_rate=self.lr, show=show_plots)
-        
-        plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred, 
-                        x_label="Epoch", y_label='Training epipolar constraint err for pred F', 
-                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
-                        penaltize_normalized=self.penaltize_normalized, learning_rate=self.lr, show=show_plots)
-        
-        plot_over_epoch(x=range(1, num_epochs + 1), y=ec_err_pred_unoramlized, 
-                        x_label="Epoch",y_label='Train epipolar constraint err for pred F unormalized', 
-                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
-                        penaltize_normalized=self.penaltize_normalized, learning_rate=self.lr, show=show_plots)
-        
-        plot_over_epoch(x=range(1, num_epochs + 1), y=val_ec_err_pred_unormalized, 
-                        x_label="Epoch", y_label='Val epipolar constraint err for pred F unormalized', 
-                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
-                        penaltize_normalized=self.penaltize_normalized, learning_rate=self.lr, show=show_plots)
-        
-        plot_over_epoch(x=range(1, num_epochs + 1), y=all_penalty,
-                         x_label="Epoch", y_label='Last singular value',
-                        penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, 
-                        penaltize_normalized=self.penaltize_normalized, learning_rate=self.lr, show=show_plots)
 
-    
+
     # def get_rotation(self, rx, ry, rz):
     #     # normalize input?
     #     R_x = nn.Parameter(torch.tensor([
