@@ -2,6 +2,7 @@ from params import *
 import matplotlib.pyplot as plt
 import torch.nn as nn
 import os
+import math
 
 class MLP(nn.Module):
     def __init__(self, num_input, mlp_hidden_sizes, num_output):
@@ -82,3 +83,15 @@ def norm_layer(unnormalized_x):
     else:
         return normalize_L2(normalize_L1(unnormalized_x))
 
+def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, ec_err_pred_unoramlized_last, val_ec_err_pred_unormalized_last, ec_err_pred_last, all_penalty_last):
+    if math.isnan(all_train_loss_last) or math.isnan(all_val_loss_last) or math.isnan(train_mae_last) or math.isnan(val_mae_last) or math.isnan(ec_err_pred_unoramlized_last) or math.isnan(val_ec_err_pred_unormalized_last) or math.isnan(ec_err_pred_last) or math.isnan(all_penalty_last):
+        with open("output.txt", "a") as f:
+            f.write("found nan")
+            print("found nan")                
+        return True
+    return False
+                     
+def print_and_write(output):
+    with open("output.txt", "a") as f:
+        f.write(output)
+        print(output)
