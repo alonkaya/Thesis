@@ -192,13 +192,13 @@ class FMatrixRegressor(nn.Module):
                 all_penalty.append(epoch_penalty.cpu().item())
             
 
-
             if check_nan(all_train_loss[-1], all_val_loss[-1], train_mae[-1], val_mae[-1], ec_err_pred_unoramlized[-1], val_ec_err_pred_unormalized[-1], ec_err_pred[-1],all_penalty[-1]): return
                 
-            epoch_output = f"""Epoch {epoch+1}/{num_epochs},  Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
+            epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
             Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
             Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]} Val epipolar error pred unormalized: {val_ec_err_pred_unormalized[-1]}
-            Train epipolar error pred: {ec_err_pred[-1]} Val epipolar error pred:  {val_ec_err_pred[-1]} penalty: {all_penalty[-1]}\n"""
+            Train epipolar error pred: {ec_err_pred[-1]} Val epipolar error pred: {val_ec_err_pred[-1]} 
+            penalty: {all_penalty[-1]}\n"""
             print_and_write(epoch_output)
         
         output = f"""Train ground truth error: {ec_err_truth[-1]} val ground truth error: {val_ec_err_truth[-1]}\n\n\n"""
