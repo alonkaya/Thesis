@@ -104,7 +104,7 @@ def get_dataloaders_RealEstate(batch_size):
     train_datasets, val_datasets = [], []
     for RealEstate_path in RealEstate_paths:
         for sequence_name in os.listdir(RealEstate_path):
-            specs_path = os.path.join(RealEstate_path, f'{sequence_name}.txt')
+            specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
             sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
 
             # Get a list of all poses [R,t] in this sequence
