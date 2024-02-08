@@ -118,7 +118,7 @@ def get_dataloaders_RealEstate(batch_size):
             original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
             K = get_intrinsic_REALESTATE(specs_path, original_image_size)
 
-            if RealEstate_path == 'RealEstate10K\\train_images':
+            if RealEstate_path == 'RealEstate10K/train_images':
                 train_datasets.append(CustomDataset(sequence_path, poses, valid_indices, transform, K))     
             else:   
                 val_datasets.append(CustomDataset(sequence_path, poses, valid_indices, transform, K))
