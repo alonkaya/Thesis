@@ -67,7 +67,7 @@ def compute_relative_transformations(pose1, pose2):
     R_relative = torch.matmul(R2, R1_T)
     
     t_image_2_world_coor = torch.matmul(R1_T, (t2 - t1))
-    t_world_2_image_coor = t2 - np.dot(R_relative, t1)
+    t_world_2_image_coor = t2 - torch.matmul(R_relative, t1)
     t_relative = t_world_2_image_coor if USE_REALESTATE else t_image_2_world_coor
     
     return R_relative, t_relative
