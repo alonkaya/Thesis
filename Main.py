@@ -6,9 +6,7 @@ import torch.multiprocessing as mp
 import itertools
 import os
 
-
 if __name__ == "__main__":
-
     mp.set_start_method('spawn', force=True)
     os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
     print_and_write("#######################################################################")
@@ -27,4 +25,4 @@ if __name__ == "__main__":
         parameters = f'learning_rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, penalty_coeff: {penalty_coeff}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}, batch_size: {batch_size}, train_seqeunces: {train_seqeunces}, val_sequences: {val_sequences}, penaltize_normalized: {penaltize_normalized}\n\n'
         print_and_write(parameters)
 
-        model.train_model(train_loader, val_loader, num_epochs=NUM_EPOCHS, show_plots=SHOW_PLOTS)
+        model.train_model(train_loader, val_loader, num_epochs=NUM_EPOCHS)
