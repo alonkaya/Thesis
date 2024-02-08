@@ -1,34 +1,45 @@
 from params import *
-from utils import read_calib
+from utils import read_camera_intrinsic
 import cv2
 import os
 from scipy.linalg import rq
-from torchvision import transforms
 import numpy as np
 
+def get_intrinsic_REALESTATE(specs_path, original_image_size):
+    intrinsics = read_camera_intrinsic(specs_path)
 
-def get_intrinsic(calib_path):
-    projection_matrix = read_calib(calib_path)
+    K = torch.tensor([
+        [intrinsics[0],     0,          intrinsics[2]],
+        [0,             intrinsics[1],  intrinsics[3]],
+        [0,                 0,          1]
+    ]).to(device)
 
-    # TODO: check if this func is correct
-    # Step 1: Decompose the projection matrix P into the form P = K [R | t]
+    # Adjust K according to resize and center crop transforms   
+    adjusted_K = adjust_intrinsic(K, original_image_size, torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
+
+    return adjusted_K
+
+def get_intrinsic_KITTI(calib_path, original_image_size):
+    projection_matrix = read_camera_intrinsic(calib_path).reshape(3,4)
+
+    # Extract the 3x3 part of the matrix (ignoring the last column)
     M = projection_matrix[:, :3]
+
+    # Perform RQ decomposition on M
     K, _ = rq(M)
-    K = torch.tensor(K).to(device)
 
-    # Enforce positive diagonal for K
-    T = torch.diag(torch.sign(torch.diag(K)))
-    if torch.det(T) < 0:
-        T[1, 1] *= -1
+    # Adjust the signs to ensure the diagonal of K is positive
+    T = np.diag(np.sign(np.diag(K)))
+    K = np.dot(K, T)
 
-    # Update K and R
-    K = torch.matmul(K.clone(), T)
-    # R = torch.matmul(T, R)
+    # Normalize K to ensure the bottom-right value is 1
+    K /= K[2, 2]
 
-    last_elem = K[2, 2]
-    K /= last_elem.clone()
+    # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
+    adjusted_K = adjust_intrinsic(K.to(device), original_image_size, torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
 
-    return K
+    return adjusted_K
+
 
 
 def adjust_intrinsic(k, original_size, resized_size, ceter_crop_size):
@@ -52,11 +63,13 @@ def compute_relative_transformations(pose1, pose2):
     t2 = pose2[:, 3]
     R2 = pose2[:, :3]
 
-    transposed_R1 = torch.transpose(R1, 0, 1)
-    R_relative = torch.matmul(R2, transposed_R1)
-    t_relative = torch.matmul(transposed_R1, (t2 - t1))
-    # t_relative = t2 - np.dot(R_relative, t1)
-
+    R1_T = torch.transpose(R1, 0, 1)
+    R_relative = torch.matmul(R2, R1_T)
+    
+    t_image_2_world_coor = torch.matmul(R1_T, (t2 - t1))
+    t_world_2_image_coor = t2 - np.dot(R_relative, t1)
+    t_relative = t_world_2_image_coor if USE_REALESTATE else t_image_2_world_coor
+    
     return R_relative, t_relative
 
 
@@ -88,7 +101,7 @@ def compute_fundamental(E, K1, K2):
 
 def get_F(poses, idx, K):
     R_relative, t_relative = compute_relative_transformations(
-        poses[idx], poses[idx+jump_frames])
+        poses[idx], poses[idx+JUMP_FRAMES])
     E = compute_essential(R_relative, t_relative)
     F = compute_fundamental(E, K, K)
 
@@ -179,7 +192,7 @@ class EpipolarGeometry:
             (0, 0, 204)
         ]
 
-    def get_keypoints(self, threshold=epipolar_constraint_threshold):
+    def get_keypoints(self, threshold=EPIPOLAR_THRESHOLD):
         """Recives numpy images and returns numpy points"""
         # sift = cv2.xfeatures2d.SIFT_create()
         sift = cv2.SIFT_create()
@@ -313,7 +326,7 @@ class EpipolarGeometry:
                     color=(130, 0, 150), lineType=cv2.LINE_AA)
 
         if(avg_distance_err_img1 > 13 or abs(epip_test_err) > 0.01):
-            if move_bad_images:
+            if MOVE_BAD_IMAGES:
                 src_path1 = os.path.join(
                     self.sequence_path, "image_0", self.file_name1)
                 dst_path1 = os.path.join(
@@ -327,7 +340,7 @@ class EpipolarGeometry:
                 print(os.path.join(sqResultDir, "bad_frames",
                       'epipoLine_sift_{}.png\n'.format(img_idx)))
 
-        elif not move_bad_images:
+        elif not MOVE_BAD_IMAGES:
             cv2.imwrite(os.path.join(sqResultDir, "good_frames",
                         'epipoLine_sift_{}.png'.format(img_idx)), vis)
             print(os.path.join(sqResultDir, "good_frames",

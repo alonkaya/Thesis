@@ -63,7 +63,7 @@ class FMatrixRegressor(nn.Module):
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
     def forward(self, x1, x2):
-        if use_deepf_nocors:
+        if DEEPF_NOCORRS:
             # net = HomographyNet(use_reconstruction_module=False).to(device)
 
             # output = net.foward(x1, x2).to(device)
@@ -89,14 +89,14 @@ class FMatrixRegressor(nn.Module):
             # Train MLP on embedding vectors            
             output = self.mlp(embeddings).to(device)
 
-            unnormalized_output = output.view(-1,3,3) if not use_reconstruction_layer else torch.stack([self.get_fmat(x)for x in output])
+            unnormalized_output = output.view(-1,3,3) if not USE_RECONSTRUCTION_LAYER else torch.stack([self.get_fmat(x)for x in output])
             
             output = norm_layer(unnormalized_output.view(-1, 9)).view(-1,3,3)
             
             if self.penaltize_normalized:
-                penalty = last_sing_value_penalty(output).to(device) if not use_reconstruction_layer else torch.tensor(0).to(device)    
+                penalty = last_sing_value_penalty(output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
             else:
-                penalty = last_sing_value_penalty(unnormalized_output).to(device) if not use_reconstruction_layer else torch.tensor(0).to(device)    
+                penalty = last_sing_value_penalty(unnormalized_output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
             
             return unnormalized_output, output, penalty
 

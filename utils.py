@@ -50,19 +50,24 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, learning_rate, 
         plt.show()
 
 
-# Define a function to read the calib.txt file
-def read_calib(calib_path):
-    with open(calib_path, 'r') as f:
-        return torch.tensor([float(x) for x in f.readline().split()[1:]]).reshape(3, 4)
+def read_camera_intrinsic(path_to_intrinsic):
+     with open(path_to_intrinsic, 'r') as f:
+        lines = f.readlines()  # Read all lines into a list
 
+        intrinsic_strings = lines[1].split()[2:6] if USE_REALESTATE else lines[0].split()[1:]
+
+        return torch.tensor([float(x) for x in intrinsic_strings])
 
 # Define a function to read the pose files in the poses folder
 def read_poses(poses_path):
     poses = []
     with open(poses_path, 'r') as f:
-        for line in f:
-            pose = torch.tensor([float(x) for x in line.strip().split()]).reshape(3, 4)
-            poses.append(pose)
+        for i, line in enumerate(f):
+            if USE_REALESTATE and i == 0: continue
+
+            line = torch.tensor([float(x) for x in line.strip().split()])
+            pose = line[8:] if USE_REALESTATE else line
+            poses.append(pose.view(3, 4))
 
     return torch.stack(poses)
 
@@ -78,7 +83,7 @@ def normalize_L2(x):
 
 def norm_layer(unnormalized_x):
     # Normalizes a batch of flattend 9-long vectors (i.e shape [-1, 9])
-    if use_reconstruction_layer:
+    if USE_RECONSTRUCTION_LAYER:
         return normalize_max(unnormalized_x)
     else:
         return normalize_L2(normalize_L1(unnormalized_x))

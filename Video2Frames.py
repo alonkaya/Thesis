@@ -2,6 +2,7 @@ from pytube import YouTube
 import cv2
 import os
 import glob
+import shutil
 
 def download_video(url, path):
     yt = YouTube(url)
@@ -36,7 +37,7 @@ def parse_file(file_path):
     timestamps = [int(line.split()[0]) for line in lines[1:]]
     return url, timestamps
 
-def process_files(directory_from, directory_to, limit=2):
+def process_files(directory_from, directory_to, limit=8):
     files = glob.glob(os.path.join(directory_from, '*.txt'))[:limit]
 
     for file_path in files:
@@ -46,13 +47,17 @@ def process_files(directory_from, directory_to, limit=2):
         url, timestamps = parse_file(file_path)
         video_path = download_video(url, path=os.path.join(directory_from, f'{filename}.mp4'))
 
-        output_dir = os.path.join(directory_to, filename, 'image_0')
-        extract_frames(video_path, timestamps, output_dir)
+        output_dir = os.path.join(directory_to, filename)
+        image_0_dir = os.path.join(output_dir, 'image_0')
+
+        extract_frames(video_path, timestamps, image_0_dir)
+
+        shutil.copy(file_path, output_dir)
 
         # Optionally, remove the downloaded video if not needed
         os.remove(video_path)
 
 # Specify the directory containing the text files
-directory_from = 'RealEstate10K/train'
-directory_to = 'RealEstate10K/train_images'
+directory_from = 'RealEstate10K/test'
+directory_to = 'RealEstate10K/val_images'
 process_files(directory_from, directory_to)
