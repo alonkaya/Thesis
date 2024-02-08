@@ -182,7 +182,7 @@ class EpipolarGeometry:
 
         self.sequence_path = os.path.join(
             'sequences', sequence_num) if sequence_num else None
-        self.file_name1 = f'{idx:06}.png' if idx != None else None
+        self.file_name1 = f'{idx:06}.{IMAGE_TYPE}' if idx != None else None
 
         self.colors = [
             (255, 102, 102),
@@ -336,15 +336,15 @@ class EpipolarGeometry:
                     os.rename(src_path1, dst_path1)
             else:
                 cv2.imwrite(os.path.join(sqResultDir, "bad_frames",
-                            'epipoLine_sift_{}.png'.format(img_idx)), vis)
+                            'epipoLine_sift_{}.{IMAGE_TYPE}'.format(img_idx)), vis)
                 print(os.path.join(sqResultDir, "bad_frames",
-                      'epipoLine_sift_{}.png\n'.format(img_idx)))
+                      'epipoLine_sift_{}.{IMAGE_TYPE}\n'.format(img_idx)))
 
         elif not MOVE_BAD_IMAGES:
             cv2.imwrite(os.path.join(sqResultDir, "good_frames",
-                        'epipoLine_sift_{}.png'.format(img_idx)), vis)
+                        'epipoLine_sift_{}.{IMAGE_TYPE}'.format(img_idx)), vis)
             print(os.path.join(sqResultDir, "good_frames",
-                  'epipoLine_sift_{}.png\n'.format(img_idx)))
+                  'epipoLine_sift_{}.{IMAGE_TYPE}\n'.format(img_idx)))
 
 def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):
     # Compute mean epipolar constraint error

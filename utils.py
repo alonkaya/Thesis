@@ -45,7 +45,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, learning_rate, 
         ax.legend()
 
     os.makedirs('plots', exist_ok=True)
-    plt.savefig(f'plots/{title}  coeff {penalty_coeff} batch size {batch_size} lr {learning_rate}.png')  # Specify the filename and extension
+    plt.savefig(f'plots/{title}  coeff {penalty_coeff} batch size {batch_size} lr {learning_rate}.{IMAGE_TYPE}')  # Specify the filename and extension
     if show:
         plt.show()
 

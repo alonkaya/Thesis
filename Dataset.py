@@ -23,8 +23,8 @@ class CustomDataset(torch.utils.data.Dataset):
     def get_valid_indices(self):
         valid_indices = []
         for idx in range(len(self.poses) - JUMP_FRAMES):
-            img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
-            img2_path = os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.png')
+            img1_path = os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}')
+            img2_path = os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')
             if os.path.exists(img1_path) and os.path.exists(img2_path):
                 valid_indices.append(idx)
         return valid_indices
@@ -32,8 +32,8 @@ class CustomDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
         
-        original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.png'))
-        original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.png'))
+        original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+        original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
 
         # Transform: Resize, center, grayscale
         first_image = self.transform(original_first_image).to(device)
@@ -49,8 +49,8 @@ class CustomDataset(torch.utils.data.Dataset):
 def get_valid_indices(sequence_len, sequence_path):
     valid_indices = []
     for idx in range(sequence_len - JUMP_FRAMES):
-        img1_path = os.path.join(sequence_path, f'{idx:06}.png')
-        img2_path = os.path.join(sequence_path, f'{idx+JUMP_FRAMES:06}.png')
+        img1_path = os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')
+        img2_path = os.path.join(sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')
         if os.path.exists(img1_path): print(img1_path)
         if os.path.exists(img1_path) and os.path.exists(img2_path):
             valid_indices.append(idx)
@@ -80,7 +80,7 @@ def get_dataloaders_KITTI(batch_size):
         valid_indices = get_valid_indices(len(poses), sequence_path)
     
         # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-        original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.png')).size).to(device)
+        original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
         K = get_intrinsic_KITTI(calib_path, original_image_size)
 
         # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
@@ -115,7 +115,7 @@ def get_dataloaders_RealEstate(batch_size):
             valid_indices = get_valid_indices(len(poses), sequence_path)
         
             # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-            original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.png')).size).to(device)
+            original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
             K = get_intrinsic_REALESTATE(specs_path, original_image_size)
 
             if RealEstate_path == 'RealEstate10K\\train_images':

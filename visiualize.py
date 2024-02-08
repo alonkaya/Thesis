@@ -120,11 +120,11 @@ class EpipoLine:
         cv2.putText(vis, str(xfx), (10, 360), font, 0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
 
         if(l_avgErr > 7 or np.abs(xfx) > 0.1 or xfx == 0):
-            cv2.imwrite(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
-            print(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))
+            cv2.imwrite(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.{IMAGE_TYPE}'.format(img_idx)), vis)
+            print(os.path.join(sqResultDir, "bad_frames", 'epipoLine_sift_{}.{IMAGE_TYPE}\n'.format(img_idx)))
         else:
-            cv2.imwrite(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png'.format(img_idx)), vis)
-            print(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.png\n'.format(img_idx)))
+            cv2.imwrite(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.{IMAGE_TYPE}'.format(img_idx)), vis)
+            print(os.path.join(sqResultDir, "good_frames", 'epipoLine_sift_{}.{IMAGE_TYPE}\n'.format(img_idx)))
 
     @staticmethod
     def verify_xFx(point1, F, point2):
@@ -156,8 +156,8 @@ class EpipoLine:
 # for i in range(len(poses) - 1):
 #     R_relative, t_relative = compute_relative_transformations(poses[i], poses[i+jump_frames])
 
-#     lImg = f'sequences\\02\\image_0\\{i:06}.png'
-#     rImg = f'sequences\\02\\image_0\\{i+jump_frames:06}.png'
+#     lImg = f'sequences\\02\\image_0\\{i:06}.{IMAGE_TYPE}'
+#     rImg = f'sequences\\02\\image_0\\{i+jump_frames:06}.{IMAGE_TYPE}'
 
 #     a = EpipoLine(leftImg=lImg, rightImg=rImg, R=R_relative, T=t_relative)
 
