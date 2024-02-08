@@ -1,57 +1,3 @@
-# from pytube import YouTube
-# import cv2
-# import os
-
-# def download_video(url, path='video.mp4'):
-#     yt = YouTube(url)
-#     ys = yt.streams.filter(file_extension='mp4').get_highest_resolution()
-#     ys.download(filename=path)
-#     return path
-
-# def extract_frames(video_path, timestamps_microsec, output_dir='frames'):
-#     if not os.path.exists(output_dir):
-#         os.makedirs(output_dir)
-
-#     cap = cv2.VideoCapture(video_path)
-
-#     for timestamp_microsec in timestamps_microsec:
-#         # Convert timestamp from microseconds to milliseconds
-#         timestamp_ms = timestamp_microsec / 1000
-#         cap.set(cv2.CAP_PROP_POS_MSEC, timestamp_ms)
-
-#         success, image = cap.read()
-#         if success:
-#             output_path = os.path.join(output_dir, f'frame_{timestamp_microsec}.jpg')
-#             cv2.imwrite(output_path, image)
-#             print(f'Frame for timestamp {timestamp_microsec} extracted and saved to {output_path}')
-#         else:
-#             print(f'Error: Could not extract frame for timestamp {timestamp_microsec}')
-
-#     cap.release()
-
-# def parse_file(file_path):
-#     with open(file_path, 'r') as file:
-#         lines = file.readlines()
-
-#     url = lines[0].strip()
-#     timestamps = [int(line.split()[0]) for line in lines[1:]]
-#     return url, timestamps
-
-# # Path to your input file
-# input_file_path = 'RealEstate10K/train/000d73d2405332df.txt'  # Change this to the path of your file
-
-# # Parse the input file
-# url, timestamps = parse_file(input_file_path)
-
-# # Download the video
-# video_path = download_video(url)
-
-# # Extract frames for all timestamps
-# extract_frames(video_path, timestamps)
-
-# # Optionally, remove the downloaded video if not needed
-# os.remove(video_path)
-
 from pytube import YouTube
 import cv2
 import os
@@ -69,12 +15,12 @@ def extract_frames(video_path, timestamps_microsec, output_dir):
 
     cap = cv2.VideoCapture(video_path)
 
-    for timestamp_microsec in timestamps_microsec:
+    for i, timestamp_microsec in enumerate(timestamps_microsec):
         timestamp_ms = timestamp_microsec / 1000  # Convert from microseconds to milliseconds
         cap.set(cv2.CAP_PROP_POS_MSEC, timestamp_ms)
         success, image = cap.read()
         if success:
-            output_path = os.path.join(output_dir, f'image_0_{timestamp_microsec}.jpg')
+            output_path = os.path.join(output_dir, f'{i:06}.jpg')
             cv2.imwrite(output_path, image)
             print(f'Frame for timestamp {timestamp_microsec} µs extracted and saved to {output_path}')
         else:
