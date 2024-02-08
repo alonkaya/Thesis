@@ -54,7 +54,7 @@ def read_camera_intrinsic(path_to_intrinsic):
      with open(path_to_intrinsic, 'r') as f:
         lines = f.readlines()  # Read all lines into a list
 
-        intrinsic_strings = lines[1].split()[2:6] if USE_REALESTATE else lines[0].split()[1:]
+        intrinsic_strings = lines[1].split()[1:5] if USE_REALESTATE else lines[0].split()[1:]
 
         return torch.tensor([float(x) for x in intrinsic_strings])
 
@@ -66,7 +66,7 @@ def read_poses(poses_path):
             if USE_REALESTATE and i == 0: continue
 
             line = torch.tensor([float(x) for x in line.strip().split()])
-            pose = line[8:] if USE_REALESTATE else line
+            pose = line[7:] if USE_REALESTATE else line
             poses.append(pose.view(3, 4))
 
     return torch.stack(poses)
