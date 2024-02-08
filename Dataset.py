@@ -53,7 +53,7 @@ def get_valid_indices(sequence_len, sequence_path):
         img2_path = os.path.join(sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')
         if os.path.exists(img1_path) and os.path.exists(img2_path):
             valid_indices.append(idx)
-            
+
     return valid_indices
 
 transform = transforms.Compose([
@@ -100,7 +100,7 @@ def get_dataloaders_KITTI(batch_size):
     return train_loader, val_loader
 
 def get_dataloaders_RealEstate(batch_size):
-    RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/validation_images']
+    RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
 
     train_datasets, val_datasets = [], []
     for RealEstate_path in RealEstate_paths:
