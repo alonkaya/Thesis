@@ -99,7 +99,7 @@ def get_dataloaders_KITTI(batch_size):
     return train_loader, val_loader
 
 def get_dataloaders_RealEstate(batch_size):
-    RealEstate_paths = ['RealEstate10K\\train_images', 'RealEstate10K\\validation_images']
+    RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/validation_images']
 
     train_datasets, val_datasets = [], []
     for RealEstate_path in RealEstate_paths:
