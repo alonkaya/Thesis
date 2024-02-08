@@ -51,9 +51,9 @@ def get_valid_indices(sequence_len, sequence_path):
     for idx in range(sequence_len - JUMP_FRAMES):
         img1_path = os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')
         img2_path = os.path.join(sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')
-        if os.path.exists(img1_path): print(img1_path)
         if os.path.exists(img1_path) and os.path.exists(img2_path):
             valid_indices.append(idx)
+            
     return valid_indices
 
 transform = transforms.Compose([
