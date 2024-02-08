@@ -7,10 +7,12 @@ import numpy as np
 
 def get_intrinsic_REALESTATE(specs_path, original_image_size):
     intrinsics = read_camera_intrinsic(specs_path)
+    width = original_image_size[0]
+    height = original_image_size[1]
 
     K = torch.tensor([
-        [intrinsics[0],     0,          intrinsics[2]],
-        [0,             intrinsics[1],  intrinsics[3]],
+        [width*intrinsics[0],     0,          width*intrinsics[2]],
+        [0,             height*intrinsics[1],  height*intrinsics[3]],
         [0,                 0,          1]
     ]).to(device)
 
@@ -36,7 +38,7 @@ def get_intrinsic_KITTI(calib_path, original_image_size):
     K /= K[2, 2]
 
     # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-    adjusted_K = adjust_intrinsic(K.to(device), original_image_size, torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
+    adjusted_K = adjust_intrinsic(torch.tensor(K).to(device), original_image_size, torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
 
     return adjusted_K
 
@@ -94,7 +96,7 @@ def compute_fundamental(E, K1, K2):
     F = torch.matmul(K2_inv_T, torch.matmul(E, K1_inv))
 
     if torch.linalg.matrix_rank(F) != 2:
-        print("rank of ground-truch not 2")
+        print("rank of ground-truth not 2")
 
     return F
 
@@ -117,6 +119,27 @@ def last_sing_value_penalty(output):
 
     return rank_penalty
 
+def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):
+    # Compute mean epipolar constraint error
+    # U1, S1, V1 = torch.svd(output)
+    # U2, S2, V2 = torch.svd(unormalized_output)
+
+    # S1[:, -1] = 0
+    # S2[:, -1] = 0
+
+    # output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2))
+    # unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), V2.transpose(1, 2))
+    
+    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = 0, 0, 0
+    for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
+        avg_ec_err_truth += EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
+        avg_ec_err_pred += EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
+        avg_ec_err_pred_unormalized += EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
+
+    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = (
+        v / len(first_image) for v in (avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized))
+
+    return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized
 
 def reconstruction_module(x):
     def get_rotation(rx, ry, rz):
@@ -346,24 +369,4 @@ class EpipolarGeometry:
             print(os.path.join(sqResultDir, "good_frames",
                   'epipoLine_sift_{}.{IMAGE_TYPE}\n'.format(img_idx)))
 
-def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):
-    # Compute mean epipolar constraint error
-    U1, S1, V1 = torch.svd(output)
-    U2, S2, V2 = torch.svd(unormalized_output)
 
-    S1[:, -1] = 0
-    S2[:, -1] = 0
-
-    output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2))
-    unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), V2.transpose(1, 2))
-    
-    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = 0, 0, 0
-    for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
-        avg_ec_err_truth += EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
-        avg_ec_err_pred += EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
-        avg_ec_err_pred_unormalized += EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
-
-    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = (
-        v / len(first_image) for v in (avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized))
-
-    return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized

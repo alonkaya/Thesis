@@ -37,7 +37,7 @@ def parse_file(file_path):
     timestamps = [int(line.split()[0]) for line in lines[1:]]
     return url, timestamps
 
-def process_files(directory_from, directory_to, limit=8):
+def process_files(directory_from, directory_to, limit):
     files = glob.glob(os.path.join(directory_from, '*.txt'))[:limit]
 
     for file_path in files:
@@ -59,6 +59,10 @@ def process_files(directory_from, directory_to, limit=8):
 
 if __name__ == "__main__":
     # Specify the directory containing the text files
-    directory_from = 'RealEstate10K/test'
-    directory_to = 'RealEstate10K/val_images'
-    process_files(directory_from, directory_to)
+    directory_from = 'RealEstate10K/train'
+    directory_to = 'RealEstate10K/train_images'
+    process_files(directory_from, directory_to, limit=30)
+
+    # directory_from = 'RealEstate10K/test'
+    # directory_to = 'RealEstate10K/val_images'
+    # process_files(directory_from, directory_to)

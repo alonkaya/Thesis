@@ -9,7 +9,7 @@ import os
 if __name__ == "__main__":
     mp.set_start_method('spawn', force=True)
     os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-    print_and_write("#######################################################################")
+    print_and_write("####################################################################################3#######################\n\n")
     
     # Iterate over each combination
     param_combinations = itertools.product(batch_sizes, penalty_coeffs, penaltize_normalized_options, learning_rates)
@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
         train_loader, val_loader = get_data_loaders(batch_size)
         
-        parameters = f'learning_rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, penalty_coeff: {penalty_coeff}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}, batch_size: {batch_size}, train_seqeunces: {train_seqeunces}, val_sequences: {val_sequences}, penaltize_normalized: {penaltize_normalized}\n\n'
+        parameters = f'learning_rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, penalty_coeff: {penalty_coeff}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}, batch_size: {batch_size}, train_seqeunces: {train_seqeunces}, val_sequences: {val_sequences}, penaltize_normalized: {penaltize_normalized}, RealEstate: {USE_REALESTATE}\n\n'
         print_and_write(parameters)
 
         model.train_model(train_loader, val_loader, num_epochs=NUM_EPOCHS)

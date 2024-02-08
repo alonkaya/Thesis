@@ -51,6 +51,7 @@ def get_valid_indices(sequence_len, sequence_path):
     for idx in range(sequence_len - JUMP_FRAMES):
         img1_path = os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')
         img2_path = os.path.join(sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')
+
         if os.path.exists(img1_path) and os.path.exists(img2_path):
             valid_indices.append(idx)
 
@@ -171,16 +172,16 @@ def test_ground_truth_epipolar_err():
     
     avg_ep_err_unnormalized, avg_ep_err = 0, 0
     for first_image, second_image, label, unormalized_label in val_loader:
-        ep_err_unnormalized, ep_err = 0, 0
+        batch_ep_err_unnormalized, batch_ep_err = 0, 0
         for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
-            ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F).get_epipolar_err()
-            ep_err += EpipolarGeometry(img_1, img_2, F).get_epipolar_err()
+            batch_ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F).get_epipolar_err()
+            batch_ep_err += EpipolarGeometry(img_1, img_2, F).get_epipolar_err()
 
-        ep_err_unnormalized, ep_err = ep_err_unnormalized/len(first_image), ep_err/len(first_image)
-        avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + ep_err_unnormalized, avg_ep_err + ep_err
+        batch_ep_err_unnormalized, batch_ep_err = batch_ep_err_unnormalized/len(first_image), batch_ep_err/len(first_image)
+        avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + batch_ep_err_unnormalized, avg_ep_err + batch_ep_err
 
     avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized/len(val_loader), avg_ep_err/len(val_loader)
     return avg_ep_err_unnormalized, avg_ep_err
 
-# if __name__ == "__main__":
-#     print(test_ground_truth_epipolar_err())
+if __name__ == "__main__":
+    print(test_ground_truth_epipolar_err())
