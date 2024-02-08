@@ -9,22 +9,22 @@ import torchvision.transforms.functional as T
 
 
 class CustomDataset(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, poses, transform, K):
+    def __init__(self, sequence_path, poses, valid_indices, transform, K):
         self.sequence_path = sequence_path
         self.sequence_num = sequence_path.split('/')[1]
         self.poses = poses
         self.transform = transform
         self.k = K
-        self.valid_indices = self.get_valid_indices()
+        self.valid_indices = valid_indices
 
     def __len__(self):
-        return len(self.valid_indices) - jump_frames
+        return len(self.valid_indices) - JUMP_FRAMES
 
     def get_valid_indices(self):
         valid_indices = []
-        for idx in range(len(self.poses) - jump_frames):
+        for idx in range(len(self.poses) - JUMP_FRAMES):
             img1_path = os.path.join(self.sequence_path, f'{idx:06}.png')
-            img2_path = os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png')
+            img2_path = os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.png')
             if os.path.exists(img1_path) and os.path.exists(img2_path):
                 valid_indices.append(idx)
         return valid_indices
@@ -33,33 +33,37 @@ class CustomDataset(torch.utils.data.Dataset):
         idx = self.valid_indices[idx]
         
         original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.png'))
-        original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+jump_frames:06}.png'))
+        original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.png'))
 
         # Transform: Resize, center, grayscale
         first_image = self.transform(original_first_image).to(device)
         second_image = self.transform(original_second_image).to(device)
 
-        # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-        adjusted_K = adjust_intrinsic(self.k.clone(), torch.tensor(original_first_image.size).to(device), torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
-
-        unnormalized_F = get_F(self.poses, idx, adjusted_K)
+        unnormalized_F = get_F(self.poses, idx, self.k)
 
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
         return first_image, second_image, F, unnormalized_F
 
+def get_valid_indices(sequence_len, sequence_path):
+    valid_indices = []
+    for idx in range(sequence_len - JUMP_FRAMES):
+        img1_path = os.path.join(sequence_path, f'{idx:06}.png')
+        img2_path = os.path.join(sequence_path, f'{idx+JUMP_FRAMES:06}.png')
+        if os.path.exists(img1_path) and os.path.exists(img2_path):
+            valid_indices.append(idx)
+    return valid_indices
 
+transform = transforms.Compose([
+    transforms.Resize((256, 256)),
+    transforms.CenterCrop(224),
+    transforms.Grayscale(num_output_channels=3),
+    transforms.ToTensor(),  # Converts to tensor and rescales [0,255] -> [0,1]
+    # TODO: Normalize images?
+])    
 
-def get_data_loaders(batch_size):
-    transform = transforms.Compose([
-        transforms.Resize((256, 256)),
-        transforms.CenterCrop(224),
-        transforms.Grayscale(num_output_channels=3),
-        transforms.ToTensor(),  # Converts to tensor and rescales [0,255] -> [0,1]
-        # TODO: Normalize images?
-    ])    
-    
+def get_dataloaders_KITTI(batch_size):
     sequence_paths = [f'sequences/0{i}/image_0' for i in range(9)]
     poses_paths = [f'poses/0{i}.txt' for i in range(9)]
     calib_paths = [f'sequences/0{i}/calib.txt' for i in range(9)]
@@ -67,38 +71,72 @@ def get_data_loaders(batch_size):
     train_datasets, val_datasets = [], []
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
         if i not in train_seqeunces and i not in val_sequences: continue
+        
         # Get a list of all poses [R,t] in this sequence
         poses = read_poses(poses_path).to(device)
 
-        # Read the calib.txt file to get the projection matrix to compute intrinsic K
-        K = get_intrinsic(calib_path)
+        # Indices of 'good' image frames
+        valid_indices = get_valid_indices(len(poses), sequence_path)
+    
+        # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
+        original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.png')).size).to(device)
+        K = get_intrinsic_KITTI(calib_path, original_image_size)
 
         # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
         if i in train_seqeunces:
-            train_datasets.append(CustomDataset(
-                sequence_path, poses, transform, K))        
+            train_datasets.append(CustomDataset(sequence_path, poses, valid_indices, transform, K))        
         elif i in val_sequences:
-            val_datasets.append(CustomDataset(
-                sequence_path, poses, transform, K))
-
+            val_datasets.append(CustomDataset(sequence_path, poses, valid_indices, transform, K))
 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
     concat_val_dataset = ConcatDataset(val_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset,batch_size=batch_size, shuffle=True, num_workers=1)
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=1)
     val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
 
     return train_loader, val_loader
 
+def get_dataloaders_RealEstate(batch_size):
+    RealEstate_paths = ['RealEstate10K\\train_images', 'RealEstate10K\\validation_images']
 
-def visualize_bad_images():
-    bad_frames_dir = os.path.join('epipole_lines', "bad_frames")
-    good_frames_dir = os.path.join('epipole_lines', "good_frames")
+    train_datasets, val_datasets = [], []
+    for RealEstate_path in RealEstate_paths:
+        for sequence_name in os.listdir(RealEstate_path):
+            specs_path = os.path.join(RealEstate_path, f'{sequence_name}.txt')
+            sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
 
-    os.makedirs(bad_frames_dir, exist_ok=True)
-    os.makedirs(good_frames_dir, exist_ok=True)
+            # Get a list of all poses [R,t] in this sequence
+            poses = read_poses(specs_path).to(device)
+
+            # Indices of 'good' image frames
+            valid_indices = get_valid_indices(len(poses), sequence_path)
+        
+            # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
+            original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.png')).size).to(device)
+            K = get_intrinsic_REALESTATE(specs_path, original_image_size)
+
+            if RealEstate_path == 'RealEstate10K\\train_images':
+                train_datasets.append(CustomDataset(sequence_path, poses, valid_indices, transform, K))     
+            else:   
+                val_datasets.append(CustomDataset(sequence_path, poses, valid_indices, transform, K))
+
+    # Concatenate datasets
+    concat_train_dataset = ConcatDataset(train_datasets)
+    concat_val_dataset = ConcatDataset(val_datasets)
+
+    # Create a DataLoader
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=1)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)    
+
+    return train_loader, val_loader
+
+def get_data_loaders(batch_size):
+    if USE_REALESTATE:
+        return get_dataloaders_RealEstate(batch_size)
+    else: # KITTI
+        return get_dataloaders_KITTI(batch_size)
 
 
 def move_bad_images():
@@ -144,4 +182,4 @@ def test_ground_truth_epipolar_err():
     return avg_ep_err_unnormalized, avg_ep_err
 
 # if __name__ == "__main__":
-    # print(test_ground_truth_epipolar_err())
+#     print(test_ground_truth_epipolar_err())
