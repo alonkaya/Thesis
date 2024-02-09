@@ -11,8 +11,8 @@ class MLP(nn.Module):
         prev_size = num_input
         for hidden_size in mlp_hidden_sizes:
             mlp_layers.append(nn.Linear(prev_size, hidden_size))
-            # if batchnorm_and_dropout:
-                # mlp_layers.append(nn.BatchNorm1d(hidden_size))  # Batch Normalization
+            if batchnorm_and_dropout:
+                mlp_layers.append(nn.BatchNorm1d(hidden_size))  # Batch Normalization
             mlp_layers.append(nn.ReLU())
             if batchnorm_and_dropout:
                 mlp_layers.append(nn.Dropout(dropout_rate))  # Dropout
