@@ -1,7 +1,7 @@
 import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-batch_sizes = [32]  
+batch_sizes = [1]  
 learning_rates_vit = [4e-5, 1e-5]
 learning_rates_mlp = [1e-4, 5e-3]
 penalty_coeffs = [1]
@@ -22,4 +22,4 @@ DEEPF_NOCORRS = False
 MOVE_BAD_IMAGES = False
 USE_REALESTATE = True
 IMAGE_TYPE = "jpg"  if USE_REALESTATE else "png"
-BATCHNORM_AND_DROPOUT = True
+BATCHNORM_AND_DROPOUT_OPTIONS = [False, True]

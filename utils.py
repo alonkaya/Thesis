@@ -5,7 +5,7 @@ import os
 import math
 
 class MLP(nn.Module):
-    def __init__(self, num_input, mlp_hidden_sizes, num_output, batchnorm_and_dropout, dropout_rate=0.5):
+    def __init__(self, num_input, mlp_hidden_sizes, num_output, batchnorm_and_dropout):
         super(MLP, self).__init__()
         mlp_layers = []
         prev_size = num_input
@@ -15,7 +15,7 @@ class MLP(nn.Module):
                 mlp_layers.append(nn.BatchNorm1d(hidden_size))  # Batch Normalization
             mlp_layers.append(nn.ReLU())
             if batchnorm_and_dropout:
-                mlp_layers.append(nn.Dropout(dropout_rate))  # Dropout
+                mlp_layers.append(nn.Dropout())  # Dropout
             prev_size = hidden_size
         mlp_layers.append(nn.Linear(prev_size, num_output))
 
@@ -25,7 +25,7 @@ class MLP(nn.Module):
         return self.layers(x)
 
 
-def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, lr_mlp, lr_vit, x_label="Epochs", show=False):
+def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False):
 
     fig, axs = plt.subplots(1, 2, figsize=(16, 6))  # 1 row, 2 columns
     
@@ -50,7 +50,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, lr_mlp, lr_vit,
         ax.legend()
 
     os.makedirs('plots', exist_ok=True)
-    plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch size {batch_size} lr_mlp {lr_mlp} lr_vit {lr_vit} RealEstate {USE_REALESTATE}.png""")  # Specify the filename and extension
+    plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch size {batch_size} bn and dropout {batchnorm_and_dropout} lr_mlp {lr_mlp} lr_vit {lr_vit} RealEstate {USE_REALESTATE}.png""")  # Specify the filename and extension
     if show:
         plt.show()
 
