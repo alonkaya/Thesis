@@ -96,7 +96,7 @@ def compute_fundamental(E, K1, K2):
     F = torch.matmul(K2_inv_T, torch.matmul(E, K1_inv))
 
     if torch.linalg.matrix_rank(F) != 2:
-        print("rank of ground-truth not 2")
+        print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
 
     return F
 
@@ -358,15 +358,10 @@ class EpipolarGeometry:
                     print(f'moved {src_path1} to {dst_path1}')
                     os.rename(src_path1, dst_path1)
             else:
-                cv2.imwrite(os.path.join(sqResultDir, "bad_frames",
-                            'epipoLine_sift_{}.{IMAGE_TYPE}'.format(img_idx)), vis)
-                print(os.path.join(sqResultDir, "bad_frames",
-                      'epipoLine_sift_{}.{IMAGE_TYPE}\n'.format(img_idx)))
+                cv2.imwrite(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{img_idx}.{IMAGE_TYPE}'), vis)
+                print(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{img_idx}.{IMAGE_TYPE}\n'))
 
         elif not MOVE_BAD_IMAGES:
-            cv2.imwrite(os.path.join(sqResultDir, "good_frames",
-                        'epipoLine_sift_{}.{IMAGE_TYPE}'.format(img_idx)), vis)
-            print(os.path.join(sqResultDir, "good_frames",
-                  'epipoLine_sift_{}.{IMAGE_TYPE}\n'.format(img_idx)))
-
+            cv2.imwrite(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{img_idx}.{IMAGE_TYPE}'), vis)
+            print(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{img_idx}.{IMAGE_TYPE}\n'))
 
