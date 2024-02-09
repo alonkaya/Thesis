@@ -19,7 +19,7 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.valid_indices) - JUMP_FRAMES
-
+    
     def get_valid_indices(self):
         valid_indices = []
         for idx in range(len(self.poses) - JUMP_FRAMES):
@@ -123,7 +123,7 @@ def get_dataloaders_RealEstate(batch_size):
                 train_datasets.append(CustomDataset(sequence_path, poses, valid_indices, transform, K))     
             else:   
                 val_datasets.append(CustomDataset(sequence_path, poses, valid_indices, transform, K))
-
+            
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
     concat_val_dataset = ConcatDataset(val_datasets)

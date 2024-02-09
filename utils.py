@@ -5,13 +5,17 @@ import os
 import math
 
 class MLP(nn.Module):
-    def __init__(self, num_input, mlp_hidden_sizes, num_output):
+    def __init__(self, num_input, mlp_hidden_sizes, num_output, batchnorm_and_dropout, dropout_rate=0.5):
         super(MLP, self).__init__()
         mlp_layers = []
         prev_size = num_input
         for hidden_size in mlp_hidden_sizes:
             mlp_layers.append(nn.Linear(prev_size, hidden_size))
+            # if batchnorm_and_dropout:
+                # mlp_layers.append(nn.BatchNorm1d(hidden_size))  # Batch Normalization
             mlp_layers.append(nn.ReLU())
+            if batchnorm_and_dropout:
+                mlp_layers.append(nn.Dropout(dropout_rate))  # Dropout
             prev_size = hidden_size
         mlp_layers.append(nn.Linear(prev_size, num_output))
 
@@ -20,7 +24,8 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.layers(x)
 
-def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, learning_rate, x_label="Epochs", show=False):
+
+def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, lr_mlp, lr_vit, x_label="Epochs", show=False):
 
     fig, axs = plt.subplots(1, 2, figsize=(16, 6))  # 1 row, 2 columns
     
@@ -37,7 +42,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, learning_rate, 
 
         ax.set_xlabel(x_label)
         ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
-        ax.set_title(f'{title} - coeff: {penalty_coeff}, batch size: {batch_size}, lr: {learning_rate}, scale: {y_scale}')
+        ax.set_title(f'{title} - coeff: {penalty_coeff}, batch size: {batch_size}, lr_mlp: {lr_mlp}, lr_vit: {lr_vit}, scale: {y_scale}')
     
         ax.set_yscale(y_scale)
         ax.set_xticks(x)
@@ -45,7 +50,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, learning_rate, 
         ax.legend()
 
     os.makedirs('plots', exist_ok=True)
-    plt.savefig(f'plots/{title}  coeff {penalty_coeff} batch size {batch_size} lr {learning_rate}.{IMAGE_TYPE} RealEstate: {USE_REALESTATE}')  # Specify the filename and extension
+    plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch size {batch_size} lr_mlp {lr_mlp} lr_vit {lr_vit} RealEstate {USE_REALESTATE}.png""")  # Specify the filename and extension
     if show:
         plt.show()
 

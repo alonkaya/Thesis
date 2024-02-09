@@ -7,7 +7,7 @@ from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 from sklearn.metrics import mean_absolute_error
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr, penalty_coeff, batch_size, penaltize_normalized, freeze_pretrained_model=False):
+    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr_vit, lr_mlp, penalty_coeff, batch_size, batchnorm_and_dropout, penaltize_normalized, freeze_pretrained_model=False):
         """
         Initialize the ViTMLPRegressor model.
 
@@ -26,7 +26,8 @@ class FMatrixRegressor(nn.Module):
         self.penalty_coeff = penalty_coeff
         self.batch_size = batch_size
         self.penaltize_normalized = penaltize_normalized
-        self.lr = lr
+        self.lr_vit = lr_vit
+        self.lr_mlp = lr_mlp
 
         # Check if CLIP model is specified
         if pretrained_model_name == "openai/clip-vit-base-patch32":
@@ -58,9 +59,13 @@ class FMatrixRegressor(nn.Module):
         self.L1_loss = nn.L1Loss().to(device)
 
         self.mlp = MLP(mlp_input_dim*7*7*3, mlp_hidden_sizes,
-                       num_output).to(device)
-
-        self.optimizer = optim.Adam(self.parameters(), lr=lr)
+                       num_output, batchnorm_and_dropout, batch_size).to(device)
+        
+        params = [
+            {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
+        ]
+        self.optimizer = optim.Adam(params)
 
     def forward(self, x1, x2):
         if DEEPF_NOCORRS:
@@ -205,16 +210,16 @@ class FMatrixRegressor(nn.Module):
         print_and_write(output)
 
         plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
-                        title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, learning_rate=self.lr)
+                        title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
-                        title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, learning_rate=self.lr)
+                        title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
-                        title="Epipolar error unnormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, learning_rate=self.lr)
+                        title="Epipolar error unnormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred, y2=val_ec_err_pred, 
-                        title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, learning_rate=self.lr)
+                        title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit)
   
 
 
