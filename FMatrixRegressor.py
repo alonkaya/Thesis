@@ -59,7 +59,7 @@ class FMatrixRegressor(nn.Module):
         self.L1_loss = nn.L1Loss().to(device)
 
         self.mlp = MLP(mlp_input_dim*7*7*3, mlp_hidden_sizes,
-                       num_output, batchnorm_and_dropout, batch_size).to(device)
+                       num_output, batchnorm_and_dropout).to(device)
         
         params = [
             {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
