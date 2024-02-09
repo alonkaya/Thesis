@@ -184,4 +184,12 @@ def test_ground_truth_epipolar_err():
     return avg_ep_err_unnormalized, avg_ep_err
 
 if __name__ == "__main__":
-    print(test_ground_truth_epipolar_err())
+    # print(test_ground_truth_epipolar_err())
+    train_loader, val_loader = get_data_loaders(1)
+    for i, (first_image, second_image, label, unormalized_label) in enumerate(train_loader):
+
+        dst_dir = os.path.join('epipole_lines_realestate')
+        os.makedirs(dst_dir, exist_ok=True)
+
+        epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label)
+        epipolar_geo.visualize(sqResultDir='epipole_lines_realestate', img_idx=i)
