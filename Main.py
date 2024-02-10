@@ -7,14 +7,15 @@ import itertools
 import os
 
 if __name__ == "__main__":
-    mp.set_start_method('spawn', force=True)
-    os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+    # mp.set_start_method('spawn', force=True)
+    # os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
     print_and_write("###########################################################################################################\n\n")
     
     # Iterate over each combination
     param_combinations = itertools.product(batch_sizes, penalty_coeffs, penaltize_normalized_options, BATCHNORM_AND_DROPOUT_OPTIONS, learning_rates_vit, learning_rates_mlp)
     
     for batch_size, penalty_coeff, penaltize_normalized, do_bn_and_do, lr_vit, lr_mlp in param_combinations:
+        do_bn_and_do = do_bn_and_do if batch_size > 1 else False
         model = FMatrixRegressor(MLP_HIDDEN_DIM, NUM_OUTPUT, 
                                 pretrained_model_name=CLIP_MODEL_NAME, lr_vit=lr_vit, lr_mlp=lr_mlp,
                                 penalty_coeff=penalty_coeff, batch_size=batch_size, batchnorm_and_dropout=do_bn_and_do,
