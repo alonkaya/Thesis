@@ -47,14 +47,14 @@ def get_intrinsic_KITTI(calib_path, original_image_size):
 def adjust_intrinsic(k, original_size, resized_size, ceter_crop_size):
     # Adjust the intrinsic matrix K according to the transformations resize and center crop
     scale_factor = resized_size / original_size
-    k[0, 0] *= scale_factor[0]  # fx
-    k[1, 1] *= scale_factor[1]  # fy
-    k[0, 2] *= scale_factor[0]  # cx
-    k[1, 2] *= scale_factor[1]  # cy
+    k[0, 0] = k[0, 0] + scale_factor[0]  # fx
+    k[1, 1] = k[1, 1] + scale_factor[1]  # fy
+    k[0, 2] = k[0, 2] + scale_factor[0]  # cx
+    k[1, 2] = k[1, 2] + scale_factor[1]  # cy
 
     crop_offset = (resized_size - ceter_crop_size) / 2
-    k[0, 2] -= crop_offset[0]  # cx
-    k[1, 2] -= crop_offset[1]  # cy
+    k[0, 2] = k[0, 2] + crop_offset[0]  # cx
+    k[1, 2] = k[1, 2] + crop_offset[1]  # cy
 
     return k
 

@@ -125,7 +125,7 @@ class FMatrixRegressor(nn.Module):
                 # Compute loss
                 l2_loss = self.L2_loss(output, label)
                 loss = l2_loss + self.penalty_coeff*penalty 
-                avg_loss += loss.detach()
+                avg_loss = avg_loss + loss.detach()
 
                 # Compute Backward pass and gradients
                 self.optimizer.zero_grad()
@@ -135,9 +135,9 @@ class FMatrixRegressor(nn.Module):
                 # Compute train mean epipolar constraint error
                 avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
                     first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unnormalized_output.detach())
-                epoch_avg_ec_err_truth += avg_ec_err_truth
-                epoch_avg_ec_err_pred += avg_ec_err_pred
-                epoch_avg_ec_err_pred_unormalized += avg_ec_err_pred_unormalized
+                epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
+                epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
+                epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
 
                 # Extend lists with batch statistics
                 labels = torch.cat((labels, label.detach()), dim=0)
@@ -168,15 +168,15 @@ class FMatrixRegressor(nn.Module):
 
                     unnormalized_val_output, val_output, penalty = self.forward(
                         val_first_image, val_second_image)
-                    epoch_penalty += penalty
-                    val_avg_loss += self.L2_loss(val_output, val_label)
+                    epoch_penalty = epoch_penalty + penalty
+                    val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
 
                     # Compute val mean epipolar constraint error
                     val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
                         val_first_image, val_second_image, val_unormalized_label, val_output, unnormalized_val_output)
-                    val_epoch_avg_ec_err_truth += val_avg_ec_err_truth
-                    val_epoch_avg_ec_err_pred += val_avg_ec_err_pred
-                    val_epoch_avg_ec_err_pred_unormalized += val_avg_ec_err_pred_unormalized
+                    val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
+                    val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
+                    val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
 
                     val_outputs = torch.cat((val_outputs, val_output), dim=0)
                     val_labels = torch.cat((val_labels, val_label), dim=0)
