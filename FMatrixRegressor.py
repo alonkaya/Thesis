@@ -204,6 +204,10 @@ class FMatrixRegressor(nn.Module):
             Train epipolar error pred: {ec_err_pred[-1]} Val epipolar error pred: {val_ec_err_pred[-1]} 
             penalty: {all_penalty[-1]}\n"""
             print_and_write(epoch_output)
+
+            if len(all_train_loss) > 2 and abs(all_train_loss[-1] - all_train_loss[-2]) < 1e-3 and abs(all_train_loss[-1] - all_train_loss[-3]) < 1e-3: 
+                num_epochs = epoch
+                break
         
         output = f"""Train ground truth error: {ec_err_truth[-1]} val ground truth error: {val_ec_err_truth[-1]}\n\n\n"""
         print_and_write(output)
