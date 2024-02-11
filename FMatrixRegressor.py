@@ -207,7 +207,7 @@ class FMatrixRegressor(nn.Module):
 
             # If the model is not learning, stop training
             if not_learning(all_train_loss):
-                num_epochs = epoch
+                num_epochs = epoch + 1
                 break
         
         output = f"""Train ground truth error: {ec_err_truth[-1]} val ground truth error: {val_ec_err_truth[-1]}\n\n\n"""
