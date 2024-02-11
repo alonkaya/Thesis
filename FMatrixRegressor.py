@@ -205,7 +205,8 @@ class FMatrixRegressor(nn.Module):
             penalty: {all_penalty[-1]}\n"""
             print_and_write(epoch_output)
 
-            if len(all_train_loss) > 2 and abs(all_train_loss[-1] - all_train_loss[-2]) < 1e-3 and abs(all_train_loss[-1] - all_train_loss[-3]) < 1e-3: 
+            # If the model is not learning, stop training
+            if not_learning(all_train_loss):
                 num_epochs = epoch
                 break
         
