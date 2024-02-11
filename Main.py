@@ -15,7 +15,7 @@ if __name__ == "__main__":
     param_combinations = itertools.product(batch_sizes, penalty_coeffs, penaltize_normalized_options, BATCHNORM_AND_DROPOUT_OPTIONS, learning_rates_vit, learning_rates_mlp)
     
     for i, (batch_size, penalty_coeff, penaltize_normalized, do_bn_and_do, lr_vit, lr_mlp) in enumerate(param_combinations):
-        if i==0: continue
+        # if i==0: continue
         do_bn_and_do = do_bn_and_do if batch_size > 1 else False
         model = FMatrixRegressor(MLP_HIDDEN_DIM, NUM_OUTPUT, 
                                 pretrained_model_name=CLIP_MODEL_NAME, lr_vit=lr_vit, lr_mlp=lr_mlp,

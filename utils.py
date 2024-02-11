@@ -42,7 +42,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
 
         ax.set_xlabel(x_label)
         ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
-        ax.set_title(f'{title} - coeff: {penalty_coeff}, batch size: {batch_size}, lr_mlp: {lr_mlp}, lr_vit: {lr_vit}, scale: {y_scale}')
+        ax.set_title(f'{title} -\n coeff: {penalty_coeff}, batch size: {batch_size}, lr_mlp: {lr_mlp}, lr_vit: {lr_vit}, scale: {y_scale}')
     
         ax.set_yscale(y_scale)
         ax.set_xticks(x)
@@ -50,7 +50,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
         ax.legend()
 
     os.makedirs('plots', exist_ok=True)
-    plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch size {batch_size} bn and dropout {batchnorm_and_dropout} lr_mlp {lr_mlp} lr_vit {lr_vit} RealEstate {USE_REALESTATE}.png""")  # Specify the filename and extension
+    plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch_size {batch_size} bn_and_dropout {batchnorm_and_dropout} lr_mlp {lr_mlp} lr_vit {lr_vit} RealEstate {USE_REALESTATE}.png""")  # Specify the filename and extension
     if show:
         plt.show()
 
@@ -105,3 +105,6 @@ def print_and_write(output):
     with open("output.txt", "a") as f:
         f.write(output)
         print(output)
+
+def not_learning(all_train_loss):
+    return len(all_train_loss) > 2 and abs(all_train_loss[-1] - all_train_loss[-2]) < 1e-3 and abs(all_train_loss[-1] - all_train_loss[-3]) < 1e-3
