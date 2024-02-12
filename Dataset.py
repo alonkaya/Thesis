@@ -18,6 +18,7 @@ class CustomDataset(torch.utils.data.Dataset):
         self.valid_indices = valid_indices
 
     def __len__(self):
+        print(len(self.valid_indices) - JUMP_FRAMES)
         return len(self.valid_indices) - JUMP_FRAMES
     
     def get_valid_indices(self):
