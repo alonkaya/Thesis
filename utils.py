@@ -106,5 +106,5 @@ def print_and_write(output):
         f.write(output)
         print(output)
 
-def not_learning(all_train_loss):
-    return len(all_train_loss) > 2 and abs(all_train_loss[-1] - all_train_loss[-2]) < 1e-3 and abs(all_train_loss[-1] - all_train_loss[-3]) < 1e-3
+def not_learning(all_train_loss, train_mae):
+    return len(all_train_loss) > 3 and abs(all_train_loss[-1] - all_train_loss[-2]) < 1e-3 and abs(all_train_loss[-1] - all_train_loss[-3]) < 1e-3 and abs(all_train_loss[-1] - all_train_loss[-4]) < 1e-3 and abs(train_mae[-1] - train_mae[-3]) < 1e-3

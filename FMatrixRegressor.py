@@ -206,7 +206,7 @@ class FMatrixRegressor(nn.Module):
             print_and_write(epoch_output)
 
             # If the model is not learning, stop training
-            if not_learning(all_train_loss):
+            if not_learning(all_train_loss, train_mae):
                 num_epochs = epoch + 1
                 break
         
