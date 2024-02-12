@@ -18,7 +18,6 @@ class CustomDataset(torch.utils.data.Dataset):
         self.valid_indices = valid_indices
 
     def __len__(self):
-        print(self.sequence_path, len(self.valid_indices))
         return len(self.valid_indices) - JUMP_FRAMES
     
     def get_valid_indices(self):
@@ -86,10 +85,11 @@ def get_dataloaders_KITTI(batch_size):
         K = get_intrinsic_KITTI(calib_path, original_image_size)
 
         # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
+        custom_dataset = CustomDataset(sequence_path, poses, valid_indices, transform, K)
         if i in train_seqeunces:
-            train_datasets.append(CustomDataset(sequence_path, poses, valid_indices, transform, K))        
+            train_datasets.append(custom_dataset)        
         elif i in val_sequences:
-            val_datasets.append(CustomDataset(sequence_path, poses, valid_indices, transform, K))
+            val_datasets.append(custom_dataset)
 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
@@ -119,11 +119,12 @@ def get_dataloaders_RealEstate(batch_size):
             # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
             original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
             K = get_intrinsic_REALESTATE(specs_path, original_image_size)
-
-            if RealEstate_path == 'RealEstate10K/train_images':
-                train_datasets.append(CustomDataset(sequence_path, poses, valid_indices, transform, K))     
-            else:   
-                val_datasets.append(CustomDataset(sequence_path, poses, valid_indices, transform, K))
+            
+            custom_dataset = CustomDataset(sequence_path, poses, valid_indices, transform, K)
+            if RealEstate_path == 'RealEstate10K/train_images' and len(custom_dataset) > 20:
+                train_datasets.append(custom_dataset)     
+            elif len(custom_dataset) > 20:   
+                val_datasets.append(custom_dataset)
             
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
