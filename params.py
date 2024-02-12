@@ -10,7 +10,7 @@ val_sequences = [1,3,4]
 penaltize_normalized_options = [False]
 
 USE_REALESTATE = True
-JUMP_FRAMES = 8 if USE_REALESTATE else 2
+JUMP_FRAMES = 2 if USE_REALESTATE else 2
 NUM_EPOCHS = 20
 MLP_HIDDEN_DIM = [512, 256]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
