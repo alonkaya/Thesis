@@ -8,10 +8,12 @@ penalty_coeffs = [1, 0.1, 5]
 train_seqeunces = [0,2]
 val_sequences = [1,3,4]
 penaltize_normalized_options = [False]
+norm_mean = torch.tensor([0.449, 0.449, 0.449])
+norm_std = torch.tensor([0.226, 0.226, 0.226])
 
 USE_REALESTATE = True
 JUMP_FRAMES = 8 if USE_REALESTATE else 2
-NUM_EPOCHS = 20
+NUM_EPOCHS = 25
 MLP_HIDDEN_DIM = [512, 256]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 VIT_MODEL_NAME = "google/vit-base-patch16-224-in21k"

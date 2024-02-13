@@ -76,9 +76,9 @@ class FMatrixRegressor(nn.Module):
             ""
         else:
             if self.clip:  # If using CLIP
-                x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=True,
+                x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False,
                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-                x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=True,
+                x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
 
             x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1,  7*7*768).to(device)
@@ -206,11 +206,11 @@ class FMatrixRegressor(nn.Module):
             print_and_write(epoch_output)
 
             # If the model is not learning, stop training
-            if not_learning(all_train_loss, train_mae):
+            if not_learning(all_train_loss, all_val_loss):
                 num_epochs = epoch + 1
                 break
         
-        output = f"""Train ground truth error: {ec_err_truth[-1]} val ground truth error: {val_ec_err_truth[-1]}\n\n\n"""
+        output = f"""Train unormalized ground truth error: {np.mean(ec_err_truth)} val unormalized ground truth error: {np.mean(val_ec_err_truth)}\n\n\n"""
         print_and_write(output)
 
         plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 

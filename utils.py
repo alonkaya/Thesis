@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import torch.nn as nn
 import os
 import math
+import numpy as np
 
 class MLP(nn.Module):
     def __init__(self, num_input, mlp_hidden_sizes, num_output, batchnorm_and_dropout):
@@ -106,5 +107,14 @@ def print_and_write(output):
         f.write(output)
         print(output)
 
-def not_learning(all_train_loss, train_mae):
-    return len(all_train_loss) > 3 and abs(all_train_loss[-1] - all_train_loss[-2]) < 1e-3 and abs(all_train_loss[-1] - all_train_loss[-3]) < 1e-3 and abs(all_train_loss[-1] - all_train_loss[-4]) < 1e-3 and abs(train_mae[-1] - train_mae[-3]) < 1e-3
+def not_learning(all_train_loss, all_val_loss):
+    return len(all_train_loss) > 2 and abs(all_train_loss[-1] - all_train_loss[-2]) < 1e-3 and abs(all_train_loss[-1] - all_train_loss[-3]) < 1e-3  \
+                                   and abs(all_val_loss[-1] - all_val_loss[-2]) < 1e-3 and abs(all_val_loss[-1] - all_val_loss[-3]) < 1e-3  
+
+def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
+    # The mean and std have to be reshaped to [3, 1, 1] to match the tensor dimensions for broadcasting
+    mean = mean.view(-1, 1, 1)
+    std = std.view(-1, 1, 1)
+    img_tensor = img_tensor * std + mean
+
+    return (img_tensor.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)

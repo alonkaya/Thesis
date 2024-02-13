@@ -1,5 +1,5 @@
 from params import *
-from utils import read_camera_intrinsic
+from utils import read_camera_intrinsic, reverse_transforms
 import cv2
 import os
 from scipy.linalg import rq
@@ -35,7 +35,7 @@ def get_intrinsic_KITTI(calib_path, original_image_size):
     K = np.dot(K, T)
 
     # Normalize K to ensure the bottom-right value is 1
-    K /= K[2, 2]
+    K = K / K[2, 2]
 
     # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
     adjusted_K = adjust_intrinsic(torch.tensor(K).to(device), original_image_size, torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
@@ -132,9 +132,9 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
     
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = 0, 0, 0
     for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
-        avg_ec_err_truth += EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
-        avg_ec_err_pred += EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
-        avg_ec_err_pred_unormalized += EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
+        avg_ec_err_truth = avg_ec_err_truth + EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
+        avg_ec_err_pred = avg_ec_err_pred + EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
+        avg_ec_err_pred_unormalized = avg_ec_err_pred_unormalized + EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
 
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = (
         v / len(first_image) for v in (avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized))
@@ -197,11 +197,10 @@ def reconstruction_module(x):
 class EpipolarGeometry:
     def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):
         self.F = F.view(3, 3)
-        # Convert to numpy and rescale pixels to original size [0,1] -> [0,255]
-        self.image1_numpy = (image1_tensors.permute(
-            1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
-        self.image2_numpy = (image2_tensors.permute(
-            1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+
+        # Convert images back to original
+        self.image1_numpy = reverse_transforms(image1_tensors)
+        self.image2_numpy = reverse_transforms(image2_tensors)
 
         self.sequence_path = os.path.join(
             'sequences', sequence_num) if sequence_num else None
@@ -220,9 +219,6 @@ class EpipolarGeometry:
         # sift = cv2.xfeatures2d.SIFT_create()
         sift = cv2.SIFT_create()
         bf = cv2.BFMatcher()
-
-        # TODO: make sure img1,img2 are grayscale
-        # self.img1 = cv2.cvtColor(self.img1.copy(), cv2.COLOR_BGR2GRAY)
 
         # Detect keypoints and compute descriptors for both images
         (kp1, des1) = sift.detectAndCompute(self.image1_numpy, None)
