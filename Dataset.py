@@ -123,7 +123,7 @@ def get_dataloaders_RealEstate(batch_size):
             K = get_intrinsic_REALESTATE(specs_path, original_image_size)
             
             custom_dataset = CustomDataset(sequence_path, poses, valid_indices, transform, K)
-            if RealEstate_path == 'RealEstate10K/train_images' and len(custom_dataset) > 20:
+            if RealEstate_path == 'RealEstate10K/train_images' and len(custom_dataset) > 30:
                 train_datasets.append(custom_dataset)     
             elif len(custom_dataset) > 20:   
                 val_datasets.append(custom_dataset)
