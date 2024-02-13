@@ -43,7 +43,8 @@ def process_files(directory_from, directory_to, limit):
     for file_path in files:
         print(f'Processing {file_path}')
         filename = os.path.splitext(os.path.basename(file_path))[0]
-
+        if filename in os.listdir(directory_to): continue
+        
         url, timestamps = parse_file(file_path)
         video_path = download_video(url, path=os.path.join(directory_from, f'{filename}.mp4'))
 
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     # Specify the directory containing the text files
     directory_from = 'RealEstate10K/train'
     directory_to = 'RealEstate10K/train_images'
-    process_files(directory_from, directory_to, limit=30)
+    process_files(directory_from, directory_to, limit=50)
 
     # directory_from = 'RealEstate10K/test'
     # directory_to = 'RealEstate10K/val_images'

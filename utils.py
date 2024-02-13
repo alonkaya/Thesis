@@ -28,18 +28,18 @@ class MLP(nn.Module):
 
 def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False):
 
-    fig, axs = plt.subplots(1, 2, figsize=(16, 6))  # 1 row, 2 columns
+    fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
         ax.plot(x, y1, color='blue', label="Train")
         ax.plot(x, y2, color='orange', label="Val")
 
         for i, txt in enumerate(y1):
-            ax.text(x[i], y1[i], f'{txt:.2f}', fontsize=8, color='blue', ha='center', va='bottom')
+            ax.text(x[i], y1[i], f'{txt:.3f}', fontsize=8, color='blue', ha='center', va='bottom')
 
         # Annotate each point on the Val line
         for i, txt in enumerate(y2):
-            ax.text(x[i], y2[i], f'{txt:.2f}', fontsize=8, color='orange', ha='center', va='top')
+            ax.text(x[i], y2[i], f'{txt:.3f}', fontsize=8, color='green', ha='center', va='top')
 
         ax.set_xlabel(x_label)
         ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
@@ -108,8 +108,8 @@ def print_and_write(output):
         print(output)
 
 def not_learning(all_train_loss, all_val_loss):
-    return len(all_train_loss) > 2 and abs(all_train_loss[-1] - all_train_loss[-2]) < 1e-3 and abs(all_train_loss[-1] - all_train_loss[-3]) < 1e-3  \
-                                   and abs(all_val_loss[-1] - all_val_loss[-2]) < 1e-3 and abs(all_val_loss[-1] - all_val_loss[-3]) < 1e-3  
+    return len(all_train_loss) > 3 and abs(all_train_loss[-1] - all_train_loss[-2]) < 1e-3 and abs(all_train_loss[-1] - all_train_loss[-3]) < 1e-3  and abs(all_train_loss[-1] - all_train_loss[-4]) < 1e-3\
+                                   and abs(all_val_loss[-1] - all_val_loss[-2]) < 1e-3 and abs(all_val_loss[-1] - all_val_loss[-3]) < 1e-3  and abs(all_val_loss[-1] - all_val_loss[-4]) < 1e-3  
 
 def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
     # The mean and std have to be reshaped to [3, 1, 1] to match the tensor dimensions for broadcasting
