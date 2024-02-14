@@ -1,9 +1,9 @@
 import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-batch_sizes = [32]
+batch_sizes = [1]
 learning_rates_vit = [2e-5, 8e-5, 2e-4]
-learning_rates_mlp = [5e-4, 2e-5, 1e-5]
+learning_rates_mlp = [5e-3, 2e-5, 1e-5]
 penalty_coeffs = [1]
 train_seqeunces = [0,2]
 val_sequences = [1,3,4]
@@ -12,7 +12,7 @@ norm_mean = torch.tensor([0.449, 0.449, 0.449]).to(device)
 norm_std = torch.tensor([0.226, 0.226, 0.226]).to(device)
 
 USE_REALESTATE = True
-JUMP_FRAMES = 2 if USE_REALESTATE else 2
+JUMP_FRAMES = 6 if USE_REALESTATE else 2
 NUM_EPOCHS = 50
 MLP_HIDDEN_DIM = [512, 256]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"

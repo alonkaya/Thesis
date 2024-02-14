@@ -109,10 +109,13 @@ def not_learning(all_train_loss, all_val_loss):
                                    and abs(all_val_loss[-1] - all_val_loss[-2]) < 1e-3 and abs(all_val_loss[-1] - all_val_loss[-3]) < 1e-3  and abs(all_val_loss[-1] - all_val_loss[-4]) < 1e-3  
 
 def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
+    """ Reverses the scaling and normalization transformation applied on the image.
+        This function is called when computing the epipolar error.
+    """
     # The mean and std have to be reshaped to [3, 1, 1] to match the tensor dimensions for broadcasting
     mean = mean.view(-1, 1, 1)
     std = std.view(-1, 1, 1)
-    # img_tensor = img_tensor * std + mean
+    img_tensor = img_tensor * std + mean
     
     try:
         img = (img_tensor.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)

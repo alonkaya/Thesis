@@ -58,7 +58,7 @@ class FMatrixRegressor(nn.Module):
         self.L2_loss = nn.MSELoss().to(device)
         self.L1_loss = nn.L1Loss().to(device)
 
-        self.mlp = MLP(mlp_input_dim*7*7*3, mlp_hidden_sizes,
+        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
         params = [
             {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
@@ -88,7 +88,7 @@ class FMatrixRegressor(nn.Module):
             mul_embedding = x1_embeddings.mul(x2_embeddings)
 
             # Concatenate both original and rotated embedding vectors
-            embeddings = torch.cat([x1_embeddings, x2_embeddings, mul_embedding], dim=1)
+            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
 
             # Train MLP on embedding vectors            
             output = self.mlp(embeddings).to(device)
@@ -114,9 +114,11 @@ class FMatrixRegressor(nn.Module):
             self.train()
             labels, outputs = torch.tensor([]).to(device), torch.tensor([]).to(device)
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = 0, 0, 0, 0
-
+            count = 0
             for first_image, second_image, label, unormalized_label in train_loader:
-                if first_image.shape[0] == 1: continue
+                if first_image.shape[0] == 1: 
+                    count = count + 1
+                    continue
                 first_image, second_image, label, unormalized_label = first_image.to(
                     device), second_image.to(device), label.to(device), unormalized_label.to(device)
 
@@ -148,7 +150,7 @@ class FMatrixRegressor(nn.Module):
             mae = torch.mean(torch.abs(labels - outputs))
 
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = (
-                v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss))
+                v / len(train_loader-count) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss))
 
             train_mae.append(mae.cpu().item())
             ec_err_truth.append(epoch_avg_ec_err_truth.cpu().item())
@@ -164,7 +166,10 @@ class FMatrixRegressor(nn.Module):
 
             with torch.no_grad():
                 for val_first_image, val_second_image, val_label, val_unormalized_label in val_loader:
-                    if val_first_image.shape[0] == 1: continue
+                    count=0
+                    if val_first_image.shape[0] == 1: 
+                        count = count + 1
+                        continue
                     val_first_image, val_second_image, val_label, val_unormalized_label = val_first_image.to(
                         device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device)
 
@@ -188,7 +193,7 @@ class FMatrixRegressor(nn.Module):
                 mae = torch.mean(torch.abs(val_labels - val_outputs))
 
                 val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss = (
-                    v / len(val_loader) for v in (val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss))
+                    v / len(val_loader-count) for v in (val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss))
 
                 val_mae.append(mae.cpu().item())
                 val_ec_err_truth.append(val_epoch_avg_ec_err_truth.cpu().item())
