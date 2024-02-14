@@ -32,21 +32,18 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
         ax.plot(x, y1, color='blue', label="Train")
-        ax.plot(x, y2, color='orange', label="Val")
+        ax.plot(x, y2, color='green', label="Val")
 
-        for i, txt in enumerate(y1):
-            ax.text(x[i], y1[i], f'{txt:.3f}', fontsize=8, color='blue', ha='center', va='bottom')
-
-        # Annotate each point on the Val line
-        for i, txt in enumerate(y2):
-            ax.text(x[i], y2[i], f'{txt:.3f}', fontsize=8, color='green', ha='center', va='top')
+        for i in range(0, len(y1), max(1, len(y1)/5)):
+            ax.text(x[i], y1[i], f'{y1[i]:.3f}', fontsize=8, color='blue', ha='center', va='bottom')
+            ax.text(x[i], y2[i], f'{y2[i]:.3f}', fontsize=8, color='green', ha='center', va='top')
 
         ax.set_xlabel(x_label)
         ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
         ax.set_title(f'{title} -\n coeff: {penalty_coeff}, batch size: {batch_size}, lr_mlp: {lr_mlp}, lr_vit: {lr_vit}, scale: {y_scale}')
     
         ax.set_yscale(y_scale)
-        ax.set_xticks(x)
+        # ax.set_xticks(x)
         ax.grid(True)
         ax.legend()
 
@@ -115,6 +112,6 @@ def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
     # The mean and std have to be reshaped to [3, 1, 1] to match the tensor dimensions for broadcasting
     mean = mean.view(-1, 1, 1)
     std = std.view(-1, 1, 1)
-    img_tensor = img_tensor * std + mean
+    # img_tensor = img_tensor * std + mean
 
     return (img_tensor.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
