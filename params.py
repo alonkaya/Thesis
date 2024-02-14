@@ -12,7 +12,7 @@ norm_mean = torch.tensor([0.449, 0.449, 0.449]).to(device)
 norm_std = torch.tensor([0.226, 0.226, 0.226]).to(device)
 
 USE_REALESTATE = True
-JUMP_FRAMES = 6 if USE_REALESTATE else 2
+JUMP_FRAMES = 2 if USE_REALESTATE else 2
 NUM_EPOCHS = 50
 MLP_HIDDEN_DIM = [512, 256]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
@@ -25,4 +25,4 @@ DEEPF_NOCORRS = False
 MOVE_BAD_IMAGES = False
 IMAGE_TYPE = "jpg"  if USE_REALESTATE else "png"
 BATCHNORM_AND_DROPOUT_OPTIONS = [True]
-NUM_WORKERS = 1
+NUM_WORKERS = 0
