@@ -2,8 +2,8 @@ import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 batch_sizes = [1]
-learning_rates_vit = [2e-5, 8e-5, 2e-4]
-learning_rates_mlp = [5e-3, 2e-5, 1e-5]
+learning_rates_vit = [8e-5, 2e-5, 5e-5]
+learning_rates_mlp = [2e-5]
 penalty_coeffs = [1]
 train_seqeunces = [0,2]
 val_sequences = [1,3,4]
