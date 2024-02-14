@@ -113,5 +113,10 @@ def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
     mean = mean.view(-1, 1, 1)
     std = std.view(-1, 1, 1)
     # img_tensor = img_tensor * std + mean
+    
+    try:
+        img = (img_tensor.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    except Warning as e:
+        print_and_write(f"warning: {e}, img_tensor: {img_tensor}")
 
-    return (img_tensor.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    return img
