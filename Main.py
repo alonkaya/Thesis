@@ -11,15 +11,14 @@ import os
 
 if __name__ == "__main__":
     if NUM_WORKERS > 0:
-
         mp.set_start_method('spawn', force=True)
         os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
-        # Set up custom warning handling
-        warnings.filterwarnings('always', category=RuntimeWarning)
+    # Set up custom warning handling
+    warnings.filterwarnings('always', category=RuntimeWarning)
 
-        # Optionally, set NumPy error handling to 'warn' to catch overflow errors
-        np.seterr(over='warn')
+    # Optionally, set NumPy error handling to 'warn' to catch overflow errors
+    np.seterr(over='warn')
         
     print_and_write("###########################################################################################################\n\n")
     
