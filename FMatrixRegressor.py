@@ -76,6 +76,7 @@ class FMatrixRegressor(nn.Module):
             ""
         else:
             if self.clip:  # If using CLIP
+                x  = x1
                 x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False,
                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
                 x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
@@ -94,7 +95,7 @@ class FMatrixRegressor(nn.Module):
                 # Train MLP on embedding vectors            
                 output = self.mlp(embeddings).to(device)
             except:
-                print(embeddings.shape, x1.shape)
+                print(embeddings.shape, x.shape)
             unnormalized_output = output.view(-1,3,3) if not USE_RECONSTRUCTION_LAYER else torch.stack([self.get_fmat(x)for x in output])
             
             output = norm_layer(unnormalized_output.view(-1, 9)).view(-1,3,3)
