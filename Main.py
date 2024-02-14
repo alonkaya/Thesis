@@ -7,8 +7,10 @@ import itertools
 import os
 
 if __name__ == "__main__":
-    # mp.set_start_method('spawn', force=True)
-    # os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+    if NUM_WORKERS > 0:
+        mp.set_start_method('spawn', force=True)
+        os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+        
     print_and_write("###########################################################################################################\n\n")
     
     # Iterate over each combination
