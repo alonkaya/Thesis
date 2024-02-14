@@ -36,8 +36,8 @@ class CustomDataset(torch.utils.data.Dataset):
         original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
 
         # Transform: Resize, center, grayscale
-        first_image = self.transform(original_first_image)
-        second_image = self.transform(original_second_image)
+        first_image = self.transform(original_first_image).to(device)
+        second_image = self.transform(original_second_image).to(device)
 
         unnormalized_F = get_F(self.poses, idx, self.k)
 
@@ -77,13 +77,13 @@ def get_dataloaders_KITTI(batch_size):
         if i not in train_seqeunces and i not in val_sequences: continue
         
         # Get a list of all poses [R,t] in this sequence
-        poses = read_poses(poses_path)
+        poses = read_poses(poses_path).to(device)
 
         # Indices of 'good' image frames
         valid_indices = get_valid_indices(len(poses), sequence_path)
     
         # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-        original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
+        original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
         K = get_intrinsic_KITTI(calib_path, original_image_size)
 
         # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
@@ -113,13 +113,13 @@ def get_dataloaders_RealEstate(batch_size):
             sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
 
             # Get a list of all poses [R,t] in this sequence
-            poses = read_poses(specs_path)
+            poses = read_poses(specs_path).to(device)
 
             # Indices of 'good' image frames
             valid_indices = get_valid_indices(len(poses), sequence_path)
             
             # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-            original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
+            original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
             K = get_intrinsic_REALESTATE(specs_path, original_image_size)
             
             custom_dataset = CustomDataset(sequence_path, poses, valid_indices, transform, K)

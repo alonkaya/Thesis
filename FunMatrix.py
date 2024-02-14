@@ -14,10 +14,10 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size):
         [width*intrinsics[0],     0,          width*intrinsics[2]],
         [0,             height*intrinsics[1],  height*intrinsics[3]],
         [0,                 0,          1]
-    ])
+    ]).to(device)
 
     # Adjust K according to resize and center crop transforms   
-    adjusted_K = adjust_intrinsic(K, original_image_size, torch.tensor([256, 256]), torch.tensor([224, 224]))
+    adjusted_K = adjust_intrinsic(K, original_image_size, torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
 
     return adjusted_K
 
@@ -38,7 +38,7 @@ def get_intrinsic_KITTI(calib_path, original_image_size):
     K = K / K[2, 2]
 
     # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-    adjusted_K = adjust_intrinsic(torch.tensor(K), original_image_size, torch.tensor([256, 256]), torch.tensor([224, 224]))
+    adjusted_K = adjust_intrinsic(torch.tensor(K).to(device), original_image_size, torch.tensor([256, 256]).to(device), torch.tensor([224, 224]).to(device))
 
     return adjusted_K
 
@@ -79,7 +79,7 @@ def compute_essential(R, t):
     # Compute the skew-symmetric matrix of t
     t_x = torch.tensor([[0, -t[2], t[1]],
                         [t[2], 0, -t[0]],
-                        [-t[1], t[0], 0]])
+                        [-t[1], t[0], 0]]).to(device)
 
     # Compute the essential matrix E
     E = torch.matmul(t_x, R)
