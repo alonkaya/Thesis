@@ -19,15 +19,6 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.valid_indices) - JUMP_FRAMES
-    
-    def get_valid_indices(self):
-        valid_indices = []
-        for idx in range(len(self.poses) - JUMP_FRAMES):
-            img1_path = os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}')
-            img2_path = os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')
-            if os.path.exists(img1_path) and os.path.exists(img2_path):
-                valid_indices.append(idx)
-        return valid_indices
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
@@ -108,7 +99,7 @@ def get_dataloaders_RealEstate(batch_size):
 
     train_datasets, val_datasets = [], []
     for RealEstate_path in RealEstate_paths:
-        for sequence_name in os.listdir(RealEstate_path):
+        for i, sequence_name in enumerate(os.listdir(RealEstate_path)):
             specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
             sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
 
@@ -123,10 +114,11 @@ def get_dataloaders_RealEstate(batch_size):
             K = get_intrinsic_REALESTATE(specs_path, original_image_size)
             
             custom_dataset = CustomDataset(sequence_path, poses, valid_indices, transform, K)
-            if RealEstate_path == 'RealEstate10K/train_images' and len(custom_dataset) > 30:
-                train_datasets.append(custom_dataset)     
-            elif len(custom_dataset) > 30:   
-                val_datasets.append(custom_dataset)
+            if len(custom_dataset) > 30:
+                if RealEstate_path == 'RealEstate10K/train_images':
+                    train_datasets.append(custom_dataset)     
+                if RealEstate_path == 'RealEstate10K/val_images' or (RealEstate_path == 'RealEstate10K/train_images' and i<=10):  
+                    val_datasets.append(custom_dataset)
             
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
@@ -143,6 +135,8 @@ def get_data_loaders(batch_size):
         return get_dataloaders_RealEstate(batch_size)
     else: # KITTI
         return get_dataloaders_KITTI(batch_size)
+
+
 
 
 def move_bad_images():
@@ -188,12 +182,12 @@ def test_ground_truth_epipolar_err():
     return avg_ep_err_unnormalized, avg_ep_err
 
 if __name__ == "__main__":
-    print(test_ground_truth_epipolar_err())
-    # train_loader, val_loader = get_data_loaders(1)
-    # for i, (first_image, second_image, label, unormalized_label) in enumerate(train_loader):
+    # print(test_ground_truth_epipolar_err())
+    train_loader, val_loader = get_data_loaders(1)
+    for i, (first_image, second_image, label, unormalized_label) in enumerate(train_loader):
 
-    #     dst_dir = os.path.join('epipole_lines_realestate')
-    #     os.makedirs(dst_dir, exist_ok=True)
+        dst_dir = os.path.join('epipole_lines_realestate')
+        os.makedirs(dst_dir, exist_ok=True)
 
-    #     epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label)
-    #     epipolar_geo.visualize(sqResultDir='epipole_lines_realestate', img_idx=i)
+        epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label)
+        epipolar_geo.visualize(sqResultDir='epipole_lines_realestate', img_idx=i)
