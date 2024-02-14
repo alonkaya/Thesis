@@ -90,9 +90,11 @@ class FMatrixRegressor(nn.Module):
             # Concatenate both original and rotated embedding vectors
             embeddings = torch.cat([x1_embeddings, x2_embeddings, mul_embedding], dim=1)
 
-            # Train MLP on embedding vectors            
-            output = self.mlp(embeddings).to(device)
-
+            try:
+                # Train MLP on embedding vectors            
+                output = self.mlp(embeddings).to(device)
+            except:
+                print(embeddings.shape, x1.shape)
             unnormalized_output = output.view(-1,3,3) if not USE_RECONSTRUCTION_LAYER else torch.stack([self.get_fmat(x)for x in output])
             
             output = norm_layer(unnormalized_output.view(-1, 9)).view(-1,3,3)
