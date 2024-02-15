@@ -163,7 +163,6 @@ class FMatrixRegressor(nn.Module):
 
             with torch.no_grad():
                 for val_first_image, val_second_image, val_label, val_unormalized_label in val_loader:
-
                     val_first_image, val_second_image, val_label, val_unormalized_label = val_first_image.to(
                         device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device)
 
@@ -196,8 +195,6 @@ class FMatrixRegressor(nn.Module):
                 all_val_loss.append(val_avg_loss.cpu().item())
                 all_penalty.append(epoch_penalty.cpu().item())
             
-
-            if check_nan(all_train_loss[-1], all_val_loss[-1], train_mae[-1], val_mae[-1], ec_err_pred_unoramlized[-1], val_ec_err_pred_unormalized[-1], ec_err_pred[-1],all_penalty[-1]): return
                 
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
             Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
@@ -206,8 +203,8 @@ class FMatrixRegressor(nn.Module):
             penalty: {all_penalty[-1]}\n"""
             print_and_write(epoch_output)
 
-            # If the model is not learning, stop training
-            if not_learning(all_train_loss, all_val_loss):
+            # If the model is not learning or outputs nan, stop training
+            if not_learning(all_train_loss, all_val_loss) or check_nan(all_train_loss[-1], all_val_loss[-1], train_mae[-1], val_mae[-1], ec_err_pred_unoramlized[-1], val_ec_err_pred_unormalized[-1], ec_err_pred[-1],all_penalty[-1]):
                 num_epochs = epoch + 1
                 break
         

@@ -95,7 +95,8 @@ def get_dataloaders_KITTI(batch_size):
     return train_loader, val_loader
 
 def get_dataloaders_RealEstate(batch_size):
-    RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
+    # RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
+    RealEstate_paths = ['RealEstate10K/train_images']
 
     train_datasets, val_datasets = [], []
     for RealEstate_path in RealEstate_paths:
@@ -115,10 +116,12 @@ def get_dataloaders_RealEstate(batch_size):
             
             custom_dataset = CustomDataset(sequence_path, poses, valid_indices, transform, K)
             if len(custom_dataset) > 30:
-                if RealEstate_path == 'RealEstate10K/train_images':
-                    train_datasets.append(custom_dataset)     
-                if RealEstate_path == 'RealEstate10K/val_images' or (RealEstate_path == 'RealEstate10K/train_images' and i<=10):  
+                # if RealEstate_path == 'RealEstate10K/train_images':
+                train_datasets.append(custom_dataset)     
+                if i < 15:
                     val_datasets.append(custom_dataset)
+                
+
             
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)

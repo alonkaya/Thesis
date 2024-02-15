@@ -37,7 +37,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
         ax.plot(x, y1, color='blue', label="Train")
         ax.plot(x, y2, color='green', label="Val")
 
-        for i in range(0, len(y1), max(1, len(y1)/5)):
+        for i in range(0, len(y1), max(1, len(y1)//5)):
             ax.text(x[i], y1[i], f'{y1[i]:.3f}', fontsize=8, color='blue', ha='center', va='bottom')
             ax.text(x[i], y2[i], f'{y2[i]:.3f}', fontsize=8, color='green', ha='center', va='top')
 
