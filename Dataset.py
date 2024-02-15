@@ -121,8 +121,6 @@ def get_dataloaders_RealEstate(batch_size):
                 if i < 15:
                     val_datasets.append(custom_dataset)
                 
-
-            
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
     concat_val_dataset = ConcatDataset(val_datasets)

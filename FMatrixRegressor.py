@@ -6,7 +6,7 @@ import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr_vit, lr_mlp, penalty_coeff, batch_size, batchnorm_and_dropout, penaltize_normalized, freeze_pretrained_model=False):
+    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr_vit, lr_mlp, penalty_coeff, batch_size, batchnorm_and_dropout, penaltize_normalized, freeze_pretrained_model=False, overfitting=False):
         """
         Initialize the ViTMLPRegressor model.
 
@@ -28,6 +28,7 @@ class FMatrixRegressor(nn.Module):
         self.lr_vit = lr_vit
         self.lr_mlp = lr_mlp
         self.batchnorm_and_dropout = batchnorm_and_dropout
+        self.overfitting = overfitting
 
         # Check if CLIP model is specified
         if pretrained_model_name == "openai/clip-vit-base-patch32":
@@ -212,16 +213,16 @@ class FMatrixRegressor(nn.Module):
         print_and_write(output)
 
         plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
-                        title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit)
+                        title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
-                        title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit)
+                        title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
-                        title="Epipolar error unnormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit)
+                        title="Epipolar error unnormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred, y2=val_ec_err_pred, 
-                        title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit)
+                        title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting)
   
 
 
