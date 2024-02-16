@@ -130,7 +130,8 @@ def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
 def init_main():
     if NUM_WORKERS > 0:
         mp.set_start_method('spawn', force=True)
-        os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+        
+    os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
     # Set up custom warning handling
     warnings.filterwarnings('always', category=RuntimeWarning)
