@@ -108,8 +108,8 @@ def print_and_write(output):
         print(output)
 
 def not_learning(all_train_loss, all_val_loss):
-    return len(all_train_loss) > 3 and abs(all_train_loss[-1] - all_train_loss[-2]) < 1e-3 and abs(all_train_loss[-1] - all_train_loss[-3]) < 1e-3  and abs(all_train_loss[-1] - all_train_loss[-4]) < 1e-3\
-                                   and abs(all_val_loss[-1] - all_val_loss[-2]) < 1e-3 and abs(all_val_loss[-1] - all_val_loss[-3]) < 1e-3  and abs(all_val_loss[-1] - all_val_loss[-4]) < 1e-3  
+    return len(all_train_loss) > 3 and abs(all_train_loss[-1] - all_train_loss[-2]) < 1e-4 and abs(all_train_loss[-1] - all_train_loss[-3]) < 1e-4  and abs(all_train_loss[-1] - all_train_loss[-4]) < 1e-4\
+                                   and abs(all_val_loss[-1] - all_val_loss[-2]) < 1e-4 and abs(all_val_loss[-1] - all_val_loss[-3]) < 1e-4  and abs(all_val_loss[-1] - all_val_loss[-4]) < 1e-4
 
 def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
     """ Reverses the scaling and normalization transformation applied on the image.
