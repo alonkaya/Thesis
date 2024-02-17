@@ -27,25 +27,38 @@ class CustomDataset2(torch.utils.data.Dataset):
                 return (len(self.valid_indices) - JUMP_FRAMES) // 3  # Every 3rd image
 
     def __getitem__(self, idx):
-        if self.dataset_type == 'train':
-            # Map idx to include 2 out of every 3 images
-            idx = idx + (idx // 2)
-        else:
-            # Map idx to select every 3rd image
-            idx = idx * 3 + 2
+        try: 
+            if self.dataset_type == 'train':
+                # Map idx to include 2 out of every 3 images
+                idx = idx + (idx // 2)
+            else:
+                # Map idx to select every 3rd image
+                idx = idx * 3 + 2
 
-        original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-        original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
-
-        # Transform: Resize, center, grayscale
-        first_image = self.transform(original_first_image).to(device)
-        second_image = self.transform(original_second_image).to(device)
-
-        unnormalized_F = get_F(self.poses, idx, self.k)
-
-        # Normalize F-Matrix
-        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
-
+            original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+            original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
+        except Exception as e:
+            print(f"1\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+        
+        try:
+            # Transform: Resize, center, grayscale
+            first_image = self.transform(original_first_image).to(device)
+            second_image = self.transform(original_second_image).to(device)
+        except Exception as e:
+            print(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+        
+        try:
+            unnormalized_F = get_F(self.poses, idx, self.k)
+        except Exception as e:
+            print(f"3\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+        
+        try:
+            # Normalize F-Matrix
+            F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
+        except Exception as e:
+            print(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+        
+        
         return first_image, second_image, F, unnormalized_F
 
 def get_valid_indices(sequence_len, sequence_path):
