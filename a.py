@@ -100,9 +100,9 @@ def data_for_checking_overfit(batch_size):
             
             train_dataset = CustomDataset2(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
             val_dataset = CustomDataset2(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
-            # if len(val_dataset) > 30:
-            train_datasets.append(train_dataset)     
-            val_datasets.append(val_dataset)
+            if len(val_dataset) > 30:
+                train_datasets.append(train_dataset)     
+                val_datasets.append(val_dataset)
                 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
