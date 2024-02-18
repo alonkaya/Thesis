@@ -122,11 +122,13 @@ class FMatrixRegressor(nn.Module):
                         device), second_image.to(device), label.to(device), unormalized_label.to(device)
                 except Exception as e:
                     print(f'1 {e}')
+
                 try:
                     # Forward pass
                     unnormalized_output, output, penalty = self.forward(first_image, second_image)
                 except Exception as e:
                     print(f'2 {e}')
+
                 try:
                     # Compute loss
                     l2_loss = self.L2_loss(output, label)
@@ -134,6 +136,7 @@ class FMatrixRegressor(nn.Module):
                     avg_loss = avg_loss + loss.detach()
                 except Exception as e:
                     print(f'3 {e}')
+
                 try:
                     # Compute Backward pass and gradients
                     self.optimizer.zero_grad()
@@ -141,6 +144,7 @@ class FMatrixRegressor(nn.Module):
                     self.optimizer.step()
                 except Exception as e:
                     print(f'4 {e}')
+
                 try:
                     # Compute train mean epipolar constraint error
                     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
@@ -150,9 +154,10 @@ class FMatrixRegressor(nn.Module):
                     epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
                 except Exception as e:
                     print(f'5 {e}')
-                    # Extend lists with batch statistics
-                    labels = torch.cat((labels, label.detach()), dim=0)
-                    outputs = torch.cat((outputs, output.detach()), dim=0)
+
+                # Extend lists with batch statistics
+                labels = torch.cat((labels, label.detach()), dim=0)
+                outputs = torch.cat((outputs, output.detach()), dim=0)
 
 
             # Calculate and store mean absolute error for the epoch
