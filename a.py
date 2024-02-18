@@ -22,18 +22,16 @@ class CustomDataset2(torch.utils.data.Dataset):
     def __len__(self):
             # Adjust the total count based on dataset type
             if self.dataset_type == 'train':
-                return ((len(self.valid_indices) - JUMP_FRAMES) // 3) * 2  # 2 out of every 3 images
+                return ((len(self.valid_indices)-JUMP_FRAMES) // 3) * 2  # 2 out of every 3 images
             else:
-                return (len(self.valid_indices) - JUMP_FRAMES) // 3  # Every 3rd image
-
+                return (len(self.valid_indices)-JUMP_FRAMES) // 3  # Every 3rd image
+            
     def __getitem__(self, idx):
         try: 
             if self.dataset_type == 'train':
-                # Map idx to include 2 out of every 3 images
-                idx = idx + (idx // 2)
+                idx = self.valid_indices[idx]
             else:
-                # Map idx to select every 3rd image
-                idx = idx * 3 + 2
+                idx = self.valid_indices[idx + ((len(self.valid_indices) - JUMP_FRAMES) // 3) * 2]
 
             original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
             original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
@@ -102,9 +100,9 @@ def data_for_checking_overfit(batch_size):
             
             train_dataset = CustomDataset2(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
             val_dataset = CustomDataset2(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
-            if len(val_dataset) > 30:
-                train_datasets.append(train_dataset)     
-                val_datasets.append(val_dataset)
+            # if len(val_dataset) > 30:
+            train_datasets.append(train_dataset)     
+            val_datasets.append(val_dataset)
                 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
