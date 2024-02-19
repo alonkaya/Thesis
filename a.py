@@ -1,4 +1,3 @@
-
 from FunMatrix import *
 from utils import *
 from torch.utils.data import DataLoader, ConcatDataset
@@ -9,7 +8,62 @@ import matplotlib.pyplot as plt
 import torchvision.transforms.functional as T
 
 
-class CustomDataset2(torch.utils.data.Dataset):
+ 
+class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
+    """Takes the first 2/3 images in the sequence for training, and the last 1/3 for testing"""
+
+    def __init__(self, sequence_path, poses, valid_indices, transform, K, dataset_type):
+        self.sequence_path = sequence_path
+        self.sequence_num = sequence_path.split('/')[1]
+        self.poses = poses
+        self.transform = transform
+        self.k = K
+        self.valid_indices = valid_indices
+        self.dataset_type = dataset_type
+
+    def __len__(self):
+            # Adjust the total count based on dataset type
+            if self.dataset_type == 'train':
+                return ((len(self.valid_indices)-JUMP_FRAMES) // 3) * 2  # 2/3 if the set
+            else:
+                return (len(self.valid_indices)-JUMP_FRAMES) // 3  # 1/3 if the set
+            
+    def __getitem__(self, idx):
+        try: 
+            if self.dataset_type == 'train':
+                idx = self.valid_indices[idx]
+            else:
+                idx = self.valid_indices[idx + ((len(self.valid_indices) - JUMP_FRAMES) // 3) * 2]
+
+            original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+            original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
+        except Exception as e:
+            print(f"1\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+        
+        try:
+            # Transform: Resize, center, grayscale
+            first_image = self.transform(original_first_image).to(device)
+            second_image = self.transform(original_second_image).to(device)
+        except Exception as e:
+            print(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+        
+        try:
+            unnormalized_F = get_F(self.poses, idx, self.k)
+        except Exception as e:
+            print(f"3\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+        
+        try:
+            # Normalize F-Matrix
+            F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
+        except Exception as e:
+            print(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+        
+        
+        return first_image, second_image, F, unnormalized_F
+    
+class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):
+    """Takes the first two images out of every three images in the sequence for training, and the third for testing"""
+
     def __init__(self, sequence_path, poses, valid_indices, transform, K, dataset_type):
         self.sequence_path = sequence_path
         self.sequence_num = sequence_path.split('/')[1]
@@ -29,9 +83,11 @@ class CustomDataset2(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         try: 
             if self.dataset_type == 'train':
-                idx = self.valid_indices[idx]
+            # Map idx to include 2 out of every 3 images
+                idx = idx + (idx // 2)
             else:
-                idx = self.valid_indices[idx + ((len(self.valid_indices) - JUMP_FRAMES) // 3) * 2]
+            # Map idx to select every 3rd image
+                idx = idx * 3 + 2
 
             original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
             original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
@@ -79,7 +135,9 @@ transform = transforms.Compose([
                          std=norm_std),
 ])    
 
-def data_for_checking_overfit(batch_size):
+
+
+def data_for_checking_overfit(batch_size, CustomDataset_type):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
 
     train_datasets, val_datasets = [], []
@@ -98,8 +156,13 @@ def data_for_checking_overfit(batch_size):
             original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
             K = get_intrinsic_REALESTATE(specs_path, original_image_size)
             
-            train_dataset = CustomDataset2(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
-            val_dataset = CustomDataset2(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
+            if CustomDataset_type == "CustomDataset_first_two_out_of_three_train":
+                train_dataset = CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
+                val_dataset = CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
+            elif  CustomDataset_type == "CustomDataset_first_two_thirds_train":
+                train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
+                val_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
+
             if len(val_dataset) > 30:
                 train_datasets.append(train_dataset)     
                 val_datasets.append(val_dataset)
@@ -113,3 +176,4 @@ def data_for_checking_overfit(batch_size):
     val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS)
 
     return train_loader, val_loader
+

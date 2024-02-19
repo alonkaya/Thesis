@@ -29,29 +29,29 @@ class MLP(nn.Module):
         return self.layers(x)
 
 
-def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False, overfitting=False):
+def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False):
 
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
-        ax.plot(x, y1, color='blue', label="Train")
-        ax.plot(x, y2, color='green', label="Val")
+        ax.plot(x, y1, color='steelblue', label="Train")
+        ax.plot(x, y2, color='salmon', label="Test")
 
-        for i in range(0, len(y1), max(1, len(y1)//5)):
-            ax.text(x[i], y1[i], f'{y1[i]:.3f}', fontsize=8, color='blue', ha='center', va='bottom')
-            ax.text(x[i], y2[i], f'{y2[i]:.3f}', fontsize=8, color='green', ha='center', va='top')
+        for i in range(0, len(y1), max(1, len(y1)//10)):
+            ax.text(x[i], y1[i], f'{y1[i]:.3f}', fontsize=9, color='blue', ha='center', va='bottom')
+            ax.text(x[i], y2[i], f'{y2[i]:.3f}', fontsize=9, color='red', ha='center', va='top')
 
         ax.set_xlabel(x_label)
         ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
         ax.set_title(f'{title} -\n coeff: {penalty_coeff}, batch size: {batch_size}, lr_mlp: {lr_mlp}, lr_vit: {lr_vit}, scale: {y_scale}')
     
         ax.set_yscale(y_scale)
-        # ax.set_xticks(x)
         ax.grid(True)
         ax.legend()
 
-    os.makedirs('plots', exist_ok=True)
-    plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch_size {batch_size} bn_and_dropout {batchnorm_and_dropout} lr_mlp {lr_mlp} lr_vit {lr_vit} jump frames {JUMP_FRAMES} RealEstate {USE_REALESTATE} overfitting {overfitting}.png""")  # Specify the filename and extension
+    if save:
+        os.makedirs('plots', exist_ok=True)
+        plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch_size {batch_size} bn_and_dropout {batchnorm_and_dropout} lr_mlp {lr_mlp} lr_vit {lr_vit} jump frames {JUMP_FRAMES} RealEstate {USE_REALESTATE} overfitting {overfitting} avg embeddings {average_embeddings}.png""")  # Specify the filename and extension
     if show:
         plt.show()
 

@@ -6,7 +6,7 @@ import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr_vit, lr_mlp, penalty_coeff, batch_size, batchnorm_and_dropout, penaltize_normalized, freeze_pretrained_model=False, overfitting=False):
+    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr_vit, lr_mlp, penalty_coeff, batch_size, batchnorm_and_dropout, penaltize_normalized, average_embeddings, freeze_pretrained_model=False, overfitting=False):
         """
         Initialize the ViTMLPRegressor model.
 
@@ -29,6 +29,7 @@ class FMatrixRegressor(nn.Module):
         self.lr_mlp = lr_mlp
         self.batchnorm_and_dropout = batchnorm_and_dropout
         self.overfitting = overfitting
+        self.average_embeddings = average_embeddings
 
         # Check if CLIP model is specified
         if pretrained_model_name == "openai/clip-vit-base-patch32":
@@ -47,26 +48,29 @@ class FMatrixRegressor(nn.Module):
             self.pretrained_model = ViTModel.from_pretrained(
                 pretrained_model_name).to(device)
 
-        # Get input dimension for the MLP based on ViT configuration
-        mlp_input_dim = self.pretrained_model.config.hidden_size
-
         # Freeze the parameters of the pretrained model if specified
         if freeze_pretrained_model:
             for param in self.pretrained_model.parameters():
                 param.requires_grad = False
 
-        # Choose appropriate loss function based on regress parameter
-        self.L2_loss = nn.MSELoss().to(device)
-        self.L1_loss = nn.L1Loss().to(device)
-
-        self.mlp = MLP(mlp_input_dim*7*7*2, mlp_hidden_sizes,
-                       num_output, batchnorm_and_dropout).to(device)
         params = [
             {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
             {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
         ]
+        self.L2_loss = nn.MSELoss().to(device)
         self.optimizer = optim.Adam(params)
 
+        # Get input dimension for the MLP based on ViT configuration
+        self.model_hidden_size = self.pretrained_model.config.hidden_size
+        if self.average_embeddings:
+            mlp_input_shape = 2*self.model_hidden_size
+        else:
+            mlp_input_shape = 7*7*2*self.model_hidden_size
+
+        self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
+                       num_output, batchnorm_and_dropout).to(device)
+
+        
     def forward(self, x1, x2):
         if DEEPF_NOCORRS:
             # net = HomographyNet(use_reconstruction_module=False).to(device)
@@ -81,9 +85,16 @@ class FMatrixRegressor(nn.Module):
                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
                 x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+            if self.average_embeddings:
+                x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1, self.model_hidden_size, 7, 7).to(device)
+                x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1, self.model_hidden_size, 7, 7).to(device)
 
-            x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1,  7*7*768).to(device)
-            x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1,  7*7*768).to(device)
+                avg_patches = nn.AdaptiveAvgPool2d(1)
+                x1_embeddings = avg_patches(x1_embeddings).view(-1, self.model_hidden_size)
+                x2_embeddings = avg_patches(x2_embeddings).view(-1, self.model_hidden_size)
+            else:
+                x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
+                x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
 
             # Create another feature embedding of the element-wise mult between the two embedding vectors
             mul_embedding = x1_embeddings.mul(x2_embeddings)
@@ -231,16 +242,20 @@ class FMatrixRegressor(nn.Module):
         print_and_write(output)
 
         plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
-                        title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting)
+                        title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
-                        title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting)
+                        title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
-                        title="Epipolar error unnormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting)
+                        title="Epipolar error unnormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred, y2=val_ec_err_pred, 
-                        title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting)
+                        title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
+                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings)
   
 
 
