@@ -1115,6 +1115,7 @@ Train unormalized ground truth error: 0.0010376219792912404 val unormalized grou
 ###########################################################################################################
 
 learning rate vit: 2e-05, learning rate mlp: 2e-05, mlp_hidden_sizes: [512, 256], jump_frames: 6, penalty_coeff: 1, use_reconstruction_layer: False
+<<<<<<< HEAD
 batch_size: 1, train_seqeunces: [0, 2], val_sequences: [1, 3, 4], penaltize_normalized: False, RealEstate: True batchnorm & dropout: False
 
 Epoch 1/80, Training Loss: 0.08926892280578613 Val Loss: 0.01934165507555008 
@@ -1961,58 +1962,3 @@ Epoch 40/40, Training Loss: 0.0006999684846960008 Val Loss: 0.13309255242347717
             penalty: 0.00022490660194307566
 Train unormalized ground truth error: 0.0010883102397201583 val unormalized ground truth error: 0.0008723743376322091
 
-
-###########################################################################################################
-
-learning rate vit: 2e-05, learning rate mlp: 2e-05, mlp_hidden_sizes: [512, 256], jump_frames: 6, penalty_coeff: 1, use_reconstruction_layer: False
-batch_size: 1, train_seqeunces: [0, 2], val_sequences: [1, 3, 4], penaltize_normalized: False, RealEstate: True, batchnorm & dropout: False, 
-average embeddings: True, customdataset type: CustomDataset_first_two_thirds_train model: google/vit-base-patch16-224-in21k
-
-2 ViTModel(
-  (embeddings): ViTEmbeddings(
-    (patch_embeddings): ViTPatchEmbeddings(
-      (projection): Conv2d(3, 768, kernel_size=(16, 16), stride=(16, 16))
-    )
-    (dropout): Dropout(p=0.0, inplace=False)
-  )
-  (encoder): ViTEncoder(
-    (layer): ModuleList(
-      (0-11): 12 x ViTLayer(
-        (attention): ViTAttention(
-          (attention): ViTSelfAttention(
-            (query): Linear(in_features=768, out_features=768, bias=True)
-            (key): Linear(in_features=768, out_features=768, bias=True)
-            (value): Linear(in_features=768, out_features=768, bias=True)
-            (dropout): Dropout(p=0.0, inplace=False)
-          )
-          (output): ViTSelfOutput(
-            (dense): Linear(in_features=768, out_features=768, bias=True)
-            (dropout): Dropout(p=0.0, inplace=False)
-          )
-        )
-        (intermediate): ViTIntermediate(
-          (dense): Linear(in_features=768, out_features=3072, bias=True)
-          (intermediate_act_fn): GELUActivation()
-        )
-        (output): ViTOutput(
-          (dense): Linear(in_features=3072, out_features=768, bias=True)
-          (dropout): Dropout(p=0.0, inplace=False)
-        )
-        (layernorm_before): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
-        (layernorm_after): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
-      )
-    )
-  )
-  (layernorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
-  (pooler): ViTPooler(
-    (dense): Linear(in_features=768, out_features=768, bias=True)
-    (activation): Tanh()
-  )
-) argument after ** must be a mapping, not Tensor3 local variable 'output' referenced before assignment4 local variable 'loss' referenced before assignment5 local variable 'output' referenced before assignment###########################################################################################################
-
-learning rate vit: 2e-05, learning rate mlp: 2e-05, mlp_hidden_sizes: [512, 256], jump_frames: 6, penalty_coeff: 1, use_reconstruction_layer: False
-batch_size: 1, train_seqeunces: [0, 2], val_sequences: [1, 3, 4], penaltize_normalized: False, RealEstate: True, batchnorm & dropout: False, 
-average embeddings: True, customdataset type: CustomDataset_first_two_thirds_train model: google/vit-base-patch16-224-in21k
-
-5 CUDA error: unspecified launch failure
-Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
