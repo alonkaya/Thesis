@@ -85,16 +85,17 @@ class FMatrixRegressor(nn.Module):
                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
                 x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-            if self.average_embeddings:
-                x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1, self.model_hidden_size, 7, 7).to(device)
-                x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1, self.model_hidden_size, 7, 7).to(device)
-
-                avg_patches = nn.AdaptiveAvgPool2d(1)
-                x1_embeddings = avg_patches(x1_embeddings).view(-1, self.model_hidden_size)
-                x2_embeddings = avg_patches(x2_embeddings).view(-1, self.model_hidden_size)
+                
+                x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)
+                x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)                
             else:
-                x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
-                x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
+                x1_embeddings = self.pretrained_model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
+                x2_embeddings = self.pretrained_model(x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
+                
+            if self.average_embeddings:
+                avg_patches = nn.AdaptiveAvgPool2d(1)
+                x1_embeddings = avg_patches(x1_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
+                x2_embeddings = avg_patches(x2_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
 
             # Create another feature embedding of the element-wise mult between the two embedding vectors
             mul_embedding = x1_embeddings.mul(x2_embeddings)
