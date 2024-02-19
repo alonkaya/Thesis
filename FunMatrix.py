@@ -1,5 +1,5 @@
 from params import *
-from utils import read_camera_intrinsic, reverse_transforms
+from utils import read_camera_intrinsic, reverse_transforms, print_and_write
 import cv2
 import os
 from scipy.linalg import rq
@@ -95,7 +95,7 @@ def compute_fundamental(E, K1, K2):
     F = torch.matmul(K2_inv_T, torch.matmul(E, K1_inv))
 
     if torch.linalg.matrix_rank(F) != 2:
-        print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
+        print_and_write(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
 
     return F
 

@@ -96,9 +96,7 @@ def norm_layer(unnormalized_x):
 
 def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, ec_err_pred_unoramlized_last, val_ec_err_pred_unormalized_last, ec_err_pred_last, all_penalty_last):
     if math.isnan(all_train_loss_last) or math.isnan(all_val_loss_last) or math.isnan(train_mae_last) or math.isnan(val_mae_last) or math.isnan(ec_err_pred_unoramlized_last) or math.isnan(val_ec_err_pred_unormalized_last) or math.isnan(ec_err_pred_last) or math.isnan(all_penalty_last):
-        with open("output.txt", "a") as f:
-            f.write("found nan")
-            print("found nan")                
+        print_and_write("found nan\n")                
         return True
     return False
                      

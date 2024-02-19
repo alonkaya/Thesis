@@ -53,13 +53,6 @@ class FMatrixRegressor(nn.Module):
             for param in self.pretrained_model.parameters():
                 param.requires_grad = False
 
-        params = [
-            {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
-            {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
-        ]
-        self.L2_loss = nn.MSELoss().to(device)
-        self.optimizer = optim.Adam(params)
-
         # Get input dimension for the MLP based on ViT configuration
         self.model_hidden_size = self.pretrained_model.config.hidden_size
         if self.average_embeddings:
@@ -70,7 +63,13 @@ class FMatrixRegressor(nn.Module):
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
 
-        
+        params = [
+            {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
+        ]
+        self.L2_loss = nn.MSELoss().to(device)
+        self.optimizer = optim.Adam(params)
+
     def forward(self, x1, x2):
         if DEEPF_NOCORRS:
             # net = HomographyNet(use_reconstruction_module=False).to(device)
@@ -132,13 +131,13 @@ class FMatrixRegressor(nn.Module):
                     first_image, second_image, label, unormalized_label = first_image.to(
                         device), second_image.to(device), label.to(device), unormalized_label.to(device)
                 except Exception as e:
-                    print(f'1 {e}')
+                    print_and_write(f'1 {e}')
 
                 try:
                     # Forward pass
                     unnormalized_output, output, penalty = self.forward(first_image, second_image)
                 except Exception as e:
-                    print(f'2 {e}')
+                    print_and_write(f'2 {e}')
 
                 try:
                     # Compute loss
@@ -146,7 +145,7 @@ class FMatrixRegressor(nn.Module):
                     loss = l2_loss + self.penalty_coeff*penalty 
                     avg_loss = avg_loss + loss.detach()
                 except Exception as e:
-                    print(f'3 {e}')
+                    print_and_write(f'3 {e}')
 
                 try:
                     # Compute Backward pass and gradients
@@ -154,7 +153,7 @@ class FMatrixRegressor(nn.Module):
                     loss.backward()
                     self.optimizer.step()
                 except Exception as e:
-                    print(f'4 {e}')
+                    print_and_write(f'4 {e}')
 
                 try:
                     # Compute train mean epipolar constraint error
@@ -164,7 +163,7 @@ class FMatrixRegressor(nn.Module):
                     epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
                     epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
                 except Exception as e:
-                    print(f'5 {e}')
+                    print_and_write(f'5 {e}')
 
                 # Extend lists with batch statistics
                 labels = torch.cat((labels, label.detach()), dim=0)
@@ -210,7 +209,7 @@ class FMatrixRegressor(nn.Module):
                         val_outputs = torch.cat((val_outputs, val_output), dim=0)
                         val_labels = torch.cat((val_labels, val_label), dim=0)
                     except Exception as e:
-                        print(f'length: {len(val_labels)}, val exception: {e}')
+                        print_and_write(f'length: {len(val_labels)}, val exception: {e}')
 
                 # Calculate and store mean absolute error for the epoch
                 mae = torch.mean(torch.abs(val_labels - val_outputs))
