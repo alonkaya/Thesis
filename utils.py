@@ -29,8 +29,9 @@ class MLP(nn.Module):
         return self.layers(x)
 
 
-def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False):
-
+def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False, model=CLIP_MODEL_NAME):
+    model_name = "CLIP" if model == CLIP_MODEL_NAME else "Google ViT"
+    
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
@@ -43,7 +44,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
 
         ax.set_xlabel(x_label)
         ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
-        ax.set_title(f'{title} -\n coeff: {penalty_coeff}, batch size: {batch_size}, lr_mlp: {lr_mlp}, lr_vit: {lr_vit}, scale: {y_scale}')
+        ax.set_title(f'{title} -\n coeff: {penalty_coeff}, batch size: {batch_size}, lr_mlp: {lr_mlp}, lr_vit: {lr_vit}, scale: {y_scale}\nmodel_name: {model_name}')
     
         ax.set_yscale(y_scale)
         ax.grid(True)
@@ -51,7 +52,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
 
     if save:
         os.makedirs('plots', exist_ok=True)
-        plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch_size {batch_size} bn_and_dropout {batchnorm_and_dropout} lr_mlp {lr_mlp} lr_vit {lr_vit} jump frames {JUMP_FRAMES} RealEstate {USE_REALESTATE} overfitting {overfitting} avg embeddings {average_embeddings}.png""")  # Specify the filename and extension
+        plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch_size {batch_size} bn_and_dropout {batchnorm_and_dropout} lr_mlp {lr_mlp} lr_vit {lr_vit} jump frames {JUMP_FRAMES} RealEstate {USE_REALESTATE} overfitting {overfitting} avg embeddings {average_embeddings} model {model_name}.png""")  # Specify the filename and extension
     if show:
         plt.show()
 

@@ -30,6 +30,7 @@ class FMatrixRegressor(nn.Module):
         self.batchnorm_and_dropout = batchnorm_and_dropout
         self.overfitting = overfitting
         self.average_embeddings = average_embeddings
+        self.pretrained_model_name = pretrained_model_name
 
         # Check if CLIP model is specified
         if pretrained_model_name == "openai/clip-vit-base-patch32":
@@ -242,19 +243,19 @@ class FMatrixRegressor(nn.Module):
 
         plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
                         title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings)
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, model=self.pretrained_model_name)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
                         title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings)
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, model=self.pretrained_model_name)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
                         title="Epipolar error unnormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings)
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, model=self.pretrained_model_name)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred, y2=val_ec_err_pred, 
                         title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
-                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings)
+                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, model=self.pretrained_model_name)
   
 
 
