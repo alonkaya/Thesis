@@ -26,7 +26,8 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             if self.dataset_type == 'train':
                 return ((len(self.valid_indices)-JUMP_FRAMES) // 3) * 2  # 2/3 if the set
             else:
-                return (len(self.valid_indices)-JUMP_FRAMES) // 3  # 1/3 if the set
+                # return (len(self.valid_indices)-JUMP_FRAMES) // 3  # 1/3 if the set
+                return 1
             
     def __getitem__(self, idx):
         try: 
@@ -135,7 +136,30 @@ transform = transforms.Compose([
                          std=norm_std),
 ])    
 
+def data_with_one_sequence(batch_size, CustomDataset_type):
+    RealEstate_path = 'RealEstate10K/train_images'
+    sequence_name = '0cb8672999a42a05'
 
+    specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
+    sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
+
+    # Get a list of all poses [R,t] in this sequence
+    poses = read_poses(specs_path).to(device)
+
+    # Indices of 'good' image frames
+    valid_indices = get_valid_indices(len(poses), sequence_path)
+    
+    # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
+    original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
+    K = get_intrinsic_REALESTATE(specs_path, original_image_size)
+    
+    train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
+    val_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS)
+
+    return train_loader, val_loader
 
 def data_for_checking_overfit(batch_size, CustomDataset_type):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']

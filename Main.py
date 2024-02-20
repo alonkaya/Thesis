@@ -13,15 +13,16 @@ if __name__ == "__main__":
     
     for i, (penalty_coeff, penaltize_normalized, lr_vit, lr_mlp) in enumerate(param_combinations):
         model = FMatrixRegressor(MLP_HIDDEN_DIM, NUM_OUTPUT, 
-                                pretrained_model_name=VIT_MODEL_NAME, lr_vit=lr_vit, lr_mlp=lr_mlp,
+                                pretrained_model_name=model_used, lr_vit=lr_vit, lr_mlp=lr_mlp,
                                 penalty_coeff=penalty_coeff, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO,
                                 penaltize_normalized=penaltize_normalized, average_embeddings=AVG_EMBEDDINGS, freeze_pretrained_model=False, overfitting=True).to(device)
 
-        train_loader, val_loader = data_for_checking_overfit(BATCH_SIZE, CUSTOMDATASET_TYPE)
+        # train_loader, val_loader = data_for_checking_overfit(BATCH_SIZE, CUSTOMDATASET_TYPE)
+        train_loader, val_loader = data_with_one_sequence(BATCH_SIZE, CUSTOMDATASET_TYPE)
         
         parameters = f"""learning rate vit: {lr_vit}, learning rate mlp: {lr_mlp}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, penalty_coeff: {penalty_coeff}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
 batch_size: {BATCH_SIZE}, train_seqeunces: {train_seqeunces}, val_sequences: {val_sequences}, penaltize_normalized: {penaltize_normalized}, RealEstate: {USE_REALESTATE}, batchnorm & dropout: {BN_AND_DO}, 
-average embeddings: {AVG_EMBEDDINGS}, customdataset type: {CUSTOMDATASET_TYPE} model: {VIT_MODEL_NAME}\n\n"""
+average embeddings: {AVG_EMBEDDINGS}, customdataset type: {CUSTOMDATASET_TYPE}, model: {model_used}\n\n"""
         print_and_write(parameters)
 
         model.train_model(train_loader, val_loader, num_epochs=NUM_EPOCHS)
