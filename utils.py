@@ -28,8 +28,21 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.layers(x)
 
+class GroupedConvolution(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, padding, groups):
+        super(GroupedConvolution, self).__init__()
+        self.grouped_conv = nn.Conv2d(in_channels=in_channels,
+                                      out_channels=out_channels,
+                                      kernel_size=kernel_size,
+                                      padding=padding,
+                                      groups=groups)
+    
+    def forward(self, x):
+        return self.grouped_conv(x)
+    
+    
 
-def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False, model=CLIP_MODEL_NAME):
+def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False, model=CLIP_MODEL_NAME, augmentation=AUGMENTATION):
     model_name = "CLIP" if model == CLIP_MODEL_NAME else "Google ViT"
     
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
@@ -52,7 +65,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
 
     if save:
         os.makedirs('plots', exist_ok=True)
-        plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch_size {batch_size} bn_and_dropout {batchnorm_and_dropout} lr_mlp {lr_mlp} lr_vit {lr_vit} jump frames {JUMP_FRAMES} RealEstate {USE_REALESTATE} overfitting {overfitting} avg embeddings {average_embeddings} model {model_name}.png""")  # Specify the filename and extension
+        plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch_size {batch_size} bn_and_dropout {batchnorm_and_dropout} lr_mlp {lr_mlp} lr_vit {lr_vit} jump frames {JUMP_FRAMES} RealEstate {USE_REALESTATE} overfitting {overfitting} avg embeddings {average_embeddings} model {model_name} augmentation {AUGMENTATION}.png""")  # Specify the filename and extension
     if show:
         plt.show()
 

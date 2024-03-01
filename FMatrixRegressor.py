@@ -6,7 +6,10 @@ import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr_vit, lr_mlp, penalty_coeff, batch_size, batchnorm_and_dropout, penaltize_normalized, average_embeddings, freeze_pretrained_model=False, overfitting=False):
+    def __init__(self, lr_vit, lr_mlp, penalty_coeff,  penaltize_normalized, 
+                 mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, 
+                 batchnorm_and_dropout=BN_AND_DO, freeze_pretrained_model=FREEZE_PRETRAINED_MODEL, overfitting=OVERFITTING, augmentation=AUGMENTATION, 
+                 pretrained_model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS):
         """
         Initialize the ViTMLPRegressor model.
 
@@ -31,6 +34,7 @@ class FMatrixRegressor(nn.Module):
         self.overfitting = overfitting
         self.average_embeddings = average_embeddings
         self.pretrained_model_name = pretrained_model_name
+        self.augmentation = AUGMENTATION
 
         # Check if CLIP model is specified
         if pretrained_model_name == "openai/clip-vit-base-patch32":
@@ -53,6 +57,10 @@ class FMatrixRegressor(nn.Module):
         if freeze_pretrained_model:
             for param in self.pretrained_model.parameters():
                 param.requires_grad = False
+        print(len(self.pretrained_model.encoder.layer))
+        for layer in self.pretrained_model.encoder.layer[len(self.pretrained_model.encoder.layer)-unfrozen_layers:]:
+            for param in layer.parameters():
+                param.requires_grad = True
 
         # Get input dimension for the MLP based on ViT configuration
         self.model_hidden_size = self.pretrained_model.config.hidden_size
@@ -96,6 +104,13 @@ class FMatrixRegressor(nn.Module):
                 avg_patches = nn.AdaptiveAvgPool2d(1)
                 x1_embeddings = avg_patches(x1_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
                 x2_embeddings = avg_patches(x2_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
+
+            if group_conv["use"]:
+                grouped_conv_layer = GroupedConvolution(in_channels=self.model_hidden_size,   # Total input channels
+                                        out_channels=group_conv["out_channels"],  # Total output channels you want
+                                        kernel_size=3,
+                                        padding=1,
+                                        groups=group_conv["num_groups"])
 
             # Create another feature embedding of the element-wise mult between the two embedding vectors
             mul_embedding = x1_embeddings.mul(x2_embeddings)
@@ -244,19 +259,23 @@ class FMatrixRegressor(nn.Module):
 
         plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
                         title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, model=self.pretrained_model_name)
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                        model=self.pretrained_model_name, augmentation=self.augmentation)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
                         title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, model=self.pretrained_model_name)
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                        model=self.pretrained_model_name, augmentation=self.augmentation)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
                         title="Epipolar error unnormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, model=self.pretrained_model_name)
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                        model=self.pretrained_model_name, augmentation=self.augmentation)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred, y2=val_ec_err_pred, 
                         title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
-                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, model=self.pretrained_model_name)
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                        model=self.pretrained_model_name, augmentation=self.augmentation)
   
 
 

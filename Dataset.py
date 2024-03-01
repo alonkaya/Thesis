@@ -48,14 +48,25 @@ def get_valid_indices(sequence_len, sequence_path):
 
     return valid_indices
 
-transform = transforms.Compose([
-    transforms.Resize((256, 256)),
-    transforms.CenterCrop(224),
-    transforms.Grayscale(num_output_channels=3),
-    transforms.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
-    transforms.Normalize(mean=norm_mean,  # Normalize each channel
-                         std=norm_std),
-])    
+if AUGMENTATION:
+    transform = transforms.Compose([
+        transforms.Resize((256, 256)),
+        transforms.CenterCrop(224),
+        transforms.Grayscale(num_output_channels=3),
+        transforms.ColorJitter(brightness=(0.9, 1.1), contrast=(0.9, 1.1)),
+        transforms.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
+        transforms.Normalize(mean=norm_mean,  # Normalize each channel
+                            std=norm_std),
+    ])    
+else:
+    transform = transforms.Compose([
+        transforms.Resize((256, 256)),
+        transforms.CenterCrop(224),
+        transforms.Grayscale(num_output_channels=3),
+        transforms.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
+        transforms.Normalize(mean=norm_mean,  # Normalize each channel
+                            std=norm_std),
+    ])   
 
 
 def get_dataloaders_KITTI(batch_size):
