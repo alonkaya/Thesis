@@ -120,20 +120,23 @@ def last_sing_value_penalty(output):
 
 def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):
     # Compute mean epipolar constraint error
-    # U1, S1, V1 = torch.svd(output)
-    # U2, S2, V2 = torch.svd(unormalized_output)
+    U1, S1, V1 = torch.svd(output)
+    U2, S2, V2 = torch.svd(unormalized_output)
 
-    # S1[:, -1] = 0
-    # S2[:, -1] = 0
+    S1[:, -1] = 0
+    S2[:, -1] = 0
 
-    # output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2))
-    # unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), V2.transpose(1, 2))
+    output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2))
+    unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), V2.transpose(1, 2))
     
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = 0, 0, 0
-    for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
-        avg_ec_err_truth = avg_ec_err_truth + EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
-        avg_ec_err_pred = avg_ec_err_pred + EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
-        avg_ec_err_pred_unormalized = avg_ec_err_pred_unormalized + EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
+    try:
+        for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
+            avg_ec_err_truth = avg_ec_err_truth + EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
+            avg_ec_err_pred = avg_ec_err_pred + EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
+            avg_ec_err_pred_unormalized = avg_ec_err_pred_unormalized + EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
+    except Exception as e:
+        print_and_write(f'Error in get_avg_epipolar_test_errors: {e}')
 
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = (
         v / len(first_image) for v in (avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized))
@@ -162,7 +165,6 @@ def reconstruction_module(x):
         return R
 
     def get_inv_intrinsic(f):
-        # TODO: What about the proncipal points?
         return torch.tensor([
             [-1/(f+1e-8),   0.,             0.],
             [0.,            -1/(f+1e-8),    0.],
@@ -179,11 +181,11 @@ def reconstruction_module(x):
     def get_fmat(x):
         # F = K2^(-T)*R*[t]x*K1^(-1)
         # Note: only need out-dim = 8
-        K1_inv = get_inv_intrinsic(x[0])
-        K2_inv = get_inv_intrinsic(x[1])  # TODO: K2 should be -t not just -1..
-        R = get_rotation(x[2], x[3], x[4])
+        K1_inv = get_inv_intrinsic(x[0]) # K1^(-1)
+        K2_inv_T = torch.transpose(get_inv_intrinsic(x[1])) # K2^(-T)
+        R = get_rotation(x[2], x[3], x[4]) 
         T = get_translate(x[5], x[6], x[7])
-        F = torch.matmul(K2_inv,
+        F = torch.matmul(K2_inv_T,
                          torch.matmul(R, torch.matmul(T, K1_inv)))
 
         return F
@@ -216,12 +218,16 @@ class EpipolarGeometry:
     def get_keypoints(self, threshold=EPIPOLAR_THRESHOLD):
         """Recives numpy images and returns numpy points"""
         # sift = cv2.xfeatures2d.SIFT_create()
-        sift = cv2.SIFT_create()
-        bf = cv2.BFMatcher()
+        try:
+            sift = cv2.SIFT_create()
+            bf = cv2.BFMatcher()
 
-        # Detect keypoints and compute descriptors for both images
-        (kp1, des1) = sift.detectAndCompute(self.image1_numpy, None)
-        (kp2, des2) = sift.detectAndCompute(self.image2_numpy, None)
+            # Detect keypoints and compute descriptors for both images
+            (kp1, des1) = sift.detectAndCompute(self.image1_numpy, None)
+            (kp2, des2) = sift.detectAndCompute(self.image2_numpy, None)
+        except Exception as e:
+            print_and_write(f'Error in sift: {e}')
+            return
 
         # matches = bf.match(des1, des2)
         matches = bf.knnMatch(des1, des2, k=2)
@@ -254,10 +260,23 @@ class EpipolarGeometry:
         return torch.mean(errs)
 
     def get_epipolar_err(self):
-        pts1, pts2 = self.get_keypoints()
-        pts1, pts2 = torch.tensor(pts1, dtype=torch.float32).to(device), torch.tensor(pts2, dtype=torch.float32).to(device)
+        try:
+            pts1, pts2 = self.get_keypoints()
+        except Exception as e:
+            print_and_write(f'Error in get_keypoints: {e}')
+            return
+        try:
+            pts1, pts2 = torch.tensor(pts1, dtype=torch.float32).to(device), torch.tensor(pts2, dtype=torch.float32).to(device)
+        except Exception as e:
+            print_and_write(f'Error in tensors: {e}')
 
-        return self.epipolar_test_all_points(pts1, pts2)
+        try:
+            err = self.epipolar_test_all_points(pts1, pts2)
+        except Exception as e:
+            print_and_write(f'Error in epipolar_test_all_points: {e}')
+            return
+
+        return err
 
     def epipoline(self, x, formula):
         array = formula.flatten()

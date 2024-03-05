@@ -6,7 +6,10 @@ import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, mlp_hidden_sizes, num_output, pretrained_model_name, lr_vit, lr_mlp, penalty_coeff, batch_size, batchnorm_and_dropout, penaltize_normalized, average_embeddings, freeze_pretrained_model=False, overfitting=False):
+    def __init__(self, lr_vit, lr_mlp, penalty_coeff,  penaltize_normalized, 
+                 mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, 
+                 batchnorm_and_dropout=BN_AND_DO, freeze_pretrained_model=FREEZE_PRETRAINED_MODEL, overfitting=OVERFITTING, augmentation=AUGMENTATION, 
+                 pretrained_model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, enforce_rank_2=ENFORCE_RANK_2, get_pose=GET_POSE):
         """
         Initialize the ViTMLPRegressor model.
 
@@ -31,6 +34,9 @@ class FMatrixRegressor(nn.Module):
         self.overfitting = overfitting
         self.average_embeddings = average_embeddings
         self.pretrained_model_name = pretrained_model_name
+        self.augmentation = augmentation
+        self.enforce_rank_2 = enforce_rank_2
+        self.get_pose=get_pose
 
         # Check if CLIP model is specified
         if pretrained_model_name == "openai/clip-vit-base-patch32":
@@ -53,6 +59,10 @@ class FMatrixRegressor(nn.Module):
         if freeze_pretrained_model:
             for param in self.pretrained_model.parameters():
                 param.requires_grad = False
+        # print(len(self.pretrained_model.encoder.layer))
+        # for layer in self.pretrained_model.encoder.layer[len(self.pretrained_model.encoder.layer)-unfrozen_layers:]:
+        #     for param in layer.parameters():
+        #         param.requires_grad = True
 
         # Get input dimension for the MLP based on ViT configuration
         self.model_hidden_size = self.pretrained_model.config.hidden_size
@@ -97,6 +107,14 @@ class FMatrixRegressor(nn.Module):
                 x1_embeddings = avg_patches(x1_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
                 x2_embeddings = avg_patches(x2_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
 
+            if group_conv["use"]:
+                grouped_conv_layer = GroupedConvolution(in_channels=self.model_hidden_size,   # Total input channels
+                                        out_channels=group_conv["out_channels"],  # Total output channels you want
+                                        kernel_size=3,
+                                        padding=1,
+                                        groups=group_conv["num_groups"])
+                #TODO: complete
+
             # Create another feature embedding of the element-wise mult between the two embedding vectors
             mul_embedding = x1_embeddings.mul(x2_embeddings)
 
@@ -105,15 +123,22 @@ class FMatrixRegressor(nn.Module):
 
             # Train MLP on embedding vectors            
             output = self.mlp(embeddings).to(device)
+            if GET_POSE:
+                unnormalized_output = output.view(-1,3,4) 
+                
+                output = norm_layer(unnormalized_output.view(-1, 12)).view(-1,3,4)
 
-            unnormalized_output = output.view(-1,3,3) if not USE_RECONSTRUCTION_LAYER else torch.stack([self.get_fmat(x)for x in output])
-            
-            output = norm_layer(unnormalized_output.view(-1, 9)).view(-1,3,3)
-            
-            if self.penaltize_normalized:
-                penalty = last_sing_value_penalty(output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
+                penalty = torch.tensor(0).to(device)
+
             else:
-                penalty = last_sing_value_penalty(unnormalized_output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
+                unnormalized_output = output.view(-1,3,3) if not USE_RECONSTRUCTION_LAYER else torch.stack([self.get_fmat(x)for x in output])
+                
+                output = norm_layer(unnormalized_output.view(-1, 9)).view(-1,3,3)
+                
+                if self.penaltize_normalized:
+                    penalty = last_sing_value_penalty(output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
+                else:
+                    penalty = last_sing_value_penalty(unnormalized_output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
             
             return unnormalized_output, output, penalty
 
@@ -157,15 +182,18 @@ class FMatrixRegressor(nn.Module):
                 except Exception as e:
                     print_and_write(f'4 {e}')
 
-                try:
-                    # Compute train mean epipolar constraint error
-                    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                        first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unnormalized_output.detach())
-                    epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
-                    epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
-                    epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
-                except Exception as e:
-                    print_and_write(f'5 {e}')
+                if GET_POSE:
+                    epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = torch.tensor(0).to(device),torch.tensor(0).to(device),torch.tensor(0).to(device)
+                else:
+                    try:
+                        # Compute train mean epipolar constraint error
+                        avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
+                            first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unnormalized_output.detach())
+                        epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
+                        epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
+                        epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
+                    except Exception as e:
+                        print_and_write(f'5 {e}')
 
                 # Extend lists with batch statistics
                 labels = torch.cat((labels, label.detach()), dim=0)
@@ -200,13 +228,16 @@ class FMatrixRegressor(nn.Module):
                             val_first_image, val_second_image)
                         epoch_penalty = epoch_penalty + penalty
                         val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
-
-                        # Compute val mean epipolar constraint error
-                        val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                            val_first_image, val_second_image, val_unormalized_label, val_output, unnormalized_val_output)
-                        val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
-                        val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
-                        val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
+                        
+                        if GET_POSE:
+                            val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized = torch.tensor(0).to(device),torch.tensor(0).to(device),torch.tensor(0).to(device)
+                        else:
+                            # Compute val mean epipolar constraint error
+                            val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
+                                val_first_image, val_second_image, val_unormalized_label, val_output, unnormalized_val_output)
+                            val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
+                            val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
+                            val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
 
                         val_outputs = torch.cat((val_outputs, val_output), dim=0)
                         val_labels = torch.cat((val_labels, val_label), dim=0)
@@ -235,114 +266,118 @@ class FMatrixRegressor(nn.Module):
             print_and_write(epoch_output)
 
             # If the model is not learning or outputs nan, stop training
-            if not_learning(all_train_loss, all_val_loss) or check_nan(all_train_loss[-1], all_val_loss[-1], train_mae[-1], val_mae[-1], ec_err_pred_unoramlized[-1], val_ec_err_pred_unormalized[-1], ec_err_pred[-1],all_penalty[-1]):
-                num_epochs = epoch + 1
-                break
+            # if not_learning(all_train_loss, all_val_loss) or check_nan(all_train_loss[-1], all_val_loss[-1], train_mae[-1], val_mae[-1], ec_err_pred_unoramlized[-1], val_ec_err_pred_unormalized[-1], ec_err_pred[-1],all_penalty[-1]):
+            #     num_epochs = epoch + 1
+            #     break
         
         output = f"""Train unormalized ground truth error: {np.mean(ec_err_truth)} val unormalized ground truth error: {np.mean(val_ec_err_truth)}\n\n\n"""
         print_and_write(output)
 
         plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
                         title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, model=self.pretrained_model_name)
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, get_pose=self.get_pose)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
                         title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, model=self.pretrained_model_name)
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, get_pose=self.get_pose)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
                         title="Epipolar error unnormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, model=self.pretrained_model_name)
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, get_pose=self.get_pose)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred, y2=val_ec_err_pred, 
                         title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
-                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, model=self.pretrained_model_name)
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, get_pose=self.get_pose)
   
 
 
-    # def get_rotation(self, rx, ry, rz):
-    #     # normalize input?
-    #     R_x = nn.Parameter(torch.tensor([
-    #         [1.,    0.,             0.],
-    #         [0.,    torch.cos(rx),    -torch.sin(rx)],
-    #         [0.,    torch.sin(rx),     torch.cos(rx)]
-    #     ]).to(device))
+    def get_rotation(self, rx, ry, rz):
+        # normalize input?
+        R_x = nn.Parameter(torch.tensor([
+            [1.,    0.,             0.],
+            [0.,    torch.cos(rx),    -torch.sin(rx)],
+            [0.,    torch.sin(rx),     torch.cos(rx)]
+        ]).to(device))
 
-    #     R_y = nn.Parameter(torch.tensor([
-    #         [torch.cos(ry),    0.,    -torch.sin(ry)],
-    #         [0.,            1.,     0.],
-    #         [torch.sin(ry),    0.,     torch.cos(ry)]
-    #     ]).to(device))
+        R_y = nn.Parameter(torch.tensor([
+            [torch.cos(ry),    0.,    -torch.sin(ry)],
+            [0.,            1.,     0.],
+            [torch.sin(ry),    0.,     torch.cos(ry)]
+        ]).to(device))
 
-    #     R_z = nn.Parameter(torch.tensor([
-    #         [torch.cos(rz),    -torch.sin(rz),    0.],
-    #         [torch.sin(rz),    torch.cos(rz),     0.],
-    #         [0.,            0.,             1.]
-    #     ]).to(device))
-    #     R = torch.matmul(R_x, torch.matmul(R_y, R_z))
-    #     return R
+        R_z = nn.Parameter(torch.tensor([
+            [torch.cos(rz),    -torch.sin(rz),    0.],
+            [torch.sin(rz),    torch.cos(rz),     0.],
+            [0.,            0.,             1.]
+        ]).to(device))
+        R = torch.matmul(R_x, torch.matmul(R_y, R_z))
+        return R
 
-    # def get_inv_intrinsic(self, f):
-    #     # TODO: What about the proncipal points?
-    #     return nn.Parameter(torch.tensor([
-    #         [-1/(f+1e-8),   0.,             0.],
-    #         [0.,            -1/(f+1e-8),    0.],
-    #         [0.,            0.,             1.]
-    #     ]).to(device))
+    def get_inv_intrinsic(self, f):
+        # TODO: What about the proncipal points?
+        return nn.Parameter(torch.tensor([
+            [-1/(f+1e-8),   0.,             0.],
+            [0.,            -1/(f+1e-8),    0.],
+            [0.,            0.,             1.]
+        ]).to(device))
 
-    # def get_translate(self, tx, ty, tz):
-    #     return nn.Parameter(torch.tensor([
-    #         [0.,  -tz, ty],
-    #         [tz,  0,   -tx],
-    #         [-ty, tx,  0]
-    #     ]).to(device))
+    def get_translate(self, tx, ty, tz):
+        return nn.Parameter(torch.tensor([
+            [0.,  -tz, ty],
+            [tz,  0,   -tx],
+            [-ty, tx,  0]
+        ]).to(device))
 
-    # def get_fmat(self, x):
-    #     # F = K2^(-T)*R*[t]x*K1^(-1)
-    #     # Note: only need out-dim = 8
-    #     R_x = nn.Parameter(torch.tensor([
-    #         [1.,    0.,             0.],
-    #         [0.,    torch.cos(x[2]),    -torch.sin(x[2])],
-    #         [0.,    torch.sin(x[2]),     torch.cos(x[2])]
-    #     ]).to(device))
+    def get_fmat(self, x):
+        # F = K2^(-T)*R*[t]x*K1^(-1)
+        # Note: only need out-dim = 8
+        R_x = torch.tensor([
+            [1.,    0.,             0.],
+            [0.,    torch.cos(x[2]),    -torch.sin(x[2])],
+            [0.,    torch.sin(x[2]),     torch.cos(x[2])]
+        ]).to(device)
 
-    #     R_y = nn.Parameter(torch.tensor([
-    #         [torch.cos(x[3]),    0.,    -torch.sin(x[3])],
-    #         [0.,            1.,     0.],
-    #         [torch.sin(x[3]),    0.,     torch.cos(x[3])]
-    #     ]).to(device))
+        R_y = torch.tensor([
+            [torch.cos(x[3]),    0.,    -torch.sin(x[3])],
+            [0.,            1.,     0.],
+            [torch.sin(x[3]),    0.,     torch.cos(x[3])]
+        ]).to(device)
 
-    #     R_z = nn.Parameter(torch.tensor([
-    #         [torch.cos(x[4]),    -torch.sin(x[4]),    0.],
-    #         [torch.sin(x[4]),    torch.cos(x[4]),     0.],
-    #         [0.,            0.,             1.]
-    #     ]).to(device))
-    #     R = torch.matmul(R_x, torch.matmul(R_y, R_z))
+        R_z = torch.tensor([
+            [torch.cos(x[4]),    -torch.sin(x[4]),    0.],
+            [torch.sin(x[4]),    torch.cos(x[4]),     0.],
+            [0.,            0.,             1.]
+        ]).to(device)
+        R = torch.matmul(R_x, torch.matmul(R_y, R_z))
 
-    #     K1_inv = nn.Parameter(torch.tensor([
-    #                 [-1/(x[0]+1e-8),   0.,             0.],
-    #                 [0.,            -1/(x[0]+1e-8),    0.],
-    #                 [0.,            0.,             1.]
-    #             ]).to(device))
+        K1_inv = torch.tensor([
+                    [-1/(x[0]+1e-8),   0.,             0.],
+                    [0.,            -1/(x[0]+1e-8),    0.],
+                    [0.,            0.,             1.]
+                ]).to(device)
 
-    #     K2_inv = nn.Parameter(torch.tensor([
-    #                 [-1/(x[1]+1e-8),   0.,             0.],
-    #                 [0.,            -1/(x[1]+1e-8),    0.],
-    #                 [0.,            0.,             1.]
-    #             ]).to(device))
+        K2_inv = torch.tensor([
+                    [-1/(x[1]+1e-8),   0.,             0.],
+                    [0.,            -1/(x[1]+1e-8),    0.],
+                    [0.,            0.,             1.]
+                ]).to(device)
 
-    #     T = nn.Parameter(torch.tensor([
-    #                 [0.,  -x[7], x[6]],
-    #                 [x[7],  0,   -x[5]],
-    #                 [-x[6], x[5],  0]
-    #             ]).to(device))
+        T = torch.tensor([
+                    [0.,  -x[7], x[6]],
+                    [x[7],  0,   -x[5]],
+                    [-x[6], x[5],  0]
+                ]).to(device)
 
-    #     # K1_inv = self.get_inv_intrinsic(x[0])
-    #     # K2_inv = self.get_inv_intrinsic(x[1])  # TODO: K2 should be -t not just -1..
-    #     # R = self.get_rotation(x[2], x[3], x[4])
-    #     # T = self.get_translate(x[5], x[6], x[7])
-    #     F = torch.matmul(K2_inv,torch.matmul(R, torch.matmul(T, K1_inv)))
+        # K1_inv = self.get_inv_intrinsic(x[0])
+        # K2_inv = self.get_inv_intrinsic(x[1])  # TODO: K2 should be -t not just -1..
+        # R = self.get_rotation(x[2], x[3], x[4])
+        # T = self.get_translate(x[5], x[6], x[7])
+        F = torch.matmul(K2_inv,torch.matmul(R, torch.matmul(T, K1_inv)))
 
-    #     return F
+        return F
 
 

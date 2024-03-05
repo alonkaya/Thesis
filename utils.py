@@ -28,31 +28,47 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.layers(x)
 
+class GroupedConvolution(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, padding, groups):
+        super(GroupedConvolution, self).__init__()
+        self.grouped_conv = nn.Conv2d(in_channels=in_channels,
+                                      out_channels=out_channels,
+                                      kernel_size=kernel_size,
+                                      padding=padding,
+                                      groups=groups)
+    
+    def forward(self, x):
+        return self.grouped_conv(x)
+    
+    
 
-def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False, model=CLIP_MODEL_NAME):
+def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False, model=CLIP_MODEL_NAME, augmentation=AUGMENTATION, enforce_rank_2=ENFORCE_RANK_2, get_pose=GET_POSE):
     model_name = "CLIP" if model == CLIP_MODEL_NAME else "Google ViT"
     
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
-        ax.plot(x, y1, color='steelblue', label="Train")
-        ax.plot(x, y2, color='salmon', label="Test")
+        try:
+            ax.plot(x, y1, color='steelblue', label="Train")
+            ax.plot(x, y2, color='salmon', label="Test")
 
-        for i in range(0, len(y1), max(1, len(y1)//10)):
-            ax.text(x[i], y1[i], f'{y1[i]:.3f}', fontsize=9, color='blue', ha='center', va='bottom')
-            ax.text(x[i], y2[i], f'{y2[i]:.3f}', fontsize=9, color='red', ha='center', va='top')
+            for i in range(0, len(y1), max(1, len(y1)//10)):
+                ax.text(x[i], y1[i], f'{y1[i]:.4f}', fontsize=9, color='blue', ha='center', va='bottom')
+                ax.text(x[i], y2[i], f'{y2[i]:.4f}', fontsize=9, color='red', ha='center', va='top')
 
-        ax.set_xlabel(x_label)
-        ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
-        ax.set_title(f'{title} -\n coeff: {penalty_coeff}, batch size: {batch_size}, lr_mlp: {lr_mlp}, lr_vit: {lr_vit}, scale: {y_scale}\nmodel_name: {model_name}')
-    
-        ax.set_yscale(y_scale)
-        ax.grid(True)
-        ax.legend()
+            ax.set_xlabel(x_label)
+            ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
+            ax.set_title(f'{title} -\n coeff: {penalty_coeff}, batch size: {batch_size}, lr_mlp: {lr_mlp}, lr_vit: {lr_vit}, scale: {y_scale}\nmodel_name: {model_name}')
+        
+            ax.set_yscale(y_scale)
+            ax.grid(True)
+            ax.legend()
+        except Exception as e:
+            print_and_write(e)
 
     if save:
         os.makedirs('plots', exist_ok=True)
-        plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch_size {batch_size} bn_and_dropout {batchnorm_and_dropout} lr_mlp {lr_mlp} lr_vit {lr_vit} jump frames {JUMP_FRAMES} RealEstate {USE_REALESTATE} overfitting {overfitting} avg embeddings {average_embeddings} model {model_name}.png""")  # Specify the filename and extension
+        plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch_size {batch_size} bn_and_dropout {batchnorm_and_dropout} lr_mlp {lr_mlp} lr_vit {lr_vit} jump frames {JUMP_FRAMES} RealEstate {USE_REALESTATE} overfitting {overfitting} avg embeddings {average_embeddings} model {model_name} augmentation {AUGMENTATION} Force_rank_2 {enforce_rank_2} get_pose {get_pose}.png""")  # Specify the filename and extension
     if show:
         plt.show()
 
@@ -131,6 +147,7 @@ def init_main():
         mp.set_start_method('spawn', force=True)
         
     os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+    os.environ['TORCH_USE_CUDA_DSA'] = '1'
 
     # Set up custom warning handling
     warnings.filterwarnings('always', category=RuntimeWarning)
