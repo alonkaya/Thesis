@@ -68,7 +68,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
 
     if save:
         os.makedirs('plots', exist_ok=True)
-        plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch_size {batch_size} bn_and_dropout {batchnorm_and_dropout} lr_mlp {lr_mlp} lr_vit {lr_vit} jump frames {JUMP_FRAMES} RealEstate {USE_REALESTATE} overfitting {overfitting} avg embeddings {average_embeddings} model {model_name} augmentation {AUGMENTATION} Force_rank_2 {enforce_rank_2} get_pose {get_pose} use_reconstruction {use_reconstruction}.png""")  # Specify the filename and extension
+        plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch_size {batch_size} lr_mlp {lr_mlp} lr_vit {lr_vit} jump frames {JUMP_FRAMES} RealEstate {USE_REALESTATE} overfitting {overfitting} avg embeddings {average_embeddings} model {model_name} augmentation {AUGMENTATION} Force_rank_2 {enforce_rank_2} get_pose {get_pose} use_reconstruction {use_reconstruction}.png""")  # Specify the filename and extension
     if show:
         plt.show()
 
