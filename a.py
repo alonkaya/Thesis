@@ -26,8 +26,7 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             if self.dataset_type == 'train':
                 return ((len(self.valid_indices)-JUMP_FRAMES) // 3) * 2  # 2/3 if the set
             else:
-                # return (len(self.valid_indices)-JUMP_FRAMES) // 3  # 1/3 if the set
-                return 1
+                return (len(self.valid_indices)-JUMP_FRAMES) // 3  # 1/3 if the set
             
     def __getitem__(self, idx):
         try: 
