@@ -120,16 +120,22 @@ def last_sing_value_penalty(output):
 
 def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):
     # Compute mean epipolar constraint error
-    U1, S1, V1 = torch.svd(output)
-    U2, S2, V2 = torch.svd(unormalized_output)
+    try:
+        U1, S1, V1 = torch.svd(output)
+        U2, S2, V2 = torch.svd(unormalized_output)
+    except Exception as e:
+        print_and_write(f'Error in svd: {e}')
+    try:
+        S1[:, -1] = 0
+        S2[:, -1] = 0
 
-    S1[:, -1] = 0
-    S2[:, -1] = 0
+        output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2))
+        unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), V2.transpose(1, 2))
+        
+        avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = 0, 0, 0
+    except Exception as e:
+        print_and_write(f'Error in matmuls: {e}')
 
-    output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), V1.transpose(1, 2))
-    unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), V2.transpose(1, 2))
-    
-    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = 0, 0, 0
     try:
         for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
             avg_ec_err_truth = avg_ec_err_truth + EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
