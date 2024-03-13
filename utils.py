@@ -156,3 +156,16 @@ def init_main():
     np.seterr(over='warn')
 
     print_and_write("###########################################################################################################\n\n")
+
+
+def geodesic_error(R, R_star):
+    # Compute the product of R transpose and R_star
+    R_T_R_star = torch.matmul(R.transpose(-2, -1), R_star)
+
+    # Compute the trace of the product
+    trace = torch.diagonal(R_T_R_star, dim1=-2, dim2=-1).sum(-1)
+
+    # Compute the geodesic error using the provided formula
+    error = torch.acos(((trace - 1) / 2).clamp(-1, 1))  # Clamping for numerical stability
+
+    return error
