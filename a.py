@@ -69,7 +69,7 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             # Normalize F-Matrix                
             F = norm_layer(unormalized_F.view(-1, 9)).view(3,3)
 
-            return first_image, second_image, F, unormalized_F
+            return first_image, second_image, F, unormalized_F, self.k
     
 class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):
     """Takes the first two images out of every three images in the sequence for training, and the third for testing"""

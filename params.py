@@ -3,8 +3,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 learning_rates_vit = [2e-5]
 learning_rates_mlp = [2e-5]
-penalty_coeffs = [1]
-RE1_COEFF = 0.1
 train_seqeunces = [0,2]
 val_sequences = [1,3,4]
 penaltize_normalized_options = [False]
@@ -25,10 +23,12 @@ NUM_WORKERS = 0
 BN_AND_DO = True if BATCH_SIZE > 1 else False
 CUSTOMDATASET_TYPE = "CustomDataset_first_two_thirds_train"
 
-ENFORCE_RANK_2 = True
+penalty_coeffs = [1]
+RE1_COEFF = 0
+ENFORCE_RANK_2 = False
 USE_RECONSTRUCTION_LAYER = False
-PREDICT_POSE = False
-NUM_OUTPUT = 12 if PREDICT_POSE else 8 if USE_RECONSTRUCTION_LAYER else 9
+PREDICT_POSE = True
+NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
 NUM_EPOCHS = 1000
 MODEL = CLIP_MODEL_NAME
 AUGMENTATION = False

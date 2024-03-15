@@ -1,5 +1,5 @@
 from params import *
-from utils import read_camera_intrinsic, reverse_transforms, print_and_write
+from utils import read_camera_intrinsic, reverse_transforms, print_and_write, norm_layer
 import cv2
 import os
 from scipy.linalg import rq
@@ -108,6 +108,21 @@ def get_F(poses, idx, K):
 
     return F
 
+def pose_to_F(unormalized_pose, pose, unormalized_k):
+    # compute unormalized_F and F from unormalized_pose and pose
+    k = norm_layer(unormalized_k.view(-1, 9)).view(-1,3,3)
+
+    R = pose[:, :3]
+    t = pose[:, 3]
+    E = compute_essential(R, t)
+    F = compute_fundamental(E, k, k)
+
+    unormalized_R = unormalized_pose[:, :3]
+    unormalized_t = unormalized_pose[:, 3]
+    unormalized_E = compute_essential(unormalized_R, unormalized_t)
+    unormalized_F = compute_fundamental(unormalized_E, unormalized_k, unormalized_k)
+    
+    return unormalized_F, F
 
 def last_sing_value_penalty(output):
     # Compute the SVD of the output

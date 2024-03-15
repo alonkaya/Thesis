@@ -79,6 +79,8 @@ class FMatrixRegressor(nn.Module):
 
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
+        self.t_mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
+                       3, batchnorm_and_dropout).to(device)
 
         params = [
             {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
@@ -130,24 +132,31 @@ class FMatrixRegressor(nn.Module):
 
             # Train MLP on embedding vectors            
             output = self.mlp(embeddings).to(device)
-            if PREDICT_POSE:
-                unnormalized_output = output.view(-1,3,4) 
-                
-                output = norm_layer(unnormalized_output.view(-1, 12)).view(-1,3,4)
 
-                penalty = torch.tensor(0).to(device)
+            if PREDICT_POSE:
+                t_output = self.t_mlp(embeddings).to(device)
+
+                unormalized_R = output.view(-1,3,3) 
+                unormalized_t = t_output.view(-1,3,1)
+                unormalized_output = torch.cat((unormalized_R, unormalized_t), dim=1)
+
+                R = norm_layer(unormalized_R.view(-1, 9)).view(-1,3,3)
+                t = norm_layer(unormalized_t.view(-1, 3)).view(-1,3,1)
+                output = torch.cat((R, t), dim=1)
+
+                return unormalized_output, output, torch.tensor(0).to(device)
 
             else:
-                unnormalized_output = output.view(-1,3,3) if not USE_RECONSTRUCTION_LAYER else torch.stack([self.get_fmat(x)for x in output])
+                unormalized_output = output.view(-1,3,3) if not USE_RECONSTRUCTION_LAYER else torch.stack([self.get_fmat(x)for x in output])
                 
-                output = norm_layer(unnormalized_output.view(-1, 9)).view(-1,3,3)
+                output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3)
                 
                 if self.penaltize_normalized:
                     penalty = last_sing_value_penalty(output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
                 else:
-                    penalty = last_sing_value_penalty(unnormalized_output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
+                    penalty = last_sing_value_penalty(unormalized_output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
             
-            return unnormalized_output, output, penalty
+                return unormalized_output, output, penalty
 
 
     def train_model(self, train_loader, val_loader, num_epochs):
@@ -160,22 +169,21 @@ class FMatrixRegressor(nn.Module):
             labels, outputs = torch.tensor([]).to(device), torch.tensor([]).to(device)
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = 0, 0, 0, 0
 
-            for first_image, second_image, label, unormalized_label in train_loader:
-                first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
-
+            for first_image, second_image, label, unormalized_label, unormalized_k in train_loader:
+                first_image, second_image, label, unormalized_label, unormalized_k = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device), unormalized_k.to(device)
                 try:
                     # Forward pass
-                    unnormalized_output, output, penalty = self.forward(first_image, second_image)
+                    unormalized_output, output, penalty = self.forward(first_image, second_image)
                 except Exception as e:
                     print_and_write(f'2 {e}')
 
                 if self.predict_pose:
-                    epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = torch.tensor(0).to(device),torch.tensor(0).to(device),torch.tensor(0).to(device)
+                    unormalized_output, output = pose_to_F(unormalized_output, output, unormalized_k)
                 else:
                     try:
                         # Compute train mean epipolar constraint error
                         avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, _, _, avg_RE1_pred_unormalized = get_avg_epipolar_test_errors(
-                            first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unnormalized_output.detach())
+                            first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach())
                         epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
                         epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
                         epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
@@ -204,7 +212,7 @@ class FMatrixRegressor(nn.Module):
                     try:
                         # Compute train mean epipolar constraint error
                         avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                            first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unnormalized_output.detach())
+                            first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach())
                         epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
                         epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
                         epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
@@ -236,22 +244,21 @@ class FMatrixRegressor(nn.Module):
             val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized, epoch_penalty, val_avg_loss = 0, 0, 0, 0, 0
 
             with torch.no_grad():
-                for val_first_image, val_second_image, val_label, val_unormalized_label in val_loader:
+                for val_first_image, val_second_image, val_label, val_unormalized_label, val_unormalized_k in val_loader:
                     try:
-                        val_first_image, val_second_image, val_label, val_unormalized_label = val_first_image.to(
-                            device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device)
+                        val_first_image, val_second_image, val_label, val_unormalized_label, val_unormalized_k = val_first_image.to(
+                            device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device), val_unormalized_k.to(device)
 
-                        unnormalized_val_output, val_output, penalty = self.forward(
-                            val_first_image, val_second_image)
+                        unormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
                         epoch_penalty = epoch_penalty + penalty
                         val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
                         
-                        if PREDICT_POSE:
-                            val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized = torch.tensor(0).to(device),torch.tensor(0).to(device),torch.tensor(0).to(device)
+                        if self.predict_pose:
+                            unormalized_output, output = pose_to_F(unormalized_val_output, val_output, val_unormalized_k)
                         else:
                             # Compute val mean epipolar constraint error
                             val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized,_,_,_ = get_avg_epipolar_test_errors(
-                                val_first_image, val_second_image, val_unormalized_label, val_output, unnormalized_val_output)
+                                val_first_image, val_second_image, val_unormalized_label, val_output, unormalized_val_output)
                             val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
                             val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
                             val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
@@ -303,7 +310,7 @@ class FMatrixRegressor(nn.Module):
                         use_reconstruction=self.use_reconstruction)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
-                        title="Epipolar error unnormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                        title="Epipolar error unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
                         model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                         use_reconstruction=self.use_reconstruction)
