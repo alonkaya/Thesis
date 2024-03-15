@@ -58,9 +58,8 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             t = norm_layer(unormalized_t.view(-1, 3)).view(3,1)
             pose = torch.cat((R, t), dim=1)
 
-            pose, unormalized_pose = pose_to_F(pose, unormalized_pose, self.k)
-            
-            return first_image, second_image, pose, unormalized_pose, self.k
+            F, unormalized_F = pose_to_F(pose, unormalized_pose, self.k)
+
             
         else:
             try:
@@ -71,7 +70,7 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             # Normalize F-Matrix                
             F = norm_layer(unormalized_F.view(-1, 9)).view(3,3)
 
-            return first_image, second_image, F, unormalized_F, self.k
+        return first_image, second_image, F.view(3,3), unormalized_F.view(3,3), self.k
     
 class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):
     """Takes the first two images out of every three images in the sequence for training, and the third for testing"""
