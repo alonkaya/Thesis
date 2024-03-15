@@ -47,28 +47,28 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
         except Exception as e:
             print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
         
-        if PREDICT_POSE:
-            try:
-                unormalized_R, unormalized_t = compute_relative_transformations(self.poses[idx], self.poses[idx+JUMP_FRAMES])
-                unormalized_pose = torch.cat((unormalized_R.view(3,3), unormalized_t.view(3,1)), dim=1)
-            except Exception as e:
-                print_and_write(f"3\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+        # if PREDICT_POSE:
+        #     try:
+        #         unormalized_R, unormalized_t = compute_relative_transformations(self.poses[idx], self.poses[idx+JUMP_FRAMES])
+        #         unormalized_pose = torch.cat((unormalized_R.view(3,3), unormalized_t.view(3,1)), dim=1)
+        #     except Exception as e:
+        #         print_and_write(f"3\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
             
-            R = norm_layer(unormalized_R.view(-1, 9)).view(3,3)
-            t = norm_layer(unormalized_t.view(-1, 3)).view(3,1)
-            pose = torch.cat((R, t), dim=1)
+        #     R = norm_layer(unormalized_R.view(-1, 9)).view(3,3)
+        #     t = norm_layer(unormalized_t.view(-1, 3)).view(3,1)
+        #     pose = torch.cat((R, t), dim=1)
 
-            F, unormalized_F = pose_to_F(pose, unormalized_pose, self.k)
+        #     F, unormalized_F = pose_to_F(pose, unormalized_pose, self.k)
 
             
-        else:
-            try:
-                unormalized_F = get_F(self.poses, idx, self.k)
-            except Exception as e:
-                print_and_write(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-            
-            # Normalize F-Matrix                
-            F = norm_layer(unormalized_F.view(-1, 9)).view(3,3)
+        # else:
+        try:
+            unormalized_F = get_F(self.poses, idx, self.k)
+        except Exception as e:
+            print_and_write(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+        
+        # Normalize F-Matrix                
+        F = norm_layer(unormalized_F.view(-1, 9)).view(3,3)
 
         return first_image, second_image, F.view(3,3), unormalized_F.view(3,3), self.k
     

@@ -179,16 +179,16 @@ class FMatrixRegressor(nn.Module):
 
                 if self.predict_pose:
                     unormalized_output, output = pose_to_F(unormalized_output, output, unormalized_k[0])
-                else:
-                    try:
-                        # Compute train mean epipolar constraint error
-                        avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, _, _, avg_RE1_pred_unormalized = get_avg_epipolar_test_errors(
-                            first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach())
-                        epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
-                        epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
-                        epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
-                    except Exception as e:
-                        print_and_write(f'5 {e}')
+                    
+                try:
+                    # Compute train mean epipolar constraint error
+                    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, _, _, avg_RE1_pred_unormalized = get_avg_epipolar_test_errors(
+                        first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach())
+                    epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
+                    epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
+                    epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
+                except Exception as e:
+                    print_and_write(f'5 {e}')
 
                 try:
                     # Compute loss
