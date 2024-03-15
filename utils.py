@@ -35,14 +35,14 @@ class GroupedConvolution(nn.Module):
                                       out_channels=out_channels,
                                       kernel_size=kernel_size,
                                       padding=padding,
-                                      groups=groups)
+                                      groups=groups).to(device)
     
     def forward(self, x):
         return self.grouped_conv(x)
     
     
 
-def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False, model=CLIP_MODEL_NAME, augmentation=AUGMENTATION, enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER):
+def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False, model=CLIP_MODEL_NAME, augmentation=AUGMENTATION, enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF):
     model_name = "CLIP" if model == CLIP_MODEL_NAME else "Google ViT"
     
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
@@ -68,7 +68,9 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
 
     if save:
         os.makedirs('plots', exist_ok=True)
-        plt.savefig(f"""plots/{title}  coeff {penalty_coeff} batch_size {batch_size} lr_mlp {lr_mlp} lr_vit {lr_vit} jump frames {JUMP_FRAMES} RealEstate {USE_REALESTATE} overfitting {overfitting} avg embeddings {average_embeddings} model {model_name} augmentation {AUGMENTATION} Force_rank_2 {enforce_rank_2} predict_pose {predict_pose} use_reconstruction {use_reconstruction}.png""")  # Specify the filename and extension
+
+        plt.savefig(f"""plots/{title}  SVD_coeff {penalty_coeff} RE1_coeff {RE1_coeff} mlp {lr_mlp} jump frames {JUMP_FRAMES} avg embeddings {average_embeddings} model {model_name} augmentation {AUGMENTATION} Force_rank_2 {enforce_rank_2} predict_pose {predict_pose} use_reconstruction {use_reconstruction} group_conv {group_conv["use"]}.png""")  # Specify the filename and extension
+
     if show:
         plt.show()
 
