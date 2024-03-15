@@ -1,9 +1,10 @@
 import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-learning_rates_vit = [6e-5]
-learning_rates_mlp = [6e-5]
+learning_rates_vit = [2e-5]
+learning_rates_mlp = [2e-5]
 penalty_coeffs = [1]
+RE1_COEFF = 0.1
 train_seqeunces = [0,2]
 val_sequences = [1,3,4]
 penaltize_normalized_options = [False]
@@ -24,7 +25,7 @@ NUM_WORKERS = 0
 BN_AND_DO = True if BATCH_SIZE > 1 else False
 CUSTOMDATASET_TYPE = "CustomDataset_first_two_thirds_train"
 
-ENFORCE_RANK_2 = False
+ENFORCE_RANK_2 = True
 USE_RECONSTRUCTION_LAYER = False
 GET_POSE = False
 NUM_OUTPUT = 12 if GET_POSE else 8 if USE_RECONSTRUCTION_LAYER else 9
@@ -35,4 +36,4 @@ FREEZE_PRETRAINED_MODEL=False
 OVERFITTING=True
 AVG_EMBEDDINGS = True
 UNFROZEN_LAYERS = 0
-group_conv = {"use" : False, "out_channels": 256, "num_groups" : "256"}
+group_conv = {"use" : False, "out_channels": 256, "num_groups" : 256}

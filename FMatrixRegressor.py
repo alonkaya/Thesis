@@ -9,7 +9,7 @@ class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, penalty_coeff,  penaltize_normalized, 
                  mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, 
                  batchnorm_and_dropout=BN_AND_DO, freeze_pretrained_model=FREEZE_PRETRAINED_MODEL, overfitting=OVERFITTING, augmentation=AUGMENTATION, 
-                 pretrained_model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, enforce_rank_2=ENFORCE_RANK_2, get_pose=GET_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER):
+                 pretrained_model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, enforce_rank_2=ENFORCE_RANK_2, get_pose=GET_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF):
         """
         Initialize the ViTMLPRegressor model.
 
@@ -26,6 +26,7 @@ class FMatrixRegressor(nn.Module):
         super(FMatrixRegressor, self).__init__()
         self.to(device)
         self.penalty_coeff = penalty_coeff
+        self.RE1_coeff = RE1_coeff
         self.batch_size = batch_size
         self.penaltize_normalized = penaltize_normalized
         self.lr_vit = lr_vit
@@ -72,6 +73,9 @@ class FMatrixRegressor(nn.Module):
         else:
             mlp_input_shape = 7*7*2*self.model_hidden_size
 
+        if group_conv["use"]:
+            mlp_input_shape //= 3
+
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
 
@@ -114,7 +118,8 @@ class FMatrixRegressor(nn.Module):
                                         kernel_size=3,
                                         padding=1,
                                         groups=group_conv["num_groups"])
-                #TODO: complete
+                x1_embeddings = grouped_conv_layer(x1_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
+                x2_embeddings = grouped_conv_layer(x2_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
 
             # Create another feature embedding of the element-wise mult between the two embedding vectors
             mul_embedding = x1_embeddings.mul(x2_embeddings)
@@ -167,10 +172,23 @@ class FMatrixRegressor(nn.Module):
                 except Exception as e:
                     print_and_write(f'2 {e}')
 
+                if GET_POSE:
+                    epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = torch.tensor(0).to(device),torch.tensor(0).to(device),torch.tensor(0).to(device)
+                else:
+                    try:
+                        # Compute train mean epipolar constraint error
+                        avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, _, _, avg_RE1_pred_unormalized = get_avg_epipolar_test_errors(
+                            first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unnormalized_output.detach())
+                        epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
+                        epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
+                        epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
+                    except Exception as e:
+                        print_and_write(f'5 {e}')
+
                 try:
                     # Compute loss
                     l2_loss = self.L2_loss(output, label)
-                    loss = l2_loss + self.penalty_coeff*penalty 
+                    loss = l2_loss + self.penalty_coeff*penalty + self.RE1_coeff*avg_ec_err_pred_unormalized
                     avg_loss = avg_loss + loss.detach()
                 except Exception as e:
                     print_and_write(f'3 {e}')
@@ -183,18 +201,6 @@ class FMatrixRegressor(nn.Module):
                 except Exception as e:
                     print_and_write(f'4 {e}')
 
-                if GET_POSE:
-                    epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = torch.tensor(0).to(device),torch.tensor(0).to(device),torch.tensor(0).to(device)
-                else:
-                    try:
-                        # Compute train mean epipolar constraint error
-                        avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                            first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unnormalized_output.detach())
-                        epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
-                        epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
-                        epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
-                    except Exception as e:
-                        print_and_write(f'5 {e}')
 
                 # Extend lists with batch statistics
                 labels = torch.cat((labels, label.detach()), dim=0)
@@ -234,7 +240,7 @@ class FMatrixRegressor(nn.Module):
                             val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized = torch.tensor(0).to(device),torch.tensor(0).to(device),torch.tensor(0).to(device)
                         else:
                             # Compute val mean epipolar constraint error
-                            val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
+                            val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized,_,_,_ = get_avg_epipolar_test_errors(
                                 val_first_image, val_second_image, val_unormalized_label, val_output, unnormalized_val_output)
                             val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
                             val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred

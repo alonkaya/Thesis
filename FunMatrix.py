@@ -137,19 +137,24 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
         except Exception as e:
             print_and_write(f'Error in matmuls: {e}')
 
-    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = 0, 0, 0
+    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized = 0, 0, 0, 0, 0, 0
     try:
         for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
-            avg_ec_err_truth = avg_ec_err_truth + EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
-            avg_ec_err_pred = avg_ec_err_pred + EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
-            avg_ec_err_pred_unormalized = avg_ec_err_pred_unormalized + EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
+            ec_err_truth, RE1_truth = EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
+            ec_err_pred, RE1_pred = EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
+            ec_err_pred_unormalized, RE1_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
+
+            avg_ec_err_truth, avg_RE1_truth = avg_ec_err_truth + ec_err_truth, avg_RE1_truth + RE1_truth
+            avg_ec_err_pred, avg_RE1_pred = avg_ec_err_pred + ec_err_pred, avg_RE1_pred + RE1_pred
+            avg_ec_err_pred_unormalized, avg_RE1_pred_unormalized = avg_ec_err_pred_unormalized + ec_err_pred_unormalized, avg_RE1_pred_unormalized + RE1_pred_unormalized
+
     except Exception as e:
         print_and_write(f'Error in get_avg_epipolar_test_errors: {e}')
 
-    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = (
-        v / len(first_image) for v in (avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized))
+    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized = (
+        v / len(first_image) for v in (avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized))
 
-    return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized
+    return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized
 
 def reconstruction_module(x):
     def get_rotation(rx, ry, rz):
@@ -265,7 +270,16 @@ class EpipolarGeometry:
         errs = torch.abs(torch.matmul(torch.matmul(
             pts2.view(-1, 1, 3), self.F), pts1.view(-1, 3, 1)))
 
-        return torch.mean(errs)
+        l1 = torch.matmul(self.F.T, pts2.view(-1, 3, 1)).view(-1,3)
+        l2 = torch.matmul(self.F, pts1.view(-1, 3, 1)).view(-1,3)
+        inhomogeneous_l1 = l1[:,0:2]
+        inhomogeneous_l2 = l2[:, 0:2]
+
+        denominator = torch.sum(torch.concat((inhomogeneous_l1, inhomogeneous_l2), dim=1) ** 2, dim=1)
+
+        RE1 = (errs**2) / denominator
+
+        return torch.mean(errs), torch.mean(RE1)
 
     def get_epipolar_err(self):
         try:
@@ -273,18 +287,16 @@ class EpipolarGeometry:
         except Exception as e:
             print_and_write(f'Error in get_keypoints: {e}')
             return
-        try:
-            pts1, pts2 = torch.tensor(pts1, dtype=torch.float32).to(device), torch.tensor(pts2, dtype=torch.float32).to(device)
-        except Exception as e:
-            print_and_write(f'Error in tensors: {e}')
+
+        pts1, pts2 = torch.tensor(pts1, dtype=torch.float32).to(device), torch.tensor(pts2, dtype=torch.float32).to(device)
 
         try:
-            err = self.epipolar_test_all_points(pts1, pts2)
+            err, RE1 = self.epipolar_test_all_points(pts1, pts2)
         except Exception as e:
             print_and_write(f'Error in epipolar_test_all_points: {e}')
             return
 
-        return err
+        return err, RE1
 
     def epipoline(self, x, formula):
         array = formula.flatten()
