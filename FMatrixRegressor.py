@@ -9,7 +9,7 @@ class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, penalty_coeff,  penaltize_normalized, 
                  mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, 
                  batchnorm_and_dropout=BN_AND_DO, freeze_pretrained_model=FREEZE_PRETRAINED_MODEL, overfitting=OVERFITTING, augmentation=AUGMENTATION, 
-                 pretrained_model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, enforce_rank_2=ENFORCE_RANK_2, get_pose=GET_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER):
+                 pretrained_model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER):
         """
         Initialize the ViTMLPRegressor model.
 
@@ -36,7 +36,7 @@ class FMatrixRegressor(nn.Module):
         self.pretrained_model_name = pretrained_model_name
         self.augmentation = augmentation
         self.enforce_rank_2 = enforce_rank_2
-        self.get_pose=get_pose
+        self.predict_pose=predict_pose
         self.use_reconstruction=use_reconstruction
 
         # Check if CLIP model is specified
@@ -124,7 +124,7 @@ class FMatrixRegressor(nn.Module):
 
             # Train MLP on embedding vectors            
             output = self.mlp(embeddings).to(device)
-            if GET_POSE:
+            if PREDICT_POSE:
                 unnormalized_output = output.view(-1,3,4) 
                 
                 output = norm_layer(unnormalized_output.view(-1, 12)).view(-1,3,4)
@@ -155,11 +155,7 @@ class FMatrixRegressor(nn.Module):
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = 0, 0, 0, 0
 
             for first_image, second_image, label, unormalized_label in train_loader:
-                try:
-                    first_image, second_image, label, unormalized_label = first_image.to(
-                        device), second_image.to(device), label.to(device), unormalized_label.to(device)
-                except Exception as e:
-                    print_and_write(f'1 {e}')
+                first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
 
                 try:
                     # Forward pass
@@ -183,7 +179,7 @@ class FMatrixRegressor(nn.Module):
                 except Exception as e:
                     print_and_write(f'4 {e}')
 
-                if GET_POSE:
+                if PREDICT_POSE:
                     epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = torch.tensor(0).to(device),torch.tensor(0).to(device),torch.tensor(0).to(device)
                 else:
                     try:
@@ -230,7 +226,7 @@ class FMatrixRegressor(nn.Module):
                         epoch_penalty = epoch_penalty + penalty
                         val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
                         
-                        if GET_POSE:
+                        if PREDICT_POSE:
                             val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized = torch.tensor(0).to(device),torch.tensor(0).to(device),torch.tensor(0).to(device)
                         else:
                             # Compute val mean epipolar constraint error
@@ -277,25 +273,25 @@ class FMatrixRegressor(nn.Module):
         plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
                         title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, get_pose=self.get_pose,
+                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                         use_reconstruction=self.use_reconstruction)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
                         title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, get_pose=self.get_pose,
+                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                         use_reconstruction=self.use_reconstruction)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
                         title="Epipolar error unnormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, get_pose=self.get_pose,
+                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                         use_reconstruction=self.use_reconstruction)
         
         plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred, y2=val_ec_err_pred, 
                         title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, get_pose=self.get_pose,
+                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                         use_reconstruction=self.use_reconstruction)
   
 
