@@ -138,6 +138,7 @@ class FMatrixRegressor(nn.Module):
 
                 unormalized_R = output.view(-1,3,3) 
                 unormalized_t = t_output.view(-1,3,1)
+                print(unormalized_R.shape, unormalized_t.shape)
                 unormalized_output = torch.cat((unormalized_R, unormalized_t), dim=1)
 
                 R = norm_layer(unormalized_R.view(-1, 9)).view(-1,3,3)
@@ -171,11 +172,11 @@ class FMatrixRegressor(nn.Module):
 
             for first_image, second_image, label, unormalized_label, unormalized_k in train_loader:
                 first_image, second_image, label, unormalized_label, unormalized_k = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device), unormalized_k.to(device)
-                # try:
+                try:
                     # Forward pass
-                unormalized_output, output, penalty = self.forward(first_image, second_image)
-                # except Exception as e:
-                #     print_and_write(f'2 {e}')
+                    unormalized_output, output, penalty = self.forward(first_image, second_image)
+                except Exception as e:
+                    print_and_write(f'2 {e}')
 
                 if self.predict_pose:
                     unormalized_output, output = pose_to_F(unormalized_output, output, unormalized_k)
