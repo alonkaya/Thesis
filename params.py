@@ -9,7 +9,7 @@ penaltize_normalized_options = [False]
 norm_mean = torch.tensor([0.449, 0.449, 0.449]).to(device)
 norm_std = torch.tensor([0.226, 0.226, 0.226]).to(device)
 
-BATCH_SIZE = 1
+BATCH_SIZE = 1 # TODO:  change pose_to_F if batch size > 1 ! 
 USE_REALESTATE = True
 JUMP_FRAMES = 6 if USE_REALESTATE else 2
 MLP_HIDDEN_DIM = [512, 256]

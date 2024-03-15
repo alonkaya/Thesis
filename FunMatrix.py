@@ -110,8 +110,12 @@ def get_F(poses, idx, K):
 
 def pose_to_F(unormalized_pose, pose, unormalized_k):
     # compute unormalized_F and F from unormalized_pose and pose
-    k = norm_layer(unormalized_k.view(-1, 9)).view(-1,3,3)
+    k = norm_layer(unormalized_k.view(-1, 9)).view(3,3)
 
+    # TODO: change this if batch size > 1 !!
+    pose = pose.view(3, 4)
+    unormalized_pose = unormalized_pose.view(3, 4)
+    
     R = pose[:, :3]
     t = pose[:, 3]
     E = compute_essential(R, t)
