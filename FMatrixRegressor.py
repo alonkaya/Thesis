@@ -192,6 +192,7 @@ class FMatrixRegressor(nn.Module):
 
                 try:
                     # Compute loss
+                    print(output.shape, label.shape)
                     l2_loss = self.L2_loss(output, label)
                     loss = l2_loss + self.penalty_coeff*penalty + self.RE1_coeff*avg_ec_err_pred_unormalized
                     avg_loss = avg_loss + loss.detach()
