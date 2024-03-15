@@ -58,6 +58,8 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             t = norm_layer(unormalized_t.view(-1, 3)).view(3,1)
             pose = torch.cat((R, t), dim=1)
 
+            pose, unormalized_pose = pose_to_F(pose, unormalized_pose, self.k)
+            
             return first_image, second_image, pose, unormalized_pose, self.k
             
         else:
