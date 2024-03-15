@@ -115,7 +115,7 @@ def pose_to_F(unormalized_pose, pose, unormalized_k):
     # TODO: change this if batch size > 1 !!
     pose = pose.view(3, 4)
     unormalized_pose = unormalized_pose.view(3, 4)
-    
+
     R = pose[:, :3]
     t = pose[:, 3]
     E = compute_essential(R, t)
@@ -126,7 +126,7 @@ def pose_to_F(unormalized_pose, pose, unormalized_k):
     unormalized_E = compute_essential(unormalized_R, unormalized_t)
     unormalized_F = compute_fundamental(unormalized_E, unormalized_k, unormalized_k)
     
-    return unormalized_F, F
+    return unormalized_F.view(-1,3,3), F.view(-1,3,3)
 
 def last_sing_value_penalty(output):
     # Compute the SVD of the output
