@@ -138,12 +138,11 @@ class FMatrixRegressor(nn.Module):
 
                 unormalized_R = output.view(-1,3,3) 
                 unormalized_t = t_output.view(-1,3,1)
-                print(unormalized_R.shape, unormalized_t.shape)
-                unormalized_output = torch.cat((unormalized_R, unormalized_t), dim=1)
+                unormalized_output = torch.cat((unormalized_R, unormalized_t), dim=-1)
 
                 R = norm_layer(unormalized_R.view(-1, 9)).view(-1,3,3)
                 t = norm_layer(unormalized_t.view(-1, 3)).view(-1,3,1)
-                output = torch.cat((R, t), dim=1)
+                output = torch.cat((R, t), dim=-1)
 
                 return unormalized_output, output, torch.tensor(0).to(device)
 
