@@ -253,7 +253,7 @@ class FMatrixRegressor(nn.Module):
                     epoch_penalty = epoch_penalty + penalty
                     
                     if self.predict_pose:
-                        unormalized_output, output = pose_to_F(unormalized_val_output, val_output, val_unormalized_k[0])
+                        unormalized_val_output, val_output = pose_to_F(unormalized_val_output, val_output, val_unormalized_k[0])
 
                     # Compute val mean epipolar constraint error
                     val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized,_,_,_ = get_avg_epipolar_test_errors(
@@ -262,7 +262,6 @@ class FMatrixRegressor(nn.Module):
                     val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
                     val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
 
-                    print(val_output.shape, val_label.shape)
                     val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
 
                     val_outputs = torch.cat((val_outputs, val_output), dim=0)
