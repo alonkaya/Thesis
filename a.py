@@ -51,10 +51,12 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             unormalized_F = get_F(self.poses, idx, self.k)
         except Exception as e:
             print_and_write(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-        
-        # Normalize F-Matrix                
-        F = norm_layer(unormalized_F.view(-1, 9)).view(3,3)
-
+        try:
+            # Normalize F-Matrix                
+            F = norm_layer(unormalized_F.view(-1, 9)).view(3,3)
+        except Exception as e:
+            print_and_write("5\n {e}")
+            
         return first_image, second_image, F.view(3,3), unormalized_F.view(3,3), self.k
     
 class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):

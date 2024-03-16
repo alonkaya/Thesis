@@ -99,21 +99,27 @@ class FMatrixRegressor(nn.Module):
             ""
         else:
             if self.clip:  # If using CLIP
-                x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False,
-                                               do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-                x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
-                                               do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-                
-                x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)
-                x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)                
+                try:
+                    x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False,
+                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+                    x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
+                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+                    
+                    x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)
+                    x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)                
+                except Exception as e:
+                    print_and_write(f'clip: {e}')
             else:
                 x1_embeddings = self.pretrained_model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
                 x2_embeddings = self.pretrained_model(x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
                 
             if self.average_embeddings:
-                avg_patches = nn.AdaptiveAvgPool2d(1)
-                x1_embeddings = avg_patches(x1_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
-                x2_embeddings = avg_patches(x2_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
+                try:
+                    avg_patches = nn.AdaptiveAvgPool2d(1)
+                    x1_embeddings = avg_patches(x1_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
+                    x2_embeddings = avg_patches(x2_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
+                except Exception as e: 
+                    print_and_write(f'avg_patches: {e}')
 
             if group_conv["use"]:
                 grouped_conv_layer = GroupedConvolution(in_channels=self.model_hidden_size,   # Total input channels
@@ -129,33 +135,39 @@ class FMatrixRegressor(nn.Module):
 
             # Concatenate both original and rotated embedding vectors
             embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
-
-            # Train MLP on embedding vectors            
-            output = self.mlp(embeddings).to(device)
+            try:
+                # Train MLP on embedding vectors            
+                output = self.mlp(embeddings).to(device)
+            except Exception as e:
+                print_and_write(f'mlp: {e}')
 
             if PREDICT_POSE:
-                t_output = self.t_mlp(embeddings).to(device)
+                try:
+                    t_output = self.t_mlp(embeddings).to(device)
 
-                unormalized_R = output.view(-1,3,3) 
-                unormalized_t = t_output.view(-1,3,1)
-                unormalized_output = torch.cat((unormalized_R, unormalized_t), dim=-1)
+                    unormalized_R = output.view(-1,3,3) 
+                    unormalized_t = t_output.view(-1,3,1)
+                    unormalized_output = torch.cat((unormalized_R, unormalized_t), dim=-1)
 
-                R = norm_layer(unormalized_R.view(-1, 9)).view(-1,3,3)
-                t = norm_layer(unormalized_t.view(-1, 3)).view(-1,3,1)
-                output = torch.cat((R, t), dim=-1)
-
+                    R = norm_layer(unormalized_R.view(-1, 9)).view(-1,3,3)
+                    t = norm_layer(unormalized_t.view(-1, 3)).view(-1,3,1)
+                    output = torch.cat((R, t), dim=-1)
+                except Exception as e:
+                    print_and_write(f'PREDICT_POSE: {e}')
                 return unormalized_output, output, torch.tensor(0).to(device)
 
             else:
-                unormalized_output = output.view(-1,3,3) if not USE_RECONSTRUCTION_LAYER else torch.stack([self.get_fmat(x)for x in output])
-                
-                output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3)
-                
-                if self.penaltize_normalized:
-                    penalty = last_sing_value_penalty(output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
-                else:
-                    penalty = last_sing_value_penalty(unormalized_output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
-            
+                try:
+                    unormalized_output = output.view(-1,3,3) if not USE_RECONSTRUCTION_LAYER else torch.stack([self.get_fmat(x)for x in output])
+                    
+                    output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3)
+                    
+                    if self.penaltize_normalized:
+                        penalty = last_sing_value_penalty(output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
+                    else:
+                        penalty = last_sing_value_penalty(unormalized_output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
+                except Exception as e:
+                    print_and_write(f'last_sing_value_penalty: {e}')
                 return unormalized_output, output, penalty
 
 
@@ -176,7 +188,7 @@ class FMatrixRegressor(nn.Module):
                     unormalized_output, output, penalty = self.forward(first_image, second_image)
                 except Exception as e:
                     print_and_write(f'2 {e}')
-
+        
                 if self.predict_pose:
                     unormalized_output, output = pose_to_F(unormalized_output, output, unormalized_k[0])
                 try:
@@ -204,24 +216,27 @@ class FMatrixRegressor(nn.Module):
                     self.optimizer.step()
                 except Exception as e:
                     print_and_write(f'4 {e}')
+                try:
+                    # Extend lists with batch statistics
+                    labels = torch.cat((labels, label.detach()), dim=0)
+                    outputs = torch.cat((outputs, output.detach()), dim=0)
+                except Exception as e:
+                    print_and_write(f'6 {e}')
 
-                # Extend lists with batch statistics
-                labels = torch.cat((labels, label.detach()), dim=0)
-                outputs = torch.cat((outputs, output.detach()), dim=0)
+            try:
+                # Calculate and store mean absolute error for the epoch
+                mae = torch.mean(torch.abs(labels - outputs))
 
+                epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = (
+                    v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss))
 
-            # Calculate and store mean absolute error for the epoch
-            mae = torch.mean(torch.abs(labels - outputs))
-
-            epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = (
-                v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss))
-
-            train_mae.append(mae.cpu().item())
-            ec_err_truth.append(epoch_avg_ec_err_truth.cpu().item())
-            ec_err_pred.append(epoch_avg_ec_err_pred.cpu().item())
-            ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized.cpu().item())
-            all_train_loss.append(avg_loss.cpu().item())
-
+                train_mae.append(mae.cpu().item())
+                ec_err_truth.append(epoch_avg_ec_err_truth.cpu().item())
+                ec_err_pred.append(epoch_avg_ec_err_pred.cpu().item())
+                ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized.cpu().item())
+                all_train_loss.append(avg_loss.cpu().item())
+            except Exception as e:
+                print_and_write(f'7 {e}')
 
             # Validation
             self.eval()
@@ -233,7 +248,7 @@ class FMatrixRegressor(nn.Module):
                     try:
                         val_first_image, val_second_image, val_label, val_unormalized_label, val_unormalized_k = val_first_image.to(
                             device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device), val_unormalized_k.to(device)
-
+                        
                         unormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
                         epoch_penalty = epoch_penalty + penalty
                         
@@ -253,20 +268,21 @@ class FMatrixRegressor(nn.Module):
                         val_labels = torch.cat((val_labels, val_label), dim=0)
                     except Exception as e:
                         print_and_write(f'length: {len(val_labels)}, val exception: {e}')
+                try:
+                    # Calculate and store mean absolute error for the epoch
+                    mae = torch.mean(torch.abs(val_labels - val_outputs))
 
-                # Calculate and store mean absolute error for the epoch
-                mae = torch.mean(torch.abs(val_labels - val_outputs))
+                    val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss = (
+                        v / len(val_loader) for v in (val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss))
 
-                val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss = (
-                    v / len(val_loader) for v in (val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss))
-
-                val_mae.append(mae.cpu().item())
-                val_ec_err_truth.append(val_epoch_avg_ec_err_truth.cpu().item())
-                val_ec_err_pred.append(val_epoch_avg_ec_err_pred.cpu().item())
-                val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized.cpu().item())
-                all_val_loss.append(val_avg_loss.cpu().item())
-                all_penalty.append(epoch_penalty.cpu().item())
-            
+                    val_mae.append(mae.cpu().item())
+                    val_ec_err_truth.append(val_epoch_avg_ec_err_truth.cpu().item())
+                    val_ec_err_pred.append(val_epoch_avg_ec_err_pred.cpu().item())
+                    val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized.cpu().item())
+                    all_val_loss.append(val_avg_loss.cpu().item())
+                    all_penalty.append(epoch_penalty.cpu().item())
+                except Exception as e:
+                    print_and_write(f'8 {e}')
                 
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
             Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
@@ -282,31 +298,32 @@ class FMatrixRegressor(nn.Module):
         
         output = f"""Train unormalized ground truth error: {np.mean(ec_err_truth)} val unormalized ground truth error: {np.mean(val_ec_err_truth)}\n\n\n"""
         print_and_write(output)
-
-        plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
-                        title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
-                        use_reconstruction=self.use_reconstruction)
-        
-        plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
-                        title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
-                        use_reconstruction=self.use_reconstruction)
-        
-        plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
-                        title="Epipolar error unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
-                        use_reconstruction=self.use_reconstruction)
-        
-        plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred, y2=val_ec_err_pred, 
-                        title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
-                        use_reconstruction=self.use_reconstruction)
-  
+        try:
+            plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
+                            title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                            lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                            model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                            use_reconstruction=self.use_reconstruction)
+            
+            plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
+                            title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                            lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                            model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                            use_reconstruction=self.use_reconstruction)
+            
+            plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
+                            title="Epipolar error unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                            lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                            model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                            use_reconstruction=self.use_reconstruction)
+            
+            plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred, y2=val_ec_err_pred, 
+                            title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
+                            lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                            model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                            use_reconstruction=self.use_reconstruction)
+        except Exception as e:
+            print_and_write(f'9 {e}')   
 
 
     def get_rotation(self, rx, ry, rz):
