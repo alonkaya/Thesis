@@ -205,20 +205,6 @@ class FMatrixRegressor(nn.Module):
                 except Exception as e:
                     print_and_write(f'4 {e}')
 
-                if PREDICT_POSE:
-                    epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized = torch.tensor(0).to(device),torch.tensor(0).to(device),torch.tensor(0).to(device)
-                else:
-                    try:
-                        # Compute train mean epipolar constraint error
-                        avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                            first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach())
-                        epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
-                        epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
-                        epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
-                    except Exception as e:
-                        print_and_write(f'5 {e}')
-
-
                 # Extend lists with batch statistics
                 labels = torch.cat((labels, label.detach()), dim=0)
                 outputs = torch.cat((outputs, output.detach()), dim=0)
@@ -244,29 +230,29 @@ class FMatrixRegressor(nn.Module):
 
             with torch.no_grad():
                 for val_first_image, val_second_image, val_label, val_unormalized_label, val_unormalized_k in val_loader:
-                    # try:
-                    val_first_image, val_second_image, val_label, val_unormalized_label, val_unormalized_k = val_first_image.to(
-                        device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device), val_unormalized_k.to(device)
+                    try:
+                        val_first_image, val_second_image, val_label, val_unormalized_label, val_unormalized_k = val_first_image.to(
+                            device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device), val_unormalized_k.to(device)
 
-                    unormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
-                    epoch_penalty = epoch_penalty + penalty
-                    
-                    if self.predict_pose:
-                        unormalized_val_output, val_output = pose_to_F(unormalized_val_output, val_output, val_unormalized_k[0])
+                        unormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
+                        epoch_penalty = epoch_penalty + penalty
+                        
+                        if self.predict_pose:
+                            unormalized_val_output, val_output = pose_to_F(unormalized_val_output, val_output, val_unormalized_k[0])
 
-                    # Compute val mean epipolar constraint error
-                    val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized,_,_,_ = get_avg_epipolar_test_errors(
-                        val_first_image, val_second_image, val_unormalized_label, val_output, unormalized_val_output)
-                    val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
-                    val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
-                    val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
+                        # Compute val mean epipolar constraint error
+                        val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized,_,_,_ = get_avg_epipolar_test_errors(
+                            val_first_image, val_second_image, val_unormalized_label, val_output, unormalized_val_output)
+                        val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
+                        val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
+                        val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
 
-                    val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
+                        val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
 
-                    val_outputs = torch.cat((val_outputs, val_output), dim=0)
-                    val_labels = torch.cat((val_labels, val_label), dim=0)
-                    # except Exception as e:
-                    #     print_and_write(f'length: {len(val_labels)}, val exception: {e}')
+                        val_outputs = torch.cat((val_outputs, val_output), dim=0)
+                        val_labels = torch.cat((val_labels, val_label), dim=0)
+                    except Exception as e:
+                        print_and_write(f'length: {len(val_labels)}, val exception: {e}')
 
                 # Calculate and store mean absolute error for the epoch
                 mae = torch.mean(torch.abs(val_labels - val_outputs))
