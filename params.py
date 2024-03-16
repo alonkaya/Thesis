@@ -23,11 +23,11 @@ NUM_WORKERS = 0
 BN_AND_DO = True if BATCH_SIZE > 1 else False
 CUSTOMDATASET_TYPE = "CustomDataset_first_two_thirds_train"
 
-penalty_coeffs = [0]
-RE1_COEFF = 0
+penalty_coeffs = [1]
+RE1_COEFF = 1
 ENFORCE_RANK_2 = False
 USE_RECONSTRUCTION_LAYER = False
-PREDICT_POSE = True
+PREDICT_POSE = False
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
 NUM_EPOCHS = 1000
 MODEL = CLIP_MODEL_NAME
