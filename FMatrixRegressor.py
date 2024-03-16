@@ -179,7 +179,7 @@ class FMatrixRegressor(nn.Module):
 
                 if self.predict_pose:
                     unormalized_output, output = pose_to_F(unormalized_output, output, unormalized_k[0])
-                    print(unormalized_output)
+                    print(unormalized_output, unormalized_label)
                 try:
                     # Compute train mean epipolar constraint error
                     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, _, _, avg_RE1_pred_unormalized = get_avg_epipolar_test_errors(
