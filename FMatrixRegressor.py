@@ -262,6 +262,7 @@ class FMatrixRegressor(nn.Module):
                     val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
                     val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
 
+                    print(val_output.shape, val_label.shape)
                     val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
 
                     val_outputs = torch.cat((val_outputs, val_output), dim=0)
