@@ -112,7 +112,7 @@ def pose_to_F(unormalized_pose, pose, unormalized_k):
     # compute unormalized_F and F from unormalized_pose and pose
     k = norm_layer(unormalized_k.view(-1, 9)).view(3,3)
 
-    # TODO: change this if batch size > 1 !!
+    # TODO: change this if batch size > 1 !! they are originally (-1,3,4)
     pose = pose.view(3, 4)
     unormalized_pose = unormalized_pose.view(3, 4)
 
