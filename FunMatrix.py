@@ -292,6 +292,7 @@ class EpipolarGeometry:
         return np.abs(pt2.T.dot(self.F).dot(pt1))
 
     def visualize(self, sqResultDir):
+        print(FILE_NUM)
         bad_frames_path = os.path.join(sqResultDir, "bad_frames")
         good_frames_path = os.path.join(sqResultDir, "good_frames")
         os.makedirs(bad_frames_path, exist_ok=True)
