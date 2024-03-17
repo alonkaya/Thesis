@@ -137,7 +137,7 @@ def last_sing_value_penalty(output):
 
     return rank_penalty
 
-def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output, epoch):
+def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output, epoch, file_num):
     # Compute mean epipolar constraint error
     if ENFORCE_RANK_2:
         try:
@@ -157,30 +157,28 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
             print_and_write(f'Error in matmuls: {e}')
 
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized = 0, 0, 0, 0, 0, 0
-    # try:
-    for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
-        ec_err_truth, RE1_truth = EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
-        ec_err_pred, RE1_pred = EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
-        ec_err_pred_unormalized, RE1_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
+    try:
+        for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
+            ec_err_truth, RE1_truth = EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
+            ec_err_pred, RE1_pred = EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
+            ec_err_pred_unormalized, RE1_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
 
-        avg_ec_err_truth, avg_RE1_truth = avg_ec_err_truth + ec_err_truth, avg_RE1_truth + RE1_truth
-        avg_ec_err_pred, avg_RE1_pred = avg_ec_err_pred + ec_err_pred, avg_RE1_pred + RE1_pred
-        avg_ec_err_pred_unormalized, avg_RE1_pred_unormalized = avg_ec_err_pred_unormalized + ec_err_pred_unormalized, avg_RE1_pred_unormalized + RE1_pred_unormalized
+            avg_ec_err_truth, avg_RE1_truth = avg_ec_err_truth + ec_err_truth, avg_RE1_truth + RE1_truth
+            avg_ec_err_pred, avg_RE1_pred = avg_ec_err_pred + ec_err_pred, avg_RE1_pred + RE1_pred
+            avg_ec_err_pred_unormalized, avg_RE1_pred_unormalized = avg_ec_err_pred_unormalized + ec_err_pred_unormalized, avg_RE1_pred_unormalized + RE1_pred_unormalized
 
-        if epoch == 0:
-            epipolar = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
-            epipolar.visualize(sqResultDir='preicted_epipole_lines_realestate', file_num=FILE_NUM)
-            FILE_NUM += 1
+            if epoch == 0:
+                epipolar = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
+                epipolar.visualize(sqResultDir='preicted_epipole_lines_realestate', file_num=file_num)
 
 
-    # except Exception as e:
-    #     print_and_write(f'Error in get_avg_epipolar_test_errors: {e}')
+    except Exception as e:
+        print_and_write(f'Error in get_avg_epipolar_test_errors: {e}')
 
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized = (
         v / len(first_image) for v in (avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized))
 
     return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized
-
 
 
 class EpipolarGeometry:
@@ -292,7 +290,7 @@ class EpipolarGeometry:
     def epipolar_test_single_point(self, pt1, pt2):
         return np.abs(pt2.T.dot(self.F).dot(pt1))
 
-    def visualize(self, sqResultDir, file_num):
+    def visualize(self, sqResultDir, ):
         bad_frames_path = os.path.join(sqResultDir, "bad_frames")
         good_frames_path = os.path.join(sqResultDir, "good_frames")
         os.makedirs(bad_frames_path, exist_ok=True)
@@ -375,12 +373,12 @@ class EpipolarGeometry:
                     print(f'moved {src_path1} to {dst_path1}')
                     os.rename(src_path1, dst_path1)
             else:
-                cv2.imwrite(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}'), vis)
-                print(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}\n'))
+                cv2.imwrite(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{}.{IMAGE_TYPE}'), vis)
+                print(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{FILE_NUM}.{IMAGE_TYPE}\n'))
 
         elif not MOVE_BAD_IMAGES:
-            cv2.imwrite(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}'), vis)
-            print(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}\n'))
+            cv2.imwrite(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{FILE_NUM}.{IMAGE_TYPE}'), vis)
+            print(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{FILE_NUM}.{IMAGE_TYPE}\n'))
         
 
 

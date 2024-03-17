@@ -179,8 +179,8 @@ class FMatrixRegressor(nn.Module):
         for epoch in range(num_epochs):
             self.train()
             labels, outputs = torch.tensor([]).to(device), torch.tensor([]).to(device)
-            epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = 0, 0, 0, 0
-
+            epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, file_num = 0, 0, 0, 0, 0
+            
             for first_image, second_image, label, unormalized_label, unormalized_k in train_loader:
                 first_image, second_image, label, unormalized_label, unormalized_k = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device), unormalized_k.to(device)
                 try:
@@ -194,10 +194,12 @@ class FMatrixRegressor(nn.Module):
                 try:
                     # Compute train mean epipolar constraint error
                     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, _, _, avg_RE1_pred_unormalized = get_avg_epipolar_test_errors(
-                        first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch)
+                        first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch, file_num=file_num)
                     epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
                     epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
                     epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
+
+                    file_num += 1
                 except Exception as e:
                     print_and_write(f'5 {e}')
 
@@ -257,7 +259,7 @@ class FMatrixRegressor(nn.Module):
 
                         # Compute val mean epipolar constraint error
                         val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized,_,_,_ = get_avg_epipolar_test_errors(
-                            val_first_image, val_second_image, val_unormalized_label, val_output, unormalized_val_output, epoch=-1)
+                            val_first_image, val_second_image, val_unormalized_label, val_output, unormalized_val_output, epoch=-1, file_num=file_num)
                         val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
                         val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
                         val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
