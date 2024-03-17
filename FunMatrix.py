@@ -137,7 +137,7 @@ def last_sing_value_penalty(output):
 
     return rank_penalty
 
-def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output):
+def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output, epoch):
     # Compute mean epipolar constraint error
     if ENFORCE_RANK_2:
         try:
@@ -158,7 +158,7 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
 
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized = 0, 0, 0, 0, 0, 0
     try:
-        for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
+        for i, (img_1, img_2, F_truth, F_pred, F_pred_unormalized) in enumerate(zip(first_image, second_image, unormalized_label, output, unormalized_output)):
             ec_err_truth, RE1_truth = EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
             ec_err_pred, RE1_pred = EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
             ec_err_pred_unormalized, RE1_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
@@ -166,6 +166,11 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
             avg_ec_err_truth, avg_RE1_truth = avg_ec_err_truth + ec_err_truth, avg_RE1_truth + RE1_truth
             avg_ec_err_pred, avg_RE1_pred = avg_ec_err_pred + ec_err_pred, avg_RE1_pred + RE1_pred
             avg_ec_err_pred_unormalized, avg_RE1_pred_unormalized = avg_ec_err_pred_unormalized + ec_err_pred_unormalized, avg_RE1_pred_unormalized + RE1_pred_unormalized
+
+            if epoch == 0:
+                epipolar = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
+                epipolar.visualize(sqResultDir='preicted_epipole_lines_realestate', img_idx=i)
+
 
     except Exception as e:
         print_and_write(f'Error in get_avg_epipolar_test_errors: {e}')
@@ -175,56 +180,6 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
 
     return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized
 
-def reconstruction_module(x):
-    def get_rotation(rx, ry, rz):
-        # normalize input?
-        R_x = torch.tensor([
-            [1.,    0.,             0.],
-            [0.,    torch.cos(rx),    -torch.sin(rx)],
-            [0.,    torch.sin(rx),     torch.cos(rx)]
-        ], requires_grad=True).to(device)
-        R_y = torch.tensor([
-            [torch.cos(ry),    0.,    -torch.sin(ry)],
-            [0.,            1.,     0.],
-            [torch.sin(ry),    0.,     torch.cos(ry)]
-        ], requires_grad=True).to(device)
-        R_z = torch.tensor([
-            [torch.cos(rz),    -torch.sin(rz),    0.],
-            [torch.sin(rz),    torch.cos(rz),     0.],
-            [0.,            0.,             1.]
-        ], requires_grad=True).to(device)
-        R = torch.matmul(R_x, torch.matmul(R_y, R_z))
-        return R
-
-    def get_inv_intrinsic(f):
-        return torch.tensor([
-            [-1/(f+1e-8),   0.,             0.],
-            [0.,            -1/(f+1e-8),    0.],
-            [0.,            0.,             1.]
-        ], requires_grad=True).to(device)
-
-    def get_translate(tx, ty, tz):
-        return torch.tensor([
-            [0.,  -tz, ty],
-            [tz,  0,   -tx],
-            [-ty, tx,  0]
-        ], requires_grad=True).to(device)
-
-    def get_fmat(x):
-        # F = K2^(-T)*R*[t]x*K1^(-1)
-        # Note: only need out-dim = 8
-        K1_inv = get_inv_intrinsic(x[0]) # K1^(-1)
-        K2_inv_T = torch.transpose(get_inv_intrinsic(x[1])) # K2^(-T)
-        R = get_rotation(x[2], x[3], x[4]) 
-        T = get_translate(x[5], x[6], x[7])
-        F = torch.matmul(K2_inv_T,
-                         torch.matmul(R, torch.matmul(T, K1_inv)))
-
-        return F
-
-    out = get_fmat(x)
-
-    return out
 
 
 class EpipolarGeometry:
@@ -421,3 +376,56 @@ class EpipolarGeometry:
             cv2.imwrite(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{img_idx}.{IMAGE_TYPE}'), vis)
             print(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{img_idx}.{IMAGE_TYPE}\n'))
 
+
+
+
+def reconstruction_module(x):
+    def get_rotation(rx, ry, rz):
+        # normalize input?
+        R_x = torch.tensor([
+            [1.,    0.,             0.],
+            [0.,    torch.cos(rx),    -torch.sin(rx)],
+            [0.,    torch.sin(rx),     torch.cos(rx)]
+        ], requires_grad=True).to(device)
+        R_y = torch.tensor([
+            [torch.cos(ry),    0.,    -torch.sin(ry)],
+            [0.,            1.,     0.],
+            [torch.sin(ry),    0.,     torch.cos(ry)]
+        ], requires_grad=True).to(device)
+        R_z = torch.tensor([
+            [torch.cos(rz),    -torch.sin(rz),    0.],
+            [torch.sin(rz),    torch.cos(rz),     0.],
+            [0.,            0.,             1.]
+        ], requires_grad=True).to(device)
+        R = torch.matmul(R_x, torch.matmul(R_y, R_z))
+        return R
+
+    def get_inv_intrinsic(f):
+        return torch.tensor([
+            [-1/(f+1e-8),   0.,             0.],
+            [0.,            -1/(f+1e-8),    0.],
+            [0.,            0.,             1.]
+        ], requires_grad=True).to(device)
+
+    def get_translate(tx, ty, tz):
+        return torch.tensor([
+            [0.,  -tz, ty],
+            [tz,  0,   -tx],
+            [-ty, tx,  0]
+        ], requires_grad=True).to(device)
+
+    def get_fmat(x):
+        # F = K2^(-T)*R*[t]x*K1^(-1)
+        # Note: only need out-dim = 8
+        K1_inv = get_inv_intrinsic(x[0]) # K1^(-1)
+        K2_inv_T = torch.transpose(get_inv_intrinsic(x[1])) # K2^(-T)
+        R = get_rotation(x[2], x[3], x[4]) 
+        T = get_translate(x[5], x[6], x[7])
+        F = torch.matmul(K2_inv_T,
+                         torch.matmul(R, torch.matmul(T, K1_inv)))
+
+        return F
+
+    out = get_fmat(x)
+
+    return out
