@@ -257,7 +257,7 @@ class FMatrixRegressor(nn.Module):
 
                         # Compute val mean epipolar constraint error
                         val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized,_,_,_ = get_avg_epipolar_test_errors(
-                            val_first_image, val_second_image, val_unormalized_label, val_output, unormalized_val_output)
+                            val_first_image, val_second_image, val_unormalized_label, val_output, unormalized_val_output, epoch=-1)
                         val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
                         val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
                         val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized

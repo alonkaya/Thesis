@@ -158,7 +158,7 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
 
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized = 0, 0, 0, 0, 0, 0
     try:
-        for i, (img_1, img_2, F_truth, F_pred, F_pred_unormalized) in enumerate(zip(first_image, second_image, unormalized_label, output, unormalized_output)):
+        for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
             ec_err_truth, RE1_truth = EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
             ec_err_pred, RE1_pred = EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
             ec_err_pred_unormalized, RE1_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
@@ -169,7 +169,7 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
 
             if epoch == 0:
                 epipolar = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
-                epipolar.visualize(sqResultDir='preicted_epipole_lines_realestate', img_idx=i)
+                epipolar.visualize(sqResultDir='preicted_epipole_lines_realestate')
 
 
     except Exception as e:
@@ -181,7 +181,7 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
     return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized
 
 
-
+file_num = 0
 class EpipolarGeometry:
     def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):
         self.F = F.view(3, 3)
@@ -291,7 +291,7 @@ class EpipolarGeometry:
     def epipolar_test_single_point(self, pt1, pt2):
         return np.abs(pt2.T.dot(self.F).dot(pt1))
 
-    def visualize(self, sqResultDir, img_idx):
+    def visualize(self, sqResultDir, img_idx=file_num):
         bad_frames_path = os.path.join(sqResultDir, "bad_frames")
         good_frames_path = os.path.join(sqResultDir, "good_frames")
         os.makedirs(bad_frames_path, exist_ok=True)
@@ -380,7 +380,8 @@ class EpipolarGeometry:
         elif not MOVE_BAD_IMAGES:
             cv2.imwrite(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{img_idx}.{IMAGE_TYPE}'), vis)
             print(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{img_idx}.{IMAGE_TYPE}\n'))
-
+        
+        file_num += 1
 
 
 
