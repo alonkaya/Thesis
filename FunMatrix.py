@@ -261,7 +261,6 @@ class EpipolarGeometry:
             print_and_write(f'Error in sift: {e}')
             return
 
-        # matches = bf.match(des1, des2)
         matches = bf.knnMatch(des1, des2, k=2)
         self.good = []
         distances = []
@@ -279,8 +278,12 @@ class EpipolarGeometry:
         pts1 = np.float32([kp1[m.queryIdx].pt for m in self.good])
         pts2 = np.float32([kp2[m.trainIdx].pt for m in self.good])
 
-        pts1 = np.concatenate((pts1, np.ones((pts1.shape[0], 1))), axis=-1)
-        pts2 = np.concatenate((pts2, np.ones((pts2.shape[0], 1))), axis=-1)
+        pts1 = np.concatenate((pts1, np.ones((pts1.shape[0], 1))), axis=-1) # shape [n,3]
+        pts2 = np.concatenate((pts2, np.ones((pts2.shape[0], 1))), axis=-1) # shape [n,3]
+
+        if NORM_KEYPOINTS:
+            pts1 = norm_layer(torch.tensor(pts1)).numpy()
+            pts2 = norm_layer(torch.tensor(pts2)).numpy()
 
         return pts1, pts2
 
