@@ -169,7 +169,8 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
 
             if epoch == 0:
                 epipolar = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
-                epipolar.visualize(sqResultDir='preicted_epipole_lines_realestate')
+                epipolar.visualize(sqResultDir='preicted_epipole_lines_realestate', file_num=FILE_NUM)
+                FILE_NUM += 1
 
 
     except Exception as e:
@@ -291,8 +292,7 @@ class EpipolarGeometry:
     def epipolar_test_single_point(self, pt1, pt2):
         return np.abs(pt2.T.dot(self.F).dot(pt1))
 
-    def visualize(self, sqResultDir):
-        print(FILE_NUM)
+    def visualize(self, sqResultDir, file_num):
         bad_frames_path = os.path.join(sqResultDir, "bad_frames")
         good_frames_path = os.path.join(sqResultDir, "good_frames")
         os.makedirs(bad_frames_path, exist_ok=True)
@@ -375,14 +375,13 @@ class EpipolarGeometry:
                     print(f'moved {src_path1} to {dst_path1}')
                     os.rename(src_path1, dst_path1)
             else:
-                cv2.imwrite(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{FILE_NUM}.{IMAGE_TYPE}'), vis)
-                print(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{FILE_NUM}.{IMAGE_TYPE}\n'))
+                cv2.imwrite(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}'), vis)
+                print(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}\n'))
 
         elif not MOVE_BAD_IMAGES:
-            cv2.imwrite(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{FILE_NUM}.{IMAGE_TYPE}'), vis)
-            print(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{FILE_NUM}.{IMAGE_TYPE}\n'))
+            cv2.imwrite(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}'), vis)
+            print(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}\n'))
         
-        FILE_NUM += 1
 
 
 
