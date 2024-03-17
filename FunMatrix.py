@@ -181,7 +181,7 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
     return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized
 
 
-file_num = 0
+
 class EpipolarGeometry:
     def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):
         self.F = F.view(3, 3)
