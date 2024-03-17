@@ -292,6 +292,11 @@ class EpipolarGeometry:
         return np.abs(pt2.T.dot(self.F).dot(pt1))
 
     def visualize(self, sqResultDir, img_idx):
+        bad_frames_path = os.path.join(sqResultDir, "bad_frames")
+        good_frames_path = os.path.join(sqResultDir, "good_frames")
+        os.makedirs(bad_frames_path, exist_ok=True)
+        os.makedirs(good_frames_path, exist_ok=True)
+
         self.F = self.F.cpu().numpy()
 
         img1_line = self.image1_numpy.copy()
