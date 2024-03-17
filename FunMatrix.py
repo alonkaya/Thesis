@@ -291,7 +291,7 @@ class EpipolarGeometry:
     def epipolar_test_single_point(self, pt1, pt2):
         return np.abs(pt2.T.dot(self.F).dot(pt1))
 
-    def visualize(self, sqResultDir, img_idx=file_num):
+    def visualize(self, sqResultDir):
         bad_frames_path = os.path.join(sqResultDir, "bad_frames")
         good_frames_path = os.path.join(sqResultDir, "good_frames")
         os.makedirs(bad_frames_path, exist_ok=True)
@@ -374,14 +374,14 @@ class EpipolarGeometry:
                     print(f'moved {src_path1} to {dst_path1}')
                     os.rename(src_path1, dst_path1)
             else:
-                cv2.imwrite(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{img_idx}.{IMAGE_TYPE}'), vis)
-                print(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{img_idx}.{IMAGE_TYPE}\n'))
+                cv2.imwrite(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{FILE_NUM}.{IMAGE_TYPE}'), vis)
+                print(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{FILE_NUM}.{IMAGE_TYPE}\n'))
 
         elif not MOVE_BAD_IMAGES:
-            cv2.imwrite(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{img_idx}.{IMAGE_TYPE}'), vis)
-            print(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{img_idx}.{IMAGE_TYPE}\n'))
+            cv2.imwrite(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{FILE_NUM}.{IMAGE_TYPE}'), vis)
+            print(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{FILE_NUM}.{IMAGE_TYPE}\n'))
         
-        file_num += 1
+        FILE_NUM += 1
 
 
 
