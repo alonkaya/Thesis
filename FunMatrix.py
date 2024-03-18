@@ -163,9 +163,9 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
             ec_err_pred, RE1_pred = EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
             ec_err_pred_unormalized, RE1_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
 
-            avg_ec_err_truth, avg_RE1_truth = avg_ec_err_truth + ec_err_truth, avg_RE1_truth + RE1_truth
-            avg_ec_err_pred, avg_RE1_pred = avg_ec_err_pred + ec_err_pred, avg_RE1_pred + RE1_pred
-            avg_ec_err_pred_unormalized, avg_RE1_pred_unormalized = avg_ec_err_pred_unormalized + ec_err_pred_unormalized, avg_RE1_pred_unormalized + RE1_pred_unormalized
+            avg_ec_err_truth = avg_ec_err_truth + ec_err_truth
+            avg_ec_err_pred = avg_ec_err_pred + ec_err_pred
+            avg_ec_err_pred_unormalized = avg_ec_err_pred_unormalized + ec_err_pred_unormalized
 
             if epoch == 999:
                 epipolar = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
@@ -175,10 +175,10 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
     except Exception as e:
         print_and_write(f'Error in get_avg_epipolar_test_errors: {e}')
 
-    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized = (
-        v / len(first_image) for v in (avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized))
+    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = (
+        v / len(first_image) for v in (avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized))
 
-    return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized
+    return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized
 
 
 class EpipolarGeometry:
