@@ -105,12 +105,12 @@ class FMatrixRegressor(nn.Module):
                 x1_embeddings = avg_patches(x1_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
                 x2_embeddings = avg_patches(x2_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
 
-            if group_conv["use"]:
-                grouped_conv_layer = GroupedConvolution(in_channels=self.model_hidden_size,   # Total input channels
-                                        out_channels=group_conv["out_channels"],  # Total output channels you want
-                                        kernel_size=3,
-                                        padding=1,
-                                        groups=group_conv["num_groups"])
+            # if group_conv["use"]:
+            #     grouped_conv_layer = GroupedConvolution(in_channels=self.model_hidden_size,   # Total input channels
+            #                             out_channels=group_conv["out_channels"],  # Total output channels you want
+            #                             kernel_size=3,
+            #                             padding=1,
+            #                             groups=group_conv["num_groups"])
 
             # Create another feature embedding of the element-wise mult between the two embedding vectors
             mul_embedding = x1_embeddings.mul(x2_embeddings)
@@ -141,7 +141,7 @@ class FMatrixRegressor(nn.Module):
         for epoch in range(num_epochs):
             self.train()
             labels, outputs = torch.tensor([]).to(device), torch.tensor([]).to(device)
-            epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = 0, 0, 0, 0
+            epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, file_num = 0, 0, 0, 0, 0
 
             for first_image, second_image, label, unormalized_label in train_loader:
                 try:
@@ -175,10 +175,12 @@ class FMatrixRegressor(nn.Module):
                 try:
                     # Compute train mean epipolar constraint error
                     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                        first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unnormalized_output.detach())
+                        first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unnormalized_output.detach(), epoch, file_num)
                     epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
                     epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
                     epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
+
+                    file_num += 1
                 except Exception as e:
                     print_and_write(f'5 {e}')
 
@@ -217,11 +219,11 @@ class FMatrixRegressor(nn.Module):
                         val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
 
                         # Compute val mean epipolar constraint error
-                        val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                            val_first_image, val_second_image, val_unormalized_label, val_output, unnormalized_val_output)
-                        val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
-                        val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
-                        val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
+                        # val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
+                        #     val_first_image, val_second_image, val_unormalized_label, val_output, unnormalized_val_output)
+                        # val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
+                        # val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
+                        # val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
 
                         val_outputs = torch.cat((val_outputs, val_output), dim=0)
                         val_labels = torch.cat((val_labels, val_label), dim=0)
