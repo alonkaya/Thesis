@@ -132,7 +132,7 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = 0, 0, 0
     # try:
     for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
-        print(img_1.shape,img_2.shape, F_truth.shape)
+
         ec_err_truth = EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
         ec_err_pred = EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
         ec_err_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
