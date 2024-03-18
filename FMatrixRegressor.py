@@ -38,7 +38,6 @@ class FMatrixRegressor(nn.Module):
         self.pretrained_model_name = pretrained_model_name
         self.augmentation = augmentation
         self.enforce_rank_2 = enforce_rank_2
-        self.predict_pose=predict_pose
         self.use_reconstruction=use_reconstruction
 
         # Check if CLIP model is specified
@@ -229,16 +228,13 @@ class FMatrixRegressor(nn.Module):
             val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized, epoch_penalty, val_avg_loss = 0, 0, 0, 0, 0
 
             with torch.no_grad():
-                for val_first_image, val_second_image, val_label, val_unormalized_label, val_unormalized_k in val_loader:
+                for val_first_image, val_second_image, val_label, val_unormalized_label in val_loader:
                     try:
-                        val_first_image, val_second_image, val_label, val_unormalized_label, val_unormalized_k = val_first_image.to(
-                            device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device), val_unormalized_k.to(device)
+                        val_first_image, val_second_image, val_label, val_unormalized_label = val_first_image.to(
+                            device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device)
                         
                         unormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
                         epoch_penalty = epoch_penalty + penalty
-                        
-                        if self.predict_pose:
-                            unormalized_val_output, val_output = pose_to_F(unormalized_val_output, val_output, val_unormalized_k[0])
 
                         # Compute val mean epipolar constraint error
                         val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
