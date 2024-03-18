@@ -57,10 +57,10 @@ class FMatrixRegressor(nn.Module):
         if freeze_pretrained_model:
             for param in self.pretrained_model.parameters():
                 param.requires_grad = False
-        print(len(self.pretrained_model.encoder.layer))
-        for layer in self.pretrained_model.encoder.layer[len(self.pretrained_model.encoder.layer)-unfrozen_layers:]:
-            for param in layer.parameters():
-                param.requires_grad = True
+        # print(len(self.pretrained_model.encoder.layer))
+        # for layer in self.pretrained_model.encoder.layer[len(self.pretrained_model.encoder.layer)-unfrozen_layers:]:
+        #     for param in layer.parameters():
+        #         param.requires_grad = True
 
         # Get input dimension for the MLP based on ViT configuration
         self.model_hidden_size = self.pretrained_model.config.hidden_size
