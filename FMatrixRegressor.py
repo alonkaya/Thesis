@@ -172,17 +172,17 @@ class FMatrixRegressor(nn.Module):
                 except Exception as e:
                     print_and_write(f'4 {e}')
 
-                try:
-                    # Compute train mean epipolar constraint error
-                    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                        first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unnormalized_output.detach(), epoch, file_num)
-                    epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
-                    epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
-                    epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
+                # try:
+                # Compute train mean epipolar constraint error
+                avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
+                    first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unnormalized_output.detach(), epoch, file_num)
+                epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
+                epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
+                epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
 
-                    file_num += 1
-                except Exception as e:
-                    print_and_write(f'5 {e}')
+                file_num += 1
+                # except Exception as e:
+                #     print_and_write(f'5 {e}')
 
                 # Extend lists with batch statistics
                 labels = torch.cat((labels, label.detach()), dim=0)
