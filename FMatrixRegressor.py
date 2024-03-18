@@ -39,6 +39,7 @@ class FMatrixRegressor(nn.Module):
         self.augmentation = augmentation
         self.enforce_rank_2 = enforce_rank_2
         self.use_reconstruction=use_reconstruction
+        self.predict_pose = predict_pose
 
         # Check if CLIP model is specified
         if pretrained_model_name == "openai/clip-vit-base-patch32":
@@ -85,74 +86,78 @@ class FMatrixRegressor(nn.Module):
             {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
             {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
         ]
+        params_t = [
+            {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.t_mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
+        ]        
         self.L2_loss = nn.MSELoss().to(device)
-        self.optimizer = optim.Adam(params)
+        self.optimizer = optim.Adam(params, lr=lr_vit)
 
-    def forward(self, x1, x2):
-        if DEEPF_NOCORRS:
-            # net = HomographyNet(use_reconstruction_module=False).to(device)
+        self.L2_loss_t = nn.MSELoss().to(device)
+        self.optimizer_t = optim.Adam(params_t, lr=lr_mlp)
 
-            # output = net.foward(x1, x2).to(device)
-
-            # return output
-            ""
+    def get_embeddings(self, x1, x2):
+        if self.clip:  
+            try:
+                x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False,
+                                            do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+                x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
+                                            do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+                
+                x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)
+                x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)                
+            except Exception as e:
+                print_and_write(f'clip: {e}')
         else:
-            if self.clip:  # If using CLIP
-                try:
-                    x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False,
-                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-                    x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
-                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-                    
-                    x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)
-                    x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)                
-                except Exception as e:
-                    print_and_write(f'clip: {e}')
-            else:
-                x1_embeddings = self.pretrained_model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
-                x2_embeddings = self.pretrained_model(x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
-                
-            if self.average_embeddings:
-                try:
-                    avg_patches = nn.AdaptiveAvgPool2d(1)
-                    x1_embeddings = avg_patches(x1_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
-                    x2_embeddings = avg_patches(x2_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
-                except Exception as e: 
-                    print_and_write(f'avg_patches: {e}')
+            x1_embeddings = self.pretrained_model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
+            x2_embeddings = self.pretrained_model(x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
 
-            if group_conv["use"]:
-                grouped_conv_layer = GroupedConvolution(in_channels=self.model_hidden_size,   # Total input channels
-                                        out_channels=group_conv["out_channels"],  # Total output channels you want
-                                        kernel_size=3,
-                                        padding=1,
-                                        groups=group_conv["num_groups"])
-                x1_embeddings = grouped_conv_layer(x1_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
-                x2_embeddings = grouped_conv_layer(x2_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
-
-            # Create another feature embedding of the element-wise mult between the two embedding vectors
-            mul_embedding = x1_embeddings.mul(x2_embeddings)
-
-            # Concatenate both original and rotated embedding vectors
-            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
+        if self.average_embeddings:
             try:
-                # Train MLP on embedding vectors            
-                output = self.mlp(embeddings).to(device)
-            except Exception as e:
-                print_and_write(f'mlp: {e}')
+                avg_patches = nn.AdaptiveAvgPool2d(1)
+                x1_embeddings = avg_patches(x1_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
+                x2_embeddings = avg_patches(x2_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
+            except Exception as e: 
+                print_and_write(f'avg_patches: {e}')
 
-            try:
-                unormalized_output = output.view(-1,3,3) if not USE_RECONSTRUCTION_LAYER else torch.stack([self.get_fmat(x)for x in output])
-                
-                output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3)
-                
-                if self.penaltize_normalized:
-                    penalty = last_sing_value_penalty(output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
-                else:
-                    penalty = last_sing_value_penalty(unormalized_output).to(device) if not USE_RECONSTRUCTION_LAYER else torch.tensor(0).to(device)    
-            except Exception as e:
-                print_and_write(f'last_sing_value_penalty: {e}')
+        if group_conv["use"]:
+            grouped_conv_layer = GroupedConvolution(in_channels=self.model_hidden_size,   # Total input channels
+                                    out_channels=group_conv["out_channels"],  # Total output channels you want
+                                    kernel_size=3,
+                                    padding=1,
+                                    groups=group_conv["num_groups"])
+            x1_embeddings = grouped_conv_layer(x1_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
+            x2_embeddings = grouped_conv_layer(x2_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
 
-            return unormalized_output, output, penalty
+        # Create another feature embedding of the element-wise mult between the two embedding vectors
+        # mul_embedding = x1_embeddings.mul(x2_embeddings)
+
+        embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
+
+        return embeddings
+
+    def forward(self, x1, x2, predict_t=False):
+        # If deepF_nocors
+        # net = HomographyNet(use_reconstruction_module=False).to(device)
+        # output = net.foward(x1, x2).to(device)
+        # return output
+
+        embeddings = self.get_embeddings(x1, x2)
+        
+        try:
+            # Train MLP on embedding vectors            
+            unormalized_output = self.mlp(embeddings).view(-1,3,3).to(device) if not predict_t else self.t_mlp(embeddings).view(-1,3).to(device)
+        except Exception as e:
+            print_and_write(f'mlp: {e}')
+
+        try:            
+            output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3) if not predict_t else norm_layer(unormalized_output.view(-1, 3)).view(-1,3)
+
+            penalty = last_sing_value_penalty(unormalized_output).to(device) if self.predict_pose else 0
+        except Exception as e:
+            print_and_write(f'last_sing_value_penalty: {e}')
+
+        return unormalized_output, output, penalty
 
 
     def train_model(self, train_loader, val_loader, num_epochs):
@@ -163,49 +168,66 @@ class FMatrixRegressor(nn.Module):
         for epoch in range(num_epochs):
             self.train()
             labels, outputs = torch.tensor([]).to(device), torch.tensor([]).to(device)
-            epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, file_num = 0, 0, 0, 0, 0
+            epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, avg_loss_R, avg_loss_t, file_num = 0, 0, 0, 0, 0, 0, 0
             
             for first_image, second_image, label, unormalized_label in train_loader:
                 first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
-                try:
-                    # Forward pass
+                # Forward pass
+                if self.predict_pose:
+                    try:
+                        unormalized_R, R, _ = self.forward(first_image, second_image, predict_t=False)
+                        unormalized_t, t, _ = self.forward(first_image, second_image, predict_t=True)
+
+                        loss_R = self.L2_loss(R, label[0])
+                        avg_loss_R += loss_R.detach()
+
+                        loss_t = self.L2_loss_t(t, label[1])
+                        avg_loss_t += loss_t.detach()   
+
+                        self.optimizer.zero_grad()
+                        loss_R.backward()
+                        self.optimizer.step()                     
+
+                        self.optimizer_t.zero_grad()
+                        loss_t.backward()
+                        self.optimizer_t.step()
+                    except Exception as e:
+                        print_and_write(f'2 {e}')
+                else:
                     unormalized_output, output, penalty = self.forward(first_image, second_image)
-                except Exception as e:
-                    print_and_write(f'2 {e}')
-        
-                try:
-                    # Compute train mean epipolar constraint error
-                    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                        first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch, file_num=file_num)
-                    epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
-                    epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
-                    epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
+                    try:
+                        # Compute train mean epipolar constraint error
+                        avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
+                            first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch, file_num=file_num)
+                        epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
+                        epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
+                        epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
 
-                    file_num += 1
-                except Exception as e:
-                    print_and_write(f'5 {e}')
+                        file_num += 1
+                    except Exception as e:
+                        print_and_write(f'5 {e}')
 
-                try:
-                    # Compute loss
-                    l2_loss = self.L2_loss(output, label)
-                    loss = l2_loss + self.penalty_coeff*penalty
-                    avg_loss = avg_loss + loss.detach()
-                except Exception as e:
-                    print_and_write(f'3 {e}')
+                    try:
+                        # Compute loss
+                        l2_loss = self.L2_loss(output, label)
+                        loss = l2_loss + self.penalty_coeff*penalty
+                        avg_loss = avg_loss + loss.detach()
+                    except Exception as e:
+                        print_and_write(f'3 {e}')
 
-                try:
-                    # Compute Backward pass and gradients
-                    self.optimizer.zero_grad()
-                    loss.backward()
-                    self.optimizer.step()
-                except Exception as e:
-                    print_and_write(f'4 {e}')
-                try:
-                    # Extend lists with batch statistics
-                    labels = torch.cat((labels, label.detach()), dim=0)
-                    outputs = torch.cat((outputs, output.detach()), dim=0)
-                except Exception as e:
-                    print_and_write(f'6 {e}')
+                    try:
+                        # Compute Backward pass and gradients
+                        self.optimizer.zero_grad()
+                        loss.backward()
+                        self.optimizer.step()
+                    except Exception as e:
+                        print_and_write(f'4 {e}')
+                    try:
+                        # Extend lists with batch statistics
+                        labels = torch.cat((labels, label.detach()), dim=0)
+                        outputs = torch.cat((outputs, output.detach()), dim=0)
+                    except Exception as e:
+                        print_and_write(f'6 {e}')
 
             try:
                 # Calculate and store mean absolute error for the epoch

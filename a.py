@@ -128,8 +128,8 @@ transform = transforms.Compose([
     transforms.CenterCrop(224),
     transforms.Grayscale(num_output_channels=3),
     transforms.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
-    # transforms.Normalize(mean=norm_mean,  # Normalize each channel
-    #                      std=norm_std),
+    transforms.Normalize(mean=norm_mean,  # Normalize each channel
+                         std=norm_std),
 ])    
 
 def data_with_one_sequence(batch_size, CustomDataset_type):
