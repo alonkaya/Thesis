@@ -56,7 +56,7 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
         except Exception as e:
             print_and_write("5\n {e}")
             
-        return first_image, second_image, F.view(3,3), unormalized_F.view(3,3)
+        return first_image, second_image, F.view(3,3), unormalized_F.view(3,3), self.k
     
 class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):
     """Takes the first two images out of every three images in the sequence for training, and the third for testing"""

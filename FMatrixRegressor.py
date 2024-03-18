@@ -153,7 +153,7 @@ class FMatrixRegressor(nn.Module):
         try:            
             output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3) if not predict_t else norm_layer(unormalized_output.view(-1, 3)).view(-1,3)
 
-            penalty = last_sing_value_penalty(unormalized_output).to(device) if self.predict_pose else 0
+            penalty = last_sing_value_penalty(unormalized_output).to(device) if not self.predict_pose else 0
         except Exception as e:
             print_and_write(f'last_sing_value_penalty: {e}')
 
@@ -170,64 +170,63 @@ class FMatrixRegressor(nn.Module):
             labels, outputs = torch.tensor([]).to(device), torch.tensor([]).to(device)
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, avg_loss_R, avg_loss_t, file_num = 0, 0, 0, 0, 0, 0, 0
             
-            for first_image, second_image, label, unormalized_label in train_loader:
-                first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
+            for first_image, second_image, label, unormalized_label, K in train_loader:
+                first_image, second_image, label, unormalized_label, K = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device), K.to(device)
                 # Forward pass
                 if self.predict_pose:
                     try:
                         unormalized_R, R, _ = self.forward(first_image, second_image, predict_t=False)
                         unormalized_t, t, _ = self.forward(first_image, second_image, predict_t=True)
 
-                        loss_R = self.L2_loss(R, label[0])
-                        avg_loss_R += loss_R.detach()
+                        pose = torch.cat((R, t.view(-1, 3, 1)), dim=-1)
+                        unormalized_pose = torch.cat((unormalized_R, unormalized_t.view(-1, 3, 1)), dim=-1)
 
-                        loss_t = self.L2_loss_t(t, label[1])
-                        avg_loss_t += loss_t.detach()   
+                        unormalized_output, output = pose_to_F(unormalized_pose, pose, K)
 
-                        self.optimizer.zero_grad()
-                        loss_R.backward()
-                        self.optimizer.step()                     
-
-                        self.optimizer_t.zero_grad()
-                        loss_t.backward()
-                        self.optimizer_t.step()
                     except Exception as e:
                         print_and_write(f'2 {e}')
                 else:
                     unormalized_output, output, penalty = self.forward(first_image, second_image)
-                    try:
-                        # Compute train mean epipolar constraint error
-                        avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                            first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch, file_num=file_num)
-                        epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
-                        epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
-                        epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
 
-                        file_num += 1
-                    except Exception as e:
-                        print_and_write(f'5 {e}')
+                # Compute train mean epipolar constraint error
+                avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
+                    first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch, file_num=file_num)
+                epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
+                epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
+                epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
 
-                    try:
-                        # Compute loss
-                        l2_loss = self.L2_loss(output, label)
-                        loss = l2_loss + self.penalty_coeff*penalty
-                        avg_loss = avg_loss + loss.detach()
-                    except Exception as e:
-                        print_and_write(f'3 {e}')
+                file_num += 1
 
-                    try:
-                        # Compute Backward pass and gradients
-                        self.optimizer.zero_grad()
-                        loss.backward()
-                        self.optimizer.step()
-                    except Exception as e:
-                        print_and_write(f'4 {e}')
-                    try:
-                        # Extend lists with batch statistics
-                        labels = torch.cat((labels, label.detach()), dim=0)
-                        outputs = torch.cat((outputs, output.detach()), dim=0)
-                    except Exception as e:
-                        print_and_write(f'6 {e}')
+                if self.predict_pose:
+                    loss_R = self.L2_loss(R, label[0])
+                    avg_loss_R += loss_R.detach()
+
+                    loss_t = self.L2_loss_t(t, label[1])
+                    avg_loss_t += loss_t.detach()   
+
+                    self.optimizer.zero_grad()
+                    loss_R.backward()
+                    self.optimizer.step()                     
+
+                    self.optimizer_t.zero_grad()
+                    loss_t.backward()
+                    self.optimizer_t.step()
+                else:
+                    # Compute loss
+                    l2_loss = self.L2_loss(output, label)
+                    loss = l2_loss + self.penalty_coeff*penalty
+                    avg_loss = avg_loss + loss.detach()
+
+
+                    # Compute Backward pass and gradients
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    self.optimizer.step()
+
+                # Extend lists with batch statistics
+                labels = torch.cat((labels, label.detach()), dim=0)
+                outputs = torch.cat((outputs, output.detach()), dim=0)
+
 
             try:
                 # Calculate and store mean absolute error for the epoch
@@ -250,10 +249,10 @@ class FMatrixRegressor(nn.Module):
             val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized, epoch_penalty, val_avg_loss = 0, 0, 0, 0, 0
 
             with torch.no_grad():
-                for val_first_image, val_second_image, val_label, val_unormalized_label in val_loader:
+                for val_first_image, val_second_image, val_label, val_unormalized_label, val_K in val_loader:
                     try:
-                        val_first_image, val_second_image, val_label, val_unormalized_label = val_first_image.to(
-                            device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device)
+                        val_first_image, val_second_image, val_label, val_unormalized_label, val_k = val_first_image.to(
+                            device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device), val_K.to(device)
                         
                         unormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
                         epoch_penalty = epoch_penalty + penalty
