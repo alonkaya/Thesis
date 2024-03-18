@@ -244,47 +244,47 @@ class FMatrixRegressor(nn.Module):
                 print_and_write(f'7 {e}')
 
             # Validation
-            self.eval()
-            val_labels, val_outputs = torch.tensor([]).to(device), torch.tensor([]).to(device)
-            val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized, epoch_penalty, val_avg_loss = 0, 0, 0, 0, 0
+            # self.eval()
+            # val_labels, val_outputs = torch.tensor([]).to(device), torch.tensor([]).to(device)
+            # val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized, epoch_penalty, val_avg_loss = 0, 0, 0, 0, 0
 
-            with torch.no_grad():
-                for val_first_image, val_second_image, val_label, val_unormalized_label, val_K in val_loader:
-                    try:
-                        val_first_image, val_second_image, val_label, val_unormalized_label, val_k = val_first_image.to(
-                            device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device), val_K.to(device)
+            # with torch.no_grad():
+            #     for val_first_image, val_second_image, val_label, val_unormalized_label, val_K in val_loader:
+            #         try:
+            #             val_first_image, val_second_image, val_label, val_unormalized_label, val_k = val_first_image.to(
+            #                 device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device), val_K.to(device)
                         
-                        unormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
-                        epoch_penalty = epoch_penalty + penalty
+            #             unormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
+            #             epoch_penalty = epoch_penalty + penalty
 
-                        # Compute val mean epipolar constraint error
-                        val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                            val_first_image, val_second_image, val_unormalized_label, val_output, unormalized_val_output, epoch=-1, file_num=file_num)
-                        val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
-                        val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
-                        val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
+            #             # Compute val mean epipolar constraint error
+            #             val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
+            #                 val_first_image, val_second_image, val_unormalized_label, val_output, unormalized_val_output, epoch=-1, file_num=file_num)
+            #             val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
+            #             val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
+            #             val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
 
-                        val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
+            #             val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
 
-                        val_outputs = torch.cat((val_outputs, val_output), dim=0)
-                        val_labels = torch.cat((val_labels, val_label), dim=0)
-                    except Exception as e:
-                        print_and_write(f'length: {len(val_labels)}, val exception: {e}')
-                try:
-                    # Calculate and store mean absolute error for the epoch
-                    mae = torch.mean(torch.abs(val_labels - val_outputs))
+            #             val_outputs = torch.cat((val_outputs, val_output), dim=0)
+            #             val_labels = torch.cat((val_labels, val_label), dim=0)
+            #         except Exception as e:
+            #             print_and_write(f'length: {len(val_labels)}, val exception: {e}')
+            #     try:
+            #         # Calculate and store mean absolute error for the epoch
+            #         mae = torch.mean(torch.abs(val_labels - val_outputs))
 
-                    val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss = (
-                        v / len(val_loader) for v in (val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss))
+            #         val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss = (
+            #             v / len(val_loader) for v in (val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss))
 
-                    val_mae.append(mae.cpu().item())
-                    val_ec_err_truth.append(val_epoch_avg_ec_err_truth.cpu().item())
-                    val_ec_err_pred.append(val_epoch_avg_ec_err_pred.cpu().item())
-                    val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized.cpu().item())
-                    all_val_loss.append(val_avg_loss.cpu().item())
-                    all_penalty.append(epoch_penalty.cpu().item())
-                except Exception as e:
-                    print_and_write(f'8 {e}')
+            #         val_mae.append(mae.cpu().item())
+            #         val_ec_err_truth.append(val_epoch_avg_ec_err_truth.cpu().item())
+            #         val_ec_err_pred.append(val_epoch_avg_ec_err_pred.cpu().item())
+            #         val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized.cpu().item())
+            #         all_val_loss.append(val_avg_loss.cpu().item())
+            #         all_penalty.append(epoch_penalty.cpu().item())
+            #     except Exception as e:
+            #         print_and_write(f'8 {e}')
                 
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
             Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
