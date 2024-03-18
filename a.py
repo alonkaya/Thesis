@@ -46,7 +46,6 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             second_image = self.transform(original_second_image).to(device)
         except Exception as e:
             print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-        
         try:
             unormalized_F = get_F(self.poses, idx, self.k)
         except Exception as e:
@@ -129,8 +128,8 @@ transform = transforms.Compose([
     transforms.CenterCrop(224),
     transforms.Grayscale(num_output_channels=3),
     transforms.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
-    transforms.Normalize(mean=norm_mean,  # Normalize each channel
-                         std=norm_std),
+    # transforms.Normalize(mean=norm_mean,  # Normalize each channel
+    #                      std=norm_std),
 ])    
 
 def data_with_one_sequence(batch_size, CustomDataset_type):
