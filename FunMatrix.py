@@ -141,7 +141,7 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
         avg_ec_err_pred = avg_ec_err_pred + ec_err_pred
         avg_ec_err_pred_unormalized = avg_ec_err_pred_unormalized + ec_err_pred_unormalized
 
-        if epoch == 999:
+        if epoch == 500:
             epipolar = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
             epipolar.visualize(sqResultDir='preicted_epipole_lines_realestate', file_num=file_num)
 
