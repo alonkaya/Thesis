@@ -162,8 +162,8 @@ class FMatrixRegressor(nn.Module):
 
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
-        all_train_loss, all_val_loss, train_mae, val_mae, ec_err_truth, ec_err_pred, ec_err_pred_unoramlized, val_ec_err_truth, \
-            val_ec_err_pred, val_ec_err_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], []
+        all_train_loss, all_val_loss, train_mae, train_mae_t, val_mae, ec_err_truth, ec_err_pred, ec_err_pred_unoramlized, val_ec_err_truth, \
+            val_ec_err_pred, val_ec_err_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], [], []
 
         for epoch in range(num_epochs):
             self.train()
@@ -180,8 +180,10 @@ class FMatrixRegressor(nn.Module):
 
                         pose = torch.cat((R, t.view(-1, 3, 1)), dim=-1)
                         unormalized_pose = torch.cat((unormalized_R, unormalized_t.view(-1, 3, 1)), dim=-1)
-
                         unormalized_output, output = pose_to_F(unormalized_pose, pose, K)
+
+                        unormalized_pose_gt = torch.cat((label[0], label[1].view(-1, 3, 1)), dim=-1)
+                        unormalized_label, _ = pose_to_F(unormalized_pose_gt, unormalized_pose_gt, K)
 
                     except Exception as e:
                         print_and_write(f'2 {e}')
@@ -198,10 +200,10 @@ class FMatrixRegressor(nn.Module):
                 file_num += 1
 
                 if self.predict_pose:
-                    loss_R = self.L2_loss(R, label[0])
+                    loss_R = self.L2_loss(R, label[:, 0])
                     avg_loss_R += loss_R.detach()
 
-                    loss_t = self.L2_loss_t(t, label[1])
+                    loss_t = self.L2_loss_t(t, label[:, 1])
                     avg_loss_t += loss_t.detach()   
 
                     self.optimizer.zero_grad()
@@ -217,7 +219,6 @@ class FMatrixRegressor(nn.Module):
                     loss = l2_loss + self.penalty_coeff*penalty
                     avg_loss = avg_loss + loss.detach()
 
-
                     # Compute Backward pass and gradients
                     self.optimizer.zero_grad()
                     loss.backward()
@@ -230,12 +231,20 @@ class FMatrixRegressor(nn.Module):
 
             try:
                 # Calculate and store mean absolute error for the epoch
-                mae = torch.mean(torch.abs(labels - outputs))
+                if self.predict_pose:
+                    mae_R = torch.mean(torch.abs(labels[:, 0] - R))
+                    mae_t = torch.mean(torch.abs(labels[:, 1] - t))
+                else:
+                    mae = torch.mean(torch.abs(labels - outputs))
 
                 epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = (
                     v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss))
-
-                train_mae.append(mae.cpu().item())
+                
+                if self.predict_pose:
+                    train_mae_t.append(mae_t.cpu().item())
+                    train_mae.append(mae_R.cpu().item())
+                else:
+                    train_mae.append(mae.cpu().item())
                 ec_err_truth.append(epoch_avg_ec_err_truth.cpu().item())
                 ec_err_pred.append(epoch_avg_ec_err_pred.cpu().item())
                 ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized.cpu().item())
@@ -285,13 +294,20 @@ class FMatrixRegressor(nn.Module):
             #         all_penalty.append(epoch_penalty.cpu().item())
             #     except Exception as e:
             #         print_and_write(f'8 {e}')
-                
-            epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
-            Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
-            Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]} Val epipolar error pred unormalized: {val_ec_err_pred_unormalized[-1]}
-            Train epipolar error pred: {ec_err_pred[-1]} Val epipolar error pred: {val_ec_err_pred[-1]} 
-            penalty: {all_penalty[-1]}\n"""
-            print_and_write(epoch_output)
+            if self.predict_pose:
+                epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
+                Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]} Val mae: {val_mae[-1]} 
+                Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]} Val epipolar error pred unormalized: {val_ec_err_pred_unormalized[-1]}
+                Train epipolar error pred: {ec_err_pred[-1]} Val epipolar error pred: {val_ec_err_pred[-1]} 
+                penalty: {all_penalty[-1]}\n"""
+                print_and_write(epoch_output)
+            else:
+                epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
+                Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
+                Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]} Val epipolar error pred unormalized: {val_ec_err_pred_unormalized[-1]}
+                Train epipolar error pred: {ec_err_pred[-1]} Val epipolar error pred: {val_ec_err_pred[-1]} 
+                penalty: {all_penalty[-1]}\n"""
+                print_and_write(epoch_output)
 
             # If the model is not learning or outputs nan, stop training
             # if not_learning(all_train_loss, all_val_loss) or check_nan(all_train_loss[-1], all_val_loss[-1], train_mae[-1], val_mae[-1], ec_err_pred_unoramlized[-1], val_ec_err_pred_unormalized[-1], ec_err_pred[-1],all_penalty[-1]):
@@ -308,10 +324,17 @@ class FMatrixRegressor(nn.Module):
                             use_reconstruction=self.use_reconstruction)
             
             plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
-                            title="MAE", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                            title="MAE" if not self.predict_pose else "MAE R", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                             lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
                             model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)
+            
+            if self.predict_pose:
+                plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae_t, y2=val_mae, 
+                                title="MAE t", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                                lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                                model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                                use_reconstruction=self.use_reconstruction)
             
             plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
                             title="Epipolar error unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
