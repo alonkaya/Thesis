@@ -146,12 +146,12 @@ class FMatrixRegressor(nn.Module):
         
         try:
             # Train MLP on embedding vectors            
-            unormalized_output = self.mlp(embeddings).view(-1,3,3).to(device) if not predict_t else self.t_mlp(embeddings).view(-1,3).to(device)
+            unormalized_output = self.mlp(embeddings).view(-1,3,3).to(device) if not predict_t else self.t_mlp(embeddings).view(-1,3,1).to(device)
         except Exception as e:
             print_and_write(f'mlp: {e}')
 
         try:            
-            output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3) if not predict_t else norm_layer(unormalized_output.view(-1, 3)).view(-1,3)
+            output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3) if not predict_t else norm_layer(unormalized_output.view(-1, 3)).view(-1,3,1)
 
             penalty = last_sing_value_penalty(unormalized_output).to(device) if not self.predict_pose else 0
         except Exception as e:
@@ -182,8 +182,7 @@ class FMatrixRegressor(nn.Module):
                         unormalized_pose = torch.cat((unormalized_R, unormalized_t.view(-1, 3, 1)), dim=-1)
                         unormalized_output, output = pose_to_F(unormalized_pose, pose, K)
 
-                        unormalized_pose_gt = torch.cat((label[0], label[1].view(-1, 3, 1)), dim=-1)
-                        unormalized_label, _ = pose_to_F(unormalized_pose_gt, unormalized_pose_gt, K)
+                        unormalized_label, _ = pose_to_F(unormalized_pose, label, K)
 
                     except Exception as e:
                         print_and_write(f'2 {e}')
@@ -200,10 +199,10 @@ class FMatrixRegressor(nn.Module):
                 file_num += 1
 
                 if self.predict_pose:
-                    loss_R = self.L2_loss(R, label[:, 0])
+                    loss_R = self.L2_loss(R, label[:, :, :3])
                     avg_loss_R += loss_R.detach()
 
-                    loss_t = self.L2_loss_t(t, label[:, 1])
+                    loss_t = self.L2_loss_t(t, label[:, :, 3])
                     avg_loss_t += loss_t.detach()   
 
                     self.optimizer.zero_grad()
@@ -232,8 +231,8 @@ class FMatrixRegressor(nn.Module):
             try:
                 # Calculate and store mean absolute error for the epoch
                 if self.predict_pose:
-                    mae_R = torch.mean(torch.abs(labels[:, 0] - R))
-                    mae_t = torch.mean(torch.abs(labels[:, 1] - t))
+                    mae_R = torch.mean(torch.abs(labels[:, :, :3] - R))
+                    mae_t = torch.mean(torch.abs(labels[:, :, 3] - t))
                 else:
                     mae = torch.mean(torch.abs(labels - outputs))
 

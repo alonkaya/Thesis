@@ -49,7 +49,7 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
         try:
             if PREDICT_POSE:
                 unormalized_R, unormalized_t = compute_relative_transformations(self.poses[idx],self. poses[idx+JUMP_FRAMES])
-                unormalized_label = (unormalized_R, unormalized_t)
+                unormalized_label = torch.cat((unormalized_R, unormalized_t.view(3,1)), dim=-1)
             else:
                 unormalized_label = get_F(self.poses, idx, self.k)
         except Exception as e:
@@ -58,7 +58,7 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             if PREDICT_POSE:
                 R, t = norm_layer(unormalized_R.view(-1, 9)).view(3,3), norm_layer(unormalized_t.view(-1, 3)).view(3)
 
-                label = (R, t)
+                label = torch.cat((R, t.view(3,1)), dim=-1)
             else:               
                 label = norm_layer(unormalized_label.view(-1, 9)).view(3,3)
         except Exception as e:
