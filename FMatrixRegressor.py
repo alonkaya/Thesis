@@ -178,8 +178,8 @@ class FMatrixRegressor(nn.Module):
 
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
-        all_train_loss, all_val_loss, train_mae, train_mae_t, val_mae, ec_err_truth, ec_err_pred, ec_err_pred_unoramlized, val_ec_err_truth, \
-            val_ec_err_pred, val_ec_err_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], [], []
+        all_train_loss, all_train_Loss_R, all_train_Loss_t, all_val_loss, train_mae, train_mae_t, val_mae, ec_err_truth, ec_err_pred, ec_err_pred_unoramlized, val_ec_err_truth, \
+            val_ec_err_pred, val_ec_err_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], [], [], [], []
 
         for epoch in range(num_epochs):
             self.train()
@@ -243,27 +243,33 @@ class FMatrixRegressor(nn.Module):
                 labels = torch.cat((labels, label.detach()), dim=0)
                 outputs = torch.cat((outputs, output.detach()), dim=0)
 
-
             try:
                 # Calculate and store mean absolute error for the epoch
                 if self.predict_pose:
                     mae_R = torch.mean(torch.abs(labels[:, :, :3] - R))
                     mae_t = torch.mean(torch.abs(label[:, :, 3].view(-1,3,1) - t))
+
+                    epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss_R, avg_loss_t = (
+                        v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss_R, avg_loss_t))
+
+                    train_mae_t.append(mae_t.cpu().item())
+                    train_mae.append(mae_R.cpu().item())
+
+                    all_train_Loss_R.append(avg_loss_R.cpu().item())
+                    all_train_Loss_t.append(avg_loss_t.cpu().item())
                 else:
                     mae = torch.mean(torch.abs(labels - outputs))
 
-                epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = (
-                    v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss))
-                
-                if self.predict_pose:
-                    train_mae_t.append(mae_t.cpu().item())
-                    train_mae.append(mae_R.cpu().item())
-                else:
+                    epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = (
+                        v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss))
+
                     train_mae.append(mae.cpu().item())
+                    all_train_loss.append(avg_loss.cpu().item())
+
                 ec_err_truth.append(epoch_avg_ec_err_truth.cpu().item())
                 ec_err_pred.append(epoch_avg_ec_err_pred.cpu().item())
                 ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized.cpu().item())
-                all_train_loss.append(avg_loss.cpu().item())
+                
             except Exception as e:
                 print_and_write(f'7 {e}')
 
