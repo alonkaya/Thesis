@@ -150,7 +150,8 @@ def init_main():
         
     os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
     os.environ['TORCH_USE_CUDA_DSA'] = '1'
-
+    torch.autograd.set_detect_anomaly(True)
+    
     # Set up custom warning handling
     warnings.filterwarnings('always', category=RuntimeWarning)
 
