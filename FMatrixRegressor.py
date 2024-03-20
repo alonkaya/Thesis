@@ -190,18 +190,18 @@ class FMatrixRegressor(nn.Module):
                 first_image, second_image, label, unormalized_label, K = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device), K.to(device)
                 # Forward pass
                 if self.predict_pose:
-                    # try:
-                    unormalized_R, R, _ = self.forward(first_image, second_image, predict_t=False)
-                    unormalized_t, t, _ = self.forward(first_image, second_image, predict_t=True)
+                    try:
+                        unormalized_R, R, _ = self.forward(first_image, second_image, predict_t=False)
+                        unormalized_t, t, _ = self.forward(first_image, second_image, predict_t=True)
 
-                    pose = torch.cat((R.detach(), t.detach().view(-1, 3, 1)), dim=-1)
-                    unormalized_pose = torch.cat((unormalized_R.detach(), unormalized_t.detach().view(-1, 3, 1)), dim=-1)
-                    unormalized_output, output = pose_to_F(unormalized_pose, pose, K[0])
+                        # This is for the epipolar test error computation:
+                        pose = torch.cat((R.detach(), t.detach().view(-1, 3, 1)), dim=-1)
+                        unormalized_pose = torch.cat((unormalized_R.detach(), unormalized_t.detach().view(-1, 3, 1)), dim=-1)
+                        unormalized_output, output = pose_to_F(unormalized_pose, pose, K[0])
+                        unormalized_label, _ = pose_to_F(unormalized_label, label, K[0])
 
-                    unormalized_label, _ = pose_to_F(unormalized_pose, label, K[0])
-
-                    # except Exception as e:
-                    #     print_and_write(f'2 {e}')
+                    except Exception as e:
+                        print_and_write(f'2 {e}')
                 else:
                     unormalized_output, output, penalty = self.forward(first_image, second_image)
 
@@ -256,8 +256,8 @@ class FMatrixRegressor(nn.Module):
                     epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss_R, avg_loss_t = (
                         v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss_R, avg_loss_t))
 
-                    train_mae_t.append(mae_t.cpu().item())
                     train_mae.append(mae_R.cpu().item())
+                    train_mae_t.append(mae_t.cpu().item())
 
                     all_train_loss.append(avg_loss_R.cpu().item())
                     all_train_loss_t.append(avg_loss_t.cpu().item())
