@@ -179,7 +179,7 @@ class FMatrixRegressor(nn.Module):
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
         all_train_loss, all_train_loss_t, all_val_loss, train_mae, train_mae_t, val_mae, ec_err_truth, ec_err_pred, ec_err_pred_unoramlized, val_ec_err_truth, \
-            val_ec_err_pred, val_ec_err_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], [], [], [], []
+            val_ec_err_pred, val_ec_err_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], [], [], []
 
         for epoch in range(num_epochs):
             self.train()
