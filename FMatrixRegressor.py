@@ -174,18 +174,18 @@ class FMatrixRegressor(nn.Module):
                 first_image, second_image, label, unormalized_label, K = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device), K.to(device)
                 # Forward pass
                 if self.predict_pose:
-                    try:
-                        unormalized_R, R, _ = self.forward(first_image, second_image, predict_t=False)
-                        unormalized_t, t, _ = self.forward(first_image, second_image, predict_t=True)
+                    # try:
+                    unormalized_R, R, _ = self.forward(first_image, second_image, predict_t=False)
+                    unormalized_t, t, _ = self.forward(first_image, second_image, predict_t=True)
 
-                        pose = torch.cat((R, t.view(-1, 3, 1)), dim=-1)
-                        unormalized_pose = torch.cat((unormalized_R, unormalized_t.view(-1, 3, 1)), dim=-1)
-                        unormalized_output, output = pose_to_F(unormalized_pose, pose, K)
+                    pose = torch.cat((R, t.view(-1, 3, 1)), dim=-1)
+                    unormalized_pose = torch.cat((unormalized_R, unormalized_t.view(-1, 3, 1)), dim=-1)
+                    unormalized_output, output = pose_to_F(unormalized_pose, pose, K)
 
-                        unormalized_label, _ = pose_to_F(unormalized_pose, label, K)
+                    unormalized_label, _ = pose_to_F(unormalized_pose, label, K)
 
-                    except Exception as e:
-                        print_and_write(f'2 {e}')
+                    # except Exception as e:
+                    #     print_and_write(f'2 {e}')
                 else:
                     unormalized_output, output, penalty = self.forward(first_image, second_image)
 
