@@ -86,22 +86,25 @@ class FMatrixRegressor(nn.Module):
 
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
-        self.t_mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
-                       3, batchnorm_and_dropout).to(device)
-
         params = [
             {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
             {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
         ]
-        params_t = [
-            {'params': self.pretrained_model_t.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
-            {'params': self.t_mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
-        ]        
+
+        if self.predict_pose:
+            self.t_mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
+                        3, batchnorm_and_dropout).to(device)
+            params_t = [
+                    {'params': self.pretrained_model_t.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
+                    {'params': self.t_mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
+                ]  
+        
         self.L2_loss = nn.MSELoss().to(device)
         self.optimizer = optim.Adam(params, lr=lr_vit)
 
-        self.L2_loss_t = nn.MSELoss().to(device)
-        self.optimizer_t = optim.Adam(params_t, lr=lr_mlp)
+        if self.predict_pose:
+            self.L2_loss_t = nn.MSELoss().to(device)
+            self.optimizer_t = optim.Adam(params_t, lr=lr_mlp)
 
     def get_embeddings(self, x1, x2, predict_t=False):
         if self.clip:  
@@ -183,7 +186,7 @@ class FMatrixRegressor(nn.Module):
 
         for epoch in range(num_epochs):
             self.train()
-            labels, outputs = torch.tensor([]).to(device), torch.tensor([]).to(device)
+            labels, outputs, Rs, ts = torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device)
             epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, avg_loss_R, avg_loss_t, file_num = 0, 0, 0, 0, 0, 0, 0
             
             for first_image, second_image, label, unormalized_label, K in train_loader:
@@ -195,10 +198,11 @@ class FMatrixRegressor(nn.Module):
                         unormalized_t, t, _ = self.forward(first_image, second_image, predict_t=True)
 
                         # This is for the epipolar test error computation:
-                        pose = torch.cat((R.detach(), t.detach().view(-1, 3, 1)), dim=-1)
                         unormalized_pose = torch.cat((unormalized_R.detach(), unormalized_t.detach().view(-1, 3, 1)), dim=-1)
-                        unormalized_output, output = pose_to_F(unormalized_pose, pose, K[0])
-                        unormalized_label, _ = pose_to_F(unormalized_label, label, K[0])
+
+                        unormalized_output = pose_to_F(unormalized_pose, K[0])
+                        unormalized_label = pose_to_F(unormalized_label, K[0])
+                        output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3)
 
                     except Exception as e:
                         print_and_write(f'2 {e}')
@@ -231,6 +235,8 @@ class FMatrixRegressor(nn.Module):
 
                     # Extend lists with batch statistics
                     labels = torch.cat((labels, label.detach()), dim=0)
+                    Rs = torch.cat((Rs, R.detach()), dim=0)
+                    ts = torch.cat((ts, t.detach()), dim=0)
 
                 else:
                     # Compute loss
@@ -245,20 +251,19 @@ class FMatrixRegressor(nn.Module):
 
                     # Extend lists with batch statistics
                     labels = torch.cat((labels, label.detach()), dim=0)
-                    outputs = torch.cat((outputs, pose.detach()), dim=0)
+                    outputs = torch.cat((outputs, output.detach()), dim=0)
 
             try:
                 # Calculate and store mean absolute error for the epoch
                 if self.predict_pose:
-                    mae_R = torch.mean(torch.abs(labels[:, :, :3] - R))
-                    mae_t = torch.mean(torch.abs(label[:, :, 3].view(-1,3,1) - t))
+                    mae_R = torch.mean(torch.abs(labels[:, :, :3] - Rs))
+                    mae_t = torch.mean(torch.abs(label[:, :, 3].view(-1,3,1) - ts))
 
                     epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss_R, avg_loss_t = (
                         v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss_R, avg_loss_t))
 
                     train_mae.append(mae_R.cpu().item())
                     train_mae_t.append(mae_t.cpu().item())
-
                     all_train_loss.append(avg_loss_R.cpu().item())
                     all_train_loss_t.append(avg_loss_t.cpu().item())
                 else:

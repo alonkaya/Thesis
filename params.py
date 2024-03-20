@@ -1,6 +1,6 @@
 import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-torch.cuda.set_device(0)
+if device == "cuda": torch.cuda.set_device(0)
 
 learning_rates_vit = [2e-5]
 learning_rates_mlp = [2e-5]
@@ -31,7 +31,7 @@ ENFORCE_RANK_2 = False
 USE_RECONSTRUCTION_LAYER = False
 PREDICT_POSE = True
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
-NUM_EPOCHS = 1000
+NUM_EPOCHS = 700
 MODEL = CLIP_MODEL_NAME
 AUGMENTATION = False
 FREEZE_PRETRAINED_MODEL=False

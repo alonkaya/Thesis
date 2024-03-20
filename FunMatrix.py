@@ -108,25 +108,18 @@ def get_F(poses, idx, K):
 
     return F
 
-def pose_to_F(unormalized_pose, pose, unormalized_k):
+def pose_to_F(pose, k):
     # compute unormalized_F and F from unormalized_pose and pose
-    k = norm_layer(unormalized_k.view(-1, 9)).view(3,3)
 
     # TODO: change this if batch size > 1 !! they are originally (-1,3,4)
     pose = pose.view(3, 4)
-    unormalized_pose = unormalized_pose.view(3, 4)
 
     R = pose[:, :3]
     t = pose[:, 3]
     E = compute_essential(R, t)
     F = compute_fundamental(E, k, k)
 
-    unormalized_R = unormalized_pose[:, :3]
-    unormalized_t = unormalized_pose[:, 3]
-    unormalized_E = compute_essential(unormalized_R, unormalized_t)
-    unormalized_F = compute_fundamental(unormalized_E, unormalized_k, unormalized_k)
-    
-    return unormalized_F.view(-1,3,3), F.view(-1,3,3)
+    return F.view(-1,3,3)
 
 def last_sing_value_penalty(output):
     # Compute the SVD of the output
@@ -167,7 +160,7 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
             avg_ec_err_pred = avg_ec_err_pred + ec_err_pred
             avg_ec_err_pred_unormalized = avg_ec_err_pred_unormalized + ec_err_pred_unormalized
 
-            if epoch == 999:
+            if epoch == 600:
                 epipolar = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
                 epipolar.visualize(sqResultDir='preicted_epipole_lines_realestate_from_pose', file_num=file_num)
 
@@ -316,6 +309,7 @@ class EpipolarGeometry:
             line_2 = np.dot(self.F, pt1)
 
             # Get ditance from point to line error
+            # TODO: should this be pt2*line1 or pt2*line2?
             avg_distance_err_img1 += self.get_point_2_line_error(pt2, line_1)
             avg_distance_err_img2 += self.get_point_2_line_error(pt1, line_2)
             epip_test_err += self.epipolar_test_single_point(pt1, pt2)
