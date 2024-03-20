@@ -50,6 +50,13 @@ class FMatrixRegressor(nn.Module):
                 pretrained_model_name)
             self.pretrained_model = CLIPVisionModel.from_pretrained(
                 pretrained_model_name).to(device)
+            
+            if self.predict_pose:
+                self.clip_image_processor_t = CLIPImageProcessor.from_pretrained(
+                    pretrained_model_name)
+                self.pretrained_model_t = CLIPVisionModel.from_pretrained(
+                    pretrained_model_name).to(device)
+                
 
         else:
             self.clip = False
@@ -59,9 +66,9 @@ class FMatrixRegressor(nn.Module):
                 pretrained_model_name).to(device)
 
         # Freeze the parameters of the pretrained model if specified
-        if freeze_pretrained_model:
-            for param in self.pretrained_model.parameters():
-                param.requires_grad = False
+        # if freeze_pretrained_model:
+        #     for param in self.pretrained_model.parameters():
+        #         param.requires_grad = False
         # print(len(self.pretrained_model.encoder.layer))
         # for layer in self.pretrained_model.encoder.layer[len(self.pretrained_model.encoder.layer)-unfrozen_layers:]:
         #     for param in layer.parameters():
@@ -87,7 +94,7 @@ class FMatrixRegressor(nn.Module):
             {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
         ]
         params_t = [
-            {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.pretrained_model_t.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
             {'params': self.t_mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
         ]        
         self.L2_loss = nn.MSELoss().to(device)
@@ -96,16 +103,25 @@ class FMatrixRegressor(nn.Module):
         self.L2_loss_t = nn.MSELoss().to(device)
         self.optimizer_t = optim.Adam(params_t, lr=lr_mlp)
 
-    def get_embeddings(self, x1, x2):
+    def get_embeddings(self, x1, x2, predict_t=False):
         if self.clip:  
             try:
-                x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False,
+                if predict_t:
+                    x1 = self.clip_image_processor_t(images=x1, return_tensors="pt", do_resize=False, do_normalize=False,
+                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+                    x2 = self.clip_image_processor_t(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
                                             do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-                x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
+                else:
+                    x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False,
+                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+                    x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
                                             do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-                
-                x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)
-                x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)                
+                if predict_t:
+                    x1_embeddings = self.pretrained_model_t(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)
+                    x2_embeddings = self.pretrained_model_t(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)                
+                else:
+                    x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)
+                    x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)                
             except Exception as e:
                 print_and_write(f'clip: {e}')
         else:
@@ -142,7 +158,7 @@ class FMatrixRegressor(nn.Module):
         # output = net.foward(x1, x2).to(device)
         # return output
 
-        embeddings = self.get_embeddings(x1, x2)
+        embeddings = self.get_embeddings(x1, x2, predict_t=predict_t)
         
         try:
             # Train MLP on embedding vectors            
@@ -199,21 +215,19 @@ class FMatrixRegressor(nn.Module):
                 file_num += 1
 
                 if self.predict_pose:
-                    loss_t = self.L2_loss_t(t, label[:, :, 3].view(-1,3,1))
-                    avg_loss_t += loss_t.detach()   
-
                     loss_R = self.L2_loss(R, label[:, :, :3])
                     avg_loss_R += loss_R.detach()
 
-                    self.optimizer_t.zero_grad()
-                    loss_t.backward()
-                    self.optimizer_t.step()
+                    loss_t = self.L2_loss_t(t, label[:, :, 3].view(-1,3,1))
+                    avg_loss_t += loss_t.detach()   
 
                     self.optimizer.zero_grad()
                     loss_R.backward()
                     self.optimizer.step()                     
 
-
+                    self.optimizer_t.zero_grad()
+                    loss_t.backward()
+                    self.optimizer_t.step()
                 else:
                     # Compute loss
                     l2_loss = self.L2_loss(output, label)
