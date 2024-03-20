@@ -180,6 +180,7 @@ class FMatrixRegressor(nn.Module):
 
                     pose = torch.cat((R, t.view(-1, 3, 1)), dim=-1)
                     unormalized_pose = torch.cat((unormalized_R, unormalized_t.view(-1, 3, 1)), dim=-1)
+                    print(unormalized_pose.shape, pose.shape, K.shape)
                     unormalized_output, output = pose_to_F(unormalized_pose, pose, K)
 
                     unormalized_label, _ = pose_to_F(unormalized_pose, label, K)
