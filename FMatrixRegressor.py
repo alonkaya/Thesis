@@ -320,9 +320,9 @@ class FMatrixRegressor(nn.Module):
             #     except Exception as e:
             #         print_and_write(f'8 {e}')
             if self.predict_pose:
-                epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t} 
+                epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t[-1]}
                 Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]}
-                Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]} 
+                Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]}
                 Train epipolar error pred: {ec_err_pred[-1]}\n"""
                 print_and_write(epoch_output)
             else:
