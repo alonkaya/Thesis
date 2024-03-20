@@ -178,7 +178,7 @@ class FMatrixRegressor(nn.Module):
                     unormalized_R, R, _ = self.forward(first_image, second_image, predict_t=False)
                     unormalized_t, t, _ = self.forward(first_image, second_image, predict_t=True)
 
-                    pose = torch.cat((R, t.view(-1, 3, 1)), dim=-1)
+                    pose = torch.cat((R, t), dim=-1)
                     unormalized_pose = torch.cat((unormalized_R, unormalized_t.view(-1, 3, 1)), dim=-1)
                     unormalized_output, output = pose_to_F(unormalized_pose, pose, K[0])
 
@@ -202,7 +202,7 @@ class FMatrixRegressor(nn.Module):
                     loss_R = self.L2_loss(R, label[:, :, :3])
                     avg_loss_R += loss_R.detach()
 
-                    loss_t = self.L2_loss_t(t, label[:, :, 3])
+                    loss_t = self.L2_loss_t(t, label[:, :, 3].view(-1,3,1))
                     avg_loss_t += loss_t.detach()   
 
                     self.optimizer.zero_grad()
@@ -232,7 +232,7 @@ class FMatrixRegressor(nn.Module):
                 # Calculate and store mean absolute error for the epoch
                 if self.predict_pose:
                     mae_R = torch.mean(torch.abs(labels[:, :, :3] - R))
-                    mae_t = torch.mean(torch.abs(labels[:, :, 3] - t))
+                    mae_t = torch.mean(torch.abs(label[:, :, 3].view(-1,3,1) - t))
                 else:
                     mae = torch.mean(torch.abs(labels - outputs))
 
