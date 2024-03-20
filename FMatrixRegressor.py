@@ -178,7 +178,7 @@ class FMatrixRegressor(nn.Module):
 
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
-        all_train_loss, all_train_Loss_R, all_train_Loss_t, all_val_loss, train_mae, train_mae_t, val_mae, ec_err_truth, ec_err_pred, ec_err_pred_unoramlized, val_ec_err_truth, \
+        all_train_loss, all_train_loss_t, all_val_loss, train_mae, train_mae_t, val_mae, ec_err_truth, ec_err_pred, ec_err_pred_unoramlized, val_ec_err_truth, \
             val_ec_err_pred, val_ec_err_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], [], [], [], []
 
         for epoch in range(num_epochs):
@@ -194,8 +194,8 @@ class FMatrixRegressor(nn.Module):
                     unormalized_R, R, _ = self.forward(first_image, second_image, predict_t=False)
                     unormalized_t, t, _ = self.forward(first_image, second_image, predict_t=True)
 
-                    pose = torch.cat((R, t), dim=-1)
-                    unormalized_pose = torch.cat((unormalized_R, unormalized_t.view(-1, 3, 1)), dim=-1)
+                    pose = torch.cat((R.detach(), t.detach().view(-1, 3, 1)), dim=-1)
+                    unormalized_pose = torch.cat((unormalized_R.detach(), unormalized_t.detach().view(-1, 3, 1)), dim=-1)
                     unormalized_output, output = pose_to_F(unormalized_pose, pose, K[0])
 
                     unormalized_label, _ = pose_to_F(unormalized_pose, label, K[0])
@@ -228,6 +228,10 @@ class FMatrixRegressor(nn.Module):
                     self.optimizer_t.zero_grad()
                     loss_t.backward()
                     self.optimizer_t.step()
+
+                    # Extend lists with batch statistics
+                    labels = torch.cat((labels, label.detach()), dim=0)
+
                 else:
                     # Compute loss
                     l2_loss = self.L2_loss(output, label)
@@ -239,9 +243,9 @@ class FMatrixRegressor(nn.Module):
                     loss.backward()
                     self.optimizer.step()
 
-                # Extend lists with batch statistics
-                labels = torch.cat((labels, label.detach()), dim=0)
-                outputs = torch.cat((outputs, output.detach()), dim=0)
+                    # Extend lists with batch statistics
+                    labels = torch.cat((labels, label.detach()), dim=0)
+                    outputs = torch.cat((outputs, pose.detach()), dim=0)
 
             try:
                 # Calculate and store mean absolute error for the epoch
@@ -255,8 +259,8 @@ class FMatrixRegressor(nn.Module):
                     train_mae_t.append(mae_t.cpu().item())
                     train_mae.append(mae_R.cpu().item())
 
-                    all_train_Loss_R.append(avg_loss_R.cpu().item())
-                    all_train_Loss_t.append(avg_loss_t.cpu().item())
+                    all_train_loss.append(avg_loss_R.cpu().item())
+                    all_train_loss_t.append(avg_loss_t.cpu().item())
                 else:
                     mae = torch.mean(torch.abs(labels - outputs))
 
@@ -316,7 +320,7 @@ class FMatrixRegressor(nn.Module):
             #     except Exception as e:
             #         print_and_write(f'8 {e}')
             if self.predict_pose:
-                epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} 
+                epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t} 
                 Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]}
                 Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]} 
                 Train epipolar error pred: {ec_err_pred[-1]}\n"""
@@ -338,7 +342,7 @@ class FMatrixRegressor(nn.Module):
         print_and_write(output)
         try:
             plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
-                            title="Loss", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                            title="Loss" if not self.predict_pose else "Loss R", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                             lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
                             model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)
@@ -350,11 +354,17 @@ class FMatrixRegressor(nn.Module):
                             use_reconstruction=self.use_reconstruction)
             
             if self.predict_pose:
+                plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss_t, y2=all_val_loss, 
+                                title="Loss t", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                                lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                                model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                                use_reconstruction=self.use_reconstruction)     
+                
                 plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae_t, y2=val_mae, 
                                 title="MAE t", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                                 lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
                                 model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
-                                use_reconstruction=self.use_reconstruction)
+                                use_reconstruction=self.use_reconstruction)           
             
             plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
                             title="Epipolar error unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
