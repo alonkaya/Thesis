@@ -93,7 +93,8 @@ def compute_fundamental(E, K1, K2):
 
     # Compute the Fundamental matrix
     F = torch.matmul(K2_inv_T, torch.matmul(E, K1_inv))
-
+    print(F.shape)
+    print(F)
     if torch.linalg.matrix_rank(F) != 2:
         print_and_write(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
 
