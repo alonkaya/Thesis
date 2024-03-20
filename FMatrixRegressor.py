@@ -199,11 +199,13 @@ class FMatrixRegressor(nn.Module):
                 file_num += 1
 
                 if self.predict_pose:
+                    loss_t = self.L2_loss_t(t, label[:, :, 3].view(-1,3,1))
+                    avg_loss_t += loss_t.detach()   
+                                        
                     loss_R = self.L2_loss(R, label[:, :, :3])
                     avg_loss_R += loss_R.detach()
 
-                    loss_t = self.L2_loss_t(t, label[:, :, 3].view(-1,3,1))
-                    avg_loss_t += loss_t.detach()   
+
 
                     self.optimizer.zero_grad()
                     loss_R.backward()
