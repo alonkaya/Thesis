@@ -106,12 +106,17 @@ def normalize_L2(x):
     return x / torch.linalg.norm(x, dim=1, keepdim=True)
 
 
-def norm_layer(unnormalized_x):
+def norm_layer(unnormalized_x, predict_t=False, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER):
     # Normalizes a batch of flattend 9-long vectors (i.e shape [-1, 9])
-    if USE_RECONSTRUCTION_LAYER:
+    if use_reconstruction or predict_pose and predict_t:
         return normalize_max(unnormalized_x)
+    
+    elif predict_pose and not predict_t:
+        return normalize_L2(unnormalized_x)
+    
     else:
         return normalize_L2(normalize_L1(unnormalized_x))
+    
 
 def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, ec_err_pred_unoramlized_last, val_ec_err_pred_unormalized_last, ec_err_pred_last, all_penalty_last):
     if math.isnan(all_train_loss_last) or math.isnan(all_val_loss_last) or math.isnan(train_mae_last) or math.isnan(val_mae_last) or math.isnan(ec_err_pred_unoramlized_last) or math.isnan(val_ec_err_pred_unormalized_last) or math.isnan(ec_err_pred_last) or math.isnan(all_penalty_last):

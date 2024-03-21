@@ -170,7 +170,7 @@ class FMatrixRegressor(nn.Module):
             print_and_write(f'mlp: {e}')
 
         try:            
-            output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3) if not predict_t else norm_layer(unormalized_output.view(-1, 3)).view(-1,3,1)
+            output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3) if not predict_t else norm_layer(unormalized_output.view(-1, 3), predict_t=True).view(-1,3,1)
 
             penalty = last_sing_value_penalty(unormalized_output).to(device) if not self.predict_pose else 0
         except Exception as e:
@@ -199,11 +199,12 @@ class FMatrixRegressor(nn.Module):
 
                         # This is for the epipolar test error computation:
                         unormalized_pose = torch.cat((unormalized_R.detach(), unormalized_t.detach().view(-1, 3, 1)), dim=-1)
+                        output = torch.cat((R.detach(), t.detach().view(-1, 3, 1)), dim=-1)
+                        # output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3)
 
                         unormalized_output = pose_to_F(unormalized_pose, K[0])
-                        unormalized_label = pose_to_F(unormalized_label, K[0])
-                        output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3)
-
+                        unormalized_label = pose_to_F(label, K[0]) # notice this is actually normalized label!
+                        
                     except Exception as e:
                         print_and_write(f'2 {e}')
                 else:
