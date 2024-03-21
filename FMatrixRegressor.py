@@ -199,10 +199,11 @@ class FMatrixRegressor(nn.Module):
 
                         # This is for the epipolar test error computation:
                         unormalized_pose = torch.cat((unormalized_R.detach(), unormalized_t.detach().view(-1, 3, 1)), dim=-1)
-                        output = torch.cat((R.detach(), t.detach().view(-1, 3, 1)), dim=-1)
+                        pose = torch.cat((R.detach(), t.detach().view(-1, 3, 1)), dim=-1)
                         # output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3)
 
                         unormalized_output = pose_to_F(unormalized_pose, K[0])
+                        output = pose_to_F(pose, K[0])
                         unormalized_label = pose_to_F(label, K[0]) # notice this is actually normalized label!
                         
                     except Exception as e:
