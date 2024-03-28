@@ -81,7 +81,7 @@ class FMatrixRegressor(nn.Module):
         else:
             mlp_input_shape = 7*7*2*self.model_hidden_size
 
-        if group_conv["use"]:
+        if GROUP_CONV["use"]:
             mlp_input_shape //= 3
 
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
@@ -139,12 +139,12 @@ class FMatrixRegressor(nn.Module):
             except Exception as e: 
                 print_and_write(f'avg_patches: {e}')
 
-        if group_conv["use"]:
+        if GROUP_CONV["use"]:
             grouped_conv_layer = GroupedConvolution(in_channels=self.model_hidden_size,   # Total input channels
-                                    out_channels=group_conv["out_channels"],  # Total output channels you want
+                                    out_channels=GROUP_CONV["out_channels"],  # Total output channels you want
                                     kernel_size=3,
                                     padding=1,
-                                    groups=group_conv["num_groups"])
+                                    groups=GROUP_CONV["num_groups"])
             x1_embeddings = grouped_conv_layer(x1_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
             x2_embeddings = grouped_conv_layer(x2_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
 
@@ -210,6 +210,7 @@ class FMatrixRegressor(nn.Module):
                         print_and_write(f'2 {e}')
                 else:
                     unormalized_output, output, penalty = self.forward(first_image, second_image)
+                    epoch_penalty = epoch_penalty + penalty
 
                 # Compute train mean epipolar constraint error
                 avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
@@ -271,11 +272,12 @@ class FMatrixRegressor(nn.Module):
                 else:
                     mae = torch.mean(torch.abs(labels - outputs))
 
-                    epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss = (
-                        v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss))
+                    epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, epoch_penalty = (
+                        v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, epoch_penalty))
 
                     train_mae.append(mae.cpu().item())
                     all_train_loss.append(avg_loss.cpu().item())
+                    all_penalty.append(epoch_penalty.cpu().item())
 
                 ec_err_truth.append(epoch_avg_ec_err_truth.cpu().item())
                 ec_err_pred.append(epoch_avg_ec_err_pred.cpu().item())
