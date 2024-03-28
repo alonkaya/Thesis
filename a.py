@@ -212,3 +212,41 @@ def data_for_checking_overfit(batch_size, CustomDataset_type):
 
     return train_loader, val_loader
 
+def add_noise_to_F(F, noise_level):
+    noise = torch.randn_like(F) * noise_level
+    print(torch.mean(torch.abs(noise)))
+    return F + noise
+
+def make_rank_2(F):
+        U1, S1, Vt1 = torch.linalg.svd(F, full_matrices=False)
+
+        S1[-1] = 0
+
+        output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), Vt1)
+
+        if torch.linalg.matrix_rank(output) != 2:
+            print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
+        return output
+
+# if __name__ == "__main__":
+#     train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE)
+    
+#     avg_ep_err_unnormalized, avg_ep_err = 0, 0
+#     for first_image, second_image, label, unormalized_label,_ in val_loader:
+#         batch_ep_err_unnormalized, batch_ep_err = 0, 0
+#         for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
+#             F2 = make_rank_2(add_noise_to_F(F,0.0001))
+#             unormalized_F2 = make_rank_2(add_noise_to_F(unormalized_F,0.0001))
+#             # print(torch.mean(torch.abs(F)))
+#             # print(torch.mean(torch.abs(F - F2)))
+#             # print(torch.mean(torch.abs(unormalized_F - unormalized_F2)))
+
+#             batch_ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F2).get_epipolar_err()
+#             batch_ep_err += EpipolarGeometry(img_1, img_2, F2).get_epipolar_err()
+
+#         batch_ep_err_unnormalized, batch_ep_err = batch_ep_err_unnormalized/len(first_image), batch_ep_err/len(first_image)
+#         avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + batch_ep_err_unnormalized, avg_ep_err + batch_ep_err
+
+#     avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized/len(val_loader), avg_ep_err/len(val_loader)
+#     print(avg_ep_err_unnormalized, avg_ep_err)
+

@@ -143,8 +143,8 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
             S1[:, -1] = 0
             S2[:, -1] = 0
 
-            output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), Vt1.transpose(1, 2))
-            unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), Vt2.transpose(1, 2))
+            output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), Vt1)
+            unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), Vt2)
 
         except Exception as e:
             print_and_write(f'Error in matmuls: {e}')
@@ -152,15 +152,15 @@ def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, o
     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized = 0, 0, 0, 0, 0, 0
     try:
         for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
-            ec_err_truth, RE1_truth = EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
-            ec_err_pred, RE1_pred = EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
-            ec_err_pred_unormalized, RE1_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
+            ec_err_truth = EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
+            ec_err_pred = EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
+            ec_err_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
 
             avg_ec_err_truth = avg_ec_err_truth + ec_err_truth
             avg_ec_err_pred = avg_ec_err_pred + ec_err_pred
             avg_ec_err_pred_unormalized = avg_ec_err_pred_unormalized + ec_err_pred_unormalized
 
-            if epoch == 600:
+            if VISIUALIZE["do"] and VISIUALIZE["epoch"] == epoch:
                 epipolar = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
                 epipolar.visualize(sqResultDir='preicted_epipole_lines_realestate_from_pose', file_num=file_num)
 
@@ -228,10 +228,6 @@ class EpipolarGeometry:
         pts1 = np.concatenate((pts1, np.ones((pts1.shape[0], 1))), axis=-1) # shape [n,3]
         pts2 = np.concatenate((pts2, np.ones((pts2.shape[0], 1))), axis=-1) # shape [n,3]
 
-        if NORM_KEYPOINTS:
-            pts1 = norm_layer(torch.tensor(pts1)).numpy()
-            pts2 = norm_layer(torch.tensor(pts2)).numpy()
-
         return pts1, pts2
 
     def epipolar_test_all_points(self, pts1, pts2):
@@ -265,7 +261,7 @@ class EpipolarGeometry:
             print_and_write(f'Error in epipolar_test_all_points: {e}')
             return
 
-        return err, RE1
+        return err
 
     def epipoline(self, x, formula):
         array = formula.flatten()
