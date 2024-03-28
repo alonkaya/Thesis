@@ -333,7 +333,7 @@ class FMatrixRegressor(nn.Module):
                 Train epipolar error pred: {ec_err_pred[-1]}\n"""
             else:
                 epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} 
-                Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
+                Training MAE: {train_mae[-1]}
                 Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]}
                 Train epipolar error pred: {ec_err_pred[-1]}
                 penalty: {all_penalty[-1]}\n"""

@@ -50,7 +50,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
     for ax, y_scale in zip(axs, ['linear', 'log']):
         try:
             ax.plot(x, y1, color='steelblue', label="Train")
-            if y2: ax.plot(x, y2, color='salmon', label="Test") 
+            if y2 and len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
 
             for i in range(0, len(y1), max(1, len(y1)//10)):
                 ax.text(x[i], y1[i], f'{y1[i]:.4f}', fontsize=9, color='blue', ha='center', va='bottom')
