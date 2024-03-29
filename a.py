@@ -108,8 +108,10 @@ class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):
         
         try:
             # Transform: Resize, center, grayscale
-            first_image = self.transform(original_first_image).to(device)
-            second_image = self.transform(original_second_image).to(device)
+            first_image = transform(original_first_image).to(device)
+            second_image = transform(original_second_image).to(device)
+            # first_image = self.transform(original_first_image).to(device)
+            # second_image = self.transform(original_second_image).to(device)
         except Exception as e:
             print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
         
@@ -126,6 +128,34 @@ class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):
         
         
         return first_image, second_image, F, unnormalized_F
+
+def transform(img):
+    try:
+        resized_image = transforms.Resize((256, 256))(img)
+    except Exception as e:
+        print_and_write(f"5/resized {e}")
+
+    try:
+        cropped_image = transforms.CenterCrop(224)(resized_image)
+    except Exception as e:
+        print_and_write(f"6/cropped {e}")
+
+    try:
+        grayscale_image = transforms.Grayscale(num_output_channels=3)(cropped_image)
+    except Exception as e:
+        print_and_write(f"7/grayscale {e}")
+
+    try:
+        tensor_image = transforms.ToTensor()(grayscale_image)
+    except Exception as e:
+        print_and_write(f"8/tensor {e}")
+
+    try:
+        normalized_image = transforms.Normalize(mean=norm_mean, std=norm_std)(tensor_image)
+    except Exception as e:
+        print_and_write(f"9/normalize {e}")
+
+    return normalized_image
 
 def get_valid_indices(sequence_len, sequence_path):
     valid_indices = []
