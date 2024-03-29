@@ -42,8 +42,10 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
         
         try:
             # Transform: Resize, center, grayscale
-            first_image = self.transform(original_first_image)
-            second_image = self.transform(original_second_image)
+            first_image = transform(original_first_image)
+            second_image = transform(original_second_image)
+            # first_image = self.transform(original_first_image)
+            # second_image = self.transform(original_second_image)
         except Exception as e:
             print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
         
@@ -179,7 +181,8 @@ transform = transforms.Compose([
 
 def data_with_one_sequence(batch_size, CustomDataset_type):
     RealEstate_path = 'RealEstate10K/train_images'
-    sequence_name = '0cb8672999a42a05'
+    # sequence_name = '0cb8672999a42a05'
+    sequence_name = "0000cc6d8b108390"
 
     specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
     sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
@@ -262,18 +265,21 @@ def make_rank_2(F):
 #     train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE)
     
 #     avg_ep_err_unnormalized, avg_ep_err = 0, 0
-#     for first_image, second_image, label, unormalized_label,_ in val_loader:
+#     for i,(first_image, second_image, label, unormalized_label,_) in enumerate(val_loader):
 #         batch_ep_err_unnormalized, batch_ep_err = 0, 0
 #         for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
-#             F2 = make_rank_2(add_noise_to_F(F,0.0001))
-#             unormalized_F2 = make_rank_2(add_noise_to_F(unormalized_F,0.0001))
-#             # print(torch.mean(torch.abs(F)))
-#             # print(torch.mean(torch.abs(F - F2)))
-#             # print(torch.mean(torch.abs(unormalized_F - unormalized_F2)))
+#             batch_ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F).get_epipolar_err()
+#             batch_ep_err += EpipolarGeometry(img_1, img_2, F).get_epipolar_err()
+#             print(torch.mean(F), torch.mean(unormalized_F))
+#             # os.makedirs(os.path.join('unormalized'), exist_ok=True)
+#             # os.makedirs(os.path.join('normalized'), exist_ok=True)
 
-#             batch_ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F2).get_epipolar_err()
-#             batch_ep_err += EpipolarGeometry(img_1, img_2, F2).get_epipolar_err()
+#             # epipolar_geo_unormalized = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label)
+#             # epipolar_geo_unormalized.visualize(sqResultDir='unormalized', file_num=i)
 
+#             # epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label)
+#             # epipolar_geo.visualize(sqResultDir='normalized', file_num=i)
+            
 #         batch_ep_err_unnormalized, batch_ep_err = batch_ep_err_unnormalized/len(first_image), batch_ep_err/len(first_image)
 #         avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + batch_ep_err_unnormalized, avg_ep_err + batch_ep_err
 

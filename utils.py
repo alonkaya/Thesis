@@ -58,7 +58,7 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
 
             ax.set_xlabel(x_label)
             ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
-            ax.set_title(f'{title} -\n coeff: {penalty_coeff}, batch size: {batch_size}, lr_mlp: {lr_mlp}, lr_vit: {lr_vit}, scale: {y_scale}\nmodel_name: {model_name}')
+            ax.set_title(f'{y_scale} scale')
         
             ax.set_yscale(y_scale)
             ax.grid(True)
@@ -67,9 +67,11 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
             print_and_write(e)
 
     if save:
-        os.makedirs('plots', exist_ok=True)
+        directory_name = f"""plots/only_one_sequence/SVD_coeff {penalty_coeff} RE1_coeff {RE1_coeff} lr {lr_mlp} avg embeddings {average_embeddings} model {model_name} augmentation {AUGMENTATION} Force_rank_2 {enforce_rank_2} predict_pose {predict_pose} use_reconstruction {use_reconstruction}"""
+        dir_path = os.path.join('plots', 'only_one_sequence', directory_name)
+        os.makedirs(dir_path, exist_ok=True)
 
-        plt.savefig(f"""plots/{title}  SVD_coeff {penalty_coeff} RE1_coeff {RE1_coeff} mlp {lr_mlp} jump frames {JUMP_FRAMES} avg embeddings {average_embeddings} model {model_name} augmentation {AUGMENTATION} Force_rank_2 {enforce_rank_2} predict_pose {predict_pose} use_reconstruction {use_reconstruction} group_conv {GROUP_CONV["use"]}.png""")  # Specify the filename and extension
+        plt.savefig(f"""{dir_path}/{title}.png""")  # Specify the filename and extension
 
     if show:
         plt.show()
