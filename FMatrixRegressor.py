@@ -104,6 +104,45 @@ class FMatrixRegressor(nn.Module):
             self.optimizer_t = optim.Adam(params_t, lr=lr_mlp)
 
 
+    def get_embeddings(self, x1, x2, predict_t=False):
+        if self.clip:  
+            try:
+                processor = self.clip_image_processor_t if predict_t else self.clip_image_processor
+                model = self.pretrained_model_t if predict_t else self.pretrained_model
+
+                x1 = processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+                x2 = processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
+
+                x1_embeddings = model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)
+                x2_embeddings = model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)    
+
+            except Exception as e:
+                print_and_write(f'clip: {e}')
+        else:
+            x1_embeddings = self.pretrained_model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
+            x2_embeddings = self.pretrained_model(x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
+
+        if self.average_embeddings:
+            try:
+                avg_patches = nn.AdaptiveAvgPool2d(1)
+                x1_embeddings = avg_patches(x1_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
+                x2_embeddings = avg_patches(x2_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
+            except Exception as e: 
+                print_and_write(f'avg_patches: {e}')
+
+        if GROUP_CONV["use"]:
+            grouped_conv_layer = GroupedConvolution(in_channels=self.model_hidden_size,   # Total input channels
+                                    out_channels=GROUP_CONV["out_channels"],  # Total output channels you want
+                                    kernel_size=3,
+                                    padding=1,
+                                    groups=GROUP_CONV["num_groups"])
+            x1_embeddings = grouped_conv_layer(x1_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
+            x2_embeddings = grouped_conv_layer(x2_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
+
+        embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
+
+        return embeddings
+
     def forward(self, x1, x2, predict_t=False):
         # If deepF_nocors
         # net = HomographyNet(use_reconstruction_module=False).to(device)
