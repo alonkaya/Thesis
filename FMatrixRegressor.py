@@ -161,8 +161,10 @@ class FMatrixRegressor(nn.Module):
         # output = net.foward(x1, x2).to(device)
         # return output
 
-        embeddings = self.get_embeddings(x1, x2, predict_t=predict_t)
-        
+        try:
+            embeddings = self.get_embeddings(x1, x2, predict_t=predict_t)
+        except Exception as e:
+            print_and_write(f'get_embeddings: {e}')
         try:
             # Train MLP on embedding vectors            
             unormalized_output = self.mlp(embeddings).view(-1,3,3).to(device) if not predict_t else self.t_mlp(embeddings).view(-1,3,1).to(device)
@@ -185,15 +187,23 @@ class FMatrixRegressor(nn.Module):
             val_ec_err_pred, val_ec_err_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], [], [], []
 
         for epoch in range(num_epochs):
-            self.train()
-            labels, outputs, Rs, ts = torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device)
-            epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, avg_loss_R, avg_loss_t, file_num, epoch_penalty = 0, 0, 0, 0, 0, 0, 0, 0
-            
+            try:
+                self.train()
+                labels, outputs, Rs, ts = torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device)
+            except Exception as e:
+                print_and_write(f'1 {e}')
+            try:
+                epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, avg_loss_R, avg_loss_t, file_num, epoch_penalty = 0, 0, 0, 0, 0, 0, 0, 0
+            except Exception as e:
+                print_and_write(f'2 {e}')
             for first_image, second_image, label, unormalized_label, K in train_loader:
-                first_image, second_image, label, unormalized_label, K = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device), K.to(device)
+                try:
+                    first_image, second_image, label, unormalized_label, K = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device), K.to(device)
+                except Exception as e:
+                    print_and_write(f'2.5 {e}')
                 # Forward pass
-                if self.predict_pose:
-                    try:
+                try:
+                    if self.predict_pose:
                         unormalized_R, R, _ = self.forward(first_image, second_image, predict_t=False)
                         unormalized_t, t, _ = self.forward(first_image, second_image, predict_t=True)
 
@@ -206,56 +216,61 @@ class FMatrixRegressor(nn.Module):
                         output = pose_to_F(pose, K[0])
                         unormalized_label = pose_to_F(label, K[0]) # notice this is actually normalized label!
                         
-                    except Exception as e:
-                        print_and_write(f'2 {e}')
-                else:
-                    unormalized_output, output, penalty = self.forward(first_image, second_image)
-                    epoch_penalty = epoch_penalty + penalty
+                    else:
+                        unormalized_output, output, penalty = self.forward(first_image, second_image)
+                        epoch_penalty = epoch_penalty + penalty
 
-                # Compute train mean epipolar constraint error
-                avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                    first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch, file_num=file_num)
-                epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
-                epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
-                epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
+                except Exception as e:
+                    print_and_write(f'3 {e}')
 
-                file_num += 1
+                try:
+                    # Compute train mean epipolar constraint error
+                    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
+                        first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch, file_num=file_num)
+                    epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
+                    epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
+                    epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
 
-                if self.predict_pose:
-                    loss_R = self.L2_loss(R, label[:, :, :3])
-                    avg_loss_R += loss_R.detach()
+                    file_num += 1
+                except Exception as e:
+                    print_and_write(f'4 {e}')
+                try:
+                    if self.predict_pose:
+                        loss_R = self.L2_loss(R, label[:, :, :3])
+                        avg_loss_R += loss_R.detach()
 
-                    loss_t = self.L2_loss_t(t, label[:, :, 3].view(-1,3,1))
-                    avg_loss_t += loss_t.detach()   
+                        loss_t = self.L2_loss_t(t, label[:, :, 3].view(-1,3,1))
+                        avg_loss_t += loss_t.detach()   
 
-                    self.optimizer.zero_grad()
-                    loss_R.backward()
-                    self.optimizer.step()                     
+                        self.optimizer.zero_grad()
+                        loss_R.backward()
+                        self.optimizer.step()                     
 
-                    self.optimizer_t.zero_grad()
-                    loss_t.backward()
-                    self.optimizer_t.step()
+                        self.optimizer_t.zero_grad()
+                        loss_t.backward()
+                        self.optimizer_t.step()
 
-                    # Extend lists with batch statistics
-                    labels = torch.cat((labels, label.detach()), dim=0)
-                    Rs = torch.cat((Rs, R.detach()), dim=0)
-                    ts = torch.cat((ts, t.detach()), dim=0)
+                        # Extend lists with batch statistics
+                        labels = torch.cat((labels, label.detach()), dim=0)
+                        Rs = torch.cat((Rs, R.detach()), dim=0)
+                        ts = torch.cat((ts, t.detach()), dim=0)
 
-                else:
-                    # Compute loss
-                    l2_loss = self.L2_loss(output, label)
-                    loss = l2_loss + self.penalty_coeff*penalty
-                    avg_loss = avg_loss + loss.detach()
+                    else:
+                        # Compute loss
+                        l2_loss = self.L2_loss(output, label)
+                        loss = l2_loss + self.penalty_coeff*penalty
+                        avg_loss = avg_loss + loss.detach()
 
-                    # Compute Backward pass and gradients
-                    self.optimizer.zero_grad()
-                    loss.backward()
-                    self.optimizer.step()
+                        # Compute Backward pass and gradients
+                        self.optimizer.zero_grad()
+                        loss.backward()
+                        self.optimizer.step()
 
-                    # Extend lists with batch statistics
-                    labels = torch.cat((labels, label.detach()), dim=0)
-                    outputs = torch.cat((outputs, output.detach()), dim=0)
-
+                        # Extend lists with batch statistics
+                        labels = torch.cat((labels, label.detach()), dim=0)
+                        outputs = torch.cat((outputs, output.detach()), dim=0)
+                except Exception as e:
+                    print_and_write(f'5 {e}')
             try:
                 # Calculate and store mean absolute error for the epoch
                 if self.predict_pose:
@@ -328,24 +343,26 @@ class FMatrixRegressor(nn.Module):
             #         all_penalty.append(epoch_penalty.cpu().item())
             #     except Exception as e:
             #         print_and_write(f'8 {e}')
-            if self.predict_pose:
-                epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t[-1]}
-                Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]}
-                Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]}
-                Train epipolar error pred: {ec_err_pred[-1]}\n"""
-            else:
-                epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} 
-                Training MAE: {train_mae[-1]}
-                Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]}
-                Train epipolar error pred: {ec_err_pred[-1]}
-                penalty: {all_penalty[-1]}\n"""
-                # epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
-                # Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
-                # Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]} Val epipolar error pred unormalized: {val_ec_err_pred_unormalized[-1]}
-                # Train epipolar error pred: {ec_err_pred[-1]} Val epipolar error pred: {val_ec_err_pred[-1]} 
-                # penalty: {all_penalty[-1]}\n"""
-            print_and_write(epoch_output)
-
+            try:
+                if self.predict_pose:
+                    epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t[-1]}
+                    Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]}
+                    Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]}
+                    Train epipolar error pred: {ec_err_pred[-1]}\n"""
+                else:
+                    epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} 
+                    Training MAE: {train_mae[-1]}
+                    Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]}
+                    Train epipolar error pred: {ec_err_pred[-1]}
+                    penalty: {all_penalty[-1]}\n"""
+                    # epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
+                    # Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
+                    # Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]} Val epipolar error pred unormalized: {val_ec_err_pred_unormalized[-1]}
+                    # Train epipolar error pred: {ec_err_pred[-1]} Val epipolar error pred: {val_ec_err_pred[-1]} 
+                    # penalty: {all_penalty[-1]}\n"""
+                print_and_write(epoch_output)
+            except Exception as e:
+                print_and_write(f'9 {e}')
             # If the model is not learning or outputs nan, stop training
             # if not_learning(all_train_loss, all_val_loss) or check_nan(all_train_loss[-1], all_val_loss[-1], train_mae[-1], val_mae[-1], ec_err_pred_unoramlized[-1], val_ec_err_pred_unormalized[-1], ec_err_pred[-1],all_penalty[-1]):
             #     num_epochs = epoch + 1
