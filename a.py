@@ -181,8 +181,8 @@ transform = transforms.Compose([
 
 def data_with_one_sequence(batch_size, CustomDataset_type):
     RealEstate_path = 'RealEstate10K/train_images'
-    # sequence_name = '0cb8672999a42a05'
-    sequence_name = "0000cc6d8b108390"
+    sequence_name = '0cb8672999a42a05'
+    # sequence_name = "0000cc6d8b108390"
 
     specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
     sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
