@@ -1,7 +1,6 @@
 from params import *
 from utils import *
 from FunMatrix import *
-# from deepF_nocors import *
 import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 
@@ -56,7 +55,6 @@ class FMatrixRegressor(nn.Module):
                     pretrained_model_name)
                 self.pretrained_model_t = CLIPVisionModel.from_pretrained(
                     pretrained_model_name).to(device)
-                
 
         else:
             self.clip = False
@@ -90,6 +88,9 @@ class FMatrixRegressor(nn.Module):
             {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
             {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
         ]
+        
+        self.L2_loss = nn.MSELoss().to(device)
+        self.optimizer = optim.Adam(params, lr=lr_vit)
 
         if self.predict_pose:
             self.t_mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
@@ -98,82 +99,32 @@ class FMatrixRegressor(nn.Module):
                     {'params': self.pretrained_model_t.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
                     {'params': self.t_mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
                 ]  
-        
-        self.L2_loss = nn.MSELoss().to(device)
-        self.optimizer = optim.Adam(params, lr=lr_vit)
 
-        if self.predict_pose:
             self.L2_loss_t = nn.MSELoss().to(device)
             self.optimizer_t = optim.Adam(params_t, lr=lr_mlp)
 
-    def get_embeddings(self, x1, x2, predict_t=False):
-        if self.clip:  
-            try:
-                if predict_t:
-                    x1 = self.clip_image_processor_t(images=x1, return_tensors="pt", do_resize=False, do_normalize=False,
-                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-                    x2 = self.clip_image_processor_t(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
-                                            do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-                else:
-                    x1 = self.clip_image_processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False,
-                                                do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-                    x2 = self.clip_image_processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False,
-                                            do_center_crop=False, do_rescale=False, do_convert_rgb=False).to(device)
-                if predict_t:
-                    x1_embeddings = self.pretrained_model_t(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)
-                    x2_embeddings = self.pretrained_model_t(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)                
-                else:
-                    x1_embeddings = self.pretrained_model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)
-                    x2_embeddings = self.pretrained_model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size).to(device)                
-            except Exception as e:
-                print_and_write(f'clip: {e}')
-        else:
-            x1_embeddings = self.pretrained_model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
-            x2_embeddings = self.pretrained_model(x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
-
-        if self.average_embeddings:
-            try:
-                avg_patches = nn.AdaptiveAvgPool2d(1)
-                x1_embeddings = avg_patches(x1_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
-                x2_embeddings = avg_patches(x2_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
-            except Exception as e: 
-                print_and_write(f'avg_patches: {e}')
-
-        if GROUP_CONV["use"]:
-            grouped_conv_layer = GroupedConvolution(in_channels=self.model_hidden_size,   # Total input channels
-                                    out_channels=GROUP_CONV["out_channels"],  # Total output channels you want
-                                    kernel_size=3,
-                                    padding=1,
-                                    groups=GROUP_CONV["num_groups"])
-            x1_embeddings = grouped_conv_layer(x1_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
-            x2_embeddings = grouped_conv_layer(x2_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
-
-        # Create another feature embedding of the element-wise mult between the two embedding vectors
-        # mul_embedding = x1_embeddings.mul(x2_embeddings)
-
-        embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
-
-        return embeddings
 
     def forward(self, x1, x2, predict_t=False):
         # If deepF_nocors
         # net = HomographyNet(use_reconstruction_module=False).to(device)
         # output = net.foward(x1, x2).to(device)
         # return output
-
+        
+        # Get embeddings from images
         try:
             embeddings = self.get_embeddings(x1, x2, predict_t=predict_t)
         except Exception as e:
             print_and_write(f'get_embeddings: {e}')
-        try:
-            # Train MLP on embedding vectors            
+
+        # Apply MLP on embedding vectors
+        try:        
             unormalized_output = self.mlp(embeddings).view(-1,3,3).to(device) if not predict_t else self.t_mlp(embeddings).view(-1,3,1).to(device)
         except Exception as e:
             print_and_write(f'mlp: {e}')
-
+        
+        # Apply norm layer
         try:            
             output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3) if not predict_t else norm_layer(unormalized_output.view(-1, 3), predict_t=True).view(-1,3,1)
-
             penalty = last_sing_value_penalty(unormalized_output).to(device) if not self.predict_pose else 0
         except Exception as e:
             print_and_write(f'last_sing_value_penalty: {e}')

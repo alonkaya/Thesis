@@ -18,12 +18,12 @@ if __name__ == "__main__":
                                  penaltize_normalized=penaltize_normalized, 
                                 ).to(device)
 
-        # train_loader, val_loader = data_for_checking_overfit(BATCH_SIZE, CUSTOMDATASET_TYPE)
         train_loader, val_loader = data_with_one_sequence(BATCH_SIZE, CUSTOMDATASET_TYPE)
         
         parameters = f"""learning rate vit: {lr_vit}, learning rate mlp: {lr_mlp}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, penalty_coeff: {penalty_coeff}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
 batch_size: {BATCH_SIZE}, train_seqeunces: {train_seqeunces}, val_sequences: {val_sequences}, penaltize_normalized: {penaltize_normalized}, RealEstate: {USE_REALESTATE}, batchnorm & dropout: {BN_AND_DO}, 
-average embeddings: {AVG_EMBEDDINGS}, customdataset type: {CUSTOMDATASET_TYPE}, model: {MODEL}, augmentation: {AUGMENTATION}, enforce_rank_2:{ENFORCE_RANK_2}, predict pose: {PREDICT_POSE}\n\n"""
+average embeddings: {AVG_EMBEDDINGS}, customdataset type: {CUSTOMDATASET_TYPE}, model: {MODEL}, augmentation: {AUGMENTATION}, enforce_rank_2:{ENFORCE_RANK_2}, predict pose: {PREDICT_POSE}, epipolar err coeff: {RE1_COEFF}
+unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV}\n\n"""
         print_and_write(parameters)
 
         model.train_model(train_loader, val_loader, num_epochs=NUM_EPOCHS)

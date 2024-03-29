@@ -42,8 +42,8 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
         
         try:
             # Transform: Resize, center, grayscale
-            first_image = transform(original_first_image)
-            second_image = transform(original_second_image)
+            first_image = transform2(original_first_image)
+            second_image = transform2(original_second_image)
             # first_image = self.transform(original_first_image)
             # second_image = self.transform(original_second_image)
         except Exception as e:
@@ -75,87 +75,38 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             
         return first_image, second_image, label, unormalized_label, self.k
     
-class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):
-    """Takes the first two images out of every three images in the sequence for training, and the third for testing"""
 
-    def __init__(self, sequence_path, poses, valid_indices, transform, K, dataset_type):
-        self.sequence_path = sequence_path
-        self.sequence_num = sequence_path.split('/')[1]
-        self.poses = poses
-        self.transform = transform
-        self.k = K
-        self.valid_indices = valid_indices
-        self.dataset_type = dataset_type
-
-    def __len__(self):
-            # Adjust the total count based on dataset type
-            if self.dataset_type == 'train':
-                return ((len(self.valid_indices)-JUMP_FRAMES) // 3) * 2  # 2 out of every 3 images
-            else:
-                return (len(self.valid_indices)-JUMP_FRAMES) // 3  # Every 3rd image
-            
-    def __getitem__(self, idx):
-        try: 
-            if self.dataset_type == 'train':
-            # Map idx to include 2 out of every 3 images
-                idx = idx + (idx // 2)
-            else:
-            # Map idx to select every 3rd image
-                idx = idx * 3 + 2
-
-            original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-            original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
-        except Exception as e:
-            print_and_write(f"1\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-        
-        try:
-            # Transform: Resize, center, grayscale
-            first_image = transform(original_first_image).to(device)
-            second_image = transform(original_second_image).to(device)
-            # first_image = self.transform(original_first_image).to(device)
-            # second_image = self.transform(original_second_image).to(device)
-        except Exception as e:
-            print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-        
-        try:
-            unnormalized_F = get_F(self.poses, idx, self.k)
-        except Exception as e:
-            print_and_write(f"3\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-        
-        try:
-            # Normalize F-Matrix
-            F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
-        except Exception as e:
-            print_and_write(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-        
-        
-        return first_image, second_image, F, unnormalized_F
-
-def transform(img):
+def transform2(img):
+    # Resize the image
     try:
-        resized_image = transforms.Resize((256, 256))(img)
+        resized_image = img.resize((256, 256))
     except Exception as e:
-        print_and_write(f"5/resized {e}")
+        print_and_write(f"Error in resizing image: {e}")
+        
+    try:
+        # Center crop the image
+        # First, calculate the cropping box
+        left = (resized_image.width - 224) / 2
+        top = (resized_image.height - 224) / 2
+        right = (resized_image.width + 224) / 2
+        bottom = (resized_image.height + 224) / 2
+
+        # Then, crop the image
+        cropped_image = resized_image.crop((left, top, right, bottom))
+    except Exception as e:
+        print_and_write(f"Error in cropping image: {e}")
 
     try:
-        cropped_image = transforms.CenterCrop(224)(resized_image)
+        # Convert the image to grayscale and then back to RGB
+        grayscale_image = cropped_image.convert('L').convert('RGB')
     except Exception as e:
-        print_and_write(f"6/cropped {e}")
-
-    try:
-        grayscale_image = transforms.Grayscale(num_output_channels=3)(cropped_image)
-    except Exception as e:
-        print_and_write(f"7/grayscale {e}")
+        print_and_write(f"Error in converting image to grayscale: {e}")
 
     try:
         tensor_image = transforms.ToTensor()(grayscale_image)
-    except Exception as e:
-        print_and_write(f"8/tensor {e}")
-
-    try:
         normalized_image = transforms.Normalize(mean=norm_mean, std=norm_std)(tensor_image)
     except Exception as e:
-        print_and_write(f"9/normalize {e}")
+        print_and_write(f"Error in converting image to tensor: {e}")
 
     return normalized_image
 
@@ -205,61 +156,22 @@ def data_with_one_sequence(batch_size, CustomDataset_type):
 
     return train_loader, val_loader
 
-def data_for_checking_overfit(batch_size, CustomDataset_type):
-    RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
 
-    train_datasets, val_datasets = [], []
-    for RealEstate_path in RealEstate_paths:
-        for i, sequence_name in enumerate(os.listdir(RealEstate_path)):
-            specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
-            sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
+# def add_noise_to_F(F, noise_level):
+#     noise = torch.randn_like(F) * noise_level
+#     print(torch.mean(torch.abs(noise)))
+#     return F + noise
 
-            # Get a list of all poses [R,t] in this sequence
-            poses = read_poses(specs_path).to(device)
+# def make_rank_2(F):
+#         U1, S1, Vt1 = torch.linalg.svd(F, full_matrices=False)
 
-            # Indices of 'good' image frames
-            valid_indices = get_valid_indices(len(poses), sequence_path)
-            
-            # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-            original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
-            K = get_intrinsic_REALESTATE(specs_path, original_image_size)
-            
-            if CustomDataset_type == "CustomDataset_first_two_out_of_three_train":
-                train_dataset = CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
-                val_dataset = CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
-            elif  CustomDataset_type == "CustomDataset_first_two_thirds_train":
-                train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
-                val_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
+#         S1[-1] = 0
 
-            if len(val_dataset) > 30:
-                train_datasets.append(train_dataset)     
-                val_datasets.append(val_dataset)
-                
-    # Concatenate datasets
-    concat_train_dataset = ConcatDataset(train_datasets)
-    concat_val_dataset = ConcatDataset(val_datasets)
+#         output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), Vt1)
 
-    # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS)
-
-    return train_loader, val_loader
-
-def add_noise_to_F(F, noise_level):
-    noise = torch.randn_like(F) * noise_level
-    print(torch.mean(torch.abs(noise)))
-    return F + noise
-
-def make_rank_2(F):
-        U1, S1, Vt1 = torch.linalg.svd(F, full_matrices=False)
-
-        S1[-1] = 0
-
-        output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), Vt1)
-
-        if torch.linalg.matrix_rank(output) != 2:
-            print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
-        return output
+#         if torch.linalg.matrix_rank(output) != 2:
+#             print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
+#         return output
 
 # if __name__ == "__main__":
 #     train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE)
