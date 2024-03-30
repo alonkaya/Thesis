@@ -1,3 +1,5 @@
+import signal
+import sys
 from FunMatrix import *
 from utils import *
 from torch.utils.data import DataLoader, ConcatDataset
@@ -6,7 +8,7 @@ import os
 from PIL import Image
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as T
-
+import traceback
 
  
 class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
@@ -82,7 +84,7 @@ def transform2(img):
         resized_image = img.resize((256, 256))
     except Exception as e:
         print_and_write(f"Error in resizing image: {e}")
-        
+
     try:
         # Center crop the image
         # First, calculate the cropping box
@@ -130,6 +132,20 @@ transform = transforms.Compose([
                          std=norm_std),
 ])    
 
+
+def worker_init_fn(worker_id):
+    def signal_handler(signal, frame):
+        print(f'Worker {worker_id} received signal, exiting gracefully.')
+        sys.exit(0)
+    signal.signal(signal.SIGINT, signal_handler)
+    
+    def worker_exception_handler(exception_type, exception, traceback_details):
+        # Here you can log the exception in a way that suits you
+        print(f"Worker {worker_id} exception: {exception}, Traceback: {traceback.format_tb(traceback_details)}")
+
+    sys.excepthook = worker_exception_handler
+
+
 def data_with_one_sequence(batch_size, CustomDataset_type):
     RealEstate_path = 'RealEstate10K/train_images'
     sequence_name = '0cb8672999a42a05'
@@ -151,8 +167,8 @@ def data_with_one_sequence(batch_size, CustomDataset_type):
     train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
     val_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, worker_init_fn=worker_init_fn)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, worker_init_fn=worker_init_fn)
 
     return train_loader, val_loader
 
