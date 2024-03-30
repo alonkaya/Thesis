@@ -3,6 +3,7 @@ from utils import *
 from FunMatrix import *
 import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
+import psutil
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, penalty_coeff,  penaltize_normalized, 
@@ -118,6 +119,7 @@ class FMatrixRegressor(nn.Module):
 
             except Exception as e:
                 print_and_write(f'clip: {e}')
+                return
         else:
             x1_embeddings = self.pretrained_model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
             x2_embeddings = self.pretrained_model(x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
@@ -129,6 +131,7 @@ class FMatrixRegressor(nn.Module):
                 x2_embeddings = avg_patches(x2_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
             except Exception as e: 
                 print_and_write(f'avg_patches: {e}')
+                return
 
         if GROUP_CONV["use"]:
             grouped_conv_layer = GroupedConvolution(in_channels=self.model_hidden_size,   # Total input channels
@@ -154,12 +157,14 @@ class FMatrixRegressor(nn.Module):
             embeddings = self.get_embeddings(x1, x2, predict_t=predict_t)
         except Exception as e:
             print_and_write(f'get_embeddings: {e}')
+            return
 
         # Apply MLP on embedding vectors
         try:        
             unormalized_output = self.mlp(embeddings).view(-1,3,3).to(device) if not predict_t else self.t_mlp(embeddings).view(-1,3,1).to(device)
         except Exception as e:
             print_and_write(f'mlp: {e}')
+            return
         
         # Apply norm layer
         try:            
@@ -167,6 +172,7 @@ class FMatrixRegressor(nn.Module):
             penalty = last_sing_value_penalty(unormalized_output).to(device) if not self.predict_pose else 0
         except Exception as e:
             print_and_write(f'last_sing_value_penalty: {e}')
+            return
 
         return unormalized_output, output, penalty
 
@@ -182,15 +188,43 @@ class FMatrixRegressor(nn.Module):
                 labels, outputs, Rs, ts = torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device)
             except Exception as e:
                 print_and_write(f'1 {e}')
+                return
             try:
                 epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, avg_loss_R, avg_loss_t, file_num, epoch_penalty = 0, 0, 0, 0, 0, 0, 0, 0
             except Exception as e:
                 print_and_write(f'2 {e}')
+                return
             for first_image, second_image, label, unormalized_label, K in train_loader:
                 try:
-                    first_image, second_image, label, unormalized_label, K = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device), K.to(device)
+                    first_image = first_image.to(device)
+                except Exception as e:
+                    print_and_write(f'2.1 {e}')
+                    print_memory()
+                    return
+                try:
+                    second_image = second_image.to(device)
+                except Exception as e:
+                    print_and_write(f'2.2 {e}')
+                    print_memory()
+                    return
+                try:
+                    label = label.to(device)
+                except Exception as e:
+                    print_and_write(f'2.3 {e}')
+                    print_memory()
+                    return
+                try:
+                    unormalized_label = unormalized_label.to(device)
+                except Exception as e:
+                    print_and_write(f'2.4 {e}')
+                    print_memory()
+                    return
+                try:
+                    K = K.to(device)
                 except Exception as e:
                     print_and_write(f'2.5 {e}')
+                    print_memory()
+                    return
                 # Forward pass
                 try:
                     if self.predict_pose:
@@ -212,6 +246,7 @@ class FMatrixRegressor(nn.Module):
 
                 except Exception as e:
                     print_and_write(f'3 {e}')
+                    return
 
                 try:
                     # Compute train mean epipolar constraint error
@@ -224,6 +259,7 @@ class FMatrixRegressor(nn.Module):
                     file_num += 1
                 except Exception as e:
                     print_and_write(f'4 {e}')
+                    return
                 try:
                     if self.predict_pose:
                         loss_R = self.L2_loss(R, label[:, :, :3])
@@ -261,6 +297,7 @@ class FMatrixRegressor(nn.Module):
                         outputs = torch.cat((outputs, output.detach()), dim=0)
                 except Exception as e:
                     print_and_write(f'5 {e}')
+                    return
             try:
                 # Calculate and store mean absolute error for the epoch
                 if self.predict_pose:
@@ -290,6 +327,7 @@ class FMatrixRegressor(nn.Module):
                 
             except Exception as e:
                 print_and_write(f'7 {e}')
+                return
 
             # Validation
             # self.eval()
@@ -488,3 +526,11 @@ class FMatrixRegressor(nn.Module):
 
 
 
+def print_memory():
+    # Get system memory usage
+    memory = psutil.virtual_memory()
+
+    print(f"Total memory: {memory.total / 1024**2} MB")
+    print(f"Available memory: {memory.available / 1024**2} MB")
+    print(f"Used memory: {memory.used / 1024**2} MB")
+    print(f"Memory usage percentage: {memory.percent}%")
