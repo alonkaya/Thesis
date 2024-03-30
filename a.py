@@ -1,5 +1,3 @@
-import signal
-import sys
 from FunMatrix import *
 from utils import *
 from torch.utils.data import DataLoader, ConcatDataset
@@ -8,7 +6,7 @@ import os
 from PIL import Image
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as T
-import traceback
+
 
  
 class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
@@ -37,46 +35,48 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             else:
                 idx = self.valid_indices[idx + ((len(self.valid_indices) - JUMP_FRAMES) // 3) * 2]
 
-            original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-            original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
+            with Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}')) as original_first_image:
+                with Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')) as original_second_image:
+                    first_image = self.transform(original_first_image)
+                    second_image = self.transform(original_second_image)    
+
+                    try:
+                        # Transform: Resize, center, grayscale
+                        first_image = transform2(original_first_image)
+                        second_image = transform2(original_second_image)
+                        # first_image = self.transform(original_first_image)
+                        # second_image = self.transform(original_second_image)
+                    except Exception as e:
+                        print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+                    
+                    try:
+                        first_image = first_image
+                        second_image = second_image
+                    except Exception as e:
+                        print_and_write(f"3\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+                    
+                    try:
+                        if PREDICT_POSE:
+                            unormalized_R, unormalized_t = compute_relative_transformations(self.poses[idx],self. poses[idx+JUMP_FRAMES])
+                            unormalized_label = torch.cat((unormalized_R, unormalized_t.view(3,1)), dim=-1)
+                        else:
+                            unormalized_label = get_F(self.poses, idx, self.k)
+                    except Exception as e:
+                        print_and_write(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+                    try:
+                        if PREDICT_POSE:
+                            R, t = norm_layer(unormalized_R.view(-1, 9)).view(3,3), norm_layer(unormalized_t.view(-1, 3), predict_t=True).view(3)
+
+                            label = torch.cat((R, t.view(3,1)), dim=-1)
+                        else:               
+                            label = norm_layer(unormalized_label.view(-1, 9)).view(3,3)
+                    except Exception as e:
+                        print_and_write("5\n {e}")
+                        
+                    return first_image, second_image, label, unormalized_label, self.k
         except Exception as e:
             print_and_write(f"1\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
         
-        try:
-            # Transform: Resize, center, grayscale
-            first_image = transform2(original_first_image)
-            second_image = transform2(original_second_image)
-            # first_image = self.transform(original_first_image)
-            # second_image = self.transform(original_second_image)
-        except Exception as e:
-            print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-        
-        try:
-            first_image = first_image.to(device)
-            second_image = second_image.to(device)
-        except Exception as e:
-            print_and_write(f"3\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-        
-        try:
-            if PREDICT_POSE:
-                unormalized_R, unormalized_t = compute_relative_transformations(self.poses[idx],self. poses[idx+JUMP_FRAMES])
-                unormalized_label = torch.cat((unormalized_R, unormalized_t.view(3,1)), dim=-1)
-            else:
-                unormalized_label = get_F(self.poses, idx, self.k)
-        except Exception as e:
-            print_and_write(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-        try:
-            if PREDICT_POSE:
-                R, t = norm_layer(unormalized_R.view(-1, 9)).view(3,3), norm_layer(unormalized_t.view(-1, 3), predict_t=True).view(3)
-
-                label = torch.cat((R, t.view(3,1)), dim=-1)
-            else:               
-                label = norm_layer(unormalized_label.view(-1, 9)).view(3,3)
-        except Exception as e:
-            print_and_write("5\n {e}")
-            
-        return first_image, second_image, label, unormalized_label, self.k
-    
 
 def transform2(img):
     # Resize the image
@@ -84,7 +84,7 @@ def transform2(img):
         resized_image = img.resize((256, 256))
     except Exception as e:
         print_and_write(f"Error in resizing image: {e}")
-
+        
     try:
         # Center crop the image
         # First, calculate the cropping box
@@ -132,20 +132,6 @@ transform = transforms.Compose([
                          std=norm_std),
 ])    
 
-
-def worker_init_fn(worker_id):
-    def signal_handler(signal, frame):
-        print(f'Worker {worker_id} received signal, exiting gracefully.')
-        sys.exit(0)
-    signal.signal(signal.SIGINT, signal_handler)
-    
-    def worker_exception_handler(exception_type, exception, traceback_details):
-        # Here you can log the exception in a way that suits you
-        print(f"Worker {worker_id} exception: {exception}, Traceback: {traceback.format_tb(traceback_details)}")
-
-    sys.excepthook = worker_exception_handler
-
-
 def data_with_one_sequence(batch_size, CustomDataset_type):
     RealEstate_path = 'RealEstate10K/train_images'
     sequence_name = '0cb8672999a42a05'
@@ -155,20 +141,20 @@ def data_with_one_sequence(batch_size, CustomDataset_type):
     sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
 
     # Get a list of all poses [R,t] in this sequence
-    poses = read_poses(specs_path).to(device)
+    poses = read_poses(specs_path)
 
     # Indices of 'good' image frames
     valid_indices = get_valid_indices(len(poses), sequence_path)
     
     # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-    original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
+    original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
     K = get_intrinsic_REALESTATE(specs_path, original_image_size)
     
     train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
     val_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, worker_init_fn=worker_init_fn)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, worker_init_fn=worker_init_fn)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
 
     return train_loader, val_loader
 
