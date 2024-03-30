@@ -3,7 +3,6 @@ from utils import *
 from FunMatrix import *
 import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
-import psutil
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, penalty_coeff,  penaltize_normalized, 
@@ -526,11 +525,27 @@ class FMatrixRegressor(nn.Module):
 
 
 
-def print_memory():
-    # Get system memory usage
-    memory = psutil.virtual_memory()
+def print_memory(device_index=0):
+    """
+    Prints the CUDA memory information for the specified device.
 
-    print(f"Total memory: {memory.total / 1024**2} MB")
-    print(f"Available memory: {memory.available / 1024**2} MB")
-    print(f"Used memory: {memory.used / 1024**2} MB")
-    print(f"Memory usage percentage: {memory.percent}%")
+    Parameters:
+    - device_index (int): Index of the CUDA device for which the memory information will be printed.
+    """
+    device = torch.device(f'cuda:{device_index}')  # Adjust device index as per your setup
+    print(f"Memory information for device: {torch.cuda.get_device_name(device)}\n")
+
+    total_memory = torch.cuda.get_device_properties(device).total_memory
+    allocated_memory = torch.cuda.memory_allocated(device)
+    cached_memory = torch.cuda.memory_reserved(device)
+    peak_allocated_memory = torch.cuda.max_memory_allocated(device)
+    peak_cached_memory = torch.cuda.max_memory_reserved(device)
+
+    print(f"Total Memory: {total_memory / 1024 ** 3:.2f} GB")
+    print(f"Allocated Memory: {allocated_memory / 1024 ** 3:.2f} GB")
+    print(f"Cached Memory: {cached_memory / 1024 ** 3:.2f} GB")
+    print(f"Peak Allocated Memory: {peak_allocated_memory / 1024 ** 3:.2f} GB")
+    print(f"Peak Cached Memory: {peak_cached_memory / 1024 ** 3:.2f} GB\n")
+
+    # Resetting peak memory stats can be useful to understand memory usage over time
+    torch.cuda.reset_peak_memory_stats(device)
