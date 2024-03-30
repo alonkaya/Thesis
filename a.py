@@ -1,3 +1,5 @@
+import signal
+import sys
 from FunMatrix import *
 from utils import *
 from torch.utils.data import DataLoader, ConcatDataset
@@ -6,7 +8,7 @@ import os
 from PIL import Image
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as T
-
+import traceback
 
  
 class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
@@ -37,22 +39,25 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
 
             with Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}')) as original_first_image:
                 with Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')) as original_second_image:
-                    first_image = self.transform(original_first_image)
-                    second_image = self.transform(original_second_image)    
-
+                    try:
+                        first_image = self.transform(original_first_image)
+                        second_image = self.transform(original_second_image)    
+                    except Exception as e:
+                        print_and_write(f"1\nsequence num: {self.sequence_num}\nException: {e}")
+                        return
                     try:
                         # Transform: Resize, center, grayscale
                         first_image = self.transform(original_first_image)
                         second_image = self.transform(original_second_image)
                     except Exception as e:
                         print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-                    
+                        return
                     try:
                         first_image = first_image
                         second_image = second_image
                     except Exception as e:
                         print_and_write(f"3\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-                    
+                        return
                     try:
                         if PREDICT_POSE:
                             unormalized_R, unormalized_t = compute_relative_transformations(self.poses[idx],self. poses[idx+JUMP_FRAMES])
@@ -61,6 +66,7 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
                             unormalized_label = get_F(self.poses, idx, self.k)
                     except Exception as e:
                         print_and_write(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+                        return
                     try:
                         if PREDICT_POSE:
                             R, t = norm_layer(unormalized_R.view(-1, 9)).view(3,3), norm_layer(unormalized_t.view(-1, 3), predict_t=True).view(3)
@@ -70,11 +76,12 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
                             label = norm_layer(unormalized_label.view(-1, 9)).view(3,3)
                     except Exception as e:
                         print_and_write("5\n {e}")
+                        return
                         
                     return first_image, second_image, label, unormalized_label, self.k
         except Exception as e:
             print_and_write(f"1\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-        
+            return
 
 def transform2(img):
     # Resize the image
@@ -130,6 +137,20 @@ transform = transforms.Compose([
                          std=norm_std),
 ])    
 
+
+def worker_init_fn(worker_id):
+    def signal_handler(signal, frame):
+        print(f'Worker {worker_id} received signal, exiting gracefully.')
+        sys.exit(0)
+    signal.signal(signal.SIGINT, signal_handler)
+    
+    def worker_exception_handler(exception_type, exception, traceback_details):
+        # Here you can log the exception in a way that suits you
+        print(f"Worker {worker_id} exception: {exception}, Traceback: {traceback.format_tb(traceback_details)}")
+
+    sys.excepthook = worker_exception_handler
+
+
 def data_with_one_sequence(batch_size, CustomDataset_type):
     RealEstate_path = 'RealEstate10K/train_images'
     sequence_name = '0cb8672999a42a05'
@@ -151,8 +172,8 @@ def data_with_one_sequence(batch_size, CustomDataset_type):
     train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
     val_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True, worker_init_fn=worker_init_fn)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True, worker_init_fn=worker_init_fn)
 
     return train_loader, val_loader
 
