@@ -7,7 +7,6 @@ import numpy as np
 import warnings
 import torch.multiprocessing as mp
 import os
-import faulthandler
 
 class MLP(nn.Module):
     def __init__(self, num_input, mlp_hidden_sizes, num_output, batchnorm_and_dropout):
@@ -101,23 +100,14 @@ def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
 
     return img
 
+
 def init_main():
-    faulthandler.enable()
+    # Optionally, set NumPy error handling to 'warn' to catch overflow errors
+    np.seterr(over='warn')
 
-    os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-    os.environ['TORCH_USE_CUDA_DSA'] = '1'
-
-    if NUM_WORKERS > 0:
-        mp.set_start_method('spawn', force=True)
-        
     torch.autograd.set_detect_anomaly(True)
     
     # Set up custom warning handling
     warnings.filterwarnings('always', category=RuntimeWarning)
 
-    # Optionally, set NumPy error handling to 'warn' to catch overflow errors
-    np.seterr(over='warn')
-
     print_and_write("###########################################################################################################\n\n")
-
-

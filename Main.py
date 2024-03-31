@@ -1,12 +1,20 @@
-from utils import print_and_write, init_main
-init_main()
+import os
+import faulthandler
 
+mp.set_start_method('spawn', force=True)
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+os.environ['TORCH_USE_CUDA_DSA'] = '1'
+faulthandler.enable()
+
+from utils import print_and_write, init_main
 from FMatrixRegressor import FMatrixRegressor
 from params import *
 import itertools
 from Dataset import * 
 
 if __name__ == "__main__":
+    init_main()
+
     # Iterate over each combination
     param_combinations = itertools.product(penalty_coeffs, penaltize_normalized_options, learning_rates_vit, learning_rates_mlp)
     
