@@ -1,18 +1,12 @@
-import os
-os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-os.environ['TORCH_USE_CUDA_DSA'] = '1'
 from utils import print_and_write, init_main
-
 init_main()
+
 from FMatrixRegressor import FMatrixRegressor
 from params import *
-from Dataset import *
 import itertools
-from a import * 
+from Dataset import * 
 
 if __name__ == "__main__":
-
-
     # Iterate over each combination
     param_combinations = itertools.product(penalty_coeffs, penaltize_normalized_options, learning_rates_vit, learning_rates_mlp)
     
@@ -24,12 +18,6 @@ if __name__ == "__main__":
                                 ).to(device)
 
         train_loader, val_loader = data_with_one_sequence(BATCH_SIZE, CUSTOMDATASET_TYPE)
-        
-        parameters = f"""learning rate vit: {lr_vit}, learning rate mlp: {lr_mlp}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, penalty_coeff: {penalty_coeff}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
-batch_size: {BATCH_SIZE}, train_seqeunces: {train_seqeunces}, val_sequences: {val_sequences}, penaltize_normalized: {penaltize_normalized}, RealEstate: {USE_REALESTATE}, batchnorm & dropout: {BN_AND_DO}, 
-average embeddings: {AVG_EMBEDDINGS}, customdataset type: {CUSTOMDATASET_TYPE}, model: {MODEL}, augmentation: {AUGMENTATION}, enforce_rank_2:{ENFORCE_RANK_2}, predict pose: {PREDICT_POSE}, 
-epipolar err coeff: {RE1_COEFF} unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV}\n\n"""
-        print_and_write(parameters)
 
         model.train_model(train_loader, val_loader, num_epochs=NUM_EPOCHS)
 
