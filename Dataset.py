@@ -100,8 +100,8 @@ def get_dataloaders_KITTI(batch_size):
     concat_val_dataset = ConcatDataset(val_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True, worker_init_fn=worker_init_fn)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True, worker_init_fn=worker_init_fn)
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS)
 
     return train_loader, val_loader
 
