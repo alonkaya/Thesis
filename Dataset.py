@@ -3,13 +3,12 @@ import sys
 from FunMatrix import *
 from utils import *
 from torch.utils.data import DataLoader, ConcatDataset
-from torchvision import transforms
+from torchvision.transforms import v2
+import torchvision
 import os
-from PIL import Image
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as T
 import traceback
-
  
 class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
     """Takes the first 2/3 images in the sequence for training, and the last 1/3 for testing"""
@@ -37,23 +36,26 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             idx = self.valid_indices[idx + ((len(self.valid_indices) - JUMP_FRAMES) // 3) * 2]
 
         try:
-            original_first_image = cv2.imread(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-            original_second_image = cv2.imread(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
+            original_first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+            original_second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
+
+            # original_first_image = cv2.imread(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+            # original_second_image = cv2.imread(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
         except Exception as e:
             print_and_write(f"1\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
             return
-        try:
-            original_first_image = cv2.cvtColor(original_first_image, cv2.COLOR_BGR2RGB)
-            original_second_image = cv2.cvtColor(original_second_image, cv2.COLOR_BGR2RGB)
-        except Exception as e:
-            print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-            return
-        try:
-            original_first_image = Image.fromarray(original_first_image)
-            original_second_image = Image.fromarray(original_second_image)
-        except Exception as e:
-            print_and_write(f"3\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-            return
+        # try:
+        #     original_first_image = cv2.cvtColor(original_first_image, cv2.COLOR_BGR2RGB)
+        #     original_second_image = cv2.cvtColor(original_second_image, cv2.COLOR_BGR2RGB)
+        # except Exception as e:
+        #     print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+        #     return
+        # try:
+        #     original_first_image = Image.fromarray(original_first_image)
+        #     original_second_image = Image.fromarray(original_second_image)
+        # except Exception as e:
+        #     print_and_write(f"3\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+        #     return
         try:
             first_image = self.transform(original_first_image)
             second_image = self.transform(original_second_image)
@@ -79,40 +81,6 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
         return first_image, second_image, label, unormalized_label, self.k
 
 
-def transform2(img):
-    # Resize the image
-    try:
-        resized_image = img.resize((256, 256))
-    except Exception as e:
-        print_and_write(f"Error in resizing image: {e}")
-        
-    try:
-        # Center crop the image
-        # First, calculate the cropping box
-        left = (resized_image.width - 224) / 2
-        top = (resized_image.height - 224) / 2
-        right = (resized_image.width + 224) / 2
-        bottom = (resized_image.height + 224) / 2
-
-        # Then, crop the image
-        cropped_image = resized_image.crop((left, top, right, bottom))
-    except Exception as e:
-        print_and_write(f"Error in cropping image: {e}")
-
-    try:
-        # Convert the image to grayscale and then back to RGB
-        grayscale_image = cropped_image.convert('L').convert('RGB')
-    except Exception as e:
-        print_and_write(f"Error in converting image to grayscale: {e}")
-
-    try:
-        tensor_image = transforms.ToTensor()(grayscale_image)
-        normalized_image = transforms.Normalize(mean=norm_mean, std=norm_std)(tensor_image)
-    except Exception as e:
-        print_and_write(f"Error in converting image to tensor: {e}")
-
-    return normalized_image
-
 def get_valid_indices(sequence_len, sequence_path):
     valid_indices = []
     for idx in range(sequence_len - JUMP_FRAMES):
@@ -124,12 +92,12 @@ def get_valid_indices(sequence_len, sequence_path):
 
     return valid_indices
 
-transform = transforms.Compose([
-    transforms.Resize((256, 256)),
-    transforms.CenterCrop(224),
-    transforms.Grayscale(num_output_channels=3),
-    transforms.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
-    transforms.Normalize(mean=norm_mean,  # Normalize each channel
+transform = v2.Compose([
+    v2.Resize((256, 256)),
+    v2.CenterCrop(224),
+    v2.Grayscale(num_output_channels=3),
+    v2.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
+    v2.Normalize(mean=norm_mean,  # Normalize each channel
                          std=norm_std),
 ])    
 
