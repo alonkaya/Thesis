@@ -167,7 +167,6 @@ def init_main():
     # Optionally, set NumPy error handling to 'warn' to catch overflow errors
     np.seterr(over='warn')
 
-    print_and_write("###########################################################################################################\n\n")
 
 
 def geodesic_error(R, R_star):
