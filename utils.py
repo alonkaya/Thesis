@@ -1,12 +1,8 @@
 from params import *
 import matplotlib.pyplot as plt
 import torch.nn as nn
-import os
-import math
 import numpy as np
 import warnings
-import torch.multiprocessing as mp
-import os
 
 class MLP(nn.Module):
     def __init__(self, num_input, mlp_hidden_sizes, num_output, batchnorm_and_dropout):
@@ -106,7 +102,7 @@ def init_main():
     np.seterr(over='warn')
 
     torch.autograd.set_detect_anomaly(True)
-    
+
     # Set up custom warning handling
     warnings.filterwarnings('always', category=RuntimeWarning)
 
