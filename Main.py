@@ -1,5 +1,5 @@
 from utils import print_and_write, init_main
-init_main()
+# init_main()
 
 from FMatrixRegressor import FMatrixRegressor
 from params import *
@@ -8,7 +8,7 @@ import itertools
 from a import * 
 
 if __name__ == "__main__":
-    # init_main()
+    init_main()
         
     # Iterate over each combination
     param_combinations = itertools.product(penalty_coeffs, penaltize_normalized_options, learning_rates_vit, learning_rates_mlp)
