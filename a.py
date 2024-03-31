@@ -40,23 +40,12 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             with Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}')) as original_first_image:
                 with Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')) as original_second_image:
                     try:
-                        first_image = self.transform(original_first_image)
-                        second_image = self.transform(original_second_image)    
-                    except Exception as e:
-                        print_and_write(f"1\nsequence num: {self.sequence_num}\nException: {e}")
-                        return
-                    try:
-                        # Transform: Resize, center, grayscale
-                        first_image = self.transform(original_first_image)
-                        second_image = self.transform(original_second_image)
+                        # first_image = self.transform(original_first_image)
+                        # second_image = self.transform(original_second_image)
+                        first_image = transform2(original_first_image)
+                        second_image = transform2(original_second_image)
                     except Exception as e:
                         print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-                        return
-                    try:
-                        first_image = first_image
-                        second_image = second_image
-                    except Exception as e:
-                        print_and_write(f"3\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
                         return
                     try:
                         if PREDICT_POSE:

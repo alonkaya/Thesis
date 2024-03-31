@@ -129,6 +129,7 @@ class FMatrixRegressor(nn.Module):
 
             except Exception as e:
                 print_and_write(f'clip: {e}')
+                print_memory()
                 return
         else:
             x1_embeddings = self.pretrained_model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size)
@@ -183,7 +184,7 @@ class FMatrixRegressor(nn.Module):
             print_and_write(f'norm_layer: {e}')
             return
         try:
-            penalty = last_sing_value_penalty(unormalized_output).to(device) if not self.predict_pose else 0
+            penalty = last_sing_value_penalty(unormalized_output) if not self.predict_pose else 0
         except Exception as e:
             print_and_write(f'last_sing_value_penalty: {e}')
             print_memory()
