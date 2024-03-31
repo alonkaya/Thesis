@@ -157,8 +157,6 @@ def init_main():
     if NUM_WORKERS > 0:
         mp.set_start_method('spawn', force=True)
         
-    os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-    os.environ['TORCH_USE_CUDA_DSA'] = '1'
     torch.autograd.set_detect_anomaly(True)
     
     # Set up custom warning handling
@@ -167,7 +165,7 @@ def init_main():
     # Optionally, set NumPy error handling to 'warn' to catch overflow errors
     np.seterr(over='warn')
 
-
+    print_and_write("###########################################################################################################\n\n")
 
 def geodesic_error(R, R_star):
     # Compute the product of R transpose and R_star
