@@ -118,6 +118,7 @@ class FMatrixRegressor(nn.Module):
 
             except Exception as e:
                 print_and_write(f'clip: {e}')
+                print_memory()
                 return
         else:
             x1_embeddings = self.pretrained_model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size).to(device)
@@ -160,7 +161,7 @@ class FMatrixRegressor(nn.Module):
 
         # Apply MLP on embedding vectors
         try:        
-            unormalized_output = self.mlp(embeddings).view(-1,3,3).to(device) if not predict_t else self.t_mlp(embeddings).view(-1,3,1).to(device)
+            unormalized_output = self.mlp(embeddings).view(-1,3,3) if not predict_t else self.t_mlp(embeddings).view(-1,3,1)
         except Exception as e:
             print_and_write(f'mlp: {e}')
             return
@@ -168,9 +169,14 @@ class FMatrixRegressor(nn.Module):
         # Apply norm layer
         try:            
             output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3) if not predict_t else norm_layer(unormalized_output.view(-1, 3), predict_t=True).view(-1,3,1)
+        except Exception as e:
+            print_and_write(f'norm_layer: {e}')
+            return
+        try:
             penalty = last_sing_value_penalty(unormalized_output).to(device) if not self.predict_pose else 0
         except Exception as e:
             print_and_write(f'last_sing_value_penalty: {e}')
+            print_memory()
             return
 
         return unormalized_output, output, penalty
@@ -187,6 +193,7 @@ class FMatrixRegressor(nn.Module):
                 labels, outputs, Rs, ts = torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device)
             except Exception as e:
                 print_and_write(f'1 {e}')
+                print_memory()
                 return
             try:
                 epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, avg_loss_R, avg_loss_t, file_num, epoch_penalty = 0, 0, 0, 0, 0, 0, 0, 0
