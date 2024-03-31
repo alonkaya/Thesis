@@ -31,35 +31,35 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
                 return (len(self.valid_indices)-JUMP_FRAMES) // 3  # 1/3 if the set
             
     def __getitem__(self, idx):
-        try: 
+        try:
             if self.dataset_type == 'train':
                 idx = self.valid_indices[idx]
             else:
                 idx = self.valid_indices[idx + ((len(self.valid_indices) - JUMP_FRAMES) // 3) * 2]
+            try:
+                with Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}')) as original_first_image:
+                    with Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')) as original_second_image:
+                        try:
+                            first_image = self.transform(original_first_image)
+                            second_image = self.transform(original_second_image)
+                            # first_image = transform2(original_first_image)
+                            # second_image = transform2(original_second_image)
+                        except Exception as e:
+                            print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+                            return
+                        try:
+                            unormalized_label = get_F(self.poses, idx, self.k)
+                        except Exception as e:
+                            print_and_write(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+                            return
+                        try:
 
-            with Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}')) as original_first_image:
-                with Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')) as original_second_image:
-                    try:
-                        first_image = self.transform(original_first_image)
-                        second_image = self.transform(original_second_image)
-                        # first_image = transform2(original_first_image)
-                        # second_image = transform2(original_second_image)
-                    except Exception as e:
-                        print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-                        return
-                    try:
-                        unormalized_label = get_F(self.poses, idx, self.k)
-                    except Exception as e:
-                        print_and_write(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-                        return
-                    try:
-                                     
-                        label = norm_layer(unormalized_label.view(-1, 9)).view(3,3)
-                    except Exception as e:
-                        print_and_write("5\n {e}")
-                        return
-                        
-                    return first_image, second_image, label, unormalized_label, self.k
+                            label = norm_layer(unormalized_label.view(-1, 9)).view(3,3)
+                        except Exception as e:
+                            print_and_write("5\n {e}")
+                            return
+
+                        return first_image, second_image, label, unormalized_label, self.k
         except Exception as e:
             print_and_write(f"1\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
             return

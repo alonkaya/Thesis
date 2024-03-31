@@ -200,18 +200,18 @@ class FMatrixRegressor(nn.Module):
                     print_and_write(f'3 {e}')
                     return
 
-                try:
-                    # Compute train mean epipolar constraint error
-                    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                        first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch, file_num=file_num)
-                    epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
-                    epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
-                    epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
-
-                    file_num += 1
-                except Exception as e:
-                    print_and_write(f'4 {e}')
-                    return
+                # try:
+                #     # Compute train mean epipolar constraint error
+                #     avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
+                #         first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch, file_num=file_num)
+                #     epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
+                #     epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
+                #     epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
+                #
+                #     file_num += 1
+                # except Exception as e:
+                #     print_and_write(f'4 {e}')
+                #     return
                 try:
                     # Compute loss
                     l2_loss = self.L2_loss(output, label)
@@ -232,16 +232,16 @@ class FMatrixRegressor(nn.Module):
             try:
                 mae = torch.mean(torch.abs(labels - outputs))
 
-                epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, epoch_penalty = (
-                    v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, epoch_penalty))
-
+                # epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, epoch_penalty = (
+                #     v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, epoch_penalty))
+                #
                 train_mae.append(mae.cpu().item())
                 all_train_loss.append(avg_loss.cpu().item())
-                all_penalty.append(epoch_penalty.cpu().item())
-
-                ec_err_truth.append(epoch_avg_ec_err_truth.cpu().item())
-                ec_err_pred.append(epoch_avg_ec_err_pred.cpu().item())
-                ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized.cpu().item())
+                # all_penalty.append(epoch_penalty.cpu().item())
+                #
+                # ec_err_truth.append(epoch_avg_ec_err_truth.cpu().item())
+                # ec_err_pred.append(epoch_avg_ec_err_pred.cpu().item())
+                # ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized.cpu().item())
                 
             except Exception as e:
                 print_and_write(f'7 {e}')
@@ -249,10 +249,7 @@ class FMatrixRegressor(nn.Module):
 
             try:
                 epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} 
-                Training MAE: {train_mae[-1]}
-                Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]}
-                Train epipolar error pred: {ec_err_pred[-1]}
-                penalty: {all_penalty[-1]}\n"""
+                Training MAE: {train_mae[-1]}\n"""
 
                 print_and_write(epoch_output)
             except Exception as e:

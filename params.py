@@ -1,6 +1,6 @@
 import torch
 
-DEVICE_INDEX = 1
+DEVICE_INDEX = 0
 torch.cuda.set_device(DEVICE_INDEX)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
