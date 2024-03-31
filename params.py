@@ -1,7 +1,8 @@
 import torch
+
+DEVICE_INDEX = 0
+torch.cuda.set_device(DEVICE_INDEX)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-DEVICE_INDEX = 2
-if device == "cuda": torch.cuda.set_device(DEVICE_INDEX)
 
 learning_rates_vit = [2e-5]
 learning_rates_mlp = [2e-5]
