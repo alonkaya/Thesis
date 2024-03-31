@@ -21,7 +21,7 @@ EPIPOLAR_THRESHOLD = 0.15
 DEEPF_NOCORRS = False
 MOVE_BAD_IMAGES = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
-NUM_WORKERS = 1
+NUM_WORKERS = 0
 BN_AND_DO = True if BATCH_SIZE > 1 else False
 CUSTOMDATASET_TYPE = "CustomDataset_first_two_thirds_train"
 
