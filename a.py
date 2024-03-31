@@ -121,9 +121,9 @@ transform = v2.Compose([
     v2.Resize((256, 256)),
     v2.CenterCrop(224),
     v2.Grayscale(num_output_channels=3),
-    v2.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
-    # v2.Normalize(mean=norm_mean,  # Normalize each channel
-    #                      std=norm_std),
+    v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
+    v2.Normalize(mean=norm_mean,  # Normalize each channel
+                         std=norm_std),
 ])    
 
 
