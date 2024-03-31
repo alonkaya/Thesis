@@ -109,10 +109,10 @@ class FMatrixRegressor(nn.Module):
             try:
                 processor = self.clip_image_processor_t if predict_t else self.clip_image_processor
                 model = self.pretrained_model_t if predict_t else self.pretrained_model
-                print(f'first: {x1.device}, {x2.device}')  
+                # print(f'first: {x1.device}, {x2.device}')  
                 x1 = processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
                 x2 = processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
-                print(f'second: {x1.device}, {x2.device}')  
+                # print(f'second: {x1.device}, {x2.device}')  
             except Exception as e:
                 print_and_write(f'processor: {e}')
                 return
@@ -126,7 +126,7 @@ class FMatrixRegressor(nn.Module):
             try:
                 x1_embeddings = model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size)
                 x2_embeddings = model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size) 
-                print(f'third: {x1_embeddings.device}, {x2_embeddings.device}')  
+                # print(f'third: {x1_embeddings.device}, {x2_embeddings.device}')  
             except Exception as e:
                 print_and_write(f'clip: {e}')
                 return
