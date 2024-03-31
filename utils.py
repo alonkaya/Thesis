@@ -153,9 +153,6 @@ def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
 
 def init_main():
     faulthandler.enable()
-
-    if NUM_WORKERS > 0:
-        mp.set_start_method('spawn', force=True)
         
     torch.autograd.set_detect_anomaly(True)
     

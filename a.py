@@ -2,14 +2,12 @@ import signal
 import sys
 from FunMatrix import *
 from utils import *
-from torch.utils.data import DataLoader, ConcatDataset
-from torchvision import transforms
+from torch.utils.data import DataLoader
+from torchvision.transforms import v2
 import os
 from PIL import Image
-import matplotlib.pyplot as plt
-import torchvision.transforms.functional as T
 import traceback
-
+import torchvision
  
 class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
     """Takes the first 2/3 images in the sequence for training, and the last 1/3 for testing"""
@@ -31,46 +29,48 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
                 return (len(self.valid_indices)-JUMP_FRAMES) // 3  # 1/3 if the set
             
     def __getitem__(self, idx):
-        try: 
-            if self.dataset_type == 'train':
-                idx = self.valid_indices[idx]
-            else:
-                idx = self.valid_indices[idx + ((len(self.valid_indices) - JUMP_FRAMES) // 3) * 2]
-
-            with Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}')) as original_first_image:
-                with Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')) as original_second_image:
-                    try:
-                        # first_image = self.transform(original_first_image)
-                        # second_image = self.transform(original_second_image)
-                        first_image = transform2(original_first_image)
-                        second_image = transform2(original_second_image)
-                    except Exception as e:
-                        print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-                        return
-                    try:
-                        if PREDICT_POSE:
-                            unormalized_R, unormalized_t = compute_relative_transformations(self.poses[idx],self. poses[idx+JUMP_FRAMES])
-                            unormalized_label = torch.cat((unormalized_R, unormalized_t.view(3,1)), dim=-1)
-                        else:
-                            unormalized_label = get_F(self.poses, idx, self.k)
-                    except Exception as e:
-                        print_and_write(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
-                        return
-                    try:
-                        if PREDICT_POSE:
-                            R, t = norm_layer(unormalized_R.view(-1, 9)).view(3,3), norm_layer(unormalized_t.view(-1, 3), predict_t=True).view(3)
-
-                            label = torch.cat((R, t.view(3,1)), dim=-1)
-                        else:               
-                            label = norm_layer(unormalized_label.view(-1, 9)).view(3,3)
-                    except Exception as e:
-                        print_and_write("5\n {e}")
-                        return
-                        
-                    return first_image, second_image, label, unormalized_label, self.k
+        if self.dataset_type == 'train':
+            idx = self.valid_indices[idx]
+        else:
+            idx = self.valid_indices[idx + ((len(self.valid_indices) - JUMP_FRAMES) // 3) * 2]
+            
+        try:
+            original_first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+            original_second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
         except Exception as e:
             print_and_write(f"1\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
             return
+        
+        try:
+            first_image = self.transform(original_first_image)
+            second_image = self.transform(original_second_image)
+        except Exception as e:
+            print_and_write(f"2\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+            return
+        
+        try:
+            if PREDICT_POSE:
+                unormalized_R, unormalized_t = compute_relative_transformations(self.poses[idx],self. poses[idx+JUMP_FRAMES])
+                unormalized_label = torch.cat((unormalized_R, unormalized_t.view(3,1)), dim=-1)
+            else:
+                unormalized_label = get_F(self.poses, idx, self.k)
+        except Exception as e:
+            print_and_write(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
+            return
+        
+        try:
+            if PREDICT_POSE:
+                R, t = norm_layer(unormalized_R.view(-1, 9)).view(3,3), norm_layer(unormalized_t.view(-1, 3), predict_t=True).view(3)
+
+                label = torch.cat((R, t.view(3,1)), dim=-1)
+            else:               
+                label = norm_layer(unormalized_label.view(-1, 9)).view(3,3)
+        except Exception as e:
+            print_and_write("5\n {e}")
+            return
+            
+        return first_image, second_image, label, unormalized_label, self.k
+
 
 def transform2(img):
     # Resize the image
@@ -99,8 +99,8 @@ def transform2(img):
         print_and_write(f"Error in converting image to grayscale: {e}")
 
     try:
-        tensor_image = transforms.ToTensor()(grayscale_image)
-        normalized_image = transforms.Normalize(mean=norm_mean, std=norm_std)(tensor_image)
+        tensor_image = v2.ToTensor()(grayscale_image)
+        normalized_image = v2.Normalize(mean=norm_mean, std=norm_std)(tensor_image)
     except Exception as e:
         print_and_write(f"Error in converting image to tensor: {e}")
 
@@ -117,12 +117,12 @@ def get_valid_indices(sequence_len, sequence_path):
 
     return valid_indices
 
-transform = transforms.Compose([
-    transforms.Resize((256, 256)),
-    transforms.CenterCrop(224),
-    transforms.Grayscale(num_output_channels=3),
-    transforms.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
-    transforms.Normalize(mean=norm_mean,  # Normalize each channel
+transform = v2.Compose([
+    v2.Resize((256, 256)),
+    v2.CenterCrop(224),
+    v2.Grayscale(num_output_channels=3),
+    v2.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
+    v2.Normalize(mean=norm_mean,  # Normalize each channel
                          std=norm_std),
 ])    
 
