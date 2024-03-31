@@ -262,6 +262,42 @@ class FMatrixRegressor(nn.Module):
         output = f"""Train unormalized ground truth error: {np.mean(ec_err_truth)} val unormalized ground truth error: {np.mean(val_ec_err_truth)}\n\n\n"""
         print_and_write(output)
  
+        plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
+                        title="Loss" if not self.predict_pose else "Loss R", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2,
+                        use_reconstruction=self.use_reconstruction)
+        
+        plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
+                        title="MAE" if not self.predict_pose else "MAE R", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2,
+                        use_reconstruction=self.use_reconstruction)
+        
+        # if self.predict_pose:
+        #     plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss_t, y2=all_val_loss, 
+        #                     title="Loss t", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+        #                     lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+        #                     model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2,
+        #                     use_reconstruction=self.use_reconstruction)     
+            
+        #     plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae_t, y2=val_mae, 
+        #                     title="MAE t", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+        #                     lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+        #                     model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2,
+        #                     use_reconstruction=self.use_reconstruction)           
+        
+        plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
+                        title="Epipolar error unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2,
+                        use_reconstruction=self.use_reconstruction)
+        
+        plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred, y2=val_ec_err_pred, 
+                        title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
+                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2,
+                        use_reconstruction=self.use_reconstruction)
 
 
 def print_memory(device_index=0):

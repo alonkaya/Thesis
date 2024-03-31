@@ -24,6 +24,31 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.layers(x)
 
+
+def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False, model=CLIP_MODEL_NAME, augmentation=AUGMENTATION, enforce_rank_2=ENFORCE_RANK_2, use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF):
+    model_name = "CLIP" if model == CLIP_MODEL_NAME else "Google ViT"
+    
+    fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
+    
+    for ax, y_scale in zip(axs, ['linear', 'log']):
+        try:
+            ax.plot(x, y1, color='steelblue', label="Train")
+            if y2 and len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
+
+            for i in range(0, len(y1), max(1, len(y1)//10)):
+                ax.text(x[i], y1[i], f'{y1[i]:.4f}', fontsize=9, color='blue', ha='center', va='bottom')
+                if y2: ax.text(x[i], y2[i], f'{y2[i]:.4f}', fontsize=9, color='red', ha='center', va='top')
+
+            ax.set_xlabel(x_label)
+            ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
+            ax.set_title(f'{y_scale} scale')
+        
+            ax.set_yscale(y_scale)
+            ax.grid(True)
+            ax.legend()
+        except Exception as e:
+            print_and_write(e)
+
 class GroupedConvolution(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, padding, groups):
         super(GroupedConvolution, self).__init__()
