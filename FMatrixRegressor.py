@@ -63,15 +63,6 @@ class FMatrixRegressor(nn.Module):
             self.pretrained_model = ViTModel.from_pretrained(
                 pretrained_model_name).to(device)
 
-        # Freeze the parameters of the pretrained model if specified
-        # if freeze_pretrained_model:
-        #     for param in self.pretrained_model.parameters():
-        #         param.requires_grad = False
-        # print(len(self.pretrained_model.encoder.layer))
-        # for layer in self.pretrained_model.encoder.layer[len(self.pretrained_model.encoder.layer)-unfrozen_layers:]:
-        #     for param in layer.parameters():
-        #         param.requires_grad = True
-
         # Get input dimension for the MLP based on ViT configuration
         self.model_hidden_size = self.pretrained_model.config.hidden_size
         if self.average_embeddings:
@@ -158,12 +149,6 @@ class FMatrixRegressor(nn.Module):
         return embeddings
 
     def forward(self, x1, x2, predict_t=False):
-        # If deepF_nocors
-        # net = HomographyNet(use_reconstruction_module=False).to(device)
-        # output = net.foward(x1, x2).to(device)
-        # return output
-        
-        # Get embeddings from images
         try:
             embeddings = self.get_embeddings(x1, x2, predict_t=predict_t)
         except Exception as e:
@@ -206,11 +191,11 @@ class FMatrixRegressor(nn.Module):
                 print_and_write(f'1 {e}')
                 print_memory()
                 return
-            try:
-                epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, avg_loss_R, avg_loss_t, file_num, epoch_penalty = 0, 0, 0, 0, 0, 0, 0, 0
-            except Exception as e:
-                print_and_write(f'2 {e}')
-                return
+            
+            epoch_stats = {"algebraic_dist_truth": 0, "algebraic_dist_pred": 0, "algebraic_dist_pred_unormalized": 0, 
+                            "RE1_dist_truth": 0, "RE1_dist_pred": 0, "RE1_dist_pred_unormalized": 0, 
+                            "SED_dist_truth": 0, "SED_dist_pred": 0, "SED_dist_pred_unormalized": 0, 
+                            "avg_loss": 0, "avg_loss_R": 0, "avg_loss_t": 0, "epoch_penalty": 0, "file_num": 0}
             for first_image, second_image, label, unormalized_label, K in train_loader:
                 try:
                     first_image = first_image.to(device)
@@ -259,21 +244,14 @@ class FMatrixRegressor(nn.Module):
                         
                     else:
                         unormalized_output, output, penalty = self.forward(first_image, second_image)
-                        epoch_penalty = epoch_penalty + penalty
+                        epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + penalty
 
                 except Exception as e:
                     print_and_write(f'3 {e}')
                     return
 
                 try:
-                    # Compute train mean epipolar constraint error
-                    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-                        first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch, file_num=file_num)
-                    epoch_avg_ec_err_truth = epoch_avg_ec_err_truth + avg_ec_err_truth
-                    epoch_avg_ec_err_pred = epoch_avg_ec_err_pred + avg_ec_err_pred
-                    epoch_avg_ec_err_pred_unormalized = epoch_avg_ec_err_pred_unormalized + avg_ec_err_pred_unormalized
-
-                    file_num += 1
+                    update_dists(epoch_stats, first_image.detach(), second_image.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch)
                 except Exception as e:
                     print_and_write(f'4 {e}')
                     return
@@ -346,48 +324,6 @@ class FMatrixRegressor(nn.Module):
                 print_and_write(f'7 {e}')
                 return
 
-            # Validation
-            # self.eval()
-            # val_labels, val_outputs = torch.tensor([]).to(device), torch.tensor([]).to(device)
-            # val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized, epoch_penalty, val_avg_loss = 0, 0, 0, 0, 0
-
-            # with torch.no_grad():
-            #     for val_first_image, val_second_image, val_label, val_unormalized_label, val_K in val_loader:
-            #         try:
-            #             val_first_image, val_second_image, val_label, val_unormalized_label, val_k = val_first_image.to(
-            #                 device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device), val_K.to(device)
-                        
-            #             unormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
-            #             epoch_penalty = epoch_penalty + penalty
-
-            #             # Compute val mean epipolar constraint error
-            #             val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
-            #                 val_first_image, val_second_image, val_unormalized_label, val_output, unormalized_val_output, epoch=-1, file_num=file_num)
-            #             val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
-            #             val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
-            #             val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
-
-            #             val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
-
-            #             val_outputs = torch.cat((val_outputs, val_output), dim=0)
-            #             val_labels = torch.cat((val_labels, val_label), dim=0)
-            #         except Exception as e:
-            #             print_and_write(f'length: {len(val_labels)}, val exception: {e}')
-            #     try:
-            #         # Calculate and store mean absolute error for the epoch
-            #         mae = torch.mean(torch.abs(val_labels - val_outputs))
-
-            #         val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss = (
-            #             v / len(val_loader) for v in (val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss))
-
-            #         val_mae.append(mae.cpu().item())
-            #         val_ec_err_truth.append(val_epoch_avg_ec_err_truth.cpu().item())
-            #         val_ec_err_pred.append(val_epoch_avg_ec_err_pred.cpu().item())
-            #         val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized.cpu().item())
-            #         all_val_loss.append(val_avg_loss.cpu().item())
-            #         all_penalty.append(epoch_penalty.cpu().item())
-            #     except Exception as e:
-            #         print_and_write(f'8 {e}')
             try:
                 if self.predict_pose:
                     epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t[-1]}
@@ -400,11 +336,7 @@ class FMatrixRegressor(nn.Module):
                     Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]}
                     Train epipolar error pred: {ec_err_pred[-1]}
                     penalty: {all_penalty[-1]}\n"""
-                    # epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} 
-                    # Training MAE: {train_mae[-1]} Val mae: {val_mae[-1]} 
-                    # Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]} Val epipolar error pred unormalized: {val_ec_err_pred_unormalized[-1]}
-                    # Train epipolar error pred: {ec_err_pred[-1]} Val epipolar error pred: {val_ec_err_pred[-1]} 
-                    # penalty: {all_penalty[-1]}\n"""
+
                 print_and_write(epoch_output)
             except Exception as e:
                 print_and_write(f'9 {e}')

@@ -183,28 +183,28 @@ def data_with_one_sequence(batch_size, CustomDataset_type):
 #             print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
 #         return output
 
-# if __name__ == "__main__":
-#     train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE)
+if __name__ == "__main__":
+    train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE)
     
-#     avg_ep_err_unnormalized, avg_ep_err = 0, 0
-#     for i,(first_image, second_image, label, unormalized_label,_) in enumerate(val_loader):
-#         batch_ep_err_unnormalized, batch_ep_err = 0, 0
-#         for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
-#             batch_ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F).get_epipolar_err()
-#             batch_ep_err += EpipolarGeometry(img_1, img_2, F).get_epipolar_err()
-#             print(torch.mean(F), torch.mean(unormalized_F))
-#             # os.makedirs(os.path.join('unormalized'), exist_ok=True)
-#             # os.makedirs(os.path.join('normalized'), exist_ok=True)
+    avg_ep_err_unnormalized, avg_ep_err = 0, 0
+    for i,(first_image, second_image, label, unormalized_label,_) in enumerate(val_loader):
+        batch_ep_err_unnormalized, batch_ep_err = 0, 0
+        for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
+            # batch_ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F).get_epipolar_err()
+            # batch_ep_err += EpipolarGeometry(img_1, img_2, F).get_epipolar_err()
+            # print(torch.mean(F), torch.mean(unormalized_F))
+            # # os.makedirs(os.path.join('unormalized'), exist_ok=True)
+            # # os.makedirs(os.path.join('normalized'), exist_ok=True)
 
-#             # epipolar_geo_unormalized = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label)
-#             # epipolar_geo_unormalized.visualize(sqResultDir='unormalized', file_num=i)
+            epipolar_geo_unormalized = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label)
+            epipolar_geo_unormalized.visualize(sqResultDir='unormalized', file_num=i)
 
-#             # epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label)
-#             # epipolar_geo.visualize(sqResultDir='normalized', file_num=i)
+            epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label)
+            epipolar_geo.visualize(sqResultDir='normalized', file_num=i)
             
-#         batch_ep_err_unnormalized, batch_ep_err = batch_ep_err_unnormalized/len(first_image), batch_ep_err/len(first_image)
-#         avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + batch_ep_err_unnormalized, avg_ep_err + batch_ep_err
+        batch_ep_err_unnormalized, batch_ep_err = batch_ep_err_unnormalized/len(first_image), batch_ep_err/len(first_image)
+        avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + batch_ep_err_unnormalized, avg_ep_err + batch_ep_err
 
-#     avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized/len(val_loader), avg_ep_err/len(val_loader)
-#     print(avg_ep_err_unnormalized, avg_ep_err)
+    avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized/len(val_loader), avg_ep_err/len(val_loader)
+    print(avg_ep_err_unnormalized, avg_ep_err)
 

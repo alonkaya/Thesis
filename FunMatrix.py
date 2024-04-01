@@ -130,49 +130,57 @@ def last_sing_value_penalty(output):
 
     return rank_penalty
 
-def get_avg_epipolar_test_errors(first_image, second_image, unormalized_label, output, unormalized_output, epoch, file_num):
-    # Compute mean epipolar constraint error
+def make_rank2(F):
+    U, S, Vt = torch.linalg.svd(F, full_matrices=False)
+
+    S[:,-1] = 0
+
+    output = torch.matmul(torch.matmul(U, torch.diag_embed(S)), Vt)
+
+    if torch.linalg.matrix_rank(output) != 2:
+        print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
+
+    return output
+
+def update_dists(stats, first_image, second_image, unormalized_label, output, unormalized_output, epoch):
     if ENFORCE_RANK_2:
-        try:
-            U1, S1, Vt1 = torch.linalg.svd(output, full_matrices=False)
-            U2, S2, Vt2 = torch.linalg.svd(unormalized_output, full_matrices=False)
-        except Exception as e:
-            print_and_write(f'Error in svd: {e}')
+        output = make_rank2(output)
+        unormalized_output = make_rank2(unormalized_output)
+    
+    algebraic_dist_truth, algebraic_dist_pred, algebraic_dist_pred_unormalized, RE1_dist_truth, RE1_dist_pred, RE1_dist_pred_unormalized, SED_dist_truth, SED_dist_pred, SED_dist_pred_unormalized = 0, 0, 0, 0, 0, 0, 0, 0, 0
+    for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
+        epipolar_geo_truth = EpipolarGeometry(img_1,img_2, F_truth)
+        epipolar_geo_pred = EpipolarGeometry(img_1,img_2, F_pred)
+        epipolar_geo_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
+        
+        algebraic_dist_truth = algebraic_dist_truth + epipolar_geo_truth.get_algebraic_distance()
+        algebraic_dist_pred = algebraic_dist_pred + epipolar_geo_pred.get_algebraic_distance()
+        algebraic_dist_pred_unormalized = algebraic_dist_pred_unormalized + epipolar_geo_pred_unormalized.get_algebraic_distance()
+        if RE1_DIST:
+            RE1_dist_truth = RE1_dist_truth + epipolar_geo_truth.get_RE1_distance(algebraic_dist_truth)
+            RE1_dist_pred = RE1_dist_pred + epipolar_geo_pred.get_RE1_distance(algebraic_dist_pred)
+            RE1_dist_pred_unormalized = RE1_dist_pred_unormalized + epipolar_geo_pred_unormalized.get_RE1_distance(algebraic_dist_pred_unormalized)
+        if SED_DIST:
+            SED_dist_truth = SED_dist_truth + epipolar_geo_truth.get_SED_distance()
+            SED_dist_pred = SED_dist_pred + epipolar_geo_pred.get_SED_distance()
+            SED_dist_pred_unormalized = SED_dist_pred_unormalized + epipolar_geo_pred_unormalized.get_SED_distance()
+    
 
-        try:
-            S1[:, -1] = 0
-            S2[:, -1] = 0
+    stats["algebraic_dist_truth"] = stats["algebraic_dist_truth"] + (algebraic_dist_truth / len(first_image))
+    stats["algebraic_dist_pred"] = stats["algebraic_dist_pred"] + (algebraic_dist_pred / len(first_image))
+    stats["algebraic_dist_pred_unormalized"] = stats["algebraic_dist_pred_unormalized"] + (algebraic_dist_pred_unormalized / len(first_image))
+    if RE1_DIST:
+        stats["RE1_dist_truth"] = stats["RE1_dist_truth"] + (RE1_dist_truth / len(first_image))
+        stats["RE1_dist_pred"] = stats["RE1_dist_pred"] + (RE1_dist_pred / len(first_image))
+        stats["RE1_dist_pred_unormalized"] = stats["RE1_dist_pred_unormalized"] + (RE1_dist_pred_unormalized / len(first_image))
+    if SED_DIST:
+        stats["SED_dist_truth"] = stats["SED_dist_truth"] + (SED_dist_truth / len(first_image))
+        stats["SED_dist_pred"] = stats["SED_dist_pred"] + (SED_dist_pred / len(first_image))
+        stats["SED_dist_pred_unormalized"] = stats["SED_dist_pred_unormalized"] + (SED_dist_pred_unormalized / len(first_image))
 
-            output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), Vt1)
-            unormalized_output = torch.matmul(torch.matmul(U2, torch.diag_embed(S2)), Vt2)
-
-        except Exception as e:
-            print_and_write(f'Error in matmuls: {e}')
-
-    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized, avg_RE1_truth, avg_RE1_pred, avg_RE1_pred_unormalized = 0, 0, 0, 0, 0, 0
-    try:
-        for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
-            ec_err_truth = EpipolarGeometry(img_1,img_2, F_truth).get_epipolar_err()
-            ec_err_pred = EpipolarGeometry(img_1,img_2, F_pred).get_epipolar_err()
-            ec_err_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized).get_epipolar_err()
-
-            avg_ec_err_truth = avg_ec_err_truth + ec_err_truth
-            avg_ec_err_pred = avg_ec_err_pred + ec_err_pred
-            avg_ec_err_pred_unormalized = avg_ec_err_pred_unormalized + ec_err_pred_unormalized
-
-            if VISIUALIZE["do"] and VISIUALIZE["epoch"] == epoch:
-                epipolar = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
-                epipolar.visualize(sqResultDir='preicted_epipole_lines_realestate_from_pose', file_num=file_num)
-
-
-    except Exception as e:
-        print_and_write(f'Error in get_avg_epipolar_test_errors: {e}')
-
-    avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized = (
-        v / len(first_image) for v in (avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized))
-
-    return avg_ec_err_truth, avg_ec_err_pred, avg_ec_err_pred_unormalized
-
+    if VISIUALIZE["epoch"] == epoch:
+        epipolar_geo_pred_unormalized.visualize(sqResultDir='preicted_epipole_lines_realestate', file_num=stats["file_num"])
+        stats["file_num"] = stats["file_num"] + 1
 
 class EpipolarGeometry:
     def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):
@@ -181,6 +189,9 @@ class EpipolarGeometry:
         # Convert images back to original
         self.image1_numpy = reverse_transforms(image1_tensors)
         self.image2_numpy = reverse_transforms(image2_tensors)
+
+        self.pts1, self.pts2 = self.get_keypoints()
+        # pts1, pts2 = torch.tensor(pts1, dtype=torch.float32).to(device), torch.tensor(pts2, dtype=torch.float32).to(device)
 
         self.sequence_path = os.path.join(
             'sequences', sequence_num) if sequence_num else None
@@ -214,7 +225,7 @@ class EpipolarGeometry:
         min_distance_index = 0
         for i, (m, n) in enumerate(matches):
             distances.append(m.distance / n.distance)
-            if distances[-1] < threshold / ((len(self.good) // 15)+1):
+            if distances[-1] < threshold / ((len(self.good) // 20)+1):
                 self.good.append(m)
             min_distance_index = i if distances[i] < distances[min_distance_index] else min_distance_index
         # If no point passed the threshold, add the smallest distance ratio point
@@ -229,39 +240,63 @@ class EpipolarGeometry:
         pts2 = np.concatenate((pts2, np.ones((pts2.shape[0], 1))), axis=-1) # shape [n,3]
 
         return pts1, pts2
-
-    def epipolar_test_all_points(self, pts1, pts2):
+    
+    def algebraic_distance(self, pt1, pt2):
+        return torch.abs(pt2.T.dot(self.F).dot(pt1))
+    
+    def algebraic_distance_all_points(self):
         # Iterates over all keypoints in 'good'
         errs = torch.abs(torch.matmul(torch.matmul(
-            pts2.view(-1, 1, 3), self.F), pts1.view(-1, 3, 1)))
+            self.pts2.view(-1, 1, 3), self.F), self.pts1.view(-1, 3, 1)))
 
-        l1 = torch.matmul(self.F.T, pts2.view(-1, 3, 1)).view(-1,3)
-        l2 = torch.matmul(self.F, pts1.view(-1, 3, 1)).view(-1,3)
-        inhomogeneous_l1 = l1[:,0:2]
-        inhomogeneous_l2 = l2[:, 0:2]
+        return torch.mean(errs)
+
+    def compute_epipolar_lines(self, F, points):
+        """Compute the epipolar lines for multiple points using vectorized operations."""
+        return torch.matmul(F, points.view(-1, 3, 1)).view(-1,3)
+    
+    def point_2_line_distance(self, point, l):
+        l = l.flatten()
+        result = abs(np.dot(point, l.T) / np.sqrt(l[0]**2 + l[1]**2))
+
+        return result
+    
+    def point_2_line_distance_all_points(self, points, lines):
+        numerators = abs(torch.sum(lines * points, axis=1))  # Element-wise multiplication and sum over rows
+        denominators = torch.sqrt(lines[:, 0]**2 + lines[:, 1]**2)
+
+        return torch.mean(numerators / denominators)
+
+    def get_RE1_distance(self, algebraic_distance):
+        inhomogeneous_l1 = self.compute_epipolar_lines(self.F.T, self.pts2)[:,0:2]
+        inhomogeneous_l2 = self.compute_epipolar_lines(self.F, self.pts1)[:,0:2]
 
         denominator = torch.sum(torch.concat((inhomogeneous_l1, inhomogeneous_l2), dim=1) ** 2, dim=1)
 
-        RE1 = (errs**2) / denominator
+        RE1 = (algebraic_distance**2) / denominator
 
-        return torch.mean(errs), torch.mean(RE1)
+        return torch.mean(RE1)
+    
+    def get_SED_distance(self):
+        lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
+        lines2 = self.compute_epipolar_lines(self.F, self.pts1)   # shape (n,3)
+        
+        # Compute the distances from each point to its corresponding epipolar line
+        distances1 = self.point_2_line_distance_all_points(self.pts1, lines1)
+        distances2 = self.point_2_line_distance_all_points(self.pts2, lines2)
 
-    def get_epipolar_err(self):
+        sed = distances1**2 + distances2**2
+        
+        return sed
+        
+    def get_algebraic_distance(self):
         try:
-            pts1, pts2 = self.get_keypoints()
+            algebraic_distance = self.algebraic_distance_all_points(self.pts1, self.pts2)
         except Exception as e:
-            print_and_write(f'Error in get_keypoints: {e}')
+            print_and_write(f'Error in algebraic_distance_all_points: {e}')
             return
 
-        pts1, pts2 = torch.tensor(pts1, dtype=torch.float32).to(device), torch.tensor(pts2, dtype=torch.float32).to(device)
-
-        try:
-            err, RE1 = self.epipolar_test_all_points(pts1, pts2)
-        except Exception as e:
-            print_and_write(f'Error in epipolar_test_all_points: {e}')
-            return
-
-        return err
+        return algebraic_distance
 
     def epipoline(self, x, formula):
         array = formula.flatten()
@@ -269,15 +304,6 @@ class EpipolarGeometry:
         b = array[1]
         c = array[2]
         return int((-c - a * x) / b)
-
-    def get_point_2_line_error(self, point, l):
-        l = l.flatten()
-        result = abs(np.dot(point, l.T) / np.sqrt(l[0] * l[0] + l[1] * l[1]))
-
-        return result
-
-    def epipolar_test_single_point(self, pt1, pt2):
-        return np.abs(pt2.T.dot(self.F).dot(pt1))
 
     def visualize(self, sqResultDir, file_num):
         bad_frames_path = os.path.join(sqResultDir, "bad_frames")
@@ -296,8 +322,7 @@ class EpipolarGeometry:
 
         img_W = self.image1_numpy.shape[1] - 1
         epip_test_err = 0
-        pts1, pts2 = self.get_keypoints()
-        for color_idx, (pt1, pt2) in enumerate(zip(pts1, pts2)):
+        for color_idx, (pt1, pt2) in enumerate(zip(self.pts1, self.pts2)):
             x1, y1, _ = pt1
             x2, y2, _ = pt2
 
@@ -305,10 +330,9 @@ class EpipolarGeometry:
             line_2 = np.dot(self.F, pt1)
 
             # Get ditance from point to line error
-            # TODO: should this be pt2*line1 or pt2*line2?
-            avg_distance_err_img1 += self.get_point_2_line_error(pt2, line_1)
-            avg_distance_err_img2 += self.get_point_2_line_error(pt1, line_2)
-            epip_test_err += self.epipolar_test_single_point(pt1, pt2)
+            avg_distance_err_img1 += self.point_2_line_distance(pt1, line_1)
+            avg_distance_err_img2 += self.point_2_line_distance(pt2, line_2)
+            epip_test_err += self.algebraic_distance(pt1, pt2)
 
             # calculating 2 points on the line
             x_0 = self.epipoline(0, line_1)
@@ -338,9 +362,9 @@ class EpipolarGeometry:
             cv2.circle(self.image2_numpy.copy(),
                        (int(x2), int(y2)), radius=4, color=color)
 
-        avg_distance_err_img1 /= pts1.shape[0]
-        avg_distance_err_img2 /= pts1.shape[0]
-        epip_test_err /= pts1.shape[0]
+        avg_distance_err_img1 /= self.pts1.shape[0]
+        avg_distance_err_img2 /= self.pts1.shape[0]
+        epip_test_err /= self.pts1.shape[0]
 
         vis = np.concatenate((img1_line, img2_line), axis=0)
         font = cv2.FONT_HERSHEY_SIMPLEX
