@@ -154,9 +154,9 @@ def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
 
 def init_main():
     # Redirection code to output.txt
-    with open('output.txt', 'a') as log_file:
-        sys.stdout = log_file
-        sys.stderr = log_file
+    # with open('output.txt', 'a') as log_file:
+    #     sys.stdout = log_file
+    #     sys.stderr = log_file
     faulthandler.enable()
         
     torch.autograd.set_detect_anomaly(True)

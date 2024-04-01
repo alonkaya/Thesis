@@ -261,10 +261,10 @@ class FMatrixRegressor(nn.Module):
                 try:
                     if self.predict_pose:
                         loss_R = self.L2_loss(R, label[:, :, :3])
-                        avg_loss_R += loss_R.detach()
+                        epoch_stats["avg_loss_R"] += loss_R.detach()
 
                         loss_t = self.L2_loss_t(t, label[:, :, 3].view(-1,3,1))
-                        avg_loss_t += loss_t.detach()   
+                        epoch_stats["avg_loss_t"] += loss_t.detach()   
 
                         self.optimizer.zero_grad()
                         loss_R.backward()
@@ -283,7 +283,7 @@ class FMatrixRegressor(nn.Module):
                         # Compute loss
                         l2_loss = self.L2_loss(output, label)
                         loss = l2_loss + self.penalty_coeff*penalty
-                        avg_loss = avg_loss + loss.detach()
+                        epoch_stats["avg_loss"] = epoch_stats["avg_loss"] + loss.detach()
 
                         # Compute Backward pass and gradients
                         self.optimizer.zero_grad()
@@ -302,22 +302,22 @@ class FMatrixRegressor(nn.Module):
                     mae_R = torch.mean(torch.abs(labels[:, :, :3] - Rs))
                     mae_t = torch.mean(torch.abs(label[:, :, 3].view(-1,3,1) - ts))
 
-                    avg_loss_R, avg_loss_t = (
-                        v / len(train_loader) for v in (avg_loss_R, avg_loss_t))
+                    epoch_stats["avg_loss_R"], epoch_stats["avg_loss_t"] = (
+                        v / len(train_loader) for v in (epoch_stats["avg_loss_R"], epoch_stats["avg_loss_t"]))
 
                     train_mae.append(mae_R.cpu().item())
                     train_mae_t.append(mae_t.cpu().item())
-                    all_train_loss.append(avg_loss_R.cpu().item())
-                    all_train_loss_t.append(avg_loss_t.cpu().item())
+                    all_train_loss.append(epoch_stats["avg_loss_R"].cpu().item())
+                    all_train_loss_t.append(epoch_stats["avg_loss_t"].cpu().item())
                 else:
                     mae = torch.mean(torch.abs(labels - outputs))
 
-                    avg_loss, epoch_penalty = (
-                        v / len(train_loader) for v in (avg_loss, epoch_penalty))
+                    epoch_stats["avg_loss"], epoch_stats["epoch_penalty"] = (
+                        v / len(train_loader) for v in (epoch_stats["avg_loss"], epoch_stats["epoch_penalty"]))
 
                     train_mae.append(mae.cpu().item())
-                    all_train_loss.append(avg_loss.cpu().item())
-                    all_penalty.append(epoch_penalty.cpu().item())
+                    all_train_loss.append(epoch_stats["avg_loss"].cpu().item())
+                    all_penalty.append(epoch_stats["epoch_penalty"].cpu().item())
             
                 all_algberaic_truth.append(epoch_stats["algebraic_dist_truth"].cpu().item() / len(train_loader))
                 all_algberaic_pred.append(epoch_stats["algebraic_dist_pred"].cpu().item() / len(train_loader))
