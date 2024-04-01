@@ -142,7 +142,7 @@ def make_rank2(F):
 
     return output
 
-def update_dists(stats, first_image, second_image, unormalized_label, output, unormalized_output, epoch):
+def update_dists(stats, first_image, second_image, unormalized_label, output, unormalized_output, epoch=0):
     if ENFORCE_RANK_2:
         output = make_rank2(output)
         unormalized_output = make_rank2(unormalized_output)
@@ -153,13 +153,13 @@ def update_dists(stats, first_image, second_image, unormalized_label, output, un
         epipolar_geo_pred = EpipolarGeometry(img_1,img_2, F_pred)
         epipolar_geo_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
         
-        algebraic_dist_truth = algebraic_dist_truth + epipolar_geo_truth.get_algebraic_distance()
-        algebraic_dist_pred = algebraic_dist_pred + epipolar_geo_pred.get_algebraic_distance()
-        algebraic_dist_pred_unormalized = algebraic_dist_pred_unormalized + epipolar_geo_pred_unormalized.get_algebraic_distance()
+        algebraic_dist_truth = algebraic_dist_truth + epipolar_geo_truth.get_mean_algebraic_distance()
+        algebraic_dist_pred = algebraic_dist_pred + epipolar_geo_pred.get_mean_algebraic_distance()
+        algebraic_dist_pred_unormalized = algebraic_dist_pred_unormalized + epipolar_geo_pred_unormalized.get_mean_algebraic_distance()
         if RE1_DIST:
-            RE1_dist_truth = RE1_dist_truth + epipolar_geo_truth.get_RE1_distance(algebraic_dist_truth)
-            RE1_dist_pred = RE1_dist_pred + epipolar_geo_pred.get_RE1_distance(algebraic_dist_pred)
-            RE1_dist_pred_unormalized = RE1_dist_pred_unormalized + epipolar_geo_pred_unormalized.get_RE1_distance(algebraic_dist_pred_unormalized)
+            RE1_dist_truth = RE1_dist_truth + epipolar_geo_truth.get_RE1_distance()
+            RE1_dist_pred = RE1_dist_pred + epipolar_geo_pred.get_RE1_distance()
+            RE1_dist_pred_unormalized = RE1_dist_pred_unormalized + epipolar_geo_pred_unormalized.get_RE1_distance()
         if SED_DIST:
             SED_dist_truth = SED_dist_truth + epipolar_geo_truth.get_SED_distance()
             SED_dist_pred = SED_dist_pred + epipolar_geo_pred.get_SED_distance()
@@ -190,8 +190,8 @@ class EpipolarGeometry:
         self.image1_numpy = reverse_transforms(image1_tensors)
         self.image2_numpy = reverse_transforms(image2_tensors)
 
-        self.pts1, self.pts2 = self.get_keypoints()
-        # pts1, pts2 = torch.tensor(pts1, dtype=torch.float32).to(device), torch.tensor(pts2, dtype=torch.float32).to(device)
+        pts1, pts2 = self.get_keypoints()
+        self.pts1, self.pts2 = torch.tensor(pts1, dtype=torch.float32).to(device), torch.tensor(pts2, dtype=torch.float32).to(device)
 
         self.sequence_path = os.path.join(
             'sequences', sequence_num) if sequence_num else None
@@ -225,7 +225,7 @@ class EpipolarGeometry:
         min_distance_index = 0
         for i, (m, n) in enumerate(matches):
             distances.append(m.distance / n.distance)
-            if distances[-1] < threshold / ((len(self.good) // 20)+1):
+            if distances[-1] < threshold / ((len(self.good) // 15)+1):
                 self.good.append(m)
             min_distance_index = i if distances[i] < distances[min_distance_index] else min_distance_index
         # If no point passed the threshold, add the smallest distance ratio point
@@ -242,14 +242,7 @@ class EpipolarGeometry:
         return pts1, pts2
     
     def algebraic_distance(self, pt1, pt2):
-        return torch.abs(pt2.T.dot(self.F).dot(pt1))
-    
-    def algebraic_distance_all_points(self):
-        # Iterates over all keypoints in 'good'
-        errs = torch.abs(torch.matmul(torch.matmul(
-            self.pts2.view(-1, 1, 3), self.F), self.pts1.view(-1, 3, 1)))
-
-        return torch.mean(errs)
+        return np.abs(pt2.T.dot(self.F).dot(pt1))        
 
     def compute_epipolar_lines(self, F, points):
         """Compute the epipolar lines for multiple points using vectorized operations."""
@@ -265,17 +258,18 @@ class EpipolarGeometry:
         numerators = abs(torch.sum(lines * points, axis=1))  # Element-wise multiplication and sum over rows
         denominators = torch.sqrt(lines[:, 0]**2 + lines[:, 1]**2)
 
-        return torch.mean(numerators / denominators)
+        return numerators / denominators
 
-    def get_RE1_distance(self, algebraic_distance):
+    def get_RE1_distance(self):
         inhomogeneous_l1 = self.compute_epipolar_lines(self.F.T, self.pts2)[:,0:2]
         inhomogeneous_l2 = self.compute_epipolar_lines(self.F, self.pts1)[:,0:2]
 
-        denominator = torch.sum(torch.concat((inhomogeneous_l1, inhomogeneous_l2), dim=1) ** 2, dim=1)
+        denominator = torch.sum(torch.concat((inhomogeneous_l1, inhomogeneous_l2), dim=1) ** 2, dim=1).view(-1,1,1)
 
-        RE1 = (algebraic_distance**2) / denominator
+        Ri = self.get_algebraic_distance()
+        RE1 = (Ri**2) * denominator
 
-        return torch.mean(RE1)
+        return torch.mean(torch.sqrt(RE1))
     
     def get_SED_distance(self):
         lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
@@ -285,18 +279,30 @@ class EpipolarGeometry:
         distances1 = self.point_2_line_distance_all_points(self.pts1, lines1)
         distances2 = self.point_2_line_distance_all_points(self.pts2, lines2)
 
-        sed = distances1**2 + distances2**2
-        
-        return sed
-        
-    def get_algebraic_distance(self):
-        try:
-            algebraic_distance = self.algebraic_distance_all_points(self.pts1, self.pts2)
-        except Exception as e:
-            print_and_write(f'Error in algebraic_distance_all_points: {e}')
-            return
+        sed = distances1**2 + distances2**2  # shape (n)
 
-        return algebraic_distance
+        return torch.mean(torch.sqrt(sed))
+    
+    def get_SED_distance2(self):
+        lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
+        lines2 = self.compute_epipolar_lines(self.F, self.pts1)   # shape (n,3)
+
+        denominator = 1/(lines1[:,0]**2 + lines1[:,1]**2) + 1/(lines2[:,0]**2 + lines2[:,1]**2)
+
+        Ri = self.get_algebraic_distance()
+        sed = (Ri**2) * denominator.view(-1,1,1) # shape (n)
+
+        return torch.mean(torch.sqrt(sed))
+
+
+    def get_algebraic_distance(self):
+        # Returns shape (n,1,1)
+        return torch.abs(torch.matmul(torch.matmul(
+            self.pts2.view(-1, 1, 3), self.F), self.pts1.view(-1, 3, 1)))
+
+    
+    def get_mean_algebraic_distance(self):
+        return torch.mean(self.get_algebraic_distance())
 
     def epipoline(self, x, formula):
         array = formula.flatten()
@@ -322,7 +328,8 @@ class EpipolarGeometry:
 
         img_W = self.image1_numpy.shape[1] - 1
         epip_test_err = 0
-        for color_idx, (pt1, pt2) in enumerate(zip(self.pts1, self.pts2)):
+        pts1, pts2 = self.pts1.numpy(), self.pts2.numpy()
+        for color_idx, (pt1, pt2) in enumerate(zip(pts1, pts2)):
             x1, y1, _ = pt1
             x2, y2, _ = pt2
 

@@ -39,6 +39,6 @@ OVERFITTING=True
 AVG_EMBEDDINGS = True
 UNFROZEN_LAYERS = 0
 GROUP_CONV = {"use" : False, "out_channels": 256, "num_groups" : 256}
-VISIUALIZE = {"epoch" : 600}
+VISIUALIZE = {"epoch" : -1}
 RE1_DIST = True
 SED_DIST = True

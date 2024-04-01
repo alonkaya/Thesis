@@ -180,8 +180,10 @@ class FMatrixRegressor(nn.Module):
 
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
-        all_train_loss, all_train_loss_t, all_val_loss, train_mae, train_mae_t, val_mae, ec_err_truth, ec_err_pred, ec_err_pred_unoramlized, val_ec_err_truth, \
-            val_ec_err_pred, val_ec_err_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], [], [], []
+        all_train_loss, all_train_loss_t, all_val_loss, train_mae, train_mae_t, val_mae, \
+        all_algberaic_truth, all_algberaic_pred, all_algberaic_pred_unormalized, \
+        all_RE1_truth, all_RE1_pred, all_RE1_pred_unormalized, \
+        all_SED_truth, all_SED_pred, all_SED_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
 
         for epoch in range(num_epochs):
             try:
@@ -255,6 +257,7 @@ class FMatrixRegressor(nn.Module):
                 except Exception as e:
                     print_and_write(f'4 {e}')
                     return
+                
                 try:
                     if self.predict_pose:
                         loss_R = self.L2_loss(R, label[:, :, :3])
@@ -299,8 +302,8 @@ class FMatrixRegressor(nn.Module):
                     mae_R = torch.mean(torch.abs(labels[:, :, :3] - Rs))
                     mae_t = torch.mean(torch.abs(label[:, :, 3].view(-1,3,1) - ts))
 
-                    epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss_R, avg_loss_t = (
-                        v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss_R, avg_loss_t))
+                    avg_loss_R, avg_loss_t = (
+                        v / len(train_loader) for v in (avg_loss_R, avg_loss_t))
 
                     train_mae.append(mae_R.cpu().item())
                     train_mae_t.append(mae_t.cpu().item())
@@ -309,44 +312,50 @@ class FMatrixRegressor(nn.Module):
                 else:
                     mae = torch.mean(torch.abs(labels - outputs))
 
-                    epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, epoch_penalty = (
-                        v / len(train_loader) for v in (epoch_avg_ec_err_truth, epoch_avg_ec_err_pred, epoch_avg_ec_err_pred_unormalized, avg_loss, epoch_penalty))
+                    avg_loss, epoch_penalty = (
+                        v / len(train_loader) for v in (avg_loss, epoch_penalty))
 
                     train_mae.append(mae.cpu().item())
                     all_train_loss.append(avg_loss.cpu().item())
                     all_penalty.append(epoch_penalty.cpu().item())
-
-                ec_err_truth.append(epoch_avg_ec_err_truth.cpu().item())
-                ec_err_pred.append(epoch_avg_ec_err_pred.cpu().item())
-                ec_err_pred_unoramlized.append(epoch_avg_ec_err_pred_unormalized.cpu().item())
+            
+                all_algberaic_truth.append(epoch_stats["algebraic_dist_truth"].cpu().item() / len(train_loader))
+                all_algberaic_pred.append(epoch_stats["algebraic_dist_pred"].cpu().item() / len(train_loader))
+                all_algberaic_pred_unormalized.append(epoch_stats["algebraic_dist_pred_unormalized"].cpu().item() / len(train_loader))
+                all_RE1_truth.append(epoch_stats["RE1_dist_truth"].cpu().item() / len(train_loader))
+                all_RE1_pred.append(epoch_stats["RE1_dist_pred"].cpu().item() / len(train_loader))
+                all_RE1_pred_unormalized.append(epoch_stats["RE1_dist_pred_unormalized"].cpu().item() / len(train_loader))
+                all_SED_truth.append(epoch_stats["SED_dist_truth"].cpu().item() / len(train_loader))
+                all_SED_pred.append(epoch_stats["SED_dist_pred"].cpu().item() / len(train_loader))
+                all_SED_pred_unormalized.append(epoch_stats["SED_dist_pred_unormalized"].cpu().item() / len(train_loader))
                 
             except Exception as e:
                 print_and_write(f'7 {e}')
                 return
 
             try:
+                epoch_output = f"""Epoch {epoch+1}/{num_epochs}"""
                 if self.predict_pose:
-                    epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t[-1]}
-                    Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]}
-                    Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]}
-                    Train epipolar error pred: {ec_err_pred[-1]}\n"""
+                    epoch_output += f""", Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t[-1]}
+                    Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]}\n"""
                 else:
-                    epoch_output = f"""Epoch {epoch+1}/{num_epochs}, Training Loss: {all_train_loss[-1]} 
-                    Training MAE: {train_mae[-1]}
-                    Train epipolar error pred unormalized: {ec_err_pred_unoramlized[-1]}
-                    Train epipolar error pred: {ec_err_pred[-1]}
-                    penalty: {all_penalty[-1]}\n"""
+                    epoch_output += f""", Training Loss: {all_train_loss[-1]}
+                    Training MAE: {train_mae[-1]} penalty: {all_penalty[-1]}\n"""
+                epoch_output += f"algebraic dist truth: {all_algberaic_truth[-1]}, algebraic dist pred: {all_algberaic_pred[-1]}, algebraic dist pred unormalized: {all_algberaic_pred_unormalized[-1]},\n"
+                if RE1_DIST:
+                    epoch_output += F"RE1_dist_truth: {all_RE1_truth[-1]}, RE1 dist pred: {all_RE1_pred[-1]}, RE1 dist pred unormalized: {all_RE1_pred_unormalized[-1]}\n"
+                if SED_DIST:
+                    epoch_output += f"SED dist truth: {all_SED_truth[-1]}, SED dist pred: {all_SED_pred[-1]}, SED dist pred unormalized: {all_SED_pred_unormalized[-1]}\n"
 
                 print_and_write(epoch_output)
             except Exception as e:
                 print_and_write(f'9 {e}')
+
             # If the model is not learning or outputs nan, stop training
             # if not_learning(all_train_loss, all_val_loss) or check_nan(all_train_loss[-1], all_val_loss[-1], train_mae[-1], val_mae[-1], ec_err_pred_unoramlized[-1], val_ec_err_pred_unormalized[-1], ec_err_pred[-1],all_penalty[-1]):
             #     num_epochs = epoch + 1
             #     break
-        
-        output = f"""Train unormalized ground truth error: {np.mean(ec_err_truth)} val unormalized ground truth error: {np.mean(val_ec_err_truth)}\n\n\n"""
-        print_and_write(output)
+
         try:
             plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
                             title="Loss" if not self.predict_pose else "Loss R", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
@@ -373,17 +382,42 @@ class FMatrixRegressor(nn.Module):
                                 model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                                 use_reconstruction=self.use_reconstruction)           
             
-            plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred_unoramlized, y2=val_ec_err_pred_unormalized, 
-                            title="Epipolar error unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+            plot_over_epoch(x=range(1, num_epochs + 1), y1=all_algberaic_pred_unormalized, y2=[], 
+                            title="Algebraic distance unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                             lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
                             model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)
             
-            plot_over_epoch(x=range(1, num_epochs + 1), y1=ec_err_pred, y2=val_ec_err_pred, 
-                            title="Epipolar error F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
+            plot_over_epoch(x=range(1, num_epochs + 1), y1=all_algberaic_pred, y2=[], 
+                            title="Algebraic distance F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
                             lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
                             model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)
+            if RE1_DIST:
+                plot_over_epoch(x=range(1, num_epochs + 1), y1=all_RE1_pred_unormalized, y2=[], 
+                                title="RE1 distance unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                                lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                                model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                                use_reconstruction=self.use_reconstruction)
+                
+                plot_over_epoch(x=range(1, num_epochs + 1), y1=all_RE1_pred, y2=[], 
+                                title="RE1 distance F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
+                                lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                                model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                                use_reconstruction=self.use_reconstruction)
+            if SED_DIST:
+                plot_over_epoch(x=range(1, num_epochs + 1), y1=all_SED_pred_unormalized, y2=[], 
+                                title="SED distance unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+                                lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                                model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                                use_reconstruction=self.use_reconstruction)
+                
+                plot_over_epoch(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=[], 
+                                title="SED distance F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
+                                lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+                                model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                                use_reconstruction=self.use_reconstruction)
+                
         except Exception as e:
             print_and_write(f'9 {e}')   
 
