@@ -106,8 +106,8 @@ def worker_init_fn(worker_id):
     sys.excepthook = worker_exception_handler
 
 
-def data_with_one_sequence(batch_size, CustomDataset_type, sequence_name='0cb8672999a42a05'):
-    RealEstate_path = 'RealEstate10K/val_images'
+def data_with_one_sequence(batch_size, CustomDataset_type, sequence_name='0adea9da21629b61'):
+    RealEstate_path = 'RealEstate10K/train_images'
     # sequence_name = '0cb8672999a42a05'
     # sequence_name = "0000cc6d8b108390"
 
@@ -151,7 +151,7 @@ def data_with_one_sequence(batch_size, CustomDataset_type, sequence_name='0cb867
 #         return output
 
 if __name__ == "__main__":
-    sequence_name = ["000eb6240f06dd5a", "000c3ab189999a83", "000db54a47bd43fe", "002ae53df0e0afe2",  "004dd4b46a06e5be", "0017ce4c6a39d122", "004334c94bbc8bd5", "0043978734eec081"]
+    sequence_name = ["0adea9da21629b61"]
     for seq in sequence_name:
         train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name=seq)
         
@@ -161,6 +161,8 @@ if __name__ == "__main__":
                                 "avg_loss": 0, "avg_loss_R": 0, "avg_loss_t": 0, "epoch_penalty": 0, "file_num": 0}
         sed1, sed2 = 0, 0
         for i,(first_image, second_image, label, unormalized_label,_) in enumerate(val_loader):
+            first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
+
             update_dists(epoch_stats, first_image, second_image, unormalized_label, label, label)
             # break
             # for key, value in epoch_stats.items():
