@@ -40,6 +40,6 @@ OVERFITTING=True
 AVG_EMBEDDINGS = True
 UNFROZEN_LAYERS = 0
 GROUP_CONV = {"use" : False, "out_channels": 256, "num_groups" : 256}
-VISIUALIZE = {"epoch" : NUM_EPOCHS-1, "dir": 'preicted_epipole_lines_realestate_with_SED'}
+VISIUALIZE = {"epoch" : NUM_EPOCHS-1, "dir": 'preicted_epipole_lines_realestate_with_RE1'}
 RE1_DIST = True
 SED_DIST = True
