@@ -142,7 +142,7 @@ def make_rank2(F):
 
     return output
 
-def update_dists(stats, first_image, second_image, unormalized_label, output, unormalized_output, epoch=0):
+def update_epoch_stats(stats, first_image, second_image, unormalized_label, output, unormalized_output, epoch=0):
     if ENFORCE_RANK_2:
         output = make_rank2(output)
         unormalized_output = make_rank2(unormalized_output)
@@ -179,7 +179,7 @@ def update_dists(stats, first_image, second_image, unormalized_label, output, un
         stats["SED_dist_pred_unormalized"] = stats["SED_dist_pred_unormalized"] + (SED_dist_pred_unormalized / len(first_image))
 
     if VISIUALIZE["epoch"] == epoch:
-        epipolar_geo_pred_unormalized.visualize(sqResultDir='preicted_epipole_lines_realestate', file_num=stats["file_num"])
+        epipolar_geo_pred_unormalized.visualize(sqResultDir=VISIUALIZE["dir"], file_num=stats["file_num"])
         stats["file_num"] = stats["file_num"] + 1
 
 class EpipolarGeometry:
