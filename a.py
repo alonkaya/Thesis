@@ -150,20 +150,20 @@ def data_with_one_sequence(batch_size, CustomDataset_type, sequence_name='0adea9
 #             print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
 #         return output
 
-if __name__ == "__main__":
-    sequence_name = ["0adea9da21629b61"]
-    for seq in sequence_name:
-        train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name=seq)
+# if __name__ == "__main__":
+#     sequence_name = ["0adea9da21629b61"]
+#     for seq in sequence_name:
+#         train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name=seq)
         
-        epoch_stats = {"algebraic_dist_truth": 0, "algebraic_dist_pred": 0, "algebraic_dist_pred_unormalized": 0, 
-                                "RE1_dist_truth": 0, "RE1_dist_pred": 0, "RE1_dist_pred_unormalized": 0, 
-                                "SED_dist_truth": 0, "SED_dist_pred": 0, "SED_dist_pred_unormalized": 0, 
-                                "avg_loss": 0, "avg_loss_R": 0, "avg_loss_t": 0, "epoch_penalty": 0, "file_num": 0}
-        sed1, sed2 = 0, 0
-        for i,(first_image, second_image, label, unormalized_label,_) in enumerate(val_loader):
-            first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
+#         epoch_stats = {"algebraic_dist_truth": 0, "algebraic_dist_pred": 0, "algebraic_dist_pred_unormalized": 0, 
+#                                 "RE1_dist_truth": 0, "RE1_dist_pred": 0, "RE1_dist_pred_unormalized": 0, 
+#                                 "SED_dist_truth": 0, "SED_dist_pred": 0, "SED_dist_pred_unormalized": 0, 
+#                                 "avg_loss": 0, "avg_loss_R": 0, "avg_loss_t": 0, "epoch_penalty": 0, "file_num": 0}
+#         sed1, sed2 = 0, 0
+#         for i,(first_image, second_image, label, unormalized_label,_) in enumerate(val_loader):
+#             first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
 
-            update_dists(epoch_stats, first_image, second_image, unormalized_label, label, label)
+#             update_dists(epoch_stats, first_image, second_image, unormalized_label, label, label)
             # break
             # for key, value in epoch_stats.items():
             #     # Convert tensor values to float for readability
@@ -182,23 +182,23 @@ if __name__ == "__main__":
                 
             # batch_ep_err_unnormalized, batch_ep_err = batch_ep_err_unnormalized/len(first_image), batch_ep_err/len(first_image)
             # avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + batch_ep_err_unnormalized, avg_ep_err + batch_ep_err
-        epoch_stats["algebraic_dist_truth"] = epoch_stats["algebraic_dist_truth"] / (i+1)
-        epoch_stats["algebraic_dist_pred"] = epoch_stats["algebraic_dist_pred"] / (i+1)
-        epoch_stats["algebraic_dist_pred_unormalized"] = epoch_stats["algebraic_dist_pred_unormalized"] / (i+1)
-        epoch_stats["RE1_dist_truth"] = epoch_stats["RE1_dist_truth"] / (i+1)
-        epoch_stats["RE1_dist_pred"] = epoch_stats["RE1_dist_pred"] / (i+1)
-        epoch_stats["RE1_dist_pred_unormalized"] = epoch_stats["RE1_dist_pred_unormalized"] / (i+1)
-        epoch_stats["SED_dist_truth"] = epoch_stats["SED_dist_truth"] / (i+1)
-        epoch_stats["SED_dist_pred"] = epoch_stats["SED_dist_pred"] / (i+1)
-        epoch_stats["SED_dist_pred_unormalized"] = epoch_stats["SED_dist_pred_unormalized"] / (i+1)
-        # sed1 /= len(val_loader)
-        # sed2 /= len(val_loader)
-        # print(sed1, sed2)
-        for key, value in epoch_stats.items():
-            # Convert tensor values to float for readability
-            if hasattr(value, 'item'):  # Checks if 'value' is a tensor
-                value = value.item()  # Converts tensor to a Python number
+        # epoch_stats["algebraic_dist_truth"] = epoch_stats["algebraic_dist_truth"] / (i+1)
+        # epoch_stats["algebraic_dist_pred"] = epoch_stats["algebraic_dist_pred"] / (i+1)
+        # epoch_stats["algebraic_dist_pred_unormalized"] = epoch_stats["algebraic_dist_pred_unormalized"] / (i+1)
+        # epoch_stats["RE1_dist_truth"] = epoch_stats["RE1_dist_truth"] / (i+1)
+        # epoch_stats["RE1_dist_pred"] = epoch_stats["RE1_dist_pred"] / (i+1)
+        # epoch_stats["RE1_dist_pred_unormalized"] = epoch_stats["RE1_dist_pred_unormalized"] / (i+1)
+        # epoch_stats["SED_dist_truth"] = epoch_stats["SED_dist_truth"] / (i+1)
+        # epoch_stats["SED_dist_pred"] = epoch_stats["SED_dist_pred"] / (i+1)
+        # epoch_stats["SED_dist_pred_unormalized"] = epoch_stats["SED_dist_pred_unormalized"] / (i+1)
+        # # sed1 /= len(val_loader)
+        # # sed2 /= len(val_loader)
+        # # print(sed1, sed2)
+        # for key, value in epoch_stats.items():
+        #     # Convert tensor values to float for readability
+        #     if hasattr(value, 'item'):  # Checks if 'value' is a tensor
+        #         value = value.item()  # Converts tensor to a Python number
 
-            print(f"{key}: {value}")
-        print("\n\n")
+        #     print(f"{key}: {value}")
+        # print("\n\n")
 

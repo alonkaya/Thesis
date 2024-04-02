@@ -216,7 +216,7 @@ class FMatrixRegressor(nn.Module):
                     epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + penalty
 
 
-                update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch)
+                batch_RE1_dist_pred = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch)
             
                 if self.predict_pose:
                     loss_R = self.L2_loss(R, label[:, :, :3])
@@ -241,7 +241,7 @@ class FMatrixRegressor(nn.Module):
                 else:
                     # Compute loss
                     l2_loss = self.L2_loss(output, label)
-                    loss = l2_loss + self.penalty_coeff*penalty
+                    loss = l2_loss + self.penalty_coeff*penalty + RE1_COEFF*batch_RE1_dist_pred
                     epoch_stats["avg_loss"] = epoch_stats["avg_loss"] + loss.detach()
 
                     # Compute Backward pass and gradients
@@ -289,14 +289,14 @@ class FMatrixRegressor(nn.Module):
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}: """
             if self.predict_pose:
                 epoch_output += f"""Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t[-1]}
-            Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]}\n"""
+             Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]}\n"""
             else:
                 epoch_output += f"""Training Loss: {all_train_loss[-1]} Training MAE: {train_mae[-1]} penalty: {all_penalty[-1]}\n"""
-            epoch_output += f"\t\talgebraic dist truth: {all_algberaic_truth[-1]}, algebraic dist pred: {all_algberaic_pred[-1]}, algebraic dist pred unormalized: {all_algberaic_pred_unormalized[-1]},\n"
+            epoch_output += f"\talgebraic dist truth: {all_algberaic_truth[-1]}, algebraic dist pred: {all_algberaic_pred[-1]}, algebraic dist pred unormalized: {all_algberaic_pred_unormalized[-1]},\n"
             if RE1_DIST:
-                epoch_output += f"\t\tRE1_dist_truth: {all_RE1_truth[-1]}, RE1 dist pred: {all_RE1_pred[-1]}, RE1 dist pred unormalized: {all_RE1_pred_unormalized[-1]}\n"
+                epoch_output += f"\tRE1_dist_truth: {all_RE1_truth[-1]}, RE1 dist pred: {all_RE1_pred[-1]}, RE1 dist pred unormalized: {all_RE1_pred_unormalized[-1]}\n"
             if SED_DIST:
-                epoch_output += f"\t\tSED dist truth: {all_SED_truth[-1]}, SED dist pred: {all_SED_pred[-1]}, SED dist pred unormalized: {all_SED_pred_unormalized[-1]}\n"
+                epoch_output += f"\tSED dist truth: {all_SED_truth[-1]}, SED dist pred: {all_SED_pred[-1]}, SED dist pred unormalized: {all_SED_pred_unormalized[-1]}\n"
 
             print_and_write(epoch_output)
 
