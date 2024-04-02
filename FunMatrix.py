@@ -183,7 +183,7 @@ def update_epoch_stats(stats, first_image, second_image, unormalized_label, outp
         epipolar_geo_pred_unormalized.visualize(sqResultDir=VISIUALIZE["dir"], file_num=stats["file_num"])
         stats["file_num"] = stats["file_num"] + 1
     
-    return RE1_dist_pred / len(first_image)
+    return RE1_dist_pred / len(first_image), SED_dist_pred / len(first_image)
 
 class EpipolarGeometry:
     def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):

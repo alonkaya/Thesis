@@ -216,7 +216,7 @@ class FMatrixRegressor(nn.Module):
                     epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + penalty
 
 
-                batch_RE1_dist_pred = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch)
+                batch_RE1_dist_pred, batch_SED_dist_pred = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch)
             
                 if self.predict_pose:
                     loss_R = self.L2_loss(R, label[:, :, :3])
@@ -241,7 +241,7 @@ class FMatrixRegressor(nn.Module):
                 else:
                     # Compute loss
                     l2_loss = self.L2_loss(output, label)
-                    loss = l2_loss + self.penalty_coeff*penalty + RE1_COEFF*batch_RE1_dist_pred
+                    loss = l2_loss + self.penalty_coeff*penalty + SED_coeff*batch_SED_dist_pred + RE1_COEFF*batch_RE1_dist_pred
                     epoch_stats["avg_loss"] = epoch_stats["avg_loss"] + loss.detach()
 
                     # Compute Backward pass and gradients
