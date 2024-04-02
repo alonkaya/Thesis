@@ -180,7 +180,7 @@ def update_epoch_stats(stats, first_image, second_image, unormalized_label, outp
         stats["SED_dist_pred_unormalized"] = stats["SED_dist_pred_unormalized"] + (SED_dist_pred_unormalized / len(first_image))
 
     if VISIUALIZE["epoch"] == epoch:
-        epipolar_geo_pred_unormalized.visualize(sqResultDir=VISIUALIZE["dir"], file_num=stats["file_num"])
+        epipolar_geo_pred_unormalized.visualize(sqResultDir=os.path.join(PLOTS_PATH, VISIUALIZE["dir"]), file_num=stats["file_num"])
         stats["file_num"] = stats["file_num"] + 1
     
     return RE1_dist_pred / len(first_image), SED_dist_pred / len(first_image)

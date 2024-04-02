@@ -241,7 +241,7 @@ class FMatrixRegressor(nn.Module):
                 else:
                     # Compute loss
                     l2_loss = self.L2_loss(output, label)
-                    loss = l2_loss + self.penalty_coeff*penalty + SED_coeff*batch_SED_dist_pred + RE1_COEFF*batch_RE1_dist_pred
+                    loss = l2_loss + self.penalty_coeff*penalty + SED_COEFF*batch_SED_dist_pred + RE1_COEFF*batch_RE1_dist_pred
                     epoch_stats["avg_loss"] = epoch_stats["avg_loss"] + loss.detach()
 
                     # Compute Backward pass and gradients

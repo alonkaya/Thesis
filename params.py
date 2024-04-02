@@ -1,5 +1,6 @@
 import torch
-DEVICE_ID = 0
+import os
+DEVICE_ID = 1
 torch.cuda.set_device(DEVICE_ID)
 device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
 
@@ -26,13 +27,13 @@ BN_AND_DO = True if BATCH_SIZE > 1 else False
 CUSTOMDATASET_TYPE = "CustomDataset_first_two_thirds_train"
 
 penalty_coeffs = [1]
-RE1_COEFF = 1
-SED_coeff = 0
+RE1_COEFF = 0
+SED_COEFF = 1
 ENFORCE_RANK_2 = True
 USE_RECONSTRUCTION_LAYER = False
 PREDICT_POSE = False
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
-NUM_EPOCHS = 700
+NUM_EPOCHS = 600
 MODEL = CLIP_MODEL_NAME
 AUGMENTATION = False
 FREEZE_PRETRAINED_MODEL=False
@@ -40,6 +41,10 @@ OVERFITTING=True
 AVG_EMBEDDINGS = True
 UNFROZEN_LAYERS = 0
 GROUP_CONV = {"use" : False, "out_channels": 256, "num_groups" : 256}
-VISIUALIZE = {"epoch" : NUM_EPOCHS-1, "dir": 'preicted_epipole_lines_realestate_with_RE1'}
+VISIUALIZE = {"epoch" : NUM_EPOCHS-1, "dir": 'unormalized_epipole_lines'}
 RE1_DIST = True
 SED_DIST = True
+PLOTS_PATH = os.path.join('plots', 'only_one_sequence', 
+                          f"""SVD_coeff {penalty_coeffs} RE1_coeff {RE1_COEFF} SED_coeff {SED_COEFF} lr {learning_rates_mlp[0]} 
+                          avg embeddings {AVG_EMBEDDINGS} model {MODEL} Force_rank_2 {ENFORCE_RANK_2} predict_pose {PREDICT_POSE} 
+                          use_reconstruction {USE_RECONSTRUCTION_LAYER}""")

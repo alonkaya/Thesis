@@ -68,11 +68,9 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
             print_and_write(e)
 
     if save:
-        directory_name = f"""SVD_coeff {penalty_coeff} RE1_coeff {RE1_coeff} SED_coeff {SED_coeff} lr {lr_mlp} avg embeddings {average_embeddings} model {model_name} Force_rank_2 {enforce_rank_2} predict_pose {predict_pose} use_reconstruction {use_reconstruction}"""
-        dir_path = os.path.join('plots', 'only_one_sequence', directory_name)
-        os.makedirs(dir_path, exist_ok=True)
-
-        plt.savefig(f"""{dir_path}/{title}.png""")  # Specify the filename and extension
+        
+        os.makedirs(PLOTS_PATH, exist_ok=True)
+        plt.savefig(f"""{PLOTS_PATH}/{title}.png""")  # Specify the filename and extension
 
     if show:
         plt.show()
