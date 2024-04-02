@@ -128,7 +128,7 @@ def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_la
     return False
                      
 def print_and_write(output):
-    with open("output.txt", "a") as f:
+    with open("output2.txt", "a") as f:
         f.write(output)
         print(output)
 
