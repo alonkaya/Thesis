@@ -74,9 +74,9 @@ def get_valid_indices(sequence_len, sequence_path):
     return valid_indices
 
 transform = v2.Compose([
-    # v2.Resize((256, 256)),
-    # v2.CenterCrop(224),
-    # v2.Grayscale(num_output_channels=3),
+    v2.Resize((256, 256)),
+    v2.CenterCrop(224),
+    v2.Grayscale(num_output_channels=3),
     v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
     v2.Normalize(mean=norm_mean,  # Normalize each channel
                          std=norm_std),
@@ -143,7 +143,7 @@ def make_rank_2(F):
 def vis():
     sequence_name = "0a610a129bdcc4e7"
 
-    path = os.path.join("epipolar lines", f"gt normalized {sequence_name}")
+    path = os.path.join("epipolar_lines", f"gt normalized {sequence_name}")
     good_frames_path = os.path.join(path, "good_frames")
     bad_frames_path = os.path.join(path, "bad_frames")
     if os.path.exists(good_frames_path) and os.path.exists(bad_frames_path):
@@ -168,12 +168,12 @@ def vis():
             bad_frames_pose.append(torch.cat((R[0], t[0].view(3,1)), dim=-1))
             b += torch.mean(torch.abs(t[0]))
     # print(g /len(good_frames_pose), b /len(bad_frames_pose))
-    print("good frames:")
-    for pose in good_frames_pose:
-        print(f'{pose}\n')
-    print("bad frames:")
-    for pose in bad_frames_pose:
-        print(f'{pose}\n')
+    # print("good frames:")
+    # for pose in good_frames_pose:
+    #     print(f'{pose}\n')
+    # print("bad frames:")
+    # for pose in bad_frames_pose:
+    #     print(f'{pose}\n')
 
 if __name__ == "__main__":
     vis()

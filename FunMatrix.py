@@ -19,7 +19,7 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size):
     # Adjust K according to resize and center crop transforms   
     adjusted_K = adjust_intrinsic(K, original_image_size, torch.tensor([256, 256]), torch.tensor([224, 224]))
 
-    return K
+    return adjusted_K
 
 def get_intrinsic_KITTI(calib_path, original_image_size):
     projection_matrix = read_camera_intrinsic(calib_path).reshape(3,4)
@@ -47,14 +47,14 @@ def get_intrinsic_KITTI(calib_path, original_image_size):
 def adjust_intrinsic(k, original_size, resized_size, ceter_crop_size):
     # Adjust the intrinsic matrix K according to the transformations resize and center crop
     scale_factor = resized_size / original_size
-    k[0, 0] = k[0, 0] + scale_factor[0]  # fx
-    k[1, 1] = k[1, 1] + scale_factor[1]  # fy
-    k[0, 2] = k[0, 2] + scale_factor[0]  # cx
-    k[1, 2] = k[1, 2] + scale_factor[1]  # cy
+    k[0, 0] = k[0, 0] * scale_factor[0]  # fx
+    k[1, 1] = k[1, 1] * scale_factor[1]  # fy
+    k[0, 2] = k[0, 2] * scale_factor[0]  # cx
+    k[1, 2] = k[1, 2] * scale_factor[1]  # cy
 
     crop_offset = (resized_size - ceter_crop_size) / 2
-    k[0, 2] = k[0, 2] + crop_offset[0]  # cx
-    k[1, 2] = k[1, 2] + crop_offset[1]  # cy
+    k[0, 2] = k[0, 2] - crop_offset[0]  # cx
+    k[1, 2] = k[1, 2] - crop_offset[1]  # cy
 
     return k
 
@@ -246,7 +246,7 @@ class EpipolarGeometry:
         return np.abs(pt2.T.dot(F).dot(pt1))        
 
     def compute_epipolar_lines(self, F, points):
-        """Compute the epipolar lines for multiple points using vectorized operations."""
+        """Compute the epipolar_lines for multiple points using vectorized operations."""
         return torch.matmul(F, points.view(-1, 3, 1)).view(-1,3)
     
     def point_2_line_distance(self, point, l):
@@ -391,7 +391,7 @@ class EpipolarGeometry:
         cv2.putText(vis, str(SED_dist), (5, 260), font,
                     0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
         
-        if(SED_dist > 10):
+        if(SED_dist > 2):
             if MOVE_BAD_IMAGES:
                 src_path1 = os.path.join(
                     self.sequence_path, "image_0", self.file_name1)
