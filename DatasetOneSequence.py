@@ -153,7 +153,6 @@ def make_rank_2(F):
         return output
 
 def vis():
-    # sequence_name = "0f26970967ddf02c"
     sequence_name = "0a610a129bdcc4e7"
 
     path = os.path.join("epipolar lines", f"gt normalized {sequence_name}")
@@ -167,6 +166,8 @@ def vis():
 
     good_frames_pose = []
     bad_frames_pose = []
+    g = 0
+    b = 0
     for i,(first_image, second_image, label, unormalized_label,_, R, t) in enumerate(train_loader):
         first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
         epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label)
@@ -174,14 +175,17 @@ def vis():
         frame = epipolar_geo.visualize(sqResultDir=path, file_num=i)
         if frame == "good":
             good_frames_pose.append(torch.cat((R[0], t[0].view(3,1)), dim=-1))
+            g += torch.mean(torch.abs(t[0]))
         else:
             bad_frames_pose.append(torch.cat((R[0], t[0].view(3,1)), dim=-1))
+            b += torch.mean(torch.abs(t[0]))
+    # print(g /len(good_frames_pose), b /len(bad_frames_pose))
     print("good frames:")
     for pose in good_frames_pose:
-        print(f'{pose.tolist()}\n')
+        print(f'{pose}\n')
     print("bad frames:")
     for pose in bad_frames_pose:
-        print(f'{pose.tolist()}\n')
+        print(f'{pose}\n')
 
 if __name__ == "__main__":
     vis()
