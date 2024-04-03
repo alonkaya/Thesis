@@ -155,6 +155,7 @@ def vis():
     train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name=sequence_name)
 
     for i,(first_image, second_image, label, unormalized_label,_) in enumerate(train_loader):
+        first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
         epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label)
         epipolar_geo_unormalized = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label[0])
 

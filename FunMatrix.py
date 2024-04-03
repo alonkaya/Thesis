@@ -242,8 +242,8 @@ class EpipolarGeometry:
 
         return pts1, pts2
     
-    def algebraic_distance(self, pt1, pt2):
-        return np.abs(pt2.T.dot(self.F).dot(pt1))        
+    def algebraic_distance(self, F, pt1, pt2):
+        return np.abs(pt2.T.dot(F).dot(pt1))        
 
     def compute_epipolar_lines(self, F, points):
         """Compute the epipolar lines for multiple points using vectorized operations."""
@@ -340,7 +340,7 @@ class EpipolarGeometry:
             # Get ditance from point to line error
             avg_distance_err_img1 += self.point_2_line_distance(pt1, line_1)
             avg_distance_err_img2 += self.point_2_line_distance(pt2, line_2)
-            epip_test_err += self.algebraic_distance(pt1, pt2)
+            epip_test_err += self.algebraic_distance(F, pt1, pt2)
 
             # calculating 2 points on the line
             x_0 = self.epipoline(0, line_1)
