@@ -178,10 +178,10 @@ def vis():
             bad_frames_pose.append(torch.cat((R[0], t[0].view(3,1)), dim=-1))
     print("good frames:")
     for pose in good_frames_pose:
-        print(f'{pose.item()}\n')
+        print(f'{pose.tolist()}\n')
     print("bad frames:")
     for pose in bad_frames_pose:
-        print(f'{pose.item()}\n')
+        print(f'{pose.tolist()}\n')
 
 if __name__ == "__main__":
     vis()
