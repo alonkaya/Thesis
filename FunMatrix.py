@@ -270,7 +270,7 @@ class EpipolarGeometry:
         Ri = self.get_algebraic_distance()
         RE1 = (Ri**2) * denominator
 
-        return torch.mean(torch.sqrt(RE1))
+        return torch.mean(RE1)
     
     def get_SED_distance(self):
         lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
@@ -282,7 +282,7 @@ class EpipolarGeometry:
 
         sed = distances1**2 + distances2**2  # shape (n)
 
-        return torch.mean(torch.sqrt(sed))
+        return torch.mean(sed)
     
     def get_SED_distance2(self):
         lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
@@ -293,7 +293,7 @@ class EpipolarGeometry:
         Ri = self.get_algebraic_distance()
         sed = (Ri**2) * denominator.view(-1,1,1) # shape (n)
 
-        return torch.mean(torch.sqrt(sed))
+        return torch.mean(sed)
 
 
     def get_algebraic_distance(self):
@@ -318,7 +318,7 @@ class EpipolarGeometry:
         os.makedirs(bad_frames_path, exist_ok=True)
         os.makedirs(good_frames_path, exist_ok=True)
 
-        self.F = self.F.cpu().numpy()
+        F = self.F.cpu().numpy()
         pts1, pts2 = self.pts1.cpu().numpy(), self.pts2.cpu().numpy()
 
         img1_line = self.image1_numpy.copy()
@@ -334,8 +334,8 @@ class EpipolarGeometry:
             x1, y1, _ = pt1
             x2, y2, _ = pt2
 
-            line_1 = np.dot(np.transpose(self.F), pt2)
-            line_2 = np.dot(self.F, pt1)
+            line_1 = np.dot(np.transpose(F), pt2)
+            line_2 = np.dot(F, pt1)
 
             # Get ditance from point to line error
             avg_distance_err_img1 += self.point_2_line_distance(pt1, line_1)
@@ -374,6 +374,8 @@ class EpipolarGeometry:
         avg_distance_err_img2 /= self.pts1.shape[0]
         epip_test_err /= self.pts1.shape[0]
 
+        RE1_dist_img1 = self.get_RE1_distance()
+        SED_dist_img1 = self.get_SED_distance()
         vis = np.concatenate((img1_line, img2_line), axis=0)
         font = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -382,9 +384,13 @@ class EpipolarGeometry:
                     0.6, color=(128, 0, 0), lineType=cv2.LINE_AA)
         cv2.putText(vis, str(avg_distance_err_img2), (10, img_H - 10),
                     font, 0.6, color=(0, 0, 128), lineType=cv2.LINE_AA)
-        cv2.putText(vis, str(epip_test_err), (10, 210), font, 0.6,
+        cv2.putText(vis, str(epip_test_err), (10, 200), font, 0.6,
                     color=(130, 0, 150), lineType=cv2.LINE_AA)
-
+        cv2.putText(vis, str(RE1_dist_img1), (10, 230), font,
+                    0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)  
+        cv2.putText(vis, str(SED_dist_img1), (10, 260), font,
+                    0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
+        
         if(avg_distance_err_img1 > 13 or abs(epip_test_err) > 0.01):
             if MOVE_BAD_IMAGES:
                 src_path1 = os.path.join(

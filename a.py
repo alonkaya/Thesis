@@ -150,10 +150,23 @@ def make_rank_2(F):
             print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
         return output
 
-# if __name__ == "__main__":
-#     sequence_name = ["0adea9da21629b61"]
-#     for seq in sequence_name:
-#         train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name=seq)
+def vis():
+    sequence_name = ["0adea9da21629b61"]
+    train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name=sequence_name)
+
+    for i,(first_image, second_image, label, unormalized_label,_) in enumerate(train_loader):
+        epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label)
+        epipolar_geo_unormalized = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label[0])
+
+        epipolar_geo.visualize(sqResultDir='normalized', file_num=i)
+        epipolar_geo_unormalized.visualize(sqResultDir='unormalized', file_num=i)
+
+
+if __name__ == "__main__":
+    vis()
+    # sequence_name = ["0adea9da21629b61"]
+    # for seq in sequence_name:
+    #     train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name=seq)
         
 #         epoch_stats = {"algebraic_dist_truth": 0, "algebraic_dist_pred": 0, "algebraic_dist_pred_unormalized": 0, 
 #                                 "RE1_dist_truth": 0, "RE1_dist_pred": 0, "RE1_dist_pred_unormalized": 0, 
@@ -172,13 +185,8 @@ def make_rank_2(F):
 
             #     print(f"{key}: {value/(i+1)}")
             # print("\n\n")
-            # epipolar_geo_unormalized = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label[0])
             # sed1 += epipolar_geo_unormalized.get_SED_distance()
             # sed2 += epipolar_geo_unormalized.get_SED_distance2()
-
-            # epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label)
-            # epipolar_geo_unormalized.visualize(sqResultDir='unormalized', file_num=i)
-            # epipolar_geo.visualize(sqResultDir='normalized', file_num=i)
                 
             # batch_ep_err_unnormalized, batch_ep_err = batch_ep_err_unnormalized/len(first_image), batch_ep_err/len(first_image)
             # avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + batch_ep_err_unnormalized, avg_ep_err + batch_ep_err
