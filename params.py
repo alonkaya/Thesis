@@ -1,7 +1,5 @@
 import torch
 import os
-# DEVICE_ID = 1
-# torch.cuda.set_device(DEVICE_ID)
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 learning_rates_vit = [2e-5]
@@ -26,11 +24,11 @@ BN_AND_DO = True if BATCH_SIZE > 1 else False
 CUSTOMDATASET_TYPE = "CustomDataset_first_two_thirds_train"
 SAVE_MODEL = True
 
-RE1_DIST = True
+RE1_DIST = False
 SED_DIST = True
 SVD_COEFF = 1
 RE1_COEFF = 0
-SED_COEFF = .3
+SED_COEFF = 0
 ENFORCE_RANK_2 = False
 USE_RECONSTRUCTION_LAYER = False
 PREDICT_POSE = False
