@@ -1,3 +1,4 @@
+import shutil
 import signal
 import sys
 from FunMatrix import *
@@ -151,16 +152,23 @@ def make_rank_2(F):
         return output
 
 def vis():
-    sequence_name = "0f26970967ddf02c"
+    # sequence_name = "0f26970967ddf02c"
+    sequence_name = "0a610a129bdcc4e7"
+
+    path = os.path.join("epipolar lines", f"gt normalized {sequence_name}")
+    good_frames_path = os.path.join(path, "good_frames")
+    bad_frames_path = os.path.join(path, "bad_frames")
+    if os.path.exists(good_frames_path) and os.path.exists(bad_frames_path):
+        shutil.rmtree(good_frames_path)
+        shutil.rmtree(bad_frames_path)
+
     train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name=sequence_name)
 
     for i,(first_image, second_image, label, unormalized_label,_) in enumerate(train_loader):
         first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
         epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label)
-        epipolar_geo_unormalized = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label[0])
 
-        epipolar_geo.visualize(sqResultDir='normalized', file_num=i)
-        # epipolar_geo_unormalized.visualize(sqResultDir='unormalized', file_num=i)
+        epipolar_geo.visualize(sqResultDir=path, file_num=i)
 
 
 if __name__ == "__main__":
