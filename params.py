@@ -45,6 +45,4 @@ UNFROZEN_LAYERS = 0
 GROUP_CONV = {"use" : False, "out_channels": 256, "num_groups" : 256}
 VISIUALIZE = {"epoch" : NUM_EPOCHS-1, "dir": 'unormalized_epipole_lines'}
 PLOTS_PATH = os.path.join('plots', 'only_one_sequence', 
-                          f"""SVD_coeff {SVD_COEFF} RE1_coeff {RE1_COEFF} SED_coeff {SED_COEFF} lr {learning_rates_mlp[0]} \
-                          avg_embeddings {AVG_EMBEDDINGS} model {"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"} \
-                          Force_rank_2 {ENFORCE_RANK_2} predict_pose {PREDICT_POSE} use_reconstruction {USE_RECONSTRUCTION_LAYER}""")
+                          f"""SVD_coeff {SVD_COEFF} RE1_coeff {RE1_COEFF} SED_coeff {SED_COEFF} lr {learning_rates_mlp[0]} avg_embeddings {AVG_EMBEDDINGS} model {"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"} Force_rank_2 {ENFORCE_RANK_2} predict_pose {PREDICT_POSE} use_reconstruction {USE_RECONSTRUCTION_LAYER}""")
