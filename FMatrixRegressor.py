@@ -189,10 +189,10 @@ class FMatrixRegressor(nn.Module):
             labels, outputs, Rs, ts = torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device)
 
             
-            epoch_stats = {"algebraic_dist_truth": 0, "algebraic_dist_pred": 0, "algebraic_dist_pred_unormalized": 0, 
-                            "RE1_dist_truth": 0, "RE1_dist_pred": 0, "RE1_dist_pred_unormalized": 0, 
-                            "SED_dist_truth": 0, "SED_dist_pred": 0, "SED_dist_pred_unormalized": 0, 
-                            "avg_loss": 0, "avg_loss_R": 0, "avg_loss_t": 0, "epoch_penalty": 0, "file_num": 0}
+            epoch_stats = {"algebraic_dist_truth": torch.tensor(0), "algebraic_dist_pred": torch.tensor(0), "algebraic_dist_pred_unormalized": torch.tensor(0), 
+                            "RE1_dist_truth": torch.tensor(0), "RE1_dist_pred": torch.tensor(0), "RE1_dist_pred_unormalized": torch.tensor(0), 
+                            "SED_dist_truth": torch.tensor(0), "SED_dist_pred": torch.tensor(0), "SED_dist_pred_unormalized": torch.tensor(0), 
+                            "avg_loss": torch.tensor(0), "avg_loss_R": torch.tensor(0), "avg_loss_t": torch.tensor(0), "epoch_penalty": torch.tensor(0), "file_num": 0}
             for img1, img2, label, unormalized_label, K in train_loader:
                 img1, img2, label, unormalized_label, K  = img1.to(device), img2.to(device), label.to(device), unormalized_label.to(device), K.to(device)
 

@@ -170,7 +170,6 @@ def update_epoch_stats(stats, first_image, second_image, unormalized_label, outp
             SED_dist_pred = SED_dist_pred + epipolar_geo_pred.get_SED_distance()
             SED_dist_pred_unormalized = SED_dist_pred_unormalized + epipolar_geo_pred_unormalized.get_SED_distance()
     
-
     stats["algebraic_dist_truth"] = stats["algebraic_dist_truth"] + (algebraic_dist_truth / len(first_image))
     stats["algebraic_dist_pred"] = stats["algebraic_dist_pred"] + (algebraic_dist_pred / len(first_image))
     stats["algebraic_dist_pred_unormalized"] = stats["algebraic_dist_pred_unormalized"] + (algebraic_dist_pred_unormalized / len(first_image))
