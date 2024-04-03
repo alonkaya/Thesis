@@ -5,10 +5,10 @@ import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, lr_vit, lr_mlp, penalty_coeff,  penaltize_normalized, 
-                 mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, 
-                 batchnorm_and_dropout=BN_AND_DO, freeze_model=FREEZE_PRETRAINED_MODEL, overfitting=OVERFITTING, augmentation=AUGMENTATION, 
-                 model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF):
+    def __init__(self, lr_vit, lr_mlp, svd_coeff=SVD_COEFF, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
+                 average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO, freeze_model=FREEZE_PRETRAINED_MODEL,
+                 overfitting=OVERFITTING, augmentation=AUGMENTATION, model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, 
+                 enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF):
 
         """
         Initialize the ViTMLPRegressor model.
@@ -25,10 +25,9 @@ class FMatrixRegressor(nn.Module):
 
         super(FMatrixRegressor, self).__init__()
         self.to(device)
-        self.penalty_coeff = penalty_coeff
+        self.penalty_coeff = svd_coeff
         self.RE1_coeff = RE1_coeff
         self.batch_size = batch_size
-        self.penaltize_normalized = penaltize_normalized
         self.lr_vit = lr_vit
         self.lr_mlp = lr_mlp
         self.batchnorm_and_dropout = batchnorm_and_dropout
@@ -306,8 +305,6 @@ class FMatrixRegressor(nn.Module):
             #     num_epochs = epoch + 1
             #     break
         
-        if SAVE_MODEL:
-            save_model(self.model.state_dict(), self.mlp.state_dict(), self.model_t.state_dict(), self.t_mlp.state_dict(), self.predict_pose)    
         
         plot(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
                         title="Loss" if not self.predict_pose else "Loss R", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
@@ -369,7 +366,17 @@ class FMatrixRegressor(nn.Module):
                             lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
                             model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)
-                
+        
+        if SAVE_MODEL:
+            self.save_model() 
+
+    def save_model(self):
+        os.makedirs(PLOTS_PATH, exist_ok=True)
+        torch.save(self.model.state_dict(), os.path.join(PLOTS_PATH, "model.pth"))
+        torch.save(self.mlp.state_dict(), os.path.join(PLOTS_PATH, "mlp.pth"))    
+        if self.predict_pose:
+            torch.save(self.model_t.state_dict(), os.path.join(PLOTS_PATH, "model_t.pth"))
+            torch.save(self.t_mlp.state_dict(), os.path.join(PLOTS_PATH, "mlp_t.pth"))   
 
 
 

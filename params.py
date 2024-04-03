@@ -8,7 +8,6 @@ learning_rates_vit = [2e-5]
 learning_rates_mlp = [2e-5]
 train_seqeunces = [0,2]
 val_sequences = [1,3,4]
-penaltize_normalized_options = [False]
 norm_mean = torch.tensor([0.449, 0.449, 0.449]).to(device)
 norm_std = torch.tensor([0.226, 0.226, 0.226]).to(device)
 
@@ -27,7 +26,9 @@ BN_AND_DO = True if BATCH_SIZE > 1 else False
 CUSTOMDATASET_TYPE = "CustomDataset_first_two_thirds_train"
 SAVE_MODEL = True
 
-penalty_coeffs = [1]
+RE1_DIST = True
+SED_DIST = True
+SVD_COEFF = 1
 RE1_COEFF = 1
 SED_COEFF = 0
 ENFORCE_RANK_2 = True
@@ -42,10 +43,8 @@ OVERFITTING=True
 AVG_EMBEDDINGS = True
 UNFROZEN_LAYERS = 0
 GROUP_CONV = {"use" : False, "out_channels": 256, "num_groups" : 256}
-RE1_DIST = True
-SED_DIST = True
 VISIUALIZE = {"epoch" : NUM_EPOCHS-1, "dir": 'unormalized_epipole_lines'}
 PLOTS_PATH = os.path.join('plots', 'only_one_sequence', 
-                          f"""SVD_coeff {penalty_coeffs} RE1_coeff {RE1_COEFF} SED_coeff {SED_COEFF} lr {learning_rates_mlp[0]} 
-                          avg embeddings {AVG_EMBEDDINGS} model {"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"} 
+                          f"""SVD_coeff {SVD_COEFF} RE1_coeff {RE1_COEFF} SED_coeff {SED_COEFF} lr {learning_rates_mlp[0]} 
+                          avg_embeddings {AVG_EMBEDDINGS} model {"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"} 
                           Force_rank_2 {ENFORCE_RANK_2} predict_pose {PREDICT_POSE} use_reconstruction {USE_RECONSTRUCTION_LAYER}""")

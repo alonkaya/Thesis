@@ -182,10 +182,4 @@ def geodesic_error(R, R_star):
 
     return error
 
-def save_model(model_state_dict, mlp_state_dict, model_t_state_dict, mlp_t_state_dict, PLOTS_PATH, predict_pose):
-    os.makedirs(PLOTS_PATH, exist_ok=True)
-    torch.save(model_state_dict, os.path.join(PLOTS_PATH, "model.pth"))
-    torch.save(mlp_state_dict, os.path.join(PLOTS_PATH, "mlp.pth"))    
-    if predict_pose:
-        torch.save(model_t_state_dict, os.path.join(PLOTS_PATH, "model_t.pth"))
-        torch.save(mlp_t_state_dict, os.path.join(PLOTS_PATH, "mlp_t.pth"))    
+ 
