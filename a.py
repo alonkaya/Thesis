@@ -160,7 +160,7 @@ def vis():
         epipolar_geo_unormalized = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label[0])
 
         epipolar_geo.visualize(sqResultDir='normalized', file_num=i)
-        epipolar_geo_unormalized.visualize(sqResultDir='unormalized', file_num=i)
+        # epipolar_geo_unormalized.visualize(sqResultDir='unormalized', file_num=i)
 
 
 if __name__ == "__main__":

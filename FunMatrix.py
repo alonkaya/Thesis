@@ -374,8 +374,8 @@ class EpipolarGeometry:
         avg_distance_err_img2 /= self.pts1.shape[0]
         epip_test_err /= self.pts1.shape[0]
 
-        RE1_dist_img1 = self.get_RE1_distance().cpu().item()
-        SED_dist_img1 = self.get_SED_distance().cpu().item()
+        RE1_dist = self.get_RE1_distance().cpu().item()
+        SED_dist = self.get_SED_distance().cpu().item()
         vis = np.concatenate((img1_line, img2_line), axis=0)
         font = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -386,12 +386,12 @@ class EpipolarGeometry:
                     font, 0.6, color=(0, 0, 128), lineType=cv2.LINE_AA)
         cv2.putText(vis, str(epip_test_err), (5, 200), font, 0.6,
                     color=(130, 0, 150), lineType=cv2.LINE_AA)
-        cv2.putText(vis, str(RE1_dist_img1), (5, 230), font,
+        cv2.putText(vis, str(RE1_dist), (5, 230), font,
                     0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)  
-        cv2.putText(vis, str(SED_dist_img1), (5, 260), font,
+        cv2.putText(vis, str(SED_dist), (5, 260), font,
                     0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
         
-        if(avg_distance_err_img1 > 13 or abs(epip_test_err) > 0.01):
+        if(SED_dist > 10):
             if MOVE_BAD_IMAGES:
                 src_path1 = os.path.join(
                     self.sequence_path, "image_0", self.file_name1)
