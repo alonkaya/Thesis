@@ -173,9 +173,9 @@ def vis():
 
         frame = epipolar_geo.visualize(sqResultDir=path, file_num=i)
         if frame == "good":
-            good_frames_pose.append(torch.cat((R[0], t[0].view(3,1))), dim=-1)
+            good_frames_pose.append(torch.cat((R[0], t[0].view(3,1)), dim=-1))
         else:
-            bad_frames_pose.append(torch.cat((R[0], t[0].view(3,1))), dim=-1)
+            bad_frames_pose.append(torch.cat((R[0], t[0].view(3,1)), dim=-1))
     print(f'good frames: {good_frames_pose}')
     print(f'bad frames: {bad_frames_pose}')
 
