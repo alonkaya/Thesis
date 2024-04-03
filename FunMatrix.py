@@ -148,7 +148,9 @@ def update_epoch_stats(stats, first_image, second_image, unormalized_label, outp
         output = make_rank2(output)
         unormalized_output = make_rank2(unormalized_output)
     
-    algebraic_dist_truth, algebraic_dist_pred, algebraic_dist_pred_unormalized, RE1_dist_truth, RE1_dist_pred, RE1_dist_pred_unormalized, SED_dist_truth, SED_dist_pred, SED_dist_pred_unormalized = 0, 0, 0, 0, 0, 0, 0, 0, 0
+    algebraic_dist_truth, algebraic_dist_pred, algebraic_dist_pred_unormalized, 
+    RE1_dist_truth, RE1_dist_pred, RE1_dist_pred_unormalized, 
+    SED_dist_truth, SED_dist_pred, SED_dist_pred_unormalized = 0, 0, 0, 0, 0, 0, 0, 0, 0
     for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
         epipolar_geo_truth = EpipolarGeometry(img_1,img_2, F_truth)
         epipolar_geo_pred = EpipolarGeometry(img_1,img_2, F_pred)
