@@ -59,7 +59,7 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             label = norm_layer(unormalized_label.view(-1, 9)).view(3,3)
 
             
-        return first_image, second_image, label, unormalized_label, self.k, R, t
+        return first_image, second_image, label, unormalized_label, self.k
 
 
 def get_valid_indices(sequence_len, sequence_path):
