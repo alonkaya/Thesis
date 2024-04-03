@@ -29,9 +29,9 @@ SAVE_MODEL = True
 RE1_DIST = True
 SED_DIST = True
 SVD_COEFF = 1
-RE1_COEFF = 1
-SED_COEFF = 0
-ENFORCE_RANK_2 = True
+RE1_COEFF = 0
+SED_COEFF = .3
+ENFORCE_RANK_2 = False
 USE_RECONSTRUCTION_LAYER = False
 PREDICT_POSE = False
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
@@ -43,7 +43,7 @@ OVERFITTING=True
 AVG_EMBEDDINGS = True
 UNFROZEN_LAYERS = 0
 GROUP_CONV = {"use" : False, "out_channels": 256, "num_groups" : 256}
-VISIUALIZE = {"epoch" : NUM_EPOCHS-1, "dir": 'unormalized_epipole_lines'}
+VISIUALIZE = {"epoch" : NUM_EPOCHS-1, "dir": 'predicted_epipole_lines'}
 PLOTS_PATH = os.path.join('plots', 'only_one_sequence', 
                           f"""SVD_coeff {SVD_COEFF} RE1_coeff {RE1_COEFF} SED_coeff {SED_COEFF} lr {learning_rates_mlp[0]} \
 avg_embeddings {AVG_EMBEDDINGS} model {"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"} \
