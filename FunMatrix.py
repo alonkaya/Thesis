@@ -75,12 +75,12 @@ def compute_relative_transformations(pose1, pose2):
     return R_relative, t_relative
 
 
-def compute_essential(R, t, device=False):
+def compute_essential(R, t, to_device=False):
     # Compute the skew-symmetric matrix of t
     t_x = torch.tensor([[0, -t[2], t[1]],
                         [t[2], 0, -t[0]],
                         [-t[1], t[0], 0]])
-    if device: t_x = t_x.to(device)
+    if to_device: t_x = t_x.to(device)
 
     # Compute the essential matrix E
     E = torch.matmul(t_x, R)
@@ -117,7 +117,7 @@ def pose_to_F(pose, k):
 
     R = pose[:, :3]
     t = pose[:, 3]
-    E = compute_essential(R, t, device=True)
+    E = compute_essential(R, t, to_device=True)
     F = compute_fundamental(E, k, k)
 
     return F.view(-1,3,3)
@@ -183,7 +183,7 @@ def update_epoch_stats(stats, first_image, second_image, unormalized_label, outp
         epipolar_geo_pred_unormalized.visualize(sqResultDir=os.path.join(PLOTS_PATH, VISIUALIZE["dir"]), file_num=stats["file_num"])
         stats["file_num"] = stats["file_num"] + 1
     
-    return RE1_dist_pred / len(first_image), SED_dist_pred / len(first_image)
+    return RE1_dist_pred/len(first_image), SED_dist_pred/len(first_image)
 
 class EpipolarGeometry:
     def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):
@@ -193,8 +193,7 @@ class EpipolarGeometry:
         self.image1_numpy = reverse_transforms(image1_tensors)
         self.image2_numpy = reverse_transforms(image2_tensors)
 
-        pts1, pts2 = self.get_keypoints()
-        self.pts1, self.pts2 = torch.tensor(pts1, dtype=torch.float32).to(device), torch.tensor(pts2, dtype=torch.float32).to(device)
+        self.pts1, self.pts2 = self.get_keypoints()
 
         self.sequence_path = os.path.join(
             'sequences', sequence_num) if sequence_num else None
@@ -235,12 +234,11 @@ class EpipolarGeometry:
         if len(self.good) == 0:
             self.good.append(matches[min_distance_index][0])
 
-        # Extract the matched keypoints
-        pts1 = np.float32([kp1[m.queryIdx].pt for m in self.good])
-        pts2 = np.float32([kp2[m.trainIdx].pt for m in self.good])
+        pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32).to(device)
+        pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32).to(device)
 
-        pts1 = np.concatenate((pts1, np.ones((pts1.shape[0], 1))), axis=-1) # shape [n,3]
-        pts2 = np.concatenate((pts2, np.ones((pts2.shape[0], 1))), axis=-1) # shape [n,3]
+        pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1).to(device)), dim=-1)
+        pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1).to(device)), dim=-1)
 
         return pts1, pts2
     
@@ -321,6 +319,7 @@ class EpipolarGeometry:
         os.makedirs(good_frames_path, exist_ok=True)
 
         self.F = self.F.cpu().numpy()
+        pts1, pts2 = self.pts1.cpu().numpy(), self.pts2.cpu().numpy()
 
         img1_line = self.image1_numpy.copy()
         img2_line = self.image2_numpy.copy()
@@ -331,7 +330,6 @@ class EpipolarGeometry:
 
         img_W = self.image1_numpy.shape[1] - 1
         epip_test_err = 0
-        pts1, pts2 = self.pts1.numpy(), self.pts2.numpy()
         for color_idx, (pt1, pt2) in enumerate(zip(pts1, pts2)):
             x1, y1, _ = pt1
             x2, y2, _ = pt2

@@ -43,7 +43,11 @@ class GroupedConvolution(nn.Module):
         return self.grouped_conv(x)
     
 
-def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False, model=CLIP_MODEL_NAME, augmentation=AUGMENTATION, enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF):
+def plot(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, 
+         x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False, 
+         model=CLIP_MODEL_NAME, augmentation=AUGMENTATION, enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, 
+         use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF):
+    
     model_name = "CLIP" if model == CLIP_MODEL_NAME else "Google ViT"
     
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
@@ -68,7 +72,6 @@ def plot_over_epoch(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_d
             print_and_write(e)
 
     if save:
-        
         os.makedirs(PLOTS_PATH, exist_ok=True)
         plt.savefig(f"""{PLOTS_PATH}/{title}.png""")  # Specify the filename and extension
 
@@ -178,3 +181,11 @@ def geodesic_error(R, R_star):
     error = torch.acos(((trace - 1) / 2).clamp(-1, 1))  # Clamping for numerical stability
 
     return error
+
+def save_model(model_state_dict, mlp_state_dict, model_t_state_dict, mlp_t_state_dict, PLOTS_PATH, predict_pose):
+    os.makedirs(PLOTS_PATH, exist_ok=True)
+    torch.save(model_state_dict, os.path.join(PLOTS_PATH, "model.pth"))
+    torch.save(mlp_state_dict, os.path.join(PLOTS_PATH, "mlp.pth"))    
+    if predict_pose:
+        torch.save(model_t_state_dict, os.path.join(PLOTS_PATH, "model_t.pth"))
+        torch.save(mlp_t_state_dict, os.path.join(PLOTS_PATH, "mlp_t.pth"))    

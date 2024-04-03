@@ -7,8 +7,8 @@ from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, penalty_coeff,  penaltize_normalized, 
                  mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, 
-                 batchnorm_and_dropout=BN_AND_DO, freeze_pretrained_model=FREEZE_PRETRAINED_MODEL, overfitting=OVERFITTING, augmentation=AUGMENTATION, 
-                 pretrained_model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF):
+                 batchnorm_and_dropout=BN_AND_DO, freeze_model=FREEZE_PRETRAINED_MODEL, overfitting=OVERFITTING, augmentation=AUGMENTATION, 
+                 model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF):
 
         """
         Initialize the ViTMLPRegressor model.
@@ -16,11 +16,11 @@ class FMatrixRegressor(nn.Module):
         Args:
         - mlp_hidden_sizes (list): List of hidden layer sizes for the MLP.
         - num_output (int): Number of output units in the final layer.
-        - pretrained_model_name (str): Name of the pretrained model to use.
+        - model_name (str): Name of the pretrained model to use.
         - lr (float): Learning rate for the optimizer.
         - device (str): Device to which the model should be moved (e.g., "cuda" or "cpu").
         - regress (bool): If True, use Mean Squared Error loss; if False, use Cross Entropy Loss.
-        - freeze_pretrained_model (bool): If True, freeze the parameters of the pretrained model.
+        - freeze_model (bool): If True, freeze the parameters of the pretrained model.
         """
 
         super(FMatrixRegressor, self).__init__()
@@ -34,37 +34,37 @@ class FMatrixRegressor(nn.Module):
         self.batchnorm_and_dropout = batchnorm_and_dropout
         self.overfitting = overfitting
         self.average_embeddings = average_embeddings
-        self.pretrained_model_name = pretrained_model_name
+        self.model_name = model_name
         self.augmentation = augmentation
         self.enforce_rank_2 = enforce_rank_2
         self.use_reconstruction=use_reconstruction
         self.predict_pose = predict_pose
 
         # Check if CLIP model is specified
-        if pretrained_model_name == "openai/clip-vit-base-patch32":
+        if model_name == "openai/clip-vit-base-patch32":
             self.clip = True
 
             # Initialize CLIP processor and pretrained model
             self.clip_image_processor = CLIPImageProcessor.from_pretrained(
-                pretrained_model_name)
-            self.pretrained_model = CLIPVisionModel.from_pretrained(
-                pretrained_model_name).to(device)
+                model_name)
+            self.model = CLIPVisionModel.from_pretrained(
+                model_name).to(device)
             
             if self.predict_pose:
                 self.clip_image_processor_t = CLIPImageProcessor.from_pretrained(
-                    pretrained_model_name)
-                self.pretrained_model_t = CLIPVisionModel.from_pretrained(
-                    pretrained_model_name).to(device)
+                    model_name)
+                self.model_t = CLIPVisionModel.from_pretrained(
+                    model_name).to(device)
 
         else:
             self.clip = False
 
             # Initialize ViT pretrained model
-            self.pretrained_model = ViTModel.from_pretrained(
-                pretrained_model_name).to(device)
+            self.model = ViTModel.from_pretrained(
+                model_name).to(device)
 
         # Get input dimension for the MLP based on ViT configuration
-        self.model_hidden_size = self.pretrained_model.config.hidden_size
+        self.model_hidden_size = self.model.config.hidden_size
         if self.average_embeddings:
             mlp_input_shape = 2*self.model_hidden_size
         else:
@@ -76,7 +76,7 @@ class FMatrixRegressor(nn.Module):
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
         params = [
-            {'params': self.pretrained_model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
             {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
         ]
         
@@ -87,7 +87,7 @@ class FMatrixRegressor(nn.Module):
             self.t_mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                         3, batchnorm_and_dropout).to(device)
             params_t = [
-                    {'params': self.pretrained_model_t.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
+                    {'params': self.model_t.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
                     {'params': self.t_mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
                 ]  
 
@@ -98,7 +98,7 @@ class FMatrixRegressor(nn.Module):
     def get_embeddings(self, x1, x2, predict_t=False):
         if self.clip:  
             processor = self.clip_image_processor_t if predict_t else self.clip_image_processor
-            model = self.pretrained_model_t if predict_t else self.pretrained_model
+            model = self.model_t if predict_t else self.model
             try:
                 x1 = processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
                 x2 = processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
@@ -123,8 +123,8 @@ class FMatrixRegressor(nn.Module):
                 print_memory()
                 return
         else:
-            x1_embeddings = self.pretrained_model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size)
-            x2_embeddings = self.pretrained_model(x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size)
+            x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size)
+            x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size)
 
         if self.average_embeddings:
             try:
@@ -305,66 +305,69 @@ class FMatrixRegressor(nn.Module):
             # if not_learning(all_train_loss, all_val_loss) or check_nan(all_train_loss[-1], all_val_loss[-1], train_mae[-1], val_mae[-1], ec_err_pred_unoramlized[-1], val_ec_err_pred_unormalized[-1], ec_err_pred[-1],all_penalty[-1]):
             #     num_epochs = epoch + 1
             #     break
-
-        plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
+        
+        if SAVE_MODEL:
+            save_model(self.model.state_dict(), self.mlp.state_dict(), self.model_t.state_dict(), self.t_mlp.state_dict(), self.predict_pose)    
+        
+        plot(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, 
                         title="Loss" if not self.predict_pose else "Loss R", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                        model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                         use_reconstruction=self.use_reconstruction)
         
-        plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
+        plot(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, 
                         title="MAE" if not self.predict_pose else "MAE R", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                        model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                         use_reconstruction=self.use_reconstruction)
         
         if self.predict_pose:
-            plot_over_epoch(x=range(1, num_epochs + 1), y1=all_train_loss_t, y2=all_val_loss, 
+            plot(x=range(1, num_epochs + 1), y1=all_train_loss_t, y2=all_val_loss, 
                             title="Loss t", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                             lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                            model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                            model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)     
             
-            plot_over_epoch(x=range(1, num_epochs + 1), y1=train_mae_t, y2=val_mae, 
+            plot(x=range(1, num_epochs + 1), y1=train_mae_t, y2=val_mae, 
                             title="MAE t", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                             lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                            model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                            model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)           
         
-        plot_over_epoch(x=range(1, num_epochs + 1), y1=all_algberaic_pred_unormalized, y2=[], 
+        plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred_unormalized, y2=[], 
                         title="Algebraic distance unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                        model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                         use_reconstruction=self.use_reconstruction)
         
-        plot_over_epoch(x=range(1, num_epochs + 1), y1=all_algberaic_pred, y2=[], 
+        plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred, y2=[], 
                         title="Algebraic distance F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
                         lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                        model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                         use_reconstruction=self.use_reconstruction)
         if RE1_DIST:
-            plot_over_epoch(x=range(1, num_epochs + 1), y1=all_RE1_pred_unormalized, y2=[], 
+            plot(x=range(1, num_epochs + 1), y1=all_RE1_pred_unormalized, y2=[], 
                             title="RE1 distance unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                             lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                            model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                            model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)
             
-            plot_over_epoch(x=range(1, num_epochs + 1), y1=all_RE1_pred, y2=[], 
+            plot(x=range(1, num_epochs + 1), y1=all_RE1_pred, y2=[], 
                             title="RE1 distance F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
                             lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                            model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                            model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)
         if SED_DIST:
-            plot_over_epoch(x=range(1, num_epochs + 1), y1=all_SED_pred_unormalized, y2=[], 
+            plot(x=range(1, num_epochs + 1), y1=all_SED_pred_unormalized, y2=[], 
                             title="SED distance unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
                             lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                            model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                            model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)
             
-            plot_over_epoch(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=[], 
+            plot(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=[], 
                             title="SED distance F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
                             lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                            model=self.pretrained_model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+                            model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)
                 
 

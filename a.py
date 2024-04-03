@@ -134,21 +134,21 @@ def data_with_one_sequence(batch_size, CustomDataset_type, sequence_name='0adea9
     return train_loader, val_loader
 
 
-# def add_noise_to_F(F, noise_level):
-#     noise = torch.randn_like(F) * noise_level
-#     print(torch.mean(torch.abs(noise)))
-#     return F + noise
+def add_noise_to_F(F, noise_level):
+    noise = torch.randn_like(F) * noise_level
+    print(torch.mean(torch.abs(noise)))
+    return F + noise
 
-# def make_rank_2(F):
-#         U1, S1, Vt1 = torch.linalg.svd(F, full_matrices=False)
+def make_rank_2(F):
+        U1, S1, Vt1 = torch.linalg.svd(F, full_matrices=False)
 
-#         S1[-1] = 0
+        S1[-1] = 0
 
-#         output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), Vt1)
+        output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), Vt1)
 
-#         if torch.linalg.matrix_rank(output) != 2:
-#             print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
-#         return output
+        if torch.linalg.matrix_rank(output) != 2:
+            print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
+        return output
 
 # if __name__ == "__main__":
 #     sequence_name = ["0adea9da21629b61"]
