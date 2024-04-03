@@ -403,10 +403,12 @@ class EpipolarGeometry:
             else:
                 cv2.imwrite(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}'), vis)
                 print(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}\n'))
+            return "bad"
 
         elif not MOVE_BAD_IMAGES:
             cv2.imwrite(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}'), vis)
             print(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}\n'))
+            return "good"
         
 
 

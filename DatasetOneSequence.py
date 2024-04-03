@@ -55,6 +55,7 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
                 unormalized_label = torch.cat((unormalized_R, unormalized_t.view(3,1)), dim=-1)
             else:
                 unormalized_label = get_F(self.poses, idx, self.k)
+                R,t = compute_relative_transformations(self.poses[idx], self.poses[idx+JUMP_FRAMES])
         except Exception as e:
             print_and_write(f"4\nError in sequence: {self.sequence_path}, idx: {idx}, dataset_type: {self.dataset_type} sequence num: {self.sequence_num}\nException: {e}")
             return
@@ -70,7 +71,7 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
             print_and_write("5\n {e}")
             return
             
-        return first_image, second_image, label, unormalized_label, self.k
+        return first_image, second_image, label, unormalized_label, self.k, R, t
 
 
 def get_valid_indices(sequence_len, sequence_path):
@@ -164,11 +165,19 @@ def vis():
 
     train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name=sequence_name)
 
-    for i,(first_image, second_image, label, unormalized_label,_) in enumerate(train_loader):
+    good_frames_pose = []
+    bad_frames_pose = []
+    for i,(first_image, second_image, label, unormalized_label,_, R, t) in enumerate(train_loader):
         first_image, second_image, label, unormalized_label = first_image.to(device), second_image.to(device), label.to(device), unormalized_label.to(device)
         epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label)
 
-        epipolar_geo.visualize(sqResultDir=path, file_num=i)
+        frame = epipolar_geo.visualize(sqResultDir=path, file_num=i)
+        if frame == "good":
+            good_frames_pose.append(torch.cat((R[0], t[0].view(3,1))), dim=-1)
+        else:
+            bad_frames_pose.append(torch.cat((R[0], t[0].view(3,1))), dim=-1)
+    print(f'good frames: {good_frames_pose}')
+    print(f'bad frames: {bad_frames_pose}')
 
 
 if __name__ == "__main__":

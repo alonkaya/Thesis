@@ -9,7 +9,7 @@ from utils import print_and_write, init_main
 from FMatrixRegressor import FMatrixRegressor
 from params import *
 import itertools
-from a import * 
+from DatasetOneSequence import * 
 
 
 if __name__ == "__main__":
