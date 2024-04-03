@@ -19,7 +19,7 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size):
     # Adjust K according to resize and center crop transforms   
     adjusted_K = adjust_intrinsic(K, original_image_size, torch.tensor([256, 256]), torch.tensor([224, 224]))
 
-    return adjusted_K
+    return K
 
 def get_intrinsic_KITTI(calib_path, original_image_size):
     projection_matrix = read_camera_intrinsic(calib_path).reshape(3,4)
