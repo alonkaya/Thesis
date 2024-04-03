@@ -374,21 +374,21 @@ class EpipolarGeometry:
         avg_distance_err_img2 /= self.pts1.shape[0]
         epip_test_err /= self.pts1.shape[0]
 
-        RE1_dist_img1 = self.get_RE1_distance()
-        SED_dist_img1 = self.get_SED_distance()
+        RE1_dist_img1 = self.get_RE1_distance().cpu().item()
+        SED_dist_img1 = self.get_SED_distance().cpu().item()
         vis = np.concatenate((img1_line, img2_line), axis=0)
         font = cv2.FONT_HERSHEY_SIMPLEX
 
         img_H = vis.shape[0]
-        cv2.putText(vis, str(avg_distance_err_img1), (10, 20), font,
+        cv2.putText(vis, str(avg_distance_err_img1), (5, 20), font,
                     0.6, color=(128, 0, 0), lineType=cv2.LINE_AA)
-        cv2.putText(vis, str(avg_distance_err_img2), (10, img_H - 10),
+        cv2.putText(vis, str(avg_distance_err_img2), (5, img_H - 10),
                     font, 0.6, color=(0, 0, 128), lineType=cv2.LINE_AA)
-        cv2.putText(vis, str(epip_test_err), (10, 200), font, 0.6,
+        cv2.putText(vis, str(epip_test_err), (5, 200), font, 0.6,
                     color=(130, 0, 150), lineType=cv2.LINE_AA)
-        cv2.putText(vis, str(RE1_dist_img1), (10, 230), font,
+        cv2.putText(vis, str(RE1_dist_img1), (5, 230), font,
                     0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)  
-        cv2.putText(vis, str(SED_dist_img1), (10, 260), font,
+        cv2.putText(vis, str(SED_dist_img1), (5, 260), font,
                     0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
         
         if(avg_distance_err_img1 > 13 or abs(epip_test_err) > 0.01):

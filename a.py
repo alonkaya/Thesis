@@ -151,7 +151,7 @@ def make_rank_2(F):
         return output
 
 def vis():
-    sequence_name = ["0adea9da21629b61"]
+    sequence_name = "0f26970967ddf02c"
     train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name=sequence_name)
 
     for i,(first_image, second_image, label, unormalized_label,_) in enumerate(train_loader):
