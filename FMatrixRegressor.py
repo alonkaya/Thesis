@@ -1,3 +1,4 @@
+from DatasetOneSequence import data_with_one_sequence
 from params import *
 from utils import *
 from FunMatrix import *
@@ -8,7 +9,8 @@ class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, svd_coeff=SVD_COEFF, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
                  average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO, freeze_model=FREEZE_PRETRAINED_MODEL,
                  overfitting=OVERFITTING, augmentation=AUGMENTATION, model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, 
-                 enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF):
+                 enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF,
+                 model_path=None, mlp_path=None):
 
         """
         Initialize the ViTMLPRegressor model.
@@ -62,18 +64,22 @@ class FMatrixRegressor(nn.Module):
             self.model = ViTModel.from_pretrained(
                 model_name).to(device)
 
+
         # Get input dimension for the MLP based on ViT configuration
         self.model_hidden_size = self.model.config.hidden_size
         if self.average_embeddings:
             mlp_input_shape = 2*self.model_hidden_size
         else:
             mlp_input_shape = 7*7*2*self.model_hidden_size
-
-        if GROUP_CONV["use"]:
-            mlp_input_shape //= 3
+        if GROUP_CONV["use"]: mlp_input_shape //= 3
 
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
+
+        if model_path and mlp_path:
+            self.model.load_state_dict(torch.load(model_path))
+            self.mlp.load_state_dict(torch.load(mlp_path))
+
         params = [
             {'params': self.model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
             {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
@@ -94,85 +100,52 @@ class FMatrixRegressor(nn.Module):
             self.optimizer_t = optim.Adam(params_t, lr=lr_mlp)
 
 
+
     def get_embeddings(self, x1, x2, predict_t=False):
         if self.clip:  
             processor = self.clip_image_processor_t if predict_t else self.clip_image_processor
             model = self.model_t if predict_t else self.model
-            try:
-                x1 = processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
-                x2 = processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
-            except Exception as e:
-                print_and_write(f'processor: {e}')
-                return
-            
-            try:
-                x1['pixel_values'] = x1['pixel_values'].to(device)
-                x2['pixel_values'] = x2['pixel_values'].to(device)
-            except Exception as e:
-                print_and_write(f'pixel_values to device: {e}')
-                print_memory()
-                return
-            
-            try:
-                x1_embeddings = model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size)
-                x2_embeddings = model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*self.model_hidden_size) 
 
-            except Exception as e:
-                print_and_write(f'clip: {e}')
-                print_memory()
-                return
+            x1 = processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
+            x2 = processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
+
+            x1['pixel_values'] = x1['pixel_values'].to(device)
+            x2['pixel_values'] = x2['pixel_values'].to(device)
+
+            x1_embeddings = model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*model.config.hidden_size)
+            x2_embeddings = model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*model.config.hidden_size)
+
         else:
-            x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size)
-            x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model_hidden_size)
+            x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model.config.hidden_size)
+            x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model.config.hidden_size)
 
         if self.average_embeddings:
-            try:
                 avg_patches = nn.AdaptiveAvgPool2d(1)
-                x1_embeddings = avg_patches(x1_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
-                x2_embeddings = avg_patches(x2_embeddings.view(-1, self.model_hidden_size, 7, 7)).view(-1, self.model_hidden_size)
-            except Exception as e: 
-                print_and_write(f'avg_patches: {e}')
-                return
+                x1_embeddings = avg_patches(x1_embeddings.view(-1, model.config.hidden_size, 7, 7)).view(-1, model.config.hidden_size)
+                x2_embeddings = avg_patches(x2_embeddings.view(-1, model.config.hidden_size, 7, 7)).view(-1, model.config.hidden_size)
+
 
         if GROUP_CONV["use"]:
-            grouped_conv_layer = GroupedConvolution(in_channels=self.model_hidden_size,   # Total input channels
+            grouped_conv_layer = GroupedConvolution(in_channels=model.config.hidden_size,   # Total input channels
                                     out_channels=GROUP_CONV["out_channels"],  # Total output channels you want
                                     kernel_size=3,
                                     padding=1,
                                     groups=GROUP_CONV["num_groups"])
-            x1_embeddings = grouped_conv_layer(x1_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
-            x2_embeddings = grouped_conv_layer(x2_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, self.model_hidden_size//3)
+            x1_embeddings = grouped_conv_layer(x1_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, model.config.hidden_size//3)
+            x2_embeddings = grouped_conv_layer(x2_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, model.config.hidden_size//3)
 
         embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
 
         return embeddings
 
     def forward(self, x1, x2, predict_t=False):
-        try:
-            embeddings = self.get_embeddings(x1, x2, predict_t=predict_t)
-        except Exception as e:
-            print_and_write(f'get_embeddings: {e}')
-            return
+        embeddings = self.get_embeddings(x1, x2, predict_t=predict_t)
 
-        # Apply MLP on embedding vectors
-        try:        
-            unormalized_output = self.mlp(embeddings).view(-1,3,3) if not predict_t else self.t_mlp(embeddings).view(-1,3,1)
-        except Exception as e:
-            print_and_write(f'mlp: {e}')
-            return
-        
-        # Apply norm layer
-        try:            
-            output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3) if not predict_t else norm_layer(unormalized_output.view(-1, 3), predict_t=True).view(-1,3,1)
-        except Exception as e:
-            print_and_write(f'norm_layer: {e}')
-            return
-        try:
-            penalty = last_sing_value_penalty(unormalized_output) if not self.predict_pose else 0
-        except Exception as e:
-            print_and_write(f'last_sing_value_penalty: {e}')
-            print_memory()
-            return
+        unormalized_output = self.mlp(embeddings).view(-1,3,3) if not predict_t else self.t_mlp(embeddings).view(-1,3,1)
+
+        output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3) if not predict_t else norm_layer(unormalized_output.view(-1, 3), predict_t=True).view(-1,3,1)
+
+        penalty = last_sing_value_penalty(unormalized_output) if not self.predict_pose else 0
 
         return unormalized_output, output, penalty
 
@@ -215,8 +188,8 @@ class FMatrixRegressor(nn.Module):
                     epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + penalty
 
 
-                batch_RE1_dist_pred, batch_SED_dist_pred = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), epoch)
-            
+                batch_RE1_dist_pred, batch_SED_dist_pred, algebraic_dist_pred = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), output, epoch)
+
                 if self.predict_pose:
                     loss_R = self.L2_loss(R, label[:, :, :3])
                     epoch_stats["avg_loss_R"] += loss_R.detach()
@@ -240,7 +213,7 @@ class FMatrixRegressor(nn.Module):
                 else:
                     # Compute loss
                     l2_loss = self.L2_loss(output, label)
-                    loss = l2_loss + self.penalty_coeff*penalty + SED_COEFF*batch_SED_dist_pred + RE1_COEFF*batch_RE1_dist_pred
+                    loss = l2_loss + self.penalty_coeff*penalty + SED_COEFF*batch_SED_dist_pred + ALG_COEFF*algebraic_dist_pred
                     epoch_stats["avg_loss"] = epoch_stats["avg_loss"] + loss.detach()
 
                     # Compute Backward pass and gradients
@@ -290,12 +263,12 @@ class FMatrixRegressor(nn.Module):
                 epoch_output += f"""Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t[-1]}
              Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]}\n"""
             else:
-                epoch_output += f"""Training Loss: {all_train_loss[-1]} Training MAE: {train_mae[-1]} penalty: {all_penalty[-1]}\n"""
-            epoch_output += f"\talgebraic dist truth: {all_algberaic_truth[-1]}, algebraic dist pred: {all_algberaic_pred[-1]}, algebraic dist pred unormalized: {all_algberaic_pred_unormalized[-1]},\n"
+                epoch_output += f"""Training Loss: {all_train_loss[-1]} Training MAE: {train_mae[-1]} last sv: {all_penalty[-1]}\n"""
+            epoch_output += f"\t    algebraic dist truth: {all_algberaic_truth[-1]}, algebraic dist pred: {all_algberaic_pred[-1]}, algebraic dist pred unormalized: {all_algberaic_pred_unormalized[-1]},\n"
             if RE1_DIST:
-                epoch_output += f"\tRE1_dist_truth: {all_RE1_truth[-1]}, RE1 dist pred: {all_RE1_pred[-1]}, RE1 dist pred unormalized: {all_RE1_pred_unormalized[-1]}\n"
+                epoch_output += f"\t    RE1_dist_truth: {all_RE1_truth[-1]}, RE1 dist pred: {all_RE1_pred[-1]}, RE1 dist pred unormalized: {all_RE1_pred_unormalized[-1]}\n"
             if SED_DIST:
-                epoch_output += f"\tSED dist truth: {all_SED_truth[-1]}, SED dist pred: {all_SED_pred[-1]}, SED dist pred unormalized: {all_SED_pred_unormalized[-1]}\n"
+                epoch_output += f"\t    SED dist truth: {all_SED_truth[-1]}, SED dist pred: {all_SED_pred[-1]}, SED dist pred unormalized: {all_SED_pred_unormalized[-1]}\n"
 
             print_and_write(epoch_output)
 
@@ -355,12 +328,6 @@ class FMatrixRegressor(nn.Module):
                             model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)
         if SED_DIST:
-            plot(x=range(1, num_epochs + 1), y1=all_SED_pred_unormalized, y2=[], 
-                            title="SED distance unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                            lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                            model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
-                            use_reconstruction=self.use_reconstruction)
-            
             plot(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=[], 
                             title="SED distance F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
                             lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
@@ -491,3 +458,41 @@ def print_memory(device_index=0):
 
     # Resetting peak memory stats can be useful to understand memory usage over time
     torch.cuda.reset_peak_memory_stats(device)
+
+
+def use_pretrained_model():
+    train_loader, val_loader = data_with_one_sequence(BATCH_SIZE, CUSTOMDATASET_TYPE)
+
+    model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5,
+                             model_path='plots/only_one_sequence/SVD_coeff 1 RE1_coeff 0 SED_coeff 0 lr 2e-05 avg_embeddings True model CLIP Force_rank_2 False predict_pose False use_reconstruction False/model.pth',
+                             mlp_path='plots/only_one_sequence/SVD_coeff 1 RE1_coeff 0 SED_coeff 0 lr 2e-05 avg_embeddings True model CLIP Force_rank_2 False predict_pose False use_reconstruction False/mlp.pth').to(device)
+
+    epoch_stats = {"algebraic_dist_truth": torch.tensor(0), "algebraic_dist_pred": torch.tensor(0),
+                   "algebraic_dist_pred_unormalized": torch.tensor(0),
+                   "RE1_dist_truth": torch.tensor(0), "RE1_dist_pred": torch.tensor(0),
+                   "RE1_dist_pred_unormalized": torch.tensor(0),
+                   "SED_dist_truth": torch.tensor(0), "SED_dist_pred": torch.tensor(0),
+                   "SED_dist_pred_unormalized": torch.tensor(0),
+                   "avg_loss": torch.tensor(0), "avg_loss_R": torch.tensor(0), "avg_loss_t": torch.tensor(0),
+                   "epoch_penalty": torch.tensor(0), "file_num": 0}
+    sed = 0
+    algebraic = 0
+    for img1, img2, label, unormalized_label, K in train_loader:
+        img1, img2, label, unormalized_label, K = img1.to(device), img2.to(device), label.to(device), unormalized_label.to(device), K.to(device)
+
+        unormalized_output, output, _ = model.forward(img1, img2)
+
+        unormalized_output = make_rank2(unormalized_output)
+        output = make_rank2(output)
+
+        batch_RE1_dist_pred, batch_SED_dist_pred = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(),
+                                                                      unormalized_label.detach(), output.detach(),
+                                                                      unormalized_output.detach(), -1)
+
+
+    print(epoch_stats["SED_dist_pred"]/len(train_loader), epoch_stats["algebraic_dist_pred_unormalized"]/len(train_loader))
+
+
+
+# if __name__ == '__main__':
+#     use_pretrained_model()

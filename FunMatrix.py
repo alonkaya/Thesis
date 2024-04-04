@@ -131,35 +131,38 @@ def last_sing_value_penalty(output):
 
     return rank_penalty
 
-def make_rank2(F):
-    U, S, Vt = torch.linalg.svd(F, full_matrices=False)
+def make_rank2(F, is_batch=True):
+    U1, S1, Vt1 = torch.linalg.svd(F, full_matrices=False)
 
-    S[:,-1] = 0
+    if is_batch:
+        S1[:, -1] = 0
+    else:
+        S1[-1] = 0
 
-    output = torch.matmul(torch.matmul(U, torch.diag_embed(S)), Vt)
+    output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), Vt1)
 
     if torch.linalg.matrix_rank(output) != 2:
         print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
-
     return output
 
-def update_epoch_stats(stats, first_image, second_image, unormalized_label, output, unormalized_output, epoch=0):
+def update_epoch_stats(stats, first_image, second_image, unormalized_label, output, unormalized_output, output_grad, epoch=0):
     if ENFORCE_RANK_2:
         output = make_rank2(output)
         unormalized_output = make_rank2(unormalized_output)
-    
+
     algebraic_dist_truth, algebraic_dist_pred, algebraic_dist_pred_unormalized, \
     RE1_dist_truth, RE1_dist_pred, RE1_dist_pred_unormalized, \
     SED_dist_truth, SED_dist_pred, SED_dist_pred_unormalized = torch.tensor(0), torch.tensor(0), torch.tensor(0), \
                                                               torch.tensor(0), torch.tensor(0), torch.tensor(0), \
                                                               torch.tensor(0), torch.tensor(0), torch.tensor(0)
-    for img_1, img_2, F_truth, F_pred, F_pred_unormalized in zip(first_image, second_image, unormalized_label, output, unormalized_output):
+    for img_1, img_2, F_truth, F_pred, F_pred_unormalized, F_pred_grad in zip(first_image, second_image, unormalized_label, output, unormalized_output, output_grad):
         epipolar_geo_truth = EpipolarGeometry(img_1,img_2, F_truth)
         epipolar_geo_pred = EpipolarGeometry(img_1,img_2, F_pred)
         epipolar_geo_pred_unormalized = EpipolarGeometry(img_1, img_2, F_pred_unormalized)
-        
+        epipolar_geo_pred_grad = EpipolarGeometry(img_1, img_2, F_pred_grad)
+
         algebraic_dist_truth = algebraic_dist_truth + epipolar_geo_truth.get_mean_algebraic_distance()
-        algebraic_dist_pred = algebraic_dist_pred + epipolar_geo_pred.get_mean_algebraic_distance()
+        algebraic_dist_pred = algebraic_dist_pred + epipolar_geo_pred_grad.get_mean_algebraic_distance()
         algebraic_dist_pred_unormalized = algebraic_dist_pred_unormalized + epipolar_geo_pred_unormalized.get_mean_algebraic_distance()
         if RE1_DIST:
             RE1_dist_truth = RE1_dist_truth + epipolar_geo_truth.get_RE1_distance()
@@ -186,7 +189,7 @@ def update_epoch_stats(stats, first_image, second_image, unormalized_label, outp
         epipolar_geo_pred.visualize(sqResultDir=os.path.join(PLOTS_PATH, VISIUALIZE["dir"]), file_num=stats["file_num"])
         stats["file_num"] = stats["file_num"] + 1
     
-    return RE1_dist_pred/len(first_image), SED_dist_pred/len(first_image)
+    return RE1_dist_pred/len(first_image), SED_dist_pred/len(first_image), algebraic_dist_pred/len(first_image)
 
 class EpipolarGeometry:
     def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):
@@ -406,12 +409,12 @@ class EpipolarGeometry:
             else:
                 cv2.imwrite(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}'), vis)
                 print(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}\n'))
-            return "bad"
 
         elif not MOVE_BAD_IMAGES:
             cv2.imwrite(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}'), vis)
             print(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}\n'))
-            return "good"
+
+        return SED_dist
         
 
 
