@@ -63,7 +63,7 @@ def plot(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_
 
             ax.set_xlabel(x_label)
             ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
-            ax.set_title(f'{y_scale} scale')
+            ax.set_title(f'{title} {y_scale} scale')
         
             ax.set_yscale(y_scale)
             ax.grid(True)
