@@ -166,7 +166,7 @@ def update_epoch_stats(stats, first_image, second_image, unormalized_label, outp
         algebraic_dist_pred_unormalized = algebraic_dist_pred_unormalized + epipolar_geo_pred_unormalized.get_mean_algebraic_distance()
         if RE1_DIST:
             RE1_dist_truth = RE1_dist_truth + epipolar_geo_truth.get_RE1_distance()
-            RE1_dist_pred = RE1_dist_pred + epipolar_geo_pred.get_RE1_distance()
+            RE1_dist_pred = RE1_dist_pred + epipolar_geo_pred_grad.get_RE1_distance()
             RE1_dist_pred_unormalized = RE1_dist_pred_unormalized + epipolar_geo_pred_unormalized.get_RE1_distance()
         if SED_DIST:
             SED_dist_truth = SED_dist_truth + epipolar_geo_truth.get_SED_distance()
