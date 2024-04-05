@@ -43,12 +43,7 @@ class GroupedConvolution(nn.Module):
         return self.grouped_conv(x)
     
 
-def plot(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, plots_path, 
-         x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False, 
-         model=CLIP_MODEL_NAME, augmentation=AUGMENTATION, enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, 
-         use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF):
-    
-    model_name = "CLIP" if model == CLIP_MODEL_NAME else "Google ViT"
+def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
     
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
