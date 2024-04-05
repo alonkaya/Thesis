@@ -21,8 +21,8 @@ if __name__ == "__main__":
     for i, (lr_vit, lr_mlp, alg_coeff, re1_coeff, sed_coeff) in enumerate(param_combinations):
         plots_path = os.path.join('plots', 'only_one_sequence', 
                           f"""SVD_{LAST_SV_COEFF}__RE1_{re1_coeff}__SED_{sed_coeff}__ALG_{alg_coeff}__lr_{learning_rates_mlp[0]}__\
-                        avg_embeddings_{AVG_EMBEDDINGS}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
-                        Force_rank_2_{ENFORCE_RANK_2}__predict_pose_{PREDICT_POSE}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""")
+avg_embeddings_{AVG_EMBEDDINGS}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
+Force_rank_2_{ENFORCE_RANK_2}__predict_pose_{PREDICT_POSE}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""")
         
         model = FMatrixRegressor(lr_vit=lr_vit, lr_mlp=lr_mlp, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path).to(device)
 
