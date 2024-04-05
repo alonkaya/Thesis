@@ -6,7 +6,7 @@ import torch.optim as optim
 from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, lr_vit, lr_mlp, svd_coeff=SVD_COEFF, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
+    def __init__(self, lr_vit, lr_mlp, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
                  average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO, freeze_model=FREEZE_PRETRAINED_MODEL,
                  overfitting=OVERFITTING, augmentation=AUGMENTATION, model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, 
                  enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF,
@@ -27,7 +27,6 @@ class FMatrixRegressor(nn.Module):
 
         super(FMatrixRegressor, self).__init__()
         self.to(device)
-        self.penalty_coeff = svd_coeff
         self.RE1_coeff = RE1_coeff
         self.batch_size = batch_size
         self.lr_vit = lr_vit
@@ -145,9 +144,9 @@ class FMatrixRegressor(nn.Module):
 
         output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3) if not predict_t else norm_layer(unormalized_output.view(-1, 3), predict_t=True).view(-1,3,1)
 
-        penalty = last_sing_value_penalty(unormalized_output) if not self.predict_pose else 0
+        last_sv_sq = last_sing_value(unormalized_output) if not self.predict_pose else 0
 
-        return unormalized_output, output, penalty
+        return unormalized_output, output, last_sv_sq
 
 
     def train_model(self, train_loader, val_loader, num_epochs):
@@ -184,11 +183,11 @@ class FMatrixRegressor(nn.Module):
                     unormalized_label = pose_to_F(label, K[0]) # notice this is actually normalized label!
                     
                 else:
-                    unormalized_output, output, penalty = self.forward(img1, img2)
-                    epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + penalty
+                    unormalized_output, output, last_sv_sq = self.forward(img1, img2)
+                    epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + last_sv_sq
 
 
-                batch_RE1_dist_pred, batch_SED_dist_pred, algebraic_dist_pred = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), unormalized_label.detach(), output.detach(), unormalized_output.detach(), output, epoch)
+                batch_RE1_dist_pred, batch_SED_dist_pred, algebraic_dist_pred = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, epoch)
 
                 if self.predict_pose:
                     loss_R = self.L2_loss(R, label[:, :, :3])
@@ -213,7 +212,7 @@ class FMatrixRegressor(nn.Module):
                 else:
                     # Compute loss
                     l2_loss = self.L2_loss(output, label)
-                    loss = l2_loss + self.penalty_coeff*penalty + SED_COEFF*batch_SED_dist_pred + ALG_COEFF*algebraic_dist_pred + RE1_COEFF*batch_RE1_dist_pred
+                    loss = l2_loss + LAST_SV_COEFF*(last_sv_sq) + SED_COEFF*batch_SED_dist_pred + ALG_COEFF*algebraic_dist_pred + RE1_COEFF*batch_RE1_dist_pred
                     epoch_stats["avg_loss"] = epoch_stats["avg_loss"] + loss.detach()
 
                     # Compute Backward pass and gradients
@@ -249,26 +248,23 @@ class FMatrixRegressor(nn.Module):
         
             all_algberaic_truth.append(epoch_stats["algebraic_dist_truth"].cpu().item() / len(train_loader))
             all_algberaic_pred.append(epoch_stats["algebraic_dist_pred"].cpu().item() / len(train_loader))
-            all_algberaic_pred_unormalized.append(epoch_stats["algebraic_dist_pred_unormalized"].cpu().item() / len(train_loader))
             all_RE1_truth.append(epoch_stats["RE1_dist_truth"].cpu().item() / len(train_loader))
             all_RE1_pred.append(epoch_stats["RE1_dist_pred"].cpu().item() / len(train_loader))
-            all_RE1_pred_unormalized.append(epoch_stats["RE1_dist_pred_unormalized"].cpu().item() / len(train_loader))
             all_SED_truth.append(epoch_stats["SED_dist_truth"].cpu().item() / len(train_loader))
             all_SED_pred.append(epoch_stats["SED_dist_pred"].cpu().item() / len(train_loader))
-            all_SED_pred_unormalized.append(epoch_stats["SED_dist_pred_unormalized"].cpu().item() / len(train_loader))
             
 
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}: """
             if self.predict_pose:
-                epoch_output += f"""Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t[-1]}
-             Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]}\n"""
+                epoch_output += f"""  Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t[-1]}
+               Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]}\n"""
             else:
-                epoch_output += f"""Training Loss: {all_train_loss[-1]} Training MAE: {train_mae[-1]} last sv: {all_penalty[-1]}\n"""
-            epoch_output += f"\t    algebraic dist truth: {all_algberaic_truth[-1]}, algebraic dist pred: {all_algberaic_pred[-1]}, algebraic dist pred unormalized: {all_algberaic_pred_unormalized[-1]},\n"
+                epoch_output += f"""  Training Loss: {all_train_loss[-1]} Training MAE: {train_mae[-1]} last sv: {all_penalty[-1]}\n"""
+            epoch_output += f"\t\talgebraic dist truth: {all_algberaic_truth[-1]}, algebraic dist pred: {all_algberaic_pred[-1]},\n"
             if RE1_DIST:
-                epoch_output += f"\t    RE1_dist_truth: {all_RE1_truth[-1]}, RE1 dist pred: {all_RE1_pred[-1]}, RE1 dist pred unormalized: {all_RE1_pred_unormalized[-1]}\n"
+                epoch_output += f"\t\tRE1_dist_truth: {all_RE1_truth[-1]}, RE1 dist pred: {all_RE1_pred[-1]}\n"
             if SED_DIST:
-                epoch_output += f"\t    SED dist truth: {all_SED_truth[-1]}, SED dist pred: {all_SED_pred[-1]}, SED dist pred unormalized: {all_SED_pred_unormalized[-1]}\n"
+                epoch_output += f"\t\tSED dist truth: {all_SED_truth[-1]}, SED dist pred: {all_SED_pred[-1]}\n"
 
             print_and_write(epoch_output)
 
@@ -304,11 +300,11 @@ class FMatrixRegressor(nn.Module):
                             model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                             use_reconstruction=self.use_reconstruction)           
         
-        plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred_unormalized, y2=[], 
-                        title="Algebraic distance unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                        lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                        model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
-                        use_reconstruction=self.use_reconstruction)
+        # plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred_unormalized, y2=[], 
+        #                 title="Algebraic distance unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+        #                 lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+        #                 model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+        #                 use_reconstruction=self.use_reconstruction)
         
         plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred, y2=[], 
                         title="Algebraic distance F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,
@@ -316,11 +312,11 @@ class FMatrixRegressor(nn.Module):
                         model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
                         use_reconstruction=self.use_reconstruction)
         if RE1_DIST:
-            plot(x=range(1, num_epochs + 1), y1=all_RE1_pred_unormalized, y2=[], 
-                            title="RE1 distance unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
-                            lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
-                            model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
-                            use_reconstruction=self.use_reconstruction)
+            # plot(x=range(1, num_epochs + 1), y1=all_RE1_pred_unormalized, y2=[], 
+            #                 title="RE1 distance unormalized F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout, 
+            #                 lr_mlp = self.lr_mlp, lr_vit = self.lr_vit, overfitting=self.overfitting, average_embeddings=self.average_embeddings, 
+            #                 model=self.model_name, augmentation=self.augmentation, enforce_rank_2=self.enforce_rank_2, predict_pose=self.predict_pose,
+            #                 use_reconstruction=self.use_reconstruction)
             
             plot(x=range(1, num_epochs + 1), y1=all_RE1_pred, y2=[], 
                             title="RE1 distance F", penalty_coeff=self.penalty_coeff, batch_size=self.batch_size, batchnorm_and_dropout=self.batchnorm_and_dropout,

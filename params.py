@@ -24,17 +24,17 @@ BN_AND_DO = True if BATCH_SIZE > 1 else False
 CUSTOMDATASET_TYPE = "CustomDataset_first_two_thirds_train"
 SAVE_MODEL = True
 
-RE1_DIST = False
+RE1_DIST = True
 SED_DIST = True
-SVD_COEFF = 1
-ALG_COEFF = 0
-RE1_COEFF = 0.1
+LAST_SV_COEFF = 1
+ALG_COEFF = [0.1, 0.01, 0.001]
+RE1_COEFF = 0
 SED_COEFF = 0
 ENFORCE_RANK_2 = False
 USE_RECONSTRUCTION_LAYER = False
 PREDICT_POSE = False
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
-NUM_EPOCHS = 700
+NUM_EPOCHS = 1
 MODEL = CLIP_MODEL_NAME
 AUGMENTATION = False
 FREEZE_PRETRAINED_MODEL=False
@@ -44,6 +44,6 @@ UNFROZEN_LAYERS = 0
 GROUP_CONV = {"use" : False, "out_channels": 256, "num_groups" : 256}
 VISIUALIZE = {"epoch" : NUM_EPOCHS-1, "dir": 'predicted_epipole_lines'}
 PLOTS_PATH = os.path.join('plots', 'only_one_sequence', 
-                          f"""SVD_coeff {SVD_COEFF} RE1_coeff {RE1_COEFF} SED_coeff {SED_COEFF} ALG_COEFF {ALG_COEFF} lr {learning_rates_mlp[0]} \
-avg_embeddings {AVG_EMBEDDINGS} model {"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"} \
-Force_rank_2 {ENFORCE_RANK_2} predict_pose {PREDICT_POSE} use_reconstruction {USE_RECONSTRUCTION_LAYER}""")
+                          f"""SVD_{LAST_SV_COEFF}__RE1_{RE1_COEFF}__SED_{SED_COEFF}__ALG_{ALG_COEFF}__lr_{learning_rates_mlp[0]}__\
+avg_embeddings_{AVG_EMBEDDINGS}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
+Force_rank_2_{ENFORCE_RANK_2}__predict_pose_{PREDICT_POSE}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""")

@@ -129,7 +129,9 @@ def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_la
     return False
                      
 def print_and_write(output):
-    with open("output1.txt", "a") as f:
+    os.makedirs(PLOTS_PATH, exist_ok=True)
+    output_path = os.path.join(PLOTS_PATH, "output.log")
+    with open(output_path, "a") as f:
         f.write(output)
         print(output)
 
@@ -168,7 +170,7 @@ def init_main():
     # Optionally, set NumPy error handling to 'warn' to catch overflow errors
     np.seterr(over='warn')
 
-    print_and_write("###########################################################################################################\n\n")
+    print_and_write("###########################################################################################################################################################\n\n")
 
 def geodesic_error(R, R_star):
     # Compute the product of R transpose and R_star
