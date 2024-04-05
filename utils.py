@@ -43,7 +43,7 @@ class GroupedConvolution(nn.Module):
         return self.grouped_conv(x)
     
 
-def plot(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, 
+def plot(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_mlp, lr_vit, plots_path, 
          x_label="Epochs", show=False, save=True, overfitting=False, average_embeddings=False, 
          model=CLIP_MODEL_NAME, augmentation=AUGMENTATION, enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, 
          use_reconstruction=USE_RECONSTRUCTION_LAYER, RE1_coeff=RE1_COEFF):
@@ -53,27 +53,25 @@ def plot(x, y1, y2, title, penalty_coeff, batch_size, batchnorm_and_dropout, lr_
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
-        try:
-            ax.plot(x, y1, color='steelblue', label="Train")
-            if y2 and len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
+        ax.plot(x, y1, color='steelblue', label="Train")
+        if y2 and len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
 
-            for i in range(0, len(y1), max(1, len(y1)//10)):
-                ax.text(x[i], y1[i], f'{y1[i]:.4f}', fontsize=9, color='blue', ha='center', va='bottom')
-                if y2: ax.text(x[i], y2[i], f'{y2[i]:.4f}', fontsize=9, color='red', ha='center', va='top')
+        for i in range(0, len(y1), max(1, len(y1)//10)):
+            ax.text(x[i], y1[i], f'{y1[i]:.4f}', fontsize=9, color='blue', ha='center', va='bottom')
+            if y2: ax.text(x[i], y2[i], f'{y2[i]:.4f}', fontsize=9, color='red', ha='center', va='top')
 
-            ax.set_xlabel(x_label)
-            ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
-            ax.set_title(f'{title} {y_scale} scale')
-        
-            ax.set_yscale(y_scale)
-            ax.grid(True)
-            ax.legend()
-        except Exception as e:
-            print_and_write(e)
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
+        ax.set_title(f'{title} {y_scale} scale')
+    
+        ax.set_yscale(y_scale)
+        ax.grid(True)
+        ax.legend()
+
 
     if save:
-        os.makedirs(PLOTS_PATH, exist_ok=True)
-        plt.savefig(f"""{PLOTS_PATH}/{title}.png""")  # Specify the filename and extension
+        os.makedirs(plots_path, exist_ok=True)
+        plt.savefig(f"""{plots_path}/{title}.png""")  # Specify the filename and extension
 
     if show:
         plt.show()
@@ -122,15 +120,15 @@ def norm_layer(unnormalized_x, predict_t=False, predict_pose=PREDICT_POSE, use_r
         return normalize_L2(normalize_L1(unnormalized_x))
     
 
-def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, ec_err_pred_unoramlized_last, val_ec_err_pred_unormalized_last, ec_err_pred_last, all_penalty_last):
+def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, ec_err_pred_unoramlized_last, val_ec_err_pred_unormalized_last, ec_err_pred_last, all_penalty_last, plots_path):
     if math.isnan(all_train_loss_last) or math.isnan(all_val_loss_last) or math.isnan(train_mae_last) or math.isnan(val_mae_last) or math.isnan(ec_err_pred_unoramlized_last) or math.isnan(val_ec_err_pred_unormalized_last) or math.isnan(ec_err_pred_last) or math.isnan(all_penalty_last):
-        print_and_write("found nan\n")                
+        print_and_write("found nan\n", plots_path)                
         return True
     return False
                      
-def print_and_write(output):
-    os.makedirs(PLOTS_PATH, exist_ok=True)
-    output_path = os.path.join(PLOTS_PATH, "output.log")
+def print_and_write(output, plots_path):
+    os.makedirs(plots_path, exist_ok=True)
+    output_path = os.path.join(plots_path, "output.log")
     with open(output_path, "a") as f:
         f.write(output)
         print(output)
@@ -148,12 +146,7 @@ def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
     std = std.view(-1, 1, 1)
     img_tensor = img_tensor * std + mean
     
-    try:
-        img = (img_tensor.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
-    except Warning as e:
-        print_and_write(f"warning: {e}, img_tensor: {img_tensor}")
-
-    return img
+    return (img_tensor.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
 
 def init_main():
     # Redirection code to output.txt
@@ -170,7 +163,7 @@ def init_main():
     # Optionally, set NumPy error handling to 'warn' to catch overflow errors
     np.seterr(over='warn')
 
-    print_and_write("###########################################################################################################################################################\n\n")
+    print("###########################################################################################################################################################\n\n")
 
 def geodesic_error(R, R_star):
     # Compute the product of R transpose and R_star

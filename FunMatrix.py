@@ -96,7 +96,7 @@ def compute_fundamental(E, K1, K2):
     F = torch.matmul(K2_inv_T, torch.matmul(E, K1_inv))
     
     if torch.linalg.matrix_rank(F) != 2:
-        print_and_write(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
+        print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
 
     return F
 
@@ -145,7 +145,7 @@ def make_rank2(F, is_batch=True):
         print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
     return output
 
-def update_epoch_stats(stats, first_image, second_image, label, output, output_grad, epoch=0):
+def update_epoch_stats(stats, first_image, second_image, label, output, output_grad, plots_path, epoch=0):
     if ENFORCE_RANK_2:
         output = make_rank2(output)
         unormalized_output = make_rank2(unormalized_output)
@@ -179,7 +179,7 @@ def update_epoch_stats(stats, first_image, second_image, label, output, output_g
         stats["SED_dist_pred"] = stats["SED_dist_pred"] + (SED_dist_pred / len(first_image))
 
     if VISIUALIZE["epoch"] == epoch:
-        epipolar_geo_pred.visualize(sqResultDir=os.path.join(PLOTS_PATH, VISIUALIZE["dir"]), file_num=stats["file_num"])
+        epipolar_geo_pred.visualize(sqResultDir=os.path.join(plots_path, VISIUALIZE["dir"]), file_num=stats["file_num"])
         stats["file_num"] = stats["file_num"] + 1
     
     return RE1_dist_pred/len(first_image), SED_dist_pred/len(first_image), algebraic_dist_pred/len(first_image)
@@ -209,16 +209,12 @@ class EpipolarGeometry:
     def get_keypoints(self, threshold=EPIPOLAR_THRESHOLD):
         """Recives numpy images and returns numpy points"""
         # sift = cv2.xfeatures2d.SIFT_create()
-        try:
-            sift = cv2.SIFT_create()
-            bf = cv2.BFMatcher()
+        sift = cv2.SIFT_create()
+        bf = cv2.BFMatcher()
 
-            # Detect keypoints and compute descriptors for both images
-            (kp1, des1) = sift.detectAndCompute(self.image1_numpy, None)
-            (kp2, des2) = sift.detectAndCompute(self.image2_numpy, None)
-        except Exception as e:
-            print_and_write(f'Error in sift: {e}')
-            return
+        # Detect keypoints and compute descriptors for both images
+        (kp1, des1) = sift.detectAndCompute(self.image1_numpy, None)
+        (kp2, des2) = sift.detectAndCompute(self.image2_numpy, None)
 
         matches = bf.knnMatch(des1, des2, k=2)
         self.good = []
