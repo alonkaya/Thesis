@@ -191,7 +191,7 @@ class FMatrixRegressor(nn.Module):
                     epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + last_sv_sq
 
 
-                batch_RE1_dist_pred, batch_SED_dist_pred, algebraic_dist_pred = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, self.plots_path epoch)
+                batch_RE1_dist_pred, batch_SED_dist_pred, algebraic_dist_pred = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, self.plots_path, epoch)
 
                 if self.predict_pose:
                     loss_R = self.L2_loss(R, label[:, :, :3])
