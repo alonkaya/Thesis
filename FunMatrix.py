@@ -150,11 +150,10 @@ def update_epoch_stats(stats, first_image, second_image, label, output, output_g
         output = make_rank2(output)
         unormalized_output = make_rank2(unormalized_output)
 
-    algebraic_dist_truth, algebraic_dist_pred, algebraic_dist_pred_unormalized, \
-    RE1_dist_truth, RE1_dist_pred, RE1_dist_pred_unormalized, \
-    SED_dist_truth, SED_dist_pred, SED_dist_pred_unormalized = torch.tensor(0), torch.tensor(0), torch.tensor(0), \
-                                                              torch.tensor(0), torch.tensor(0), torch.tensor(0), \
-                                                              torch.tensor(0), torch.tensor(0), torch.tensor(0)
+    algebraic_dist_truth, algebraic_dist_pred, \
+    RE1_dist_truth, RE1_dist_pred, \
+    SED_dist_truth, SED_dist_pred = torch.tensor(0), torch.tensor(0), torch.tensor(0), \
+                                    torch.tensor(0), torch.tensor(0), torch.tensor(0)
     for img_1, img_2, F_truth, F_pred, F_pred_grad in zip(first_image, second_image, label, output, output_grad):
         epipolar_geo_truth = EpipolarGeometry(img_1,img_2, F_truth)
         epipolar_geo_pred = EpipolarGeometry(img_1,img_2, F_pred)

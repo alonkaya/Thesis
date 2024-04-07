@@ -140,92 +140,58 @@ class FMatrixRegressor(nn.Module):
 
         return embeddings
 
-    def forward(self, x1, x2, predict_t=False):
-        embeddings = self.get_embeddings(x1, x2, predict_t=predict_t)
+    def forward(self, x1, x2):
+        embeddings = self.get_embeddings(x1, x2)
 
-        unormalized_output = self.mlp(embeddings).view(-1,3,3) if not predict_t else self.t_mlp(embeddings).view(-1,3,1)
+        output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
 
-        output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3) if not predict_t else norm_layer(unormalized_output.view(-1, 3), predict_t=True).view(-1,3,1)
+        last_sv_sq = 0 if self.use_reconstruction else last_sing_value(output) 
 
-        last_sv_sq = last_sing_value(unormalized_output) if not self.predict_pose else 0
+        output = paramterization_layer(output) if self.use_reconstruction else output
 
-        return unormalized_output, output, last_sv_sq
+        output = norm_layer(output.view(-1, 9)).view(-1,3,3) 
+
+        return output, last_sv_sq
 
 
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
         all_train_loss, all_train_loss_t, all_val_loss, train_mae, train_mae_t, val_mae, \
-        all_algberaic_truth, all_algberaic_pred, all_algberaic_pred_unormalized, \
-        all_RE1_truth, all_RE1_pred, all_RE1_pred_unormalized, \
-        all_SED_truth, all_SED_pred, all_SED_pred_unormalized, all_penalty = [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
+        all_algberaic_truth, all_algberaic_pred, \
+        all_RE1_truth, all_RE1_pred, \
+        all_SED_truth, all_SED_pred, all_penalty = [], [], [], [], [], [], [], [], [], [], [], [], []
 
         for epoch in range(num_epochs):
             self.train()
             labels, outputs, Rs, ts = torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device)
 
             
-            epoch_stats = {"algebraic_dist_truth": torch.tensor(0), "algebraic_dist_pred": torch.tensor(0), "algebraic_dist_pred_unormalized": torch.tensor(0), 
-                            "RE1_dist_truth": torch.tensor(0), "RE1_dist_pred": torch.tensor(0), "RE1_dist_pred_unormalized": torch.tensor(0), 
-                            "SED_dist_truth": torch.tensor(0), "SED_dist_pred": torch.tensor(0), "SED_dist_pred_unormalized": torch.tensor(0), 
+            epoch_stats = {"algebraic_dist_truth": torch.tensor(0), "algebraic_dist_pred": torch.tensor(0), 
+                            "RE1_dist_truth": torch.tensor(0), "RE1_dist_pred": torch.tensor(0), 
+                            "SED_dist_truth": torch.tensor(0), "SED_dist_pred": torch.tensor(0), 
                             "avg_loss": torch.tensor(0), "avg_loss_R": torch.tensor(0), "avg_loss_t": torch.tensor(0), "epoch_penalty": torch.tensor(0), "file_num": 0}
-            for img1, img2, label, unormalized_label, K in train_loader:
-                img1, img2, label, unormalized_label, K  = img1.to(device), img2.to(device), label.to(device), unormalized_label.to(device), K.to(device)
+            for img1, img2, label in train_loader:
+                img1, img2, label = img1.to(device), img2.to(device), label.to(device)
 
                 # Forward pass
-                if self.predict_pose:
-                    unormalized_R, R, _ = self.forward(img1, img2, predict_t=False)
-                    unormalized_t, t, _ = self.forward(img1, img2, predict_t=True)
-
-                    # This is for the epipolar test error computation:
-                    unormalized_pose = torch.cat((unormalized_R.detach(), unormalized_t.detach().view(-1, 3, 1)), dim=-1)
-                    pose = torch.cat((R.detach(), t.detach().view(-1, 3, 1)), dim=-1)
-                    # output = norm_layer(unormalized_output.view(-1, 9)).view(-1,3,3)
-
-                    unormalized_output = pose_to_F(unormalized_pose, K[0])
-                    output = pose_to_F(pose, K[0])
-                    unormalized_label = pose_to_F(label, K[0]) # notice this is actually normalized label!
-                    
-                else:
-                    unormalized_output, output, last_sv_sq = self.forward(img1, img2)
-                    epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + last_sv_sq
-
+                output, last_sv_sq = self.forward(img1, img2)
+                epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + last_sv_sq
 
                 batch_RE1_dist_pred, batch_SED_dist_pred, algebraic_dist_pred = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, self.plots_path, epoch)
 
-                if self.predict_pose:
-                    loss_R = self.L2_loss(R, label[:, :, :3])
-                    epoch_stats["avg_loss_R"] += loss_R.detach()
+                # Compute loss
+                l2_loss = self.L2_loss(output, label)
+                loss = l2_loss + LAST_SV_COEFF*(last_sv_sq) + self.sed_coeff*batch_SED_dist_pred + self.alg_coeff*algebraic_dist_pred + self.re1_coeff*batch_RE1_dist_pred
+                epoch_stats["avg_loss"] = epoch_stats["avg_loss"] + loss.detach()
 
-                    loss_t = self.L2_loss_t(t, label[:, :, 3].view(-1,3,1))
-                    epoch_stats["avg_loss_t"] += loss_t.detach()   
+                # Compute Backward pass and gradients
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
 
-                    self.optimizer.zero_grad()
-                    loss_R.backward()
-                    self.optimizer.step()                     
-
-                    self.optimizer_t.zero_grad()
-                    loss_t.backward()
-                    self.optimizer_t.step()
-
-                    # Extend lists with batch statistics
-                    labels = torch.cat((labels, label.detach()), dim=0)
-                    Rs = torch.cat((Rs, R.detach()), dim=0)
-                    ts = torch.cat((ts, t.detach()), dim=0)
-
-                else:
-                    # Compute loss
-                    l2_loss = self.L2_loss(output, label)
-                    loss = l2_loss + LAST_SV_COEFF*(last_sv_sq) + self.sed_coeff*batch_SED_dist_pred + self.alg_coeff*algebraic_dist_pred + self.re1_coeff*batch_RE1_dist_pred
-                    epoch_stats["avg_loss"] = epoch_stats["avg_loss"] + loss.detach()
-
-                    # Compute Backward pass and gradients
-                    self.optimizer.zero_grad()
-                    loss.backward()
-                    self.optimizer.step()
-
-                    # Extend lists with batch statistics
-                    labels = torch.cat((labels, label.detach()), dim=0)
-                    outputs = torch.cat((outputs, output.detach()), dim=0)
+                # Extend lists with batch statistics
+                labels = torch.cat((labels, label.detach()), dim=0)
+                outputs = torch.cat((outputs, output.detach()), dim=0)
 
             # Calculate and store mean absolute error for the epoch
             if self.predict_pose:
@@ -287,13 +253,13 @@ class FMatrixRegressor(nn.Module):
             
             plot(x=range(1, num_epochs + 1), y1=train_mae_t, y2=val_mae, title="MAE t", plots_path=self.plots_path)           
         
-        plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred, y2=[], title="Algebraic distance F", plots_path=self.plots_path)
+        plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred, y2=[], title="Algebraic distance", plots_path=self.plots_path)
         
         if RE1_DIST:
-            
-            plot(x=range(1, num_epochs + 1), y1=all_RE1_pred, y2=[], title="RE1 distance F", plots_path=self.plots_path)
+            plot(x=range(1, num_epochs + 1), y1=all_RE1_pred, y2=[], title="RE1 distance", plots_path=self.plots_path)
+
         if SED_DIST:
-            plot(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=[], title="SED distance F", plots_path=self.plots_path)
+            plot(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=[], title="SED distance", plots_path=self.plots_path)
         
         if SAVE_MODEL:
             self.save_model() 
@@ -455,5 +421,34 @@ def use_pretrained_model():
 
 
 
-# if __name__ == '__main__':
-#     use_pretrained_model()
+def paramterization_layer(x):
+    """
+    Constructs a batch of 3x3 fundamental matrices from a batch of 8-element vectors based on the described parametrization.
+
+    Parameters:
+    outputs (torch.Tensor): A tensor of shape (batch_size, 8) where each row is an 8-element vector.
+                            The first 6 elements of each vector represent the first two columns
+                            of a fundamental matrix, and the last 2 elements are the coefficients for
+                            combining these columns to get the third column.
+
+    Returns:
+    torch.Tensor: A tensor of shape (batch_size, 3, 3) representing a batch of 3x3 fundamental matrices.
+    """
+
+    # Split the tensor into the first two columns (f1, f2) and the coefficients (alpha, beta)
+    f1 = x[:, :3]  # First three elements of each vector for the first column
+    f2 = x[:, 3:6]  # Next three elements of each vector for the second column
+    alpha, beta = x[:, 6], x[:, 7]  # Last two elements of each vector for the coefficients
+
+    # Compute the third column as a linear combination: f3 = alpha * f1 + beta * f2
+    # We need to use broadcasting to correctly multiply the coefficients with the columns
+    f3 = alpha * f1 + beta * f2
+
+    # Construct the batch of 3x3 fundamental matrices
+    # We need to reshape the columns to concatenate them correctly
+    F = torch.cat((f1.view(-1, 3, 1), f2.view(-1, 3, 1), f3.view(-1, 3, 1)), dim=-1)
+
+    if torch.linalg.matrix_rank(F[0]) != 2:
+        print(f'rank of estimated F not 2: {torch.linalg.matrix_rank(F)}')
+
+    return F

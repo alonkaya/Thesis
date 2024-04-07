@@ -38,28 +38,14 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
         original_first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
         original_second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
 
-    
         first_image = self.transform(original_first_image)
         second_image = self.transform(original_second_image)
 
+        unormalized_label = get_F(self.poses, idx, self.k)
     
-        if PREDICT_POSE:
-            unormalized_R, unormalized_t = compute_relative_transformations(self.poses[idx],self. poses[idx+JUMP_FRAMES])
-            unormalized_label = torch.cat((unormalized_R, unormalized_t.view(3,1)), dim=-1)
-        else:
-            unormalized_label = get_F(self.poses, idx, self.k)
-            R,t = compute_relative_transformations(self.poses[idx], self.poses[idx+JUMP_FRAMES])
+        label = norm_layer(unormalized_label.view(-1, 9)).view(3,3)
 
-    
-        if PREDICT_POSE:
-            R, t = norm_layer(unormalized_R.view(-1, 9)).view(3,3), norm_layer(unormalized_t.view(-1, 3), predict_t=True).view(3)
-
-            label = torch.cat((R, t.view(3,1)), dim=-1)
-        else:               
-            label = norm_layer(unormalized_label.view(-1, 9)).view(3,3)
-
-            
-        return first_image, second_image, label, unormalized_label, self.k
+        return first_image, second_image, label
 
 
 def get_valid_indices(sequence_len, sequence_path):
