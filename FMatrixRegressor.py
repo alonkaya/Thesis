@@ -233,7 +233,7 @@ class FMatrixRegressor(nn.Module):
             if RE1_DIST:
                 epoch_output += f"\t\tRE1_dist_truth: {all_RE1_truth[-1]}, RE1 dist pred: {all_RE1_pred[-1]}\n"
             if SED_DIST:
-                epoch_output += f"\t\tSED dist truth: {all_SED_truth[-1]}, SED dist pred: {all_SED_pred[-1]}\n"
+                epoch_output += f"\t\tSED dist truth: {all_SED_truth[-1]}, SED dist pred: {all_SED_pred[-1]}\n\n"
 
             print_and_write(epoch_output, self.plots_path)
 
@@ -245,22 +245,16 @@ class FMatrixRegressor(nn.Module):
         
         
         plot(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, title="Loss" if not self.predict_pose else "Loss R", plots_path=self.plots_path)
-        
         plot(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, title="MAE" if not self.predict_pose else "MAE R", plots_path=self.plots_path)
-        
-        if self.predict_pose:
-            plot(x=range(1, num_epochs + 1), y1=all_train_loss_t, y2=all_val_loss, title="Loss t", plots_path=self.plots_path)     
-            
-            plot(x=range(1, num_epochs + 1), y1=train_mae_t, y2=val_mae, title="MAE t", plots_path=self.plots_path)           
-        
         plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred, y2=[], title="Algebraic distance", plots_path=self.plots_path)
-        
         if RE1_DIST:
             plot(x=range(1, num_epochs + 1), y1=all_RE1_pred, y2=[], title="RE1 distance", plots_path=self.plots_path)
-
         if SED_DIST:
             plot(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=[], title="SED distance", plots_path=self.plots_path)
-        
+        if self.predict_pose:
+            plot(x=range(1, num_epochs + 1), y1=all_train_loss_t, y2=all_val_loss, title="Loss t", plots_path=self.plots_path)     
+            plot(x=range(1, num_epochs + 1), y1=train_mae_t, y2=val_mae, title="MAE t", plots_path=self.plots_path)                       
+
         if SAVE_MODEL:
             self.save_model() 
 
@@ -271,120 +265,6 @@ class FMatrixRegressor(nn.Module):
         if self.predict_pose:
             torch.save(self.model_t.state_dict(), os.path.join(self.plots_path, "model_t.pth"))
             torch.save(self.t_mlp.state_dict(), os.path.join(self.plots_path, "mlp_t.pth"))   
-
-
-
-    def get_rotation(self, rx, ry, rz):
-        # normalize input?
-        R_x = nn.Parameter(torch.tensor([
-            [1.,    0.,             0.],
-            [0.,    torch.cos(rx),    -torch.sin(rx)],
-            [0.,    torch.sin(rx),     torch.cos(rx)]
-        ]).to(device))
-
-        R_y = nn.Parameter(torch.tensor([
-            [torch.cos(ry),    0.,    -torch.sin(ry)],
-            [0.,            1.,     0.],
-            [torch.sin(ry),    0.,     torch.cos(ry)]
-        ]).to(device))
-
-        R_z = nn.Parameter(torch.tensor([
-            [torch.cos(rz),    -torch.sin(rz),    0.],
-            [torch.sin(rz),    torch.cos(rz),     0.],
-            [0.,            0.,             1.]
-        ]).to(device))
-        R = torch.matmul(R_x, torch.matmul(R_y, R_z))
-        return R
-
-    def get_inv_intrinsic(self, f):
-        # TODO: What about the proncipal points?
-        return nn.Parameter(torch.tensor([
-            [-1/(f+1e-8),   0.,             0.],
-            [0.,            -1/(f+1e-8),    0.],
-            [0.,            0.,             1.]
-        ]).to(device))
-
-    def get_translate(self, tx, ty, tz):
-        return nn.Parameter(torch.tensor([
-            [0.,  -tz, ty],
-            [tz,  0,   -tx],
-            [-ty, tx,  0]
-        ]).to(device))
-
-    def get_fmat(self, x):
-        # F = K2^(-T)*R*[t]x*K1^(-1)
-        # Note: only need out-dim = 8
-        R_x = torch.tensor([
-            [1.,    0.,             0.],
-            [0.,    torch.cos(x[2]),    -torch.sin(x[2])],
-            [0.,    torch.sin(x[2]),     torch.cos(x[2])]
-        ], requires_grad=True).to(device)
-
-        R_y = torch.tensor([
-            [torch.cos(x[3]),    0.,    -torch.sin(x[3])],
-            [0.,            1.,     0.],
-            [torch.sin(x[3]),    0.,     torch.cos(x[3])]
-        ], requires_grad=True).to(device)
-
-        R_z = torch.tensor([
-            [torch.cos(x[4]),    -torch.sin(x[4]),    0.],
-            [torch.sin(x[4]),    torch.cos(x[4]),     0.],
-            [0.,            0.,             1.]
-        ], requires_grad=True).to(device)
-
-        K1_inv = torch.tensor([
-                    [-1/(x[0]+1e-8),   0.,             0.],
-                    [0.,            -1/(x[0]+1e-8),    0.],
-                    [0.,            0.,             1.]
-                ], requires_grad=True).to(device)
-
-        K2_inv = torch.tensor([
-                    [-1/(x[1]+1e-8),   0.,             0.],
-                    [0.,            -1/(x[1]+1e-8),    0.],
-                    [0.,            0.,             1.]
-                ], requires_grad=True).to(device)
-
-        T = torch.tensor([
-                    [0.,  -x[7], x[6]],
-                    [x[7],  0,   -x[5]],
-                    [-x[6], x[5],  0]
-                ], requires_grad=True).to(device)
-
-        # K1_inv = self.get_inv_intrinsic(x[0])
-        # K2_inv = self.get_inv_intrinsic(x[1])  # TODO: K2 should be -t not just -1..
-        # R = self.get_rotation(x[2], x[3], x[4])
-        # T = self.get_translate(x[5], x[6], x[7])
-        R = torch.matmul(R_x, torch.matmul(R_y, R_z))
-        F = torch.matmul(K2_inv,torch.matmul(R, torch.matmul(T, K1_inv)))
-
-        return F
-
-
-
-def print_memory(device_index=0):
-    """
-    Prints the CUDA memory information for the specified device.
-
-    Parameters:
-    - device_index (int): Index of the CUDA device for which the memory information will be printed.
-    """
-    device = torch.device(f'cuda:{device_index}')  # Adjust device index as per your setup
-    print(f"Memory information for device: {torch.cuda.get_device_name(device)}\n")
-
-    total_memory = torch.cuda.get_device_properties(device).total_memory
-    allocated_memory = torch.cuda.memory_allocated(device)
-    cached_memory = torch.cuda.memory_reserved(device)
-    peak_allocated_memory = torch.cuda.max_memory_allocated(device)
-    peak_cached_memory = torch.cuda.max_memory_reserved(device)
-
-    print(f"Total Memory: {total_memory / 1024 ** 3:.2f} GB")
-    print(f"Allocated Memory: {allocated_memory / 1024 ** 3:.2f} GB")
-    print(f"Cached Memory: {cached_memory / 1024 ** 3:.2f} GB")
-    print(f"Peak Allocated Memory: {peak_allocated_memory / 1024 ** 3:.2f} GB")
-    print(f"Peak Cached Memory: {peak_cached_memory / 1024 ** 3:.2f} GB\n")
-
-    # Resetting peak memory stats can be useful to understand memory usage over time
-    torch.cuda.reset_peak_memory_stats(device)
 
 
 def use_pretrained_model():
@@ -449,6 +329,6 @@ def paramterization_layer(x):
     F = torch.cat((f1.view(-1, 3, 1), f2.view(-1, 3, 1), f3.view(-1, 3, 1)), dim=-1)
 
     if torch.linalg.matrix_rank(F[0]) != 2:
-        print(f'rank of estimated F not 2: {torch.linalg.matrix_rank(F)}')
+        print_and_write(f'rank of estimated F not 2: {torch.linalg.matrix_rank(F)}')
 
     return F

@@ -259,10 +259,10 @@ class EpipolarGeometry:
         inhomogeneous_l1 = self.compute_epipolar_lines(self.F.T, self.pts2)[:,0:2]
         inhomogeneous_l2 = self.compute_epipolar_lines(self.F, self.pts1)[:,0:2]
 
-        denominator = torch.sum(torch.concat((inhomogeneous_l1, inhomogeneous_l2), dim=1) ** 2, dim=1).view(-1,1,1)
+        denominator = (torch.sum(inhomogeneous_l1**2, dim=1) + torch.sum(inhomogeneous_l2**2, dim=1)).view(-1,1,1)
 
         Ri = self.get_algebraic_distance()
-        RE1 = (Ri**2) * denominator
+        RE1 = (Ri**2) / denominator
 
         return torch.mean(RE1)
     
@@ -289,15 +289,13 @@ class EpipolarGeometry:
 
         return torch.mean(sed)
 
-
     def get_algebraic_distance(self):
-        # Returns shape (n,1,1)
         return torch.abs(torch.matmul(torch.matmul(
-            self.pts2.view(-1, 1, 3), self.F), self.pts1.view(-1, 3, 1)))
+            self.pts2.view(-1, 1, 3), self.F), self.pts1.view(-1, 3, 1))) # Returns shape (n,1,1)
 
-    
     def get_mean_algebraic_distance(self):
         return torch.mean(self.get_algebraic_distance())
+
 
     def epipoline(self, x, formula):
         array = formula.flatten()
