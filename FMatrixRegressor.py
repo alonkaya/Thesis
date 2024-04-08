@@ -146,7 +146,7 @@ class FMatrixRegressor(nn.Module):
 
         output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
 
-        last_sv_sq = last_sing_value(output) 
+        last_sv_sq = 0 if self.use_reconstruction else last_sing_value(output) 
 
         output = paramterization_layer(output) 
 
