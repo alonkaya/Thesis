@@ -115,7 +115,8 @@ class FMatrixRegressor(nn.Module):
             x2['pixel_values'] = x2['pixel_values'].to(device)
 
             x1_embeddings = model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*model.config.hidden_size)
-            x2_embeddings = model(**x2).last_hidden_state[:, 1:, :].view(-1, 7*7*model.config.hidden_size)
+            x2_embeddings = model(**x2).last_hidden_state[:, 1:, :]
+            x2_embeddings = x2_embeddings.view(-1, 7*7*model.config.hidden_size)
 
         else:
             x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model.config.hidden_size)
@@ -147,7 +148,7 @@ class FMatrixRegressor(nn.Module):
 
         last_sv_sq = 0 if self.use_reconstruction else last_sing_value(output) 
 
-        output = paramterization_layer(output) if self.use_reconstruction else output
+        output = paramterization_layer(output) 
 
         output = norm_layer(output.view(-1, 9)).view(-1,3,3) 
 
@@ -225,7 +226,7 @@ class FMatrixRegressor(nn.Module):
 
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}: """
             if self.predict_pose:
-                epoch_output += f"""  Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t[-1]}
+                epoch_output += f""" Training Loss R: {all_train_loss[-1]}, Training Loss t: {all_train_loss_t[-1]}
                Training R MAE: {train_mae[-1]} Training t MAE: {train_mae_t[-1]}\n"""
             else:
                 epoch_output += f"""  Training Loss: {all_train_loss[-1]} Training MAE: {train_mae[-1]} last sv: {all_penalty[-1]}\n"""
