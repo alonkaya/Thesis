@@ -230,11 +230,11 @@ class FMatrixRegressor(nn.Module):
                     val_outputs = torch.cat((val_outputs, val_output), dim=0)
                     val_labels = torch.cat((val_labels, val_label), dim=0)
 
-            train_mae = torch.mean(torch.abs(labels - outputs))
-            val_mae = torch.mean(torch.abs(val_labels - val_outputs))
+            train_mae = torch.mean(torch.abs(labels - outputs)).cpu().item()
+            val_mae = torch.mean(torch.abs(val_labels - val_outputs)).cpu().item()
 
-            all_train_mae.append(train_mae.cpu().item())
-            all_val_mae.append(val_mae.cpu().item())
+            all_train_mae.append(train_mae)
+            all_val_mae.append(val_mae)
             all_train_loss.append(epoch_stats["loss"].cpu().item() / len(train_loader))
             all_val_loss.append(epoch_stats["val_loss"].cpu().item() / len(val_loader))
             all_RE1_pred.append(epoch_stats["RE1_pred"].cpu().item() / len(train_loader))

@@ -141,7 +141,7 @@ def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
 def init_main():
     faulthandler.enable()
         
-    torch.autograd.set_detect_anomaly(True)
+    # torch.autograd.set_detect_anomaly(True)
     
     # Set up custom warning handling
     warnings.filterwarnings('always', category=RuntimeWarning)
