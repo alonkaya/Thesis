@@ -170,7 +170,7 @@ class FMatrixRegressor(nn.Module):
         all_val_loss, val_mae, \
         all_algberaic_pred, all_RE1_pred, all_SED_pred, \
         all_val_algberaic_pred, all_val_RE1_pred, all_val_SED_pred,\
-        all_penalty = [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
+        all_penalty = [], [], [], [], [], [], [], [], [], [], []
 
         for epoch in range(num_epochs):
             self.train()
