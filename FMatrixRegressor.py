@@ -66,6 +66,14 @@ class FMatrixRegressor(nn.Module):
             self.model = ViTModel.from_pretrained(
                 model_name).to(device)
 
+        # Freeze the parameters of the pretrained model if specified
+        # if freeze_pretrained_model:
+        #     for param in self.pretrained_model.parameters():
+        #         param.requires_grad = False
+        # print(len(self.pretrained_model.encoder.layer))
+        # for layer in self.pretrained_model.encoder.layer[len(self.pretrained_model.encoder.layer)-unfrozen_layers:]:
+        #     for param in layer.parameters():
+        #         param.requires_grad = True
 
         # Get input dimension for the MLP based on ViT configuration
         self.model_hidden_size = self.model.config.hidden_size
@@ -142,6 +150,10 @@ class FMatrixRegressor(nn.Module):
         return embeddings
 
     def forward(self, x1, x2):
+        # If deepF_nocors
+        # net = HomographyNet(use_reconstruction_module=False).to(device)
+        # output = net.foward(x1, x2).to(device)
+        # return output
         embeddings = self.get_embeddings(x1, x2)
 
         output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
@@ -216,6 +228,50 @@ class FMatrixRegressor(nn.Module):
                 all_train_loss.append(epoch_stats["avg_loss"].cpu().item())
                 all_penalty.append(epoch_stats["epoch_penalty"].cpu().item())
         
+            # Validation
+            # self.eval()
+            # val_labels, val_outputs = torch.tensor([]).to(device), torch.tensor([]).to(device)
+            # val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred, val_epoch_avg_ec_err_pred_unormalized, epoch_penalty, val_avg_loss = 0, 0, 0, 0, 0
+
+            # with torch.no_grad():
+            #     for val_first_image, val_second_image, val_label, val_unormalized_label, val_K in val_loader:
+            #         try:
+            #             val_first_image, val_second_image, val_label, val_unormalized_label, val_k = val_first_image.to(
+            #                 device), val_second_image.to(device), val_label.to(device), val_unormalized_label.to(device), val_K.to(device)
+
+            #             unormalized_val_output, val_output, penalty = self.forward(val_first_image, val_second_image)
+            #             epoch_penalty = epoch_penalty + penalty
+
+            #             # Compute val mean epipolar constraint error
+            #             val_avg_ec_err_truth, val_avg_ec_err_pred, val_avg_ec_err_pred_unormalized = get_avg_epipolar_test_errors(
+            #                 val_first_image, val_second_image, val_unormalized_label, val_output, unormalized_val_output, epoch=-1, file_num=file_num)
+            #             val_epoch_avg_ec_err_truth = val_epoch_avg_ec_err_truth + val_avg_ec_err_truth
+            #             val_epoch_avg_ec_err_pred = val_epoch_avg_ec_err_pred + val_avg_ec_err_pred
+            #             val_epoch_avg_ec_err_pred_unormalized = val_epoch_avg_ec_err_pred_unormalized + val_avg_ec_err_pred_unormalized
+
+            #             val_avg_loss = val_avg_loss + self.L2_loss(val_output, val_label)
+
+            #             val_outputs = torch.cat((val_outputs, val_output), dim=0)
+            #             val_labels = torch.cat((val_labels, val_label), dim=0)
+            #         except Exception as e:
+            #             print_and_write(f'length: {len(val_labels)}, val exception: {e}')
+            #     try:
+            #         # Calculate and store mean absolute error for the epoch
+            #         mae = torch.mean(torch.abs(val_labels - val_outputs))
+
+            #         val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss = (
+            #             v / len(val_loader) for v in (val_epoch_avg_ec_err_truth, val_epoch_avg_ec_err_pred_unormalized, val_epoch_avg_ec_err_pred, epoch_penalty, val_avg_loss))
+
+            #         val_mae.append(mae.cpu().item())
+            #         val_ec_err_truth.append(val_epoch_avg_ec_err_truth.cpu().item())
+            #         val_ec_err_pred.append(val_epoch_avg_ec_err_pred.cpu().item())
+            #         val_ec_err_pred_unormalized.append(val_epoch_avg_ec_err_pred_unormalized.cpu().item())
+            #         all_val_loss.append(val_avg_loss.cpu().item())
+            #         all_penalty.append(epoch_penalty.cpu().item())
+            #     except Exception as e:
+            #         print_and_write(f'8 {e}')
+
+
             all_algberaic_truth.append(epoch_stats["algebraic_dist_truth"].cpu().item() / len(train_loader))
             all_algberaic_pred.append(epoch_stats["algebraic_dist_pred"].cpu().item() / len(train_loader))
             all_RE1_truth.append(epoch_stats["RE1_dist_truth"].cpu().item() / len(train_loader))
