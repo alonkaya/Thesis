@@ -140,7 +140,10 @@ def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
 
 def init_main():
     faulthandler.enable()
-        
+    
+    """When anomaly detection is enabled, PyTorch will perform additional checks during the backward pass
+     to help locate the exact operation where an "anomalous" gradient (e.g., NaN or infinity) was produced. 
+     But this jutrs perfomrance"""
     # torch.autograd.set_detect_anomaly(True)
     
     # Set up custom warning handling

@@ -230,11 +230,11 @@ class FMatrixRegressor(nn.Module):
                     val_outputs = torch.cat((val_outputs, val_output), dim=0)
                     val_labels = torch.cat((val_labels, val_label), dim=0)
 
-            train_mae = torch.mean(torch.abs(labels - outputs)).cpu().item()
-            val_mae = torch.mean(torch.abs(val_labels - val_outputs)).cpu().item()
+            train_mae = torch.mean(torch.abs(labels - outputs))
+            val_mae = torch.mean(torch.abs(val_labels - val_outputs))
 
-            all_train_mae.append(train_mae)
-            all_val_mae.append(val_mae)
+            all_train_mae.append(train_mae.cpu().item())
+            all_val_mae.append(val_mae.cpu().item())
             all_train_loss.append(epoch_stats["loss"].cpu().item() / len(train_loader))
             all_val_loss.append(epoch_stats["val_loss"].cpu().item() / len(val_loader))
             all_RE1_pred.append(epoch_stats["RE1_pred"].cpu().item() / len(train_loader))
@@ -264,7 +264,7 @@ class FMatrixRegressor(nn.Module):
         
         
         plot(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, title="Loss" if not self.predict_pose else "Loss R", plots_path=self.plots_path)
-        plot(x=range(1, num_epochs + 1), y1=train_mae, y2=val_mae, title="MAE" if not self.predict_pose else "MAE R", plots_path=self.plots_path)
+        plot(x=range(1, num_epochs + 1), y1=all_train_mae, y2=all_val_mae, title="MAE" if not self.predict_pose else "MAE R", plots_path=self.plots_path)
         plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred, y2=all_val_algberaic_pred, title="Algebraic distance", plots_path=self.plots_path)
         plot(x=range(1, num_epochs + 1), y1=all_RE1_pred, y2=all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
         plot(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
