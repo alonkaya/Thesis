@@ -246,8 +246,8 @@ class FMatrixRegressor(nn.Module):
             all_penalty.append(epoch_stats["epoch_penalty"].cpu().item() / len(train_loader))
 
             if epoch == 0: 
-                print_and_write(f"""RE1_truth: {RE1_truth/len(train_loader)}, SED_truth: {SED_truth/len(train_loader)}, algebraic_truth: {algebraic_truth/len(train_loader)})
-                val_RE1_truth: {val_RE1_truth/len(val_loader)}, val_SED_truth: {val_SED_truth/len(val_loader)}, val_algebraic_truth: {val_algebraic_truth/len(val_loader)}\n\n""", self.plots_path)
+                print_and_write(f"""RE1_truth: {RE1_truth/len(train_loader)}, SED_truth: {SED_truth/len(train_loader)}, algebraic_truth: {algebraic_truth/len(train_loader)}
+val_RE1_truth: {val_RE1_truth/len(val_loader)}, val_SED_truth: {val_SED_truth/len(val_loader)}, val_algebraic_truth: {val_algebraic_truth/len(val_loader)}\n\n""", self.plots_path)
             
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}:  Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} last sv: {all_penalty[-1]}
             Training MAE: {all_train_mae[-1]} Val MAE: {all_val_mae[-1]}
