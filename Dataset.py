@@ -1,14 +1,13 @@
 from FunMatrix import *
 from utils import *
 from torch.utils.data import DataLoader, ConcatDataset
-from torchvision import transforms
+from torchvision.transforms import v2
 import os
 from PIL import Image
-import matplotlib.pyplot as plt
-import torchvision.transforms.functional as T
+import torchvision
 
 
-class CustomDataset(torch.utils.data.Dataset):
+class Dataset(torch.utils.data.Dataset):
     def __init__(self, sequence_path, poses, valid_indices, transform, K):
         self.sequence_path = sequence_path
         self.sequence_num = sequence_path.split('/')[1]
@@ -23,19 +22,19 @@ class CustomDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
         
-        original_first_image = Image.open(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-        original_second_image = Image.open(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
+        original_first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+        original_second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
 
         # Transform: Resize, center, grayscale
-        first_image = self.transform(original_first_image).to(device)
-        second_image = self.transform(original_second_image).to(device)
+        first_image = self.transform(original_first_image)
+        second_image = self.transform(original_second_image)
 
         unnormalized_F = get_F(self.poses, idx, self.k)
 
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-        return first_image, second_image, F, unnormalized_F
+        return first_image, second_image, F
 
 def get_valid_indices(sequence_len, sequence_path):
     valid_indices = []
@@ -49,25 +48,61 @@ def get_valid_indices(sequence_len, sequence_path):
     return valid_indices
 
 if AUGMENTATION:
-    transform = transforms.Compose([
-        transforms.Resize((256, 256)),
-        transforms.CenterCrop(224),
-        transforms.Grayscale(num_output_channels=3),
-        transforms.ColorJitter(brightness=(0.9, 1.1), contrast=(0.9, 1.1)),
-        transforms.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
-        transforms.Normalize(mean=norm_mean,  # Normalize each channel
+    transform = v2.Compose([
+        v2.Resize((256, 256)),
+        v2.CenterCrop(224),
+        v2.Grayscale(num_output_channels=3),
+        v2.ColorJitter(brightness=(0.9, 1.1), contrast=(0.9, 1.1)),
+        v2.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
+        v2.Normalize(mean=norm_mean,  # Normalize each channel
                             std=norm_std),
     ])    
 else:
-    transform = transforms.Compose([
-        transforms.Resize((256, 256)),
-        transforms.CenterCrop(224),
-        transforms.Grayscale(num_output_channels=3),
-        transforms.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
-        transforms.Normalize(mean=norm_mean,  # Normalize each channel
+    transform = v2.Compose([
+        v2.Resize((256, 256)),
+        v2.CenterCrop(224),
+        v2.Grayscale(num_output_channels=3),
+        v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
+        v2.Normalize(mean=norm_mean,  # Normalize each channel
                             std=norm_std),
-    ])   
+    ])     
 
+
+def get_dataloaders_RealEstate(batch_size):
+    RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
+
+    train_datasets, val_datasets = [], []
+    for RealEstate_path in RealEstate_paths:
+        for i, sequence_name in enumerate(os.listdir(RealEstate_path)):
+            specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
+            sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
+
+            # Get a list of all poses [R,t] in this sequence
+            poses = read_poses(specs_path).to(device)
+
+            # Indices of 'good' image frames
+            valid_indices = get_valid_indices(len(poses), sequence_path)
+            
+            # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
+            original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
+            K = get_intrinsic_REALESTATE(specs_path, original_image_size)
+            
+            custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K)
+            if len(custom_dataset) > 30:
+                if RealEstate_path == 'RealEstate10K/train_images':
+                    train_datasets.append(custom_dataset) 
+                else:    
+                    val_datasets.append(custom_dataset)
+                
+    # Concatenate datasets
+    concat_train_dataset = ConcatDataset(train_datasets)
+    concat_val_dataset = ConcatDataset(val_datasets)
+
+    # Create a DataLoader
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+
+    return train_loader, val_loader
 
 def get_dataloaders_KITTI(batch_size):
     sequence_paths = [f'sequences/0{i}/image_0' for i in range(9)]
@@ -89,7 +124,7 @@ def get_dataloaders_KITTI(batch_size):
         K = get_intrinsic_KITTI(calib_path, original_image_size)
 
         # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
-        custom_dataset = CustomDataset(sequence_path, poses, valid_indices, transform, K)
+        custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K)
         if i in train_seqeunces:
             train_datasets.append(custom_dataset)        
         elif i in val_sequences:
@@ -100,55 +135,17 @@ def get_dataloaders_KITTI(batch_size):
     concat_val_dataset = ConcatDataset(val_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS)
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
 
     return train_loader, val_loader
 
-def get_dataloaders_RealEstate(batch_size):
-    RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
-    # RealEstate_paths = ['RealEstate10K/train_images']
-
-    train_datasets, val_datasets = [], []
-    for RealEstate_path in RealEstate_paths:
-        for i, sequence_name in enumerate(os.listdir(RealEstate_path)):
-            specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
-            sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
-
-            # Get a list of all poses [R,t] in this sequence
-            poses = read_poses(specs_path).to(device)
-
-            # Indices of 'good' image frames
-            valid_indices = get_valid_indices(len(poses), sequence_path)
-            
-            # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-            original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
-            K = get_intrinsic_REALESTATE(specs_path, original_image_size)
-            
-            custom_dataset = CustomDataset(sequence_path, poses, valid_indices, transform, K)
-            if len(custom_dataset) > 30:
-                if RealEstate_path == 'RealEstate10K/train_images':
-                    train_datasets.append(custom_dataset) 
-                else:    
-                    val_datasets.append(custom_dataset)
-                
-    # Concatenate datasets
-    concat_train_dataset = ConcatDataset(train_datasets)
-    concat_val_dataset = ConcatDataset(val_datasets)
-
-    # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS)
-
-    return train_loader, val_loader
 
 def get_data_loaders(batch_size):
     if USE_REALESTATE:
         return get_dataloaders_RealEstate(batch_size)
     else: # KITTI
         return get_dataloaders_KITTI(batch_size)
-
-
 
 
 def move_bad_images():
@@ -174,32 +171,3 @@ def move_bad_images():
         epipolar_geo = EpipolarGeometry(
             first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
         epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
-
-def test_ground_truth_epipolar_err():
-    """computes average epipolar error for both normalized ground truth and unnormalized ground truth """
-
-    train_loader, val_loader = get_data_loaders(batch_size=1)
-    
-    avg_ep_err_unnormalized, avg_ep_err = 0, 0
-    for first_image, second_image, label, unormalized_label in val_loader:
-        batch_ep_err_unnormalized, batch_ep_err = 0, 0
-        for img_1, img_2, F, unormalized_F in zip(first_image, second_image, label, unormalized_label):
-            batch_ep_err_unnormalized += EpipolarGeometry(img_1, img_2, unormalized_F).get_epipolar_err()
-            batch_ep_err += EpipolarGeometry(img_1, img_2, F).get_epipolar_err()
-
-        batch_ep_err_unnormalized, batch_ep_err = batch_ep_err_unnormalized/len(first_image), batch_ep_err/len(first_image)
-        avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized + batch_ep_err_unnormalized, avg_ep_err + batch_ep_err
-
-    avg_ep_err_unnormalized, avg_ep_err = avg_ep_err_unnormalized/len(val_loader), avg_ep_err/len(val_loader)
-    return avg_ep_err_unnormalized, avg_ep_err
-
-if __name__ == "__main__":
-    # print(test_ground_truth_epipolar_err())
-    train_loader, val_loader = get_data_loaders(1)
-    for i, (first_image, second_image, label, unormalized_label) in enumerate(train_loader):
-
-        dst_dir = os.path.join('epipole_lines_realestate')
-        os.makedirs(dst_dir, exist_ok=True)
-
-        epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=unormalized_label)
-        epipolar_geo.visualize(sqResultDir='epipole_lines_realestate', img_idx=i)
