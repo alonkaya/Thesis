@@ -192,7 +192,9 @@ class FMatrixRegressor(nn.Module):
 
                 batch_RE1_pred, batch_SED_pred, batch_algebraic_pred, \
                 batch_RE1_truth, batch_SED_truth, batch_algebraic_truth = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, self.plots_path, epoch)
-                RE1_truth, SED_truth, algebraic_truth += batch_RE1_truth.cpu().item(), batch_SED_truth.cpu().item(), batch_algebraic_truth.cpu().item()
+                RE1_truth += batch_RE1_truth.cpu().item()
+                SED_truth += batch_SED_truth.cpu().item()
+                algebraic_truth += batch_algebraic_truth.cpu().item()
 
                 # Compute loss
                 loss = self.L2_loss(output, label) + LAST_SV_COEFF*(last_sv_sq) + \
@@ -219,7 +221,9 @@ class FMatrixRegressor(nn.Module):
 
                     val_batch_RE1_pred, val_batch_SED_pred, val_batch_algebraic_pred, \
                     val_batch_RE1_truth, val_batch_SED_truth, val_batch_algebraic_truth = update_epoch_stats(epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output.detach(), val_output, self.plots_path, epoch, val=True)
-                    val_RE1_truth, val_SED_truth, val_algebraic_truth += val_batch_RE1_truth.cpu().item(), val_batch_SED_truth.cpu().item(), val_batch_algebraic_truth.cpu().item()
+                    val_RE1_truth += val_batch_RE1_truth.cpu().item()
+                    val_SED_truth += val_batch_SED_truth.cpu().item()
+                    val_algebraic_truth += val_batch_algebraic_truth.cpu().item()
 
                     epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) + \
                                             self.sed_coeff*val_batch_SED_pred + self.alg_coeff*val_batch_algebraic_pred + self.re1_coeff*val_batch_RE1_pred
