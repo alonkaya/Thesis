@@ -166,11 +166,10 @@ class FMatrixRegressor(nn.Module):
 
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
-        all_train_loss, train_mae, \
-        all_val_loss, val_mae, \
+        all_train_loss, all_val_loss, all_penalty, \
+        all_train_mae, all_val_mae, \
         all_algberaic_pred, all_RE1_pred, all_SED_pred, \
-        all_val_algberaic_pred, all_val_RE1_pred, all_val_SED_pred,\
-        all_penalty = [], [], [], [], [], [], [], [], [], [], []
+        all_val_algberaic_pred, all_val_RE1_pred, all_val_SED_pred = [], [], [], [], [], [], [], [], [], [], []
 
         for epoch in range(num_epochs):
             self.train()
@@ -231,11 +230,11 @@ class FMatrixRegressor(nn.Module):
                     val_outputs = torch.cat((val_outputs, val_output), dim=0)
                     val_labels = torch.cat((val_labels, val_label), dim=0)
 
-            mae = torch.mean(torch.abs(labels - outputs))
+            train_mae = torch.mean(torch.abs(labels - outputs))
             val_mae = torch.mean(torch.abs(val_labels - val_outputs))
 
-            train_mae.append(mae.cpu().item())
-            val_mae.append(val_mae.cpu().item())
+            all_train_mae.append(train_mae.cpu().item())
+            all_val_mae.append(val_mae.cpu().item())
             all_train_loss.append(epoch_stats["loss"].cpu().item() / len(train_loader))
             all_val_loss.append(epoch_stats["val_loss"].cpu().item() / len(val_loader))
             all_RE1_pred.append(epoch_stats["RE1_pred"].cpu().item() / len(train_loader))
