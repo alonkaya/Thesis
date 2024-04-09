@@ -250,7 +250,7 @@ class FMatrixRegressor(nn.Module):
                                 val_RE1_truth: {val_RE1_truth/len(val_loader)}, val_SED_truth: {val_SED_truth/len(val_loader)}, val_algebraic_truth: {val_algebraic_truth/len(val_loader)}\n\n""", self.plots_path)
             
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}: Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} last sv: {all_penalty[-1]}
-            Training MAE: {train_mae[-1]}, Val MAE: {val_mae[-1]}
+            Training MAE: {all_train_mae[-1]}, Val MAE: {all_val_mae[-1]}
             algebraic dist: {all_algberaic_pred[-1]}, val algebraic dist: {all_val_algberaic_pred[-1]}
             RE1 dist: {all_RE1_pred[-1]}, val RE1 dist: {all_val_RE1_pred[-1]}
             SED dist: {all_SED_pred[-1]}, val SED dist: {all_val_SED_pred[-1]}\n\n"""
