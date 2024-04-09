@@ -162,7 +162,7 @@ def update_epoch_stats(stats, first_image, second_image, label, output, output_g
             RE1_dist_truth = RE1_dist_truth + epipolar_geo_truth.get_RE1_distance() if RE1_DIST else RE1_dist_truth
             SED_dist_truth = SED_dist_truth + epipolar_geo_truth.get_SED_distance() if SED_DIST else SED_dist_truth
 
-        if epoch == VISIUALIZE["epoch"]:
+        if epoch == VISIUALIZE["epoch"] and val:
             epipolar_geo_pred = EpipolarGeometry(img_1,img_2, F_pred)
             epipolar_geo_pred.visualize(sqResultDir=os.path.join(plots_path, VISIUALIZE["dir"]), file_num=stats["file_num"])
             stats["file_num"] = stats["file_num"] + 1
@@ -175,7 +175,7 @@ def update_epoch_stats(stats, first_image, second_image, label, output, output_g
         stats["val_algebraic_pred"] = stats["val_algebraic_pred"] + (algebraic_dist_pred / len(first_image))
         stats["val_RE1_pred"] = stats["val_RE1_pred"] + (RE1_dist_pred / len(first_image)) if RE1_DIST else stats["val_RE1_pred"]
         stats["val_SED_pred"] = stats["val_SED_pred"] + (SED_dist_pred / len(first_image)) if SED_DIST else stats["val_SED_pred"]
-        
+
     return RE1_dist_pred/len(first_image), SED_dist_pred/len(first_image), algebraic_dist_pred/len(first_image), \
            RE1_dist_truth/len(first_image), SED_dist_truth/len(first_image), algebraic_dist_truth/len(first_image)
 

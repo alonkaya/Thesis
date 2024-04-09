@@ -30,7 +30,7 @@ USE_RECONSTRUCTION_LAYER = True
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0.1, 0.001]
+SED_COEFF = [0.01]
 ENFORCE_RANK_2 = False
 PREDICT_POSE = False
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
@@ -41,5 +41,5 @@ FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = True
 UNFROZEN_LAYERS = 0
 GROUP_CONV = {"use" : False, "out_channels": 256, "num_groups" : 256}
-VISIUALIZE = {"epoch" : NUM_EPOCHS-1, "dir": 'predicted_epipole_lines'}
+VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
 
