@@ -5,6 +5,7 @@ import os
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 # os.environ['TORCH_USE_CUDA_DSA'] = '1'
 
+from Dataset import get_data_loaders
 from utils import print_and_write, init_main
 from FMatrixRegressor import FMatrixRegressor
 from params import *
@@ -27,7 +28,7 @@ Force_rank_2_{ENFORCE_RANK_2}__predict_pose_{PREDICT_POSE}__use_reconstruction_{
         
         model = FMatrixRegressor(lr_vit=lr_vit, lr_mlp=lr_mlp, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path).to(device)
 
-        train_loader, val_loader = data_with_one_sequence(BATCH_SIZE, CUSTOMDATASET_TYPE)
+        train_loader, val_loader = get_data_loaders(BATCH_SIZE)
 
         
         parameters = f"""learning rate vit: {lr_vit}, learning rate mlp: {lr_mlp}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
