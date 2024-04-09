@@ -142,7 +142,14 @@ def vis():
 
 # if __name__ == "__main__":
 #     vis()
-#         train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name=seq)
+        # train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name="0000cc6d8b108390")
+        # it = iter(train_loader)
+        # first_image, second_image, label = next(it)
+        # alpha, beta = find_coefficients(label[0])
+        # f1 = label[0][:, 0]
+        # f2 = label[0][:, 1]
+        # f3 = label[0][:, 2]
+        # print(alpha*f1 + beta*f2 - f3)
 #
 #         epoch_stats = {"algebraic_dist_truth": 0, "algebraic_dist_pred": 0, "algebraic_dist_pred_unormalized": 0,
 #                                 "RE1_dist_truth": 0, "RE1_dist_pred": 0, "RE1_dist_pred_unormalized": 0,

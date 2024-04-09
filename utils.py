@@ -152,4 +152,22 @@ def init_main():
     print("###########################################################################################################################################################\n\n")
 
 
- 
+def find_coefficients(F):
+    # Assuming F is a PyTorch tensor of shape (3, 3)
+    # Extract columns f1, f2, and f3 from F
+    f1 = F[:, 0:1]  # Column vector
+    f2 = F[:, 1:2]  # Column vector
+    f3 = F[:, 2]    # Vector
+
+    # Stack f1 and f2 horizontally to form a 3x2 matrix
+    A = torch.hstack([f1, f2])
+
+    # Solve for alpha and beta using the least squares method
+    # lstsq returns a named tuple, where the solution is the first item
+    result  = torch.linalg.lstsq(A, f3)
+
+    # Extract alpha and beta from the solution
+    alpha = result.solution[0].item()
+    beta = result.solution[1].item()
+
+    return alpha, beta

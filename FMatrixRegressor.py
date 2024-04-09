@@ -114,9 +114,9 @@ class FMatrixRegressor(nn.Module):
             x1['pixel_values'] = x1['pixel_values'].to(device)
             x2['pixel_values'] = x2['pixel_values'].to(device)
 
-            x1_embeddings = model(**x1).last_hidden_state[:, 1:, :].view(-1, 7*7*model.config.hidden_size)
+            x1_embeddings = model(**x1).last_hidden_state[:, 1:, :].reshape(-1, 7*7*model.config.hidden_size)
             x2_embeddings = model(**x2).last_hidden_state[:, 1:, :]
-            x2_embeddings = x2_embeddings.view(-1, 7*7*model.config.hidden_size)
+            x2_embeddings = x2_embeddings.reshape(-1, 7*7*model.config.hidden_size)
 
         else:
             x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model.config.hidden_size)
