@@ -136,7 +136,11 @@ class FMatrixRegressor(nn.Module):
                                                     kernel_size=1,
                                                     padding=1,
                                                     groups=out_channels)
-            x1_embeddings = grouped_conv_layer(x1_embeddings.view(-1, num_channels, 7, 7)).view(-1, 7*7*out_channels)
+            x1_embeddings = grouped_conv_layer(x1_embeddings.view(-1, num_channels, 7, 7))
+
+            print_and_write(x1_embeddings.size(), self.plots_path)
+            x1_embeddings = x1_embeddings.view(-1, 7*7*out_channels)
+
             x2_embeddings = grouped_conv_layer(x2_embeddings.view(-1, num_channels, 7, 7)).view(-1, 7*7*out_channels)
             num_channels = out_channels
 

@@ -1,6 +1,6 @@
 import torch
 
-DEVICE_ID = 1
+DEVICE_ID = 0
 device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
 
 learning_rates_vit = [2e-5]
