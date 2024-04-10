@@ -76,7 +76,7 @@ class FMatrixRegressor(nn.Module):
         if GROUP_CONV["use"]: 
             mlp_input_shape = 2 * 7*7 * GROUP_CONV["out_channels"] 
         if self.average_embeddings:
-            mlp_input_shape /= 49        
+            mlp_input_shape //= 49        
 
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
