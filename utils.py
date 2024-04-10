@@ -152,9 +152,6 @@ def init_main():
     # Optionally, set NumPy error handling to 'warn' to catch overflow errors
     np.seterr(over='warn')
 
-    print("###########################################################################################################################################################\n\n")
-
-
 def find_coefficients(F):
     # Assuming F is a PyTorch tensor of shape (3, 3)
     # Extract columns f1, f2, and f3 from F
