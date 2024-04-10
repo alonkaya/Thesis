@@ -9,7 +9,7 @@ class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
                  average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO, freeze_model=FREEZE_PRETRAINED_MODEL,
                  augmentation=AUGMENTATION, model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, 
-                 enforce_rank_2=ENFORCE_RANK_2, predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER,
+                 predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER,
                  model_path=None, mlp_path=None, alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None):
 
         """
@@ -34,7 +34,6 @@ class FMatrixRegressor(nn.Module):
         self.average_embeddings = average_embeddings
         self.model_name = model_name
         self.augmentation = augmentation
-        self.enforce_rank_2 = enforce_rank_2
         self.use_reconstruction=use_reconstruction
         self.predict_pose = predict_pose
         self.re1_coeff = re1_coeff
@@ -72,12 +71,12 @@ class FMatrixRegressor(nn.Module):
         #         param.requires_grad = True
 
         # Get input dimension for the MLP based on ViT configuration
-        self.model_hidden_size = self.model.config.hidden_size
+
+        mlp_input_shape = 2 * 7*7 * self.model.config.hidden_size
+        if GROUP_CONV["use"]: 
+            mlp_input_shape = 2 * 7*7 * GROUP_CONV["out_channels"] 
         if self.average_embeddings:
-            mlp_input_shape = 2*self.model_hidden_size
-        else:
-            mlp_input_shape = 7*7*2*self.model_hidden_size
-        if GROUP_CONV["use"]: mlp_input_shape //= 3
+            mlp_input_shape /= 49        
 
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
@@ -111,36 +110,41 @@ class FMatrixRegressor(nn.Module):
         if self.clip:  
             processor = self.clip_image_processor_t if predict_t else self.clip_image_processor
             model = self.model_t if predict_t else self.model
+            num_channels = model.config.hidden_size
 
             x1 = processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
             x2 = processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
 
             x1['pixel_values'] = x1['pixel_values'].to(device)
             x2['pixel_values'] = x2['pixel_values'].to(device)
-
+            
+            # Run ViT. Input shape is (batch_size, 3, 224, 224). Output shape is (batch_size, 49*hidden_size)
             x1_embeddings = model(**x1).last_hidden_state[:, 1:, :]
             x2_embeddings = model(**x2).last_hidden_state[:, 1:, :]
-
-            x2_embeddings = x2_embeddings.reshape(-1, 7*7*model.config.hidden_size)
-            x1_embeddings = x1_embeddings.reshape(-1, 7*7*model.config.hidden_size)
+            x2_embeddings = x2_embeddings.reshape(-1, 7*7*num_channels)
+            x1_embeddings = x1_embeddings.reshape(-1, 7*7*num_channels)
 
         else:
-            x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model.config.hidden_size)
-            x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :].view(-1,  7*7*self.model.config.hidden_size)
-
-        if self.average_embeddings:
-            avg_patches = nn.AdaptiveAvgPool2d(1)
-            x1_embeddings = avg_patches(x1_embeddings.view(-1, model.config.hidden_size, 7, 7)).view(-1, model.config.hidden_size)
-            x2_embeddings = avg_patches(x2_embeddings.view(-1, model.config.hidden_size, 7, 7)).view(-1, model.config.hidden_size)
+            x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :].reshape(-1,  7*7*num_channels)
+            x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :].reshape(-1,  7*7*num_channels)
 
         if GROUP_CONV["use"]:
-            grouped_conv_layer = GroupedConvolution(in_channels=model.config.hidden_size,   # Total input channels
-                                    out_channels=GROUP_CONV["out_channels"],  # Total output channels you want
-                                    kernel_size=3,
-                                    padding=1,
-                                    groups=GROUP_CONV["num_groups"])
-            x1_embeddings = grouped_conv_layer(x1_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, model.config.hidden_size//3)
-            x2_embeddings = grouped_conv_layer(x2_embeddings.unsqueeze(2).unsqueeze(3)).view(-1, model.config.hidden_size//3)
+            # Apply grouped convolution to reduce channels. Input shape is (batch_size, hidden_size, 49). Output shape is (batch_size, 49*out_channels)
+            out_channels = GROUP_CONV["out_channels"]
+            grouped_conv_layer = GroupedConvolution(in_channels=num_channels,     # Total input channels
+                                                    out_channels=out_channels,  # Total output channels you want
+                                                    kernel_size=1,
+                                                    padding=1,
+                                                    groups=model.config.hidden_size)
+            x1_embeddings = grouped_conv_layer(x1_embeddings.view(-1, num_channels, 7, 7)).view(-1, 7*7*out_channels)
+            x2_embeddings = grouped_conv_layer(x2_embeddings.view(-1, num_channels, 7, 7)).view(-1, 7*7*out_channels)
+            num_channels = out_channels
+
+        if self.average_embeddings:
+            # Average embeddings over spatial dimensions. Input shape is (batch_size, hidden_size, 49). Output shape is (batch_size, out_channels)
+            avg_patches = nn.AdaptiveAvgPool2d(1)
+            x1_embeddings = avg_patches(x1_embeddings.view(-1, num_channels, 7, 7)).view(-1, num_channels)
+            x2_embeddings = avg_patches(x2_embeddings.view(-1, num_channels, 7, 7)).view(-1, num_channels)
 
         embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
 
@@ -292,7 +296,7 @@ val_RE1_truth: {epoch_stats["val_RE1_truth"]}, val_SED_truth: {epoch_stats["val_
 
 
 def use_pretrained_model():
-    train_loader, val_loader = data_with_one_sequence(BATCH_SIZE, CUSTOMDATASET_TYPE)
+    train_loader, val_loader = data_with_one_sequence(BATCH_SIZE)
 
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5,
                              model_path='plots/only_one_sequence/AAAAAAAAAAAAAAAASVD_coeff 1 A 0 SED_coeff 0 lr 2e-05 avg_embeddings True model CLIP Force_rank_2 False predict_pose False use_reconstruction False/model.pth',

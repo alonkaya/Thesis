@@ -126,7 +126,7 @@ def vis():
         shutil.rmtree(good_frames_path)
         shutil.rmtree(bad_frames_path)
 
-    train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name=sequence_name)
+    train_loader, val_loader = data_with_one_sequence(batch_size=1, sequence_name=sequence_name)
 
     sed = 0
     for i,(first_image, second_image, label, unormalized_label,_) in enumerate(train_loader):
