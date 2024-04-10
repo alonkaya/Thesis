@@ -53,7 +53,7 @@ if AUGMENTATION:
         v2.CenterCrop(224),
         v2.Grayscale(num_output_channels=3),
         v2.ColorJitter(brightness=(0.85, 1.15), contrast=(0.85, 1.15)),
-        v2.ToTensor(),                # Converts to tensor and rescales [0,255] -> [0,1]
+        v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
         v2.Normalize(mean=norm_mean,  # Normalize each channel
                             std=norm_std),
     ])    
