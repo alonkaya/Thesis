@@ -161,7 +161,7 @@ class FMatrixRegressor(nn.Module):
 
         last_sv_sq = 0 if self.use_reconstruction else last_sing_value(output) 
 
-        output = paramterization_layer(output) 
+        output = paramterization_layer(output, self.plots_path) 
 
         output = norm_layer(output.view(-1, 9)).view(-1,3,3) 
 
@@ -252,7 +252,7 @@ class FMatrixRegressor(nn.Module):
 
             if epoch == 0: 
                 print_and_write(f"""RE1_truth: {epoch_stats["RE1_truth"]}, SED_truth: {epoch_stats["SED_truth"]}, algebraic_truth: {epoch_stats["algebraic_truth"]}
-val_RE1_truth: {epoch_stats["val_RE1_truth"]}, val_SED_truth: {epoch_stats["val_SED_truth"]}, val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}\n""", self.plots_path)
+val_RE1_truth: {epoch_stats["val_RE1_truth"]}, val_SED_truth: {epoch_stats["val_SED_truth"]}, val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}\n\n""", self.plots_path)
 
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}:  Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} last sv: {all_penalty[-1]}
             Training MAE: {all_train_mae[-1]} Val MAE: {all_val_mae[-1]}
@@ -329,7 +329,7 @@ def use_pretrained_model():
 
 
 
-def paramterization_layer(x):
+def paramterization_layer(x, plots_path):
     """
     Constructs a batch of 3x3 fundamental matrices from a batch of 8-element vectors based on the described parametrization.
 
@@ -357,6 +357,9 @@ def paramterization_layer(x):
     F = torch.cat((f1.view(-1, 3, 1), f2.view(-1, 3, 1), f3.view(-1, 3, 1)), dim=-1)
 
     if torch.linalg.matrix_rank(F[0]) != 2:
-        print_and_write(f'rank of estimated F not 2: {torch.linalg.matrix_rank(F)}')
+        U, S, V = torch.svd(F[0])
+        smallest_sv = S[-1]  # Select the smallest singular value
+        print_and_write(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(F)}
+smallest_sv: {smallest_sv}""", plots_path)
 
     return F
