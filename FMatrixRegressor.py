@@ -134,7 +134,6 @@ class FMatrixRegressor(nn.Module):
             grouped_conv_layer = GroupedConvolution(in_channels=num_channels,     # Total input channels
                                                     out_channels=out_channels,  # Total output channels you want
                                                     kernel_size=1,
-                                                    padding=1,
                                                     groups=out_channels)
             x1_embeddings = grouped_conv_layer(x1_embeddings.view(-1, num_channels, 7, 7))
 
