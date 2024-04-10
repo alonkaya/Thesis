@@ -174,3 +174,14 @@ def find_coefficients(F):
     beta = result.solution[1].item()
 
     return alpha, beta
+
+def divide_by_dataloader(epoch_stats, len_train_loader, len_val_loader):
+    for key, value in epoch_stats.items():
+        if key.startswith("val_"):
+            # For keys that start with "val_", divide by the length of val_loader
+            epoch_stats[key] = value.cpu().item() / len_val_loader
+        else:
+            # For all other keys, divide by the length of train_loader
+            # Assuming that 'file_num' should not be processed, we'll skip it
+            if key != "file_num":
+                epoch_stats[key] = value.cpu().item() / len_train_loader

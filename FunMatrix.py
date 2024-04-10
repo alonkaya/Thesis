@@ -145,39 +145,41 @@ def make_rank2(F, is_batch=True):
         print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
     return output
 
+def update_distances(img_1, img_2, F, algebraic_dist, RE1_dist, SED_dist):
+    epipolar_geo = EpipolarGeometry(img_1, img_2, F)
+    algebraic_dist = algebraic_dist + epipolar_geo.get_mean_algebraic_distance()
+    RE1_dist = RE1_dist + epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
+    SED_dist = SED_dist + epipolar_geo.get_SED_distance() if SED_DIST else SED_dist
+    return algebraic_dist, RE1_dist, SED_dist
+
 def update_epoch_stats(stats, first_image, second_image, label, output, output_grad, plots_path, epoch=0, val=False):
     algebraic_dist_truth, algebraic_dist_pred, \
     RE1_dist_truth, RE1_dist_pred, \
     SED_dist_truth, SED_dist_pred = torch.tensor(0), torch.tensor(0), torch.tensor(0), \
                                     torch.tensor(0), torch.tensor(0), torch.tensor(0)
     for img_1, img_2, F_truth, F_pred, F_pred_grad in zip(first_image, second_image, label, output, output_grad):
-        epipolar_geo_pred_grad = EpipolarGeometry(img_1, img_2, F_pred_grad)
-        algebraic_dist_pred = algebraic_dist_pred + epipolar_geo_pred_grad.get_mean_algebraic_distance()
-        RE1_dist_pred = RE1_dist_pred + epipolar_geo_pred_grad.get_RE1_distance() if RE1_DIST else RE1_dist_pred
-        SED_dist_pred = SED_dist_pred + epipolar_geo_pred_grad.get_SED_distance() if SED_DIST else SED_dist_pred
+        algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img_1, img_2, F_pred_grad, algebraic_dist_pred, RE1_dist_pred, SED_dist_pred)
 
         if epoch == 0:
-            epipolar_geo_truth = EpipolarGeometry(img_1,img_2, F_truth)
-            algebraic_dist_truth = algebraic_dist_truth + epipolar_geo_truth.get_mean_algebraic_distance()
-            RE1_dist_truth = RE1_dist_truth + epipolar_geo_truth.get_RE1_distance() if RE1_DIST else RE1_dist_truth
-            SED_dist_truth = SED_dist_truth + epipolar_geo_truth.get_SED_distance() if SED_DIST else SED_dist_truth
+            algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img_1, img_2, F_truth, algebraic_dist_truth, RE1_dist_truth, SED_dist_truth)
 
         if epoch == VISIUALIZE["epoch"] and val:
             epipolar_geo_pred = EpipolarGeometry(img_1,img_2, F_pred)
             epipolar_geo_pred.visualize(sqResultDir=os.path.join(plots_path, VISIUALIZE["dir"]), file_num=stats["file_num"])
             stats["file_num"] = stats["file_num"] + 1
 
-    if not val:
-        stats["algebraic_pred"] = stats["algebraic_pred"] + (algebraic_dist_pred / len(first_image))
-        stats["RE1_pred"] = stats["RE1_pred"] + (RE1_dist_pred / len(first_image)) if RE1_DIST else stats["RE1_pred"]
-        stats["SED_pred"] = stats["SED_pred"] + (SED_dist_pred / len(first_image)) if SED_DIST else stats["SED_pred"]
-    else:
-        stats["val_algebraic_pred"] = stats["val_algebraic_pred"] + (algebraic_dist_pred / len(first_image))
-        stats["val_RE1_pred"] = stats["val_RE1_pred"] + (RE1_dist_pred / len(first_image)) if RE1_DIST else stats["val_RE1_pred"]
-        stats["val_SED_pred"] = stats["val_SED_pred"] + (SED_dist_pred / len(first_image)) if SED_DIST else stats["val_SED_pred"]
+    algebraic_dist_pred, RE1_dist_pred, SED_dist_pred, algebraic_dist_truth, RE1_dist_truth, SED_dist_truth =\
+        (v/len(first_image) for v in [algebraic_dist_pred, RE1_dist_pred, SED_dist_pred, algebraic_dist_truth, RE1_dist_truth, SED_dist_truth])
+    
+    prefix = "val_" if val else ""
+    stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred)
+    stats[f"{prefix}RE1_pred"] = stats[f"{prefix}RE1_pred"] + (RE1_dist_pred) if RE1_DIST else stats[f"{prefix}RE1_pred"]
+    stats[f"{prefix}SED_pred"] = stats[f"{prefix}SED_pred"] + (SED_dist_pred) if SED_DIST else stats[f"{prefix}SED_pred"]
+    stats[f"{prefix}algebraic_truth"] = stats[f"{prefix}algebraic_truth"] + (algebraic_dist_truth)
+    stats[f"{prefix}RE1_truth"] = stats[f"{prefix}RE1_truth"] + (RE1_dist_truth) if RE1_DIST else stats[f"{prefix}RE1_truth"]
+    stats[f"{prefix}SED_truth"] = stats[f"{prefix}SED_truth"] + (SED_dist_truth) if SED_DIST else stats[f"{prefix}SED_truth"]
 
-    return RE1_dist_pred/len(first_image), SED_dist_pred/len(first_image), algebraic_dist_pred/len(first_image), \
-           RE1_dist_truth/len(first_image), SED_dist_truth/len(first_image), algebraic_dist_truth/len(first_image)
+    return algebraic_dist_pred, RE1_dist_pred, SED_dist_pred
 
 class EpipolarGeometry:
     def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):

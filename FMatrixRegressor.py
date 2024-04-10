@@ -178,10 +178,12 @@ class FMatrixRegressor(nn.Module):
             
             epoch_stats = {"algebraic_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
                             "val_algebraic_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
+                            "algebraic_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
+                            "val_algebraic_truth": torch.tensor(0), "val_RE1_truth": torch.tensor(0), "val_SED_truth": torch.tensor(0), 
                             "loss": torch.tensor(0), "val_loss": torch.tensor(0),
                             "epoch_penalty": torch.tensor(0), "file_num": 0}
             
-            RE1_truth, SED_truth, algebraic_truth, val_RE1_truth, val_SED_truth, val_algebraic_truth = 0, 0, 0, 0, 0, 0
+            # RE1_truth, SED_truth, algebraic_truth, val_RE1_truth, val_SED_truth, val_algebraic_truth = 0, 0, 0, 0, 0, 0
             for img1, img2, label in train_loader:
                 img1, img2, label = img1.to(device), img2.to(device), label.to(device)
 
@@ -189,11 +191,8 @@ class FMatrixRegressor(nn.Module):
                 output, last_sv_sq = self.forward(img1, img2)
                 epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + last_sv_sq
 
-                batch_RE1_pred, batch_SED_pred, batch_algebraic_pred, \
-                batch_RE1_truth, batch_SED_truth, batch_algebraic_truth = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, self.plots_path, epoch)
-                RE1_truth += batch_RE1_truth.cpu().item()
-                SED_truth += batch_SED_truth.cpu().item()
-                algebraic_truth += batch_algebraic_truth.cpu().item()
+                batch_RE1_pred, batch_SED_pred, batch_algebraic_pred = update_epoch_stats(
+                    epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, self.plots_path, epoch)
 
                 # Compute loss
                 loss = self.L2_loss(output, label) + LAST_SV_COEFF*(last_sv_sq) + \
@@ -218,11 +217,8 @@ class FMatrixRegressor(nn.Module):
 
                     val_output,_ = self.forward(val_img1, val_img2)
 
-                    val_batch_RE1_pred, val_batch_SED_pred, val_batch_algebraic_pred, \
-                    val_batch_RE1_truth, val_batch_SED_truth, val_batch_algebraic_truth = update_epoch_stats(epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output.detach(), val_output, self.plots_path, epoch, val=True)
-                    val_RE1_truth += val_batch_RE1_truth.cpu().item()
-                    val_SED_truth += val_batch_SED_truth.cpu().item()
-                    val_algebraic_truth += val_batch_algebraic_truth.cpu().item()
+                    val_batch_RE1_pred, val_batch_SED_pred, val_batch_algebraic_pred = update_epoch_stats(
+                        epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output.detach(), val_output, self.plots_path, epoch, val=True)
 
                     epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) + \
                                             self.sed_coeff*val_batch_SED_pred + self.alg_coeff*val_batch_algebraic_pred + self.re1_coeff*val_batch_RE1_pred
@@ -233,28 +229,32 @@ class FMatrixRegressor(nn.Module):
             train_mae = torch.mean(torch.abs(labels - outputs))
             val_mae = torch.mean(torch.abs(val_labels - val_outputs))
 
+
+            divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
+
             all_train_mae.append(train_mae.cpu().item())
+            all_train_loss.append(epoch_stats["loss"])
+            all_RE1_pred.append(epoch_stats["RE1_pred"])
+            all_SED_pred.append(epoch_stats["SED_pred"])
+            all_algberaic_pred.append(epoch_stats["algebraic_pred"])     
+            all_penalty.append(epoch_stats["epoch_penalty"])
+
             all_val_mae.append(val_mae.cpu().item())
-            all_train_loss.append(epoch_stats["loss"].cpu().item() / len(train_loader))
-            all_val_loss.append(epoch_stats["val_loss"].cpu().item() / len(val_loader))
-            all_RE1_pred.append(epoch_stats["RE1_pred"].cpu().item() / len(train_loader))
-            all_val_RE1_pred.append(epoch_stats["val_RE1_pred"].cpu().item() / len(val_loader))
-            all_SED_pred.append(epoch_stats["SED_pred"].cpu().item() / len(train_loader))
-            all_val_SED_pred.append(epoch_stats["val_SED_pred"].cpu().item() / len(val_loader))
-            all_algberaic_pred.append(epoch_stats["algebraic_pred"].cpu().item() / len(train_loader))            
-            all_val_algberaic_pred.append(epoch_stats["val_algebraic_pred"].cpu().item() / len(val_loader))
-            all_penalty.append(epoch_stats["epoch_penalty"].cpu().item() / len(train_loader))
+            all_val_loss.append(epoch_stats["val_loss"])
+            all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
+            all_val_SED_pred.append(epoch_stats["val_SED_pred"])
+            all_val_algberaic_pred.append(epoch_stats["val_algebraic_pred"])
+
 
             if epoch == 0: 
-                print_and_write(f"""RE1_truth: {RE1_truth/len(train_loader)}, SED_truth: {SED_truth/len(train_loader)}, algebraic_truth: {algebraic_truth/len(train_loader)}
-val_RE1_truth: {val_RE1_truth/len(val_loader)}, val_SED_truth: {val_SED_truth/len(val_loader)}, val_algebraic_truth: {val_algebraic_truth/len(val_loader)}\n\n""", self.plots_path)
-            
+                print_and_write(f"""RE1_truth: {epoch_stats["RE1_truth"]}, SED_truth: {epoch_stats["SED_truth"]}, algebraic_truth: {epoch_stats["algebraic_truth"]}
+val_RE1_truth: {epoch_stats["val_RE1_truth"]}, val_SED_truth: {epoch_stats["val_SED_truth"]}, val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}\n""", self.plots_path)
+
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}:  Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} last sv: {all_penalty[-1]}
             Training MAE: {all_train_mae[-1]} Val MAE: {all_val_mae[-1]}
             algebraic dist: {all_algberaic_pred[-1]} val algebraic dist: {all_val_algberaic_pred[-1]}
             RE1 dist: {all_RE1_pred[-1]} val RE1 dist: {all_val_RE1_pred[-1]}
             SED dist: {all_SED_pred[-1]} val SED dist: {all_val_SED_pred[-1]}\n\n"""
-
             print_and_write(epoch_output, self.plots_path)
 
             # If the model is not learning or outputs nan, stop training
@@ -279,8 +279,6 @@ val_RE1_truth: {val_RE1_truth/len(val_loader)}, val_SED_truth: {val_SED_truth/le
         if self.predict_pose:
             torch.save(self.model_t.state_dict(), os.path.join(self.plots_path, "model_t.pth"))
             torch.save(self.t_mlp.state_dict(), os.path.join(self.plots_path, "mlp_t.pth"))   
-
-
 
 
 
