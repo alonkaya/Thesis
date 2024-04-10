@@ -39,6 +39,6 @@ AUGMENTATION = True
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = True
 UNFROZEN_LAYERS = 0
-GROUP_CONV = {"use" : True, "out_channels": 256, "num_groups" : 768}
+GROUP_CONV = {"use" : True, "out_channels": 256}
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
 

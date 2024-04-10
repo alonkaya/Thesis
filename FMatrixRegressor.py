@@ -135,7 +135,7 @@ class FMatrixRegressor(nn.Module):
                                                     out_channels=out_channels,  # Total output channels you want
                                                     kernel_size=1,
                                                     padding=1,
-                                                    groups=model.config.hidden_size)
+                                                    groups=out_channels)
             x1_embeddings = grouped_conv_layer(x1_embeddings.view(-1, num_channels, 7, 7)).view(-1, 7*7*out_channels)
             x2_embeddings = grouped_conv_layer(x2_embeddings.view(-1, num_channels, 7, 7)).view(-1, 7*7*out_channels)
             num_channels = out_channels
