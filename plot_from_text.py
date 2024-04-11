@@ -1,74 +1,104 @@
+import os
 import re
 import matplotlib.pyplot as plt
 import numpy as np
-# Initialize lists to hold parameter values
+
 epochs = []
 training_losses = []
+val_losses = []
 training_maes = []
-last_svs = []
-alg_dists_truth = []
-alg_dists_pred = []
-alg_dists_pred_unorm = []
-sed_dists_truth = []
-sed_dists_pred = []
-sed_dists_pred_unorm = []
-# Open the file and process each line
-with open("g.txt", 'r') as file:
-    for line in file:
-        # Extract epoch number
-        epoch_match = re.search(r'Epoch (\d+)', line)
-        if epoch_match:
-            epochs.append(int(epoch_match.group(1)))
+val_maes = []
+alg_dists = []
+val_alg_dists = []
+re1_dists = []
+val_re1_dists = []
+sed_dists = []
+val_sed_dists = []
 
-        # Extract training metrics
-        if 'Training Loss' in line:
+def process_epoch_stats(file_path):
+    # Open the file and iterate over each line
+    with open(file_path, 'r') as file:
+        for line in file:
+            # Check if the line contains epoch information
+            epoch_match = re.search(r'Epoch (\d+)/', line)
+            if epoch_match:
+                epochs.append(int(epoch_match.group(1)))
+
+            # Extract and append the training and validation losses
             training_loss_match = re.search(r'Training Loss: ([\d.]+)', line)
-            training_mae_match = re.search(r'Training MAE: ([\d.]+)', line)
-            last_sv_match = re.search(r'last sv: ([\d.e-]+)', line)
+            val_loss_match = re.search(r'Val Loss: ([\d.]+)', line)
             if training_loss_match:
                 training_losses.append(float(training_loss_match.group(1)))
+            if val_loss_match:
+                val_losses.append(float(val_loss_match.group(1)))
+
+            # Extract and append the training and validation MAEs
+            training_mae_match = re.search(r'Training MAE: ([\d.]+)', line)
+            val_mae_match = re.search(r'Val MAE: ([\d.]+)', line)
             if training_mae_match:
                 training_maes.append(float(training_mae_match.group(1)))
-            if last_sv_match:
-                last_svs.append(float(last_sv_match.group(1)))
+            if val_mae_match:
+                val_maes.append(float(val_mae_match.group(1)))
 
-        # Extract algebraic and SED distances
-        alg_dist_match = re.search(r'algebraic dist truth: ([\d.e-]+), algebraic dist pred: ([\d.e-]+), algebraic dist pred unormalized: ([\d.e-]+)', line)
-        sed_dist_match = re.search(r'SED dist truth: ([\d.e-]+), SED dist pred: ([\d.e-]+), SED dist pred unormalized: ([\d.e-]+)', line)
-        if alg_dist_match:
-            alg_dists_truth.append(float(alg_dist_match.group(1)))
-            alg_dists_pred.append(float(alg_dist_match.group(2)))
-            alg_dists_pred_unorm.append(float(alg_dist_match.group(3)))
-        if sed_dist_match:
-            sed_dists_truth.append(float(sed_dist_match.group(1)))
-            sed_dists_pred.append(float(sed_dist_match.group(2)))
-            sed_dists_pred_unorm.append(float(sed_dist_match.group(3)))
+            # Extract and append the algebraic distances
+            alg_dist_match = re.search(r'algebraic dist: ([\d.]+)', line)
+            val_alg_dist_match = re.search(r'val algebraic dist: ([\d.]+)', line)
+            if alg_dist_match:
+                alg_dists.append(float(alg_dist_match.group(1)))
+            if val_alg_dist_match:
+                val_alg_dists.append(float(val_alg_dist_match.group(1)))
+
+            # Extract and append the RE1 distances
+            re1_dist_match = re.search(r'RE1 dist: ([\d.]+)', line)
+            val_re1_dist_match = re.search(r'val RE1 dist: ([\d.]+)', line)
+            if re1_dist_match:
+                re1_dists.append(float(re1_dist_match.group(1)))
+            if val_re1_dist_match:
+                val_re1_dists.append(float(val_re1_dist_match.group(1)))
+
+            # Extract and append the SED distances
+            sed_dist_match = re.search(r'SED dist: ([\d.]+)', line)
+            val_sed_dist_match = re.search(r'val SED dist: ([\d.]+)', line)
+            if sed_dist_match:
+                sed_dists.append(float(sed_dist_match.group(1)))
+            if val_sed_dist_match:
+                val_sed_dists.append(float(val_sed_dist_match.group(1)))
+
 
 # Plotting function for each parameter
-def plot_parameter(epochs, values, title, ylabel):
-    plt.figure(figsize=(10, 5))
-    plt.plot(epochs, values)  # Removed marker argument to display only the line
-    plt.title(title)
-    plt.xlabel('Epoch')
-    plt.ylabel(ylabel)
+def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs"):
+    fig, axs = plt.subplots(1, 2, figsize=(16, 7))  # 1 row, 2 columns
+    
+    for ax, y_scale in zip(axs, ['linear', 'log']):
+        ax.plot(x, y1, color='steelblue', label="Train")
+        if y2 and len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
 
-    for i in range(0, len(epochs), max(1, len(epochs)//10)):
-        plt.text(epochs[i], values[i], f'{values[i]:.4f}', fontsize=9, color='blue', ha='center', va='bottom')
+        for i in range(0, len(y1), max(1, len(y1)//10)):
+            ax.text(x[i], y1[i], f'{y1[i]:.4f}', fontsize=9, color='blue', ha='center', va='bottom')
+            if y2: ax.text(x[i], y2[i], f'{y2[i]:.4f}', fontsize=9, color='red', ha='center', va='top')
 
-    # Set the number of y-axis ticks to 10
-    y_ticks = np.linspace(min(values), max(values), 10)
-    plt.yticks(y_ticks)
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
+        ax.set_title(f'{title} {y_scale} scale')
+    
+        ax.set_yscale(y_scale)
+        ax.grid(True)
+        ax.legend()
 
-    plt.grid(True)
-    plt.show()
+    os.makedirs(plots_path, exist_ok=True)
+    plt.savefig(f"""{plots_path}/{title}.png""")  # Specify the filename and extension
+    
+    # plt.show()
 
-# Plotting graphs for each parameter
-plot_parameter(epochs, training_losses, 'Training Loss per Epoch', 'Training Loss')
-plot_parameter(epochs, training_maes, 'Training MAE per Epoch', 'Training MAE')
-plot_parameter(epochs, last_svs, 'Last SV per Epoch', 'Last SV')
-plot_parameter(epochs, alg_dists_truth, 'Algebraic Distance Truth per Epoch', 'Algebraic Distance Truth')
-plot_parameter(epochs, alg_dists_pred, 'Algebraic Distance Predicted per Epoch', 'Algebraic Distance Predicted')
-plot_parameter(epochs, alg_dists_pred_unorm, 'Algebraic Distance Predicted Unnormalized per Epoch', 'Algebraic Distance Pred Unnormalized')
-plot_parameter(epochs, sed_dists_truth, 'SED Distance Truth per Epoch', 'SED Distance Truth')
-plot_parameter(epochs, sed_dists_pred, 'SED Distance Predicted per Epoch', 'SED Distance Predicted')
-plot_parameter(epochs, sed_dists_pred_unorm, 'SED Distance Predicted Unnormalized per Epoch', 'SED Distance Pred Unnormalized')
+
+if __name__ == "__main__":
+    file_path = "plots/RealEstate/SVD_0__RE1_0__SED_0__ALG_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augmentation_False__Conv_True/output.log"
+    plots_path = "plots/RealEstate/SVD_0__RE1_0__SED_0__ALG_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augmentation_False__Conv_True"
+    process_epoch_stats(file_path)
+    # plot_parameter(epochs, training_losses, val_losses, "Loss", plots_path)
+    # plot_parameter(epochs, training_maes, val_maes, "MAE", plots_path)
+    # plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic Distance", plots_path)
+    # plot_parameter(epochs, re1_dists, val_re1_dists, "RE1 Distance", plots_path)
+    plot_parameter(epochs, sed_dists, val_sed_dists, "SED Distance", plots_path)
+
+    
