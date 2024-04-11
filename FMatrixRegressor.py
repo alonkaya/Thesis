@@ -129,7 +129,8 @@ class FMatrixRegressor(nn.Module):
             x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :].reshape(-1,  7*7*num_channels)
 
         if GROUP_CONV["use"]:
-            # Apply grouped convolution to reduce channels. Input shape is (batch_size, hidden_size, 49). Output shape is (batch_size, 49*out_channels)
+            # Apply grouped convolution to reduce channels. 
+            # Input shape is (batch_size, hidden_size, 49). Output shape is (batch_size, 49*out_channels)
             out_channels = GROUP_CONV["out_channels"]
             grouped_conv_layer = GroupedConvolution(in_channels=num_channels,     # Total input channels
                                                     out_channels=out_channels,  # Total output channels you want
@@ -140,7 +141,8 @@ class FMatrixRegressor(nn.Module):
             num_channels = out_channels
 
         if self.average_embeddings:
-            # Average embeddings over spatial dimensions. Input shape is (batch_size, hidden_size, 49). Output shape is (batch_size, out_channels)
+            # Average embeddings over spatial dimensions. 
+            # Input shape is (batch_size, hidden_size, 49). Output shape is (batch_size, out_channels)
             avg_patches = nn.AdaptiveAvgPool2d(1)
             x1_embeddings = avg_patches(x1_embeddings.view(-1, num_channels, 7, 7)).view(-1, num_channels)
             x2_embeddings = avg_patches(x2_embeddings.view(-1, num_channels, 7, 7)).view(-1, num_channels)
@@ -193,6 +195,7 @@ class FMatrixRegressor(nn.Module):
                 output, last_sv_sq = self.forward(img1, img2)
                 epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + last_sv_sq
 
+                # Update epoch statistics
                 batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
                     epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, self.plots_path, epoch)
 
@@ -210,27 +213,30 @@ class FMatrixRegressor(nn.Module):
                 labels = torch.cat((labels, label.detach()), dim=0)
                 outputs = torch.cat((outputs, output.detach()), dim=0)
 
-            
             # Validation
             self.eval()
             with torch.no_grad():
                 for val_img1, val_img2, val_label in val_loader:
                     val_img1, val_img2, val_label = val_img1.to(device), val_img2.to(device), val_label.to(device)
 
+                    # Forward pass
                     val_output,_ = self.forward(val_img1, val_img2)
 
+                    # Update epoch statistics
                     val_batch_algebraic_pred, val_batch_RE1_pred, val_batch_SED_pred,  = update_epoch_stats(
                         epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output.detach(), val_output, self.plots_path, epoch, val=True)
-
+                    
+                    # Compute loss
                     epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) + \
                                             self.alg_coeff*val_batch_algebraic_pred + self.re1_coeff*val_batch_RE1_pred + self.sed_coeff*val_batch_SED_pred
-
-                    val_outputs = torch.cat((val_outputs, val_output), dim=0)
+                    
+                    # Extend lists with batch statistics
                     val_labels = torch.cat((val_labels, val_label), dim=0)
+                    val_outputs = torch.cat((val_outputs, val_output), dim=0)
+                    
 
             train_mae = torch.mean(torch.abs(labels - outputs))
             val_mae = torch.mean(torch.abs(val_labels - val_outputs))
-
 
             divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
 
