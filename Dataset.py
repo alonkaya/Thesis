@@ -1,11 +1,8 @@
-import os
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 from FunMatrix import *
 from utils import *
-
 from torch.utils.data import DataLoader, ConcatDataset
 from torchvision.transforms import v2
-
+import os
 from PIL import Image
 import torchvision
 
@@ -52,7 +49,7 @@ def get_valid_indices(sequence_len, sequence_path):
 
 if AUGMENTATION:
     transform = v2.Compose([
-        v2.Resize((256, 256)),
+        v2.Resize((256, 256), antialias=True),
         v2.CenterCrop(224),
         v2.Grayscale(num_output_channels=3),
         v2.ColorJitter(brightness=(0.85, 1.15), contrast=(0.85, 1.15)),
@@ -62,7 +59,7 @@ if AUGMENTATION:
     ])    
 else:
     transform = v2.Compose([
-        v2.Resize((256, 256)),
+        v2.Resize((256, 256), antialias=True),
         v2.CenterCrop(224),
         v2.Grayscale(num_output_channels=3),
         v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]

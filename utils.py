@@ -1,4 +1,3 @@
-import sys
 from params import *
 import matplotlib.pyplot as plt
 import torch.nn as nn
