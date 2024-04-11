@@ -340,7 +340,7 @@ def paramterization_layer(x, plots_path):
     # Split the tensor into the first two columns (f1, f2) and the coefficients (alpha, beta)
     f1 = x[:, :3]  # First three elements of each vector for the first column
     f2 = x[:, 3:6]  # Next three elements of each vector for the second column
-    alpha, beta = x[:, 6], x[:, 7]  # Last two elements of each vector for the coefficients
+    alpha, beta = x[:, 6].unsqueeze(1), x[:, 7].unsqueeze(1)  # Last two elements of each vector for the coefficients
 
     # Compute the third column as a linear combination: f3 = alpha * f1 + beta * f2
     # We need to use broadcasting to correctly multiply the coefficients with the columns
