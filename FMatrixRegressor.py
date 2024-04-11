@@ -186,7 +186,6 @@ class FMatrixRegressor(nn.Module):
                             "loss": torch.tensor(0), "val_loss": torch.tensor(0),
                             "epoch_penalty": torch.tensor(0), "file_num": 0}
             
-            # RE1_truth, SED_truth, algebraic_truth, val_RE1_truth, val_SED_truth, val_algebraic_truth = 0, 0, 0, 0, 0, 0
             for img1, img2, label in train_loader:
                 img1, img2, label = img1.to(device), img2.to(device), label.to(device)
 
@@ -194,12 +193,12 @@ class FMatrixRegressor(nn.Module):
                 output, last_sv_sq = self.forward(img1, img2)
                 epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + last_sv_sq
 
-                batch_RE1_pred, batch_SED_pred, batch_algebraic_pred = update_epoch_stats(
+                batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
                     epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, self.plots_path, epoch)
 
                 # Compute loss
                 loss = self.L2_loss(output, label) + LAST_SV_COEFF*(last_sv_sq) + \
-                       self.sed_coeff*batch_SED_pred + self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred
+                       self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred +self.sed_coeff*batch_SED_pred
                 epoch_stats["loss"] = epoch_stats["loss"] + loss.detach()
 
                 # Compute Backward pass and gradients
@@ -220,11 +219,11 @@ class FMatrixRegressor(nn.Module):
 
                     val_output,_ = self.forward(val_img1, val_img2)
 
-                    val_batch_RE1_pred, val_batch_SED_pred, val_batch_algebraic_pred = update_epoch_stats(
+                    val_batch_algebraic_pred, val_batch_RE1_pred, val_batch_SED_pred,  = update_epoch_stats(
                         epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output.detach(), val_output, self.plots_path, epoch, val=True)
 
                     epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) + \
-                                            self.sed_coeff*val_batch_SED_pred + self.alg_coeff*val_batch_algebraic_pred + self.re1_coeff*val_batch_RE1_pred
+                                            self.alg_coeff*val_batch_algebraic_pred + self.re1_coeff*val_batch_RE1_pred + self.sed_coeff*val_batch_SED_pred
 
                     val_outputs = torch.cat((val_outputs, val_output), dim=0)
                     val_labels = torch.cat((val_labels, val_label), dim=0)
@@ -237,21 +236,21 @@ class FMatrixRegressor(nn.Module):
 
             all_train_mae.append(train_mae.cpu().item())
             all_train_loss.append(epoch_stats["loss"])
+            all_algberaic_pred.append(epoch_stats["algebraic_pred"])  
             all_RE1_pred.append(epoch_stats["RE1_pred"])
             all_SED_pred.append(epoch_stats["SED_pred"])
-            all_algberaic_pred.append(epoch_stats["algebraic_pred"])     
             all_penalty.append(epoch_stats["epoch_penalty"])
 
             all_val_mae.append(val_mae.cpu().item())
             all_val_loss.append(epoch_stats["val_loss"])
+            all_val_algberaic_pred.append(epoch_stats["val_algebraic_pred"])
             all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
             all_val_SED_pred.append(epoch_stats["val_SED_pred"])
-            all_val_algberaic_pred.append(epoch_stats["val_algebraic_pred"])
 
 
             if epoch == 0: 
-                print_and_write(f"""RE1_truth: {epoch_stats["RE1_truth"]}, SED_truth: {epoch_stats["SED_truth"]}, algebraic_truth: {epoch_stats["algebraic_truth"]}
-val_RE1_truth: {epoch_stats["val_RE1_truth"]}, val_SED_truth: {epoch_stats["val_SED_truth"]}, val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}\n\n""", self.plots_path)
+                print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]} RE1_truth: {epoch_stats["RE1_truth"]}, SED_truth: {epoch_stats["SED_truth"]}
+val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}, val_RE1_truth: {epoch_stats["val_RE1_truth"]}, val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}:  Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]} last sv: {all_penalty[-1]}
             Training MAE: {all_train_mae[-1]} Val MAE: {all_val_mae[-1]}
@@ -359,6 +358,6 @@ def paramterization_layer(x, plots_path):
         U, S, V = torch.svd(F[0])
         smallest_sv = S[-1]  # Select the smallest singular value
         print_and_write(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(F)}
-smallest_sv: {smallest_sv}""", plots_path)
+smallest_sv: {smallest_sv.cpu().item()}\n""", plots_path)
 
     return F
