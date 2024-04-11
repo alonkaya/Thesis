@@ -66,7 +66,7 @@ def process_epoch_stats(file_path):
 
 
 # Plotting function for each parameter
-def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs"):
+def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=False, show=False):
     fig, axs = plt.subplots(1, 2, figsize=(16, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
@@ -84,21 +84,25 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs"):
         ax.set_yscale(y_scale)
         ax.grid(True)
         ax.legend()
-
-    os.makedirs(plots_path, exist_ok=True)
-    plt.savefig(f"""{plots_path}/{title}.png""")  # Specify the filename and extension
     
-    # plt.show()
+    if save:
+        os.makedirs(plots_path, exist_ok=True)
+        plt.savefig(f"""{plots_path}/{title}.png""")  # Specify the filename and extension
+    if show:
+        plt.show()
 
 
 if __name__ == "__main__":
-    file_path = "plots/RealEstate/SVD_0__RE1_0__SED_0__ALG_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augmentation_False__Conv_True/output.log"
-    plots_path = "plots/RealEstate/SVD_0__RE1_0__SED_0__ALG_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augmentation_False__Conv_True"
+    plots_path = "plots/RealEstate/SVD_0__RE1_0__SED_0__ALG_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__predict_pose_False__use_reconstruction_True__Augmentation_True/"
+    file_path = os.path.join(plots_path, "output.log")
+    save = False
+    show = True
+
     process_epoch_stats(file_path)
-    # plot_parameter(epochs, training_losses, val_losses, "Loss", plots_path)
-    # plot_parameter(epochs, training_maes, val_maes, "MAE", plots_path)
-    # plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic Distance", plots_path)
-    # plot_parameter(epochs, re1_dists, val_re1_dists, "RE1 Distance", plots_path)
-    plot_parameter(epochs, sed_dists, val_sed_dists, "SED Distance", plots_path)
+    plot_parameter(epochs, training_losses, val_losses, "Loss", plots_path, save=save, show=show)
+    plot_parameter(epochs, training_maes, val_maes, "MAE", plots_path, save=save, show=show)
+    plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic Distance", plots_path, save=save, show=show)
+    plot_parameter(epochs, re1_dists, val_re1_dists, "RE1 Distance", plots_path, save=save, show=show)
+    plot_parameter(epochs, sed_dists, val_sed_dists, "SED Distance", plots_path, save=save, show=show)
 
     
