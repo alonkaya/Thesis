@@ -223,12 +223,12 @@ class FMatrixRegressor(nn.Module):
                     val_output,_ = self.forward(val_img1, val_img2)
 
                     # Update epoch statistics
-                    val_batch_algebraic_pred, val_batch_RE1_pred, val_batch_SED_pred,  = update_epoch_stats(
+                    val_batch_algebraic_pred, val_batch_RE1_pred, val_batch_SED_pred = update_epoch_stats(
                         epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output.detach(), val_output, self.plots_path, epoch, val=True)
                     
                     # Compute loss
                     epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) + \
-                                            self.alg_coeff*val_batch_algebraic_pred + self.re1_coeff*val_batch_RE1_pred + self.sed_coeff*val_batch_SED_pred
+                                self.alg_coeff*val_batch_algebraic_pred + self.re1_coeff*val_batch_RE1_pred + self.sed_coeff*val_batch_SED_pred
                     
                     # Extend lists with batch statistics
                     val_labels = torch.cat((val_labels, val_label), dim=0)
@@ -255,14 +255,14 @@ class FMatrixRegressor(nn.Module):
 
 
             if epoch == 0: 
-                print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]} RE1_truth: {epoch_stats["RE1_truth"]}, SED_truth: {epoch_stats["SED_truth"]}
-val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}, val_RE1_truth: {epoch_stats["val_RE1_truth"]}, val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
+                print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}     RE1_truth: {epoch_stats["RE1_truth"]},         SED_truth: {epoch_stats["SED_truth"]}
+val_algebraic_truth: {epoch_stats["val_algebraic_truth"]} val_RE1_truth: {epoch_stats["val_RE1_truth"]} val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
-            epoch_output = f"""Epoch {epoch+1}/{num_epochs}:  Training Loss: {all_train_loss[-1]} Val Loss: {all_val_loss[-1]}
-            Training MAE: {all_train_mae[-1]} Val MAE: {all_val_mae[-1]}
-            algebraic dist: {all_algberaic_pred[-1]} val algebraic dist: {all_val_algberaic_pred[-1]}
-            RE1 dist: {all_RE1_pred[-1]} val RE1 dist: {all_val_RE1_pred[-1]}
-            SED dist: {all_SED_pred[-1]} val SED dist: {all_val_SED_pred[-1]}\n\n"""
+            epoch_output = f"""Epoch {epoch+1}/{num_epochs}: Training Loss: {all_train_loss[-1]}   Val Loss: {all_val_loss[-1]}
+            Training MAE: {all_train_mae[-1]}   Val MAE: {all_val_mae[-1]}
+            Algebraic dist: {all_algberaic_pred[-1]} Val algebraic dist: {all_val_algberaic_pred[-1]}
+            RE1 dist: {all_RE1_pred[-1]}        Val RE1 dist: {all_val_RE1_pred[-1]}
+            SED dist: {all_SED_pred[-1]}       Val SED dist: {all_val_SED_pred[-1]}\n\n"""
             print_and_write(epoch_output, self.plots_path)
 
             # If the model is not learning or outputs nan, stop training
@@ -287,15 +287,6 @@ val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}, val_RE1_truth: {epoch
         if self.predict_pose:
             torch.save(self.model_t.state_dict(), os.path.join(self.plots_path, "model_t.pth"))
             torch.save(self.t_mlp.state_dict(), os.path.join(self.plots_path, "mlp_t.pth"))   
-
-
-
-
-
-
-
-
-
 
 
 
@@ -330,7 +321,6 @@ def use_pretrained_model():
 
 
     print(epoch_stats["SED_dist_pred"]/len(train_loader), epoch_stats["algebraic_dist_pred_unormalized"]/len(train_loader))
-
 
 
 def paramterization_layer(x, plots_path):
