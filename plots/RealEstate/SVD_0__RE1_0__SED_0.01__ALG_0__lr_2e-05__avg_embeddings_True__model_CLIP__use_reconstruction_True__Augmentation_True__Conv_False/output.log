@@ -1,0 +1,28 @@
+###########################################################################################################################################################
+
+learning rate vit: 2e-05, learning rate mlp: 2e-05, mlp_hidden_sizes: [512, 256], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 1, train_seqeunces: [0, 2], val_sequences: [1, 3, 4], RealEstate: True, batchnorm & dropout: False, 
+average embeddings: True, model: openai/clip-vit-base-patch32, augmentation: True, 
+predict pose: False, SVD coeff: 0, RE1 coeff: 0 SED coeff: 0.01, ALG_COEFF: 0, unforzen layers: 0, group conv: False
+
+algebraic_truth: 0.07035544475269738 RE1_truth: 0.12196035007023076, SED_truth: 0.49295413651655423
+val_algebraic_truth: 0.05607714736670778, val_RE1_truth: 0.07393572890967653, val_SED_truth: 0.2963780881647478
+
+Epoch 1/80:  Training Loss: 133.14571000825993 Val Loss: 174.51655701754385
+            Training MAE: 0.3728983700275421 Val MAE: 0.32226449251174927
+            algebraic dist: 5821.060022026431 val algebraic dist: 2063.1929824561403
+            RE1 dist: 3307.5344162995593 val RE1 dist: 4321.175789473684
+            SED dist: 13291.47356828194 val SED dist: 17428.757894736842
+
+Epoch 2/80:  Training Loss: 94.81797219162996 Val Loss: 109.06854166666666
+            Training MAE: 0.32280850410461426 Val MAE: 0.30204007029533386
+            algebraic dist: 348.2650055066079 val algebraic dist: 35.6308826754386
+            RE1 dist: 1901.7892345814978 val RE1 dist: 1448.311052631579
+            SED dist: 9456.221365638767 val SED dist: 10883.169824561404
+
+Epoch 3/80:  Training Loss: 21.198648730038546 Val Loss: 0.36145413582785085
+            Training MAE: 0.25797614455223083 Val MAE: 0.28911495208740234
+            algebraic dist: 33.37935151087555 val algebraic dist: 47.12824013157895
+            RE1 dist: 244.53054446585904 val RE1 dist: 4.277179276315789
+            SED dist: 2102.904598017621 val SED dist: 17.12998355263158
+
