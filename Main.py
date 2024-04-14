@@ -22,10 +22,11 @@ if __name__ == "__main__":
     for i, (lr_vit, lr_mlp, alg_coeff, re1_coeff, sed_coeff) in enumerate(param_combinations):
 
         coeff = f'ALG__{alg_coeff}__' if alg_coeff > 0 else f'RE1__{re1_coeff}__' if re1_coeff > 0 else f'SED__{sed_coeff}__' if sed_coeff > 0 else ''
+        dataset = "__first_2_thirds_train" if FIRST_2_THRIDS_TRAIN else "__first_2_of_three_train" if FIRST_2_OF_3_TRAIN else ""
         plots_path = os.path.join('plots', 'RealEstate', 
-                          f"""{coeff}lr_{learning_rates_mlp[0]}__BS_{BATCH_SIZE}__\
+                          f"""{coeff}lr_{learning_rates_mlp[0]}__\
 avg_embeddings_{AVG_EMBEDDINGS}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
-use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augmentation_{AUGMENTATION}__Conv_{GROUP_CONV["use"]}""")
+use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augmentation_{AUGMENTATION}__Conv_{GROUP_CONV["use"]}{dataset}""")\
         
         model = FMatrixRegressor(lr_vit=lr_vit, lr_mlp=lr_mlp, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path).to(device)
 
@@ -35,7 +36,8 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augmentation_{AUGMENTATION}__Conv
 learning rate vit: {lr_vit}, learning rate mlp: {lr_mlp}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
 batch_size: {BATCH_SIZE}, train_seqeunces: {train_seqeunces}, val_sequences: {val_sequences}, RealEstate: {USE_REALESTATE}, batchnorm & dropout: {BN_AND_DO}, 
 average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, 
-predict pose: {PREDICT_POSE}, SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}\n\n"""
+predict pose: {PREDICT_POSE}, SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}
+Dataset: {dataset}\n\n"""
         print_and_write(parameters, plots_path)
 
         model.train_model(train_loader, val_loader, num_epochs=NUM_EPOCHS)
