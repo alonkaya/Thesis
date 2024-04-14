@@ -21,8 +21,9 @@ if __name__ == "__main__":
 
     for i, (lr_vit, lr_mlp, alg_coeff, re1_coeff, sed_coeff) in enumerate(param_combinations):
 
+        coeff = f'ALG__{alg_coeff}__' if alg_coeff > 0 else f'RE1__{re1_coeff}__' if re1_coeff > 0 else f'SED__{sed_coeff}__' if sed_coeff > 0 else ''
         plots_path = os.path.join('plots', 'RealEstate', 
-                          f"""SVD_{LAST_SV_COEFF}__RE1_{re1_coeff}__SED_{sed_coeff}__ALG_{alg_coeff}__lr_{learning_rates_mlp[0]}__\
+                          f"""{coeff}lr_{learning_rates_mlp[0]}__BS_{BATCH_SIZE}__\
 avg_embeddings_{AVG_EMBEDDINGS}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
 use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augmentation_{AUGMENTATION}__Conv_{GROUP_CONV["use"]}""")
         
