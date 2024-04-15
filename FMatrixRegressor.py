@@ -171,20 +171,27 @@ class FMatrixRegressor(nn.Module):
 
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
-        all_train_loss, all_val_loss, all_penalty, \
+        all_train_loss, all_val_loss, \
         all_train_mae, all_val_mae, \
         all_algberaic_pred, all_RE1_pred, all_SED_pred, \
-        all_val_algberaic_pred, all_val_RE1_pred, all_val_SED_pred = [], [], [], [], [], [], [], [], [], [], []
+        all_val_algberaic_pred, all_val_RE1_pred, all_val_SED_pred, \
+        all_train_mae_T, all_val_mae_T, \
+        all_algberaic_pred_T, all_RE1_pred_T, all_SED_pred_T, \
+        all_val_algberaic_pred_T, all_val_RE1_pred_T, all_val_SED_pred_T = [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
 
         for epoch in range(num_epochs):
             self.train()
-            labels, outputs, val_labels, val_outputs = torch.tensor([]).to(device), torch.tensor([]).to(device), \
-                                                       torch.tensor([]).to(device), torch.tensor([]).to(device)
+            labels, outputs, val_labels, val_outputs, labels_T, outputs_T, val_labels_T, val_outputs_T  = torch.tensor([]).to(device), torch.tensor([]).to(device), \
+                    torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device)
             
             epoch_stats = {"algebraic_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
                             "val_algebraic_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
                             "algebraic_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
                             "val_algebraic_truth": torch.tensor(0), "val_RE1_truth": torch.tensor(0), "val_SED_truth": torch.tensor(0), 
+                            "algebraic_pred_T": torch.tensor(0), "RE1_pred_T": torch.tensor(0), "SED_pred_T": torch.tensor(0), 
+                            "val_algebraic_pred_T": torch.tensor(0), "val_RE1_pred_T": torch.tensor(0), "val_SED_pred_T": torch.tensor(0), 
+                            "algebraic_truth_T": torch.tensor(0), "RE1_truth_T": torch.tensor(0), "SED_truth_T": torch.tensor(0), 
+                            "val_algebraic_truth_T": torch.tensor(0), "val_RE1_truth_T": torch.tensor(0), "val_SED_truth_T": torch.tensor(0), 
                             "loss": torch.tensor(0), "val_loss": torch.tensor(0),
                             "epoch_penalty": torch.tensor(0), "file_num": 0}
             
@@ -192,16 +199,16 @@ class FMatrixRegressor(nn.Module):
                 img1, img2, label = img1.to(device), img2.to(device), label.to(device)
 
                 # Forward pass
-                output, last_sv_sq = self.forward(img1, img2)
-                epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + last_sv_sq
+                output, _ = self.forward(img1, img2)
+                output_T, _ = self.forward(img2, img1) 
 
                 # Update epoch statistics
-                batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
-                    epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, self.plots_path, epoch)
+                batch_algebraic_pred, batch_RE1_pred, batch_SED_pred, batch_algebraic_pred_T, batch_RE1_pred_T, batch_SED_pred_T = update_epoch_stats(
+                    epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach, output, output_T, self.plots_path, epoch)
 
                 # Compute loss
-                loss = self.L2_loss(output, label) + LAST_SV_COEFF*(last_sv_sq) + \
-                       self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred +self.sed_coeff*batch_SED_pred
+                loss = self.L2_loss(output, label) + self.L2_loss(output_T, label.transpose(1,2)) + \
+                       self.alg_coeff*(batch_algebraic_pred+batch_algebraic_pred_T) + self.re1_coeff*(batch_RE1_pred+batch_RE1_pred_T) +self.sed_coeff*(batch_SED_pred+batch_SED_pred_T)
                 epoch_stats["loss"] = epoch_stats["loss"] + loss.detach()
 
                 # Compute Backward pass and gradients
@@ -212,6 +219,9 @@ class FMatrixRegressor(nn.Module):
                 # Extend lists with batch statistics
                 labels = torch.cat((labels, label.detach()), dim=0)
                 outputs = torch.cat((outputs, output.detach()), dim=0)
+                labels_T = torch.cat((labels_T, label.transpose(1,2).detach()), dim=0)
+                outputs_T = torch.cat((outputs_T, output_T.detach()), dim=0)
+                
 
             # Validation
             self.eval()
@@ -224,20 +234,24 @@ class FMatrixRegressor(nn.Module):
                     val_output_T,_ = self.forward(val_img2, val_img1)
 
                     # Update epoch statistics
-                    val_batch_algebraic_pred, val_batch_RE1_pred, val_batch_SED_pred = update_epoch_stats(
-                        epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output.detach(), val_output, self.plots_path, epoch, val=True)
+                    val_batch_algebraic_pred, val_batch_RE1_pred, val_batch_SED_pred, val_batch_algebraic_pred_T, val_batch_RE1_pred_T, val_batch_SED_pred_T = update_epoch_stats(
+                        epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output.detach(), val_output, val_output_T, self.plots_path, epoch, val=True)
                     
                     # Compute loss
-                    epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) + \
-                                self.alg_coeff*val_batch_algebraic_pred + self.re1_coeff*val_batch_RE1_pred + self.sed_coeff*val_batch_SED_pred
+                    epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) +  self.L2_loss(val_output_T, val_label.transpose(1,2)) + \
+                                self.alg_coeff*(val_batch_algebraic_pred+val_batch_algebraic_pred_T) + self.re1_coeff*(val_batch_RE1_pred+val_batch_RE1_pred_T) + self.sed_coeff*(val_batch_SED_pred+val_batch_SED_pred_T)
                     
                     # Extend lists with batch statistics
                     val_labels = torch.cat((val_labels, val_label), dim=0)
                     val_outputs = torch.cat((val_outputs, val_output), dim=0)
+                    val_labels_T = torch.cat((val_labels_T, val_label.transpose(1,2)), dim=0)
+                    val_outputs_T = torch.cat((val_outputs_T, val_output_T), dim=0)
                     
 
             train_mae = torch.mean(torch.abs(labels - outputs))
             val_mae = torch.mean(torch.abs(val_labels - val_outputs))
+            train_mae_T = torch.mean(torch.abs(labels_T - outputs_T))
+            val_mae_T = torch.mean(torch.abs(val_labels_T - val_outputs_T))
 
             divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
 
@@ -246,13 +260,22 @@ class FMatrixRegressor(nn.Module):
             all_algberaic_pred.append(epoch_stats["algebraic_pred"])  
             all_RE1_pred.append(epoch_stats["RE1_pred"])
             all_SED_pred.append(epoch_stats["SED_pred"])
-            all_penalty.append(epoch_stats["epoch_penalty"])
 
             all_val_mae.append(val_mae.cpu().item())
             all_val_loss.append(epoch_stats["val_loss"])
             all_val_algberaic_pred.append(epoch_stats["val_algebraic_pred"])
             all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
             all_val_SED_pred.append(epoch_stats["val_SED_pred"])
+
+            all_train_mae_T.append(train_mae_T.cpu().item())
+            all_algberaic_pred_T.append(epoch_stats["algebraic_pred_T"])
+            all_RE1_pred_T.append(epoch_stats["RE1_pred_T"])
+            all_SED_pred_T.append(epoch_stats["SED_pred_T"])
+
+            all_val_mae_T.append(val_mae_T.cpu().item())
+            all_val_algberaic_pred_T.append(epoch_stats["val_algebraic_pred_T"])
+            all_val_RE1_pred_T.append(epoch_stats["val_RE1_pred_T"])
+            all_val_SED_pred_T.append(epoch_stats["val_SED_pred_T"])
 
 
             if epoch == 0: 
@@ -263,7 +286,11 @@ val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}   val_RE1_truth: {epoc
             Training MAE: {all_train_mae[-1]}  Val MAE: {all_val_mae[-1]}
             Algebraic dist: {all_algberaic_pred[-1]}  Val algebraic dist: {all_val_algberaic_pred[-1]}
             RE1 dist: {all_RE1_pred[-1]}        Val RE1 dist: {all_val_RE1_pred[-1]}
-            SED dist: {all_SED_pred[-1]}        Val SED dist: {all_val_SED_pred[-1]}\n\n"""
+            SED dist: {all_SED_pred[-1]}        Val SED dist: {all_val_SED_pred[-1]}
+            Training MAE T: {all_train_mae_T[-1]}  Val MAE T: {all_val_mae_T[-1]}
+            Algebraic dist T: {all_algberaic_pred_T[-1]}  Val algebraic dist T: {all_val_algberaic_pred_T[-1]}
+            RE1 dist T: {all_RE1_pred_T[-1]}        Val RE1 dist T: {all_val_RE1_pred_T[-1]}
+            SED dist T: {all_SED_pred_T[-1]}        Val SED dist T: {all_val_SED_pred_T[-1]}\n\n"""
             print_and_write(epoch_output, self.plots_path)
 
             # If the model is not learning or outputs nan, stop training
@@ -277,6 +304,11 @@ val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}   val_RE1_truth: {epoc
         plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred, y2=all_val_algberaic_pred, title="Algebraic distance", plots_path=self.plots_path)
         plot(x=range(1, num_epochs + 1), y1=all_RE1_pred, y2=all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
         plot(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
+        plot(x=range(1, num_epochs + 1), y1=all_train_mae_T, y2=all_val_mae_T, title="MAE T" if not self.predict_pose else "MAE T R", plots_path=self.plots_path)
+        plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred_T, y2=all_val_algberaic_pred_T, title="Algebraic distance T", plots_path=self.plots_path)
+        plot(x=range(1, num_epochs + 1), y1=all_RE1_pred_T, y2=all_val_RE1_pred_T, title="RE1 distance T", plots_path=self.plots_path) if RE1_DIST else None
+        plot(x=range(1, num_epochs + 1), y1=all_SED_pred_T, y2=all_val_SED_pred_T, title="SED distance T", plots_path=self.plots_path) if SED_DIST else None
+        
 
         if SAVE_MODEL:
             self.save_model() 
