@@ -147,12 +147,13 @@ def make_rank2(F, is_batch=True):
 
 def update_distances(img_1, img_2, F, algebraic_dist, RE1_dist, SED_dist):
     epipolar_geo = EpipolarGeometry(img_1, img_2, F)
-    algebraic_dist = algebraic_dist + epipolar_geo.get_mean_algebraic_distance()
+    algebraic_dist = algebraic_dist + epipolar_geo.get_sqr_algebraic_distance()
     RE1_dist = RE1_dist + epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
     SED_dist = SED_dist + epipolar_geo.get_SED_distance() if SED_DIST else SED_dist
     return algebraic_dist, RE1_dist, SED_dist
 
 def update_epoch_stats(stats, first_image, second_image, label, output, output_grad, plots_path, epoch=0, val=False):
+    # TODO: change from squared to abs in evalutation
     algebraic_dist_truth, algebraic_dist_pred, \
     RE1_dist_truth, RE1_dist_pred, \
     SED_dist_truth, SED_dist_pred = torch.tensor(0), torch.tensor(0), torch.tensor(0), \
@@ -293,6 +294,8 @@ class EpipolarGeometry:
 
     def get_mean_algebraic_distance(self):
         return torch.mean(self.get_algebraic_distance())
+    def get_sqr_algebraic_distance(self):
+        return torch.mean(self.get_algebraic_distance()**2)
 
 
     def epipoline(self, x, formula):

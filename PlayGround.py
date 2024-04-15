@@ -29,20 +29,17 @@ def show_images(first_image, second_image):
 
     plt.show()
 
-if __name__ == "__main__":
-    # Get the train_loader
-    train_loader, val_loader = get_data_loaders(batch_size=1)
-    sed = 0
-    alg = 0
-    i=0
-    thresh = 0.1
-    for img_1,img_2,label in train_loader:
-        epipolar_geo_pred = EpipolarGeometry(img_1[0],img_2[0], label[0]) 
+
+
+
+# if __name__ == "__main__":
+        
+        # epipolar_geo_pred = EpipolarGeometry(img_1[0],img_2[0], label[0]) 
         # epipolar_geo_pred.visualize(sqResultDir='predicted_epipole_lines', file_num=i)
-        i+=1
-        if epipolar_geo_pred.get_SED_distance() > thresh:
-            sed+=1
-    print(sed, i)
+    #     i+=1
+    #     if epipolar_geo_pred.get_SED_distance() > thresh:
+    #         sed+=1
+    # print(sed, i)
     
     # Iterate over the train_loader
     # for first_image, second_image, _ in train_loader:

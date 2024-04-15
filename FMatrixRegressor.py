@@ -221,6 +221,7 @@ class FMatrixRegressor(nn.Module):
 
                     # Forward pass
                     val_output,_ = self.forward(val_img1, val_img2)
+                    val_output_T,_ = self.forward(val_img2, val_img1)
 
                     # Update epoch statistics
                     val_batch_algebraic_pred, val_batch_RE1_pred, val_batch_SED_pred = update_epoch_stats(
@@ -255,11 +256,11 @@ class FMatrixRegressor(nn.Module):
 
 
             if epoch == 0: 
-                print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}     RE1_truth: {epoch_stats["RE1_truth"]},         SED_truth: {epoch_stats["SED_truth"]}
-val_algebraic_truth: {epoch_stats["val_algebraic_truth"]} val_RE1_truth: {epoch_stats["val_RE1_truth"]}      val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
+                print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}     RE1_truth: {epoch_stats["RE1_truth"]}       SED_truth: {epoch_stats["SED_truth"]}
+val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}   val_RE1_truth: {epoch_stats["val_RE1_truth"]}    val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}: Training Loss: {all_train_loss[-1]}   Val Loss: {all_val_loss[-1]}
-            Training MAE: {all_train_mae[-1]}   Val MAE: {all_val_mae[-1]}
+            Training MAE: {all_train_mae[-1]}  Val MAE: {all_val_mae[-1]}
             Algebraic dist: {all_algberaic_pred[-1]}  Val algebraic dist: {all_val_algberaic_pred[-1]}
             RE1 dist: {all_RE1_pred[-1]}        Val RE1 dist: {all_val_RE1_pred[-1]}
             SED dist: {all_SED_pred[-1]}        Val SED dist: {all_val_SED_pred[-1]}\n\n"""

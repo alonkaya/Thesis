@@ -74,8 +74,8 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
         if y2 and len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
 
         for i in range(0, len(y1), max(1, len(y1)//10)):
-            ax.text(x[i], y1[i], f'{y1[i]:.4f}', fontsize=9, color='blue', ha='center', va='bottom')
-            if y2: ax.text(x[i], y2[i], f'{y2[i]:.4f}', fontsize=9, color='red', ha='center', va='top')
+            ax.text(x[i], y1[i], f'{y1[i]:.4g}', fontsize=9, color='blue', ha='center', va='bottom')
+            if y2: ax.text(x[i], y2[i], f'{y2[i]:.4g}', fontsize=9, color='red', ha='center', va='top')
 
         ax.set_xlabel(x_label)
         ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
@@ -93,7 +93,7 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-    plots_path = "plots/RealEstate/SVD_0__RE1_0.01__SED_0__ALG_0__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augmentation_True__Conv_False"
+    plots_path = "plots/RealEstate/SED__0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augmentation_False__Conv_False__first_2_thirds_train"
     file_path = os.path.join(plots_path, "output.log")
     save = False
 
