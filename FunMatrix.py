@@ -158,7 +158,7 @@ def update_epoch_stats(stats, first_image, second_image, label, output_detached,
     RE1_dist_truth, RE1_dist_pred, RE1_dist_pred_T, \
     SED_dist_truth, SED_dist_pred, SED_dist_pred_T = torch.tensor(0), torch.tensor(0), torch.tensor(0), \
                                     torch.tensor(0), torch.tensor(0), torch.tensor(0),  torch.tensor(0), torch.tensor(0), torch.tensor(0)
-    print(output_T)
+    print(first_image, second_image, label, output_detached, output, output_T)
     for img_1, img_2, F_truth, F_pred_detached, F_pred, F_pred_T in zip(first_image, second_image, label, output_detached, output, output_T):
         algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img_1, img_2, F_pred, algebraic_dist_pred, RE1_dist_pred, SED_dist_pred)
         algebraic_dist_pred_T, RE1_dist_pred_T, SED_dist_pred_T = update_distances(img_1, img_2, F_pred_T, algebraic_dist_pred_T, RE1_dist_pred_T, SED_dist_pred_T)
