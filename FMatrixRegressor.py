@@ -204,7 +204,7 @@ class FMatrixRegressor(nn.Module):
 
                 # Update epoch statistics
                 batch_algebraic_pred, batch_RE1_pred, batch_SED_pred, batch_algebraic_pred_T, batch_RE1_pred_T, batch_SED_pred_T = update_epoch_stats(
-                    epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach, output, output_T, self.plots_path, epoch)
+                    epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, output_T, self.plots_path, epoch)
 
                 # Compute loss
                 loss = self.L2_loss(output, label) + self.L2_loss(output_T, label.transpose(1,2)) + \
@@ -308,7 +308,7 @@ val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}   val_RE1_truth: {epoc
         plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred_T, y2=all_val_algberaic_pred_T, title="Algebraic distance T", plots_path=self.plots_path)
         plot(x=range(1, num_epochs + 1), y1=all_RE1_pred_T, y2=all_val_RE1_pred_T, title="RE1 distance T", plots_path=self.plots_path) if RE1_DIST else None
         plot(x=range(1, num_epochs + 1), y1=all_SED_pred_T, y2=all_val_SED_pred_T, title="SED distance T", plots_path=self.plots_path) if SED_DIST else None
-        
+
 
         if SAVE_MODEL:
             self.save_model() 
