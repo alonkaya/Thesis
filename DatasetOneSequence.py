@@ -41,13 +41,54 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
         first_image = self.transform(original_first_image)
         second_image = self.transform(original_second_image)
 
-        unormalized_label = get_F(self.poses, idx, self.k)
+        unnormalized_F = get_F(self.poses, idx, self.k)
+
+        # Normalize F-Matrix
+        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
+
+        return first_image, second_image, F
+
+ 
+class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):
+    """Takes the first two images out of every three images in the sequence for training, and the third for testing"""
+
+    def __init__(self, sequence_path, poses, valid_indices, transform, K, dataset_type):
+        self.sequence_path = sequence_path
+        self.sequence_num = sequence_path.split('/')[1]
+        self.poses = poses
+        self.transform = transform
+        self.k = K
+        self.valid_indices = valid_indices
+        self.dataset_type = dataset_type
+
+    def __len__(self):
+        # Adjust the total count based on dataset type
+        if self.dataset_type == 'train':
+            return ((len(self.valid_indices)-JUMP_FRAMES) // 3) * 2  # 2 out of every 3 images
+        else:
+            return (len(self.valid_indices)-JUMP_FRAMES) // 3  # Every 3rd image
+            
+    def __getitem__(self, idx):
+        if self.dataset_type == 'train':
+        # Map idx to include 2 out of every 3 images
+            idx = idx + (idx // 2)
+        else:
+        # Map idx to select every 3rd image
+            idx = idx * 3 + 2
+
+        original_first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+        original_second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
+
+        first_image = self.transform(original_first_image)
+        second_image = self.transform(original_second_image)
+
+        unnormalized_F = get_F(self.poses, idx, self.k)
+
+        # Normalize F-Matrix
+        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
+
+        return first_image, second_image, F
     
-        label = norm_layer(unormalized_label.view(-1, 9)).view(3,3)
-
-        return first_image, second_image, label
-
-
 def get_valid_indices(sequence_len, sequence_path):
     valid_indices = []
     for idx in range(sequence_len - JUMP_FRAMES):
@@ -59,14 +100,25 @@ def get_valid_indices(sequence_len, sequence_path):
 
     return valid_indices
 
-transform = v2.Compose([
-    v2.Resize((256, 256)),
-    v2.CenterCrop(224),
-    v2.Grayscale(num_output_channels=3),
-    v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
-    v2.Normalize(mean=norm_mean,  # Normalize each channel
-                         std=norm_std),
-])    
+if AUGMENTATION:
+    transform = v2.Compose([
+        v2.Resize((256, 256), antialias=True),
+        v2.CenterCrop(224),
+        v2.Grayscale(num_output_channels=3),
+        v2.ColorJitter(brightness=(0.85, 1.15), contrast=(0.85, 1.15)),
+        v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
+        v2.Normalize(mean=norm_mean,  # Normalize each channel
+                            std=norm_std),
+    ])    
+else:
+    transform = v2.Compose([
+        v2.Resize((256, 256), antialias=True),
+        v2.CenterCrop(224),
+        v2.Grayscale(num_output_channels=3),
+        v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
+        v2.Normalize(mean=norm_mean,  # Normalize each channel
+                            std=norm_std),
+    ])      
 
 
 def worker_init_fn(worker_id):

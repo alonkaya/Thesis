@@ -34,7 +34,7 @@ def process_epoch_stats(file_path):
 
             # Extract and append the training and validation MAEs
             training_mae_match = re.search(r'Training MAE: ([\d.]+)', line)
-            val_mae_match = re.search(r'Val MAE: ([\d.]+)', line)
+            val_mae_match = re.search(r'Val MAE: ([\d.]+)', line, re.IGNORECASE)
             if training_mae_match:
                 training_maes.append(float(training_mae_match.group(1)))
             if val_mae_match:
@@ -42,7 +42,7 @@ def process_epoch_stats(file_path):
 
             # Extract and append the algebraic distances
             alg_dist_match = re.search(r'algebraic dist: ([\d.]+)', line)
-            val_alg_dist_match = re.search(r'val algebraic dist: ([\d.]+)', line)
+            val_alg_dist_match = re.search(r'Val algebraic dist: ([\d.]+)', line, re.IGNORECASE)
             if alg_dist_match:
                 alg_dists.append(float(alg_dist_match.group(1)))
             if val_alg_dist_match:
@@ -50,7 +50,7 @@ def process_epoch_stats(file_path):
 
             # Extract and append the RE1 distances
             re1_dist_match = re.search(r'RE1 dist: ([\d.]+)', line)
-            val_re1_dist_match = re.search(r'val RE1 dist: ([\d.]+)', line)
+            val_re1_dist_match = re.search(r'Val RE1 dist: ([\d.]+)', line, re.IGNORECASE)
             if re1_dist_match:
                 re1_dists.append(float(re1_dist_match.group(1)))
             if val_re1_dist_match:
@@ -58,7 +58,7 @@ def process_epoch_stats(file_path):
 
             # Extract and append the SED distances
             sed_dist_match = re.search(r'SED dist: ([\d.]+)', line)
-            val_sed_dist_match = re.search(r'val SED dist: ([\d.]+)', line)
+            val_sed_dist_match = re.search(r'Val SED dist: ([\d.]+)', line, re.IGNORECASE)
             if sed_dist_match:
                 sed_dists.append(float(sed_dist_match.group(1)))
             if val_sed_dist_match:
@@ -66,7 +66,7 @@ def process_epoch_stats(file_path):
 
 
 # Plotting function for each parameter
-def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=False, show=False):
+def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=False):
     fig, axs = plt.subplots(1, 2, figsize=(16, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
@@ -74,8 +74,8 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
         if y2 and len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
 
         for i in range(0, len(y1), max(1, len(y1)//10)):
-            ax.text(x[i], y1[i], f'{y1[i]:.4f}', fontsize=9, color='blue', ha='center', va='bottom')
-            if y2: ax.text(x[i], y2[i], f'{y2[i]:.4f}', fontsize=9, color='red', ha='center', va='top')
+            ax.text(x[i], y1[i], f'{y1[i]:.4g}', fontsize=9, color='blue', ha='center', va='bottom')
+            if y2: ax.text(x[i], y2[i], f'{y2[i]:.4g}', fontsize=9, color='red', ha='center', va='top')
 
         ax.set_xlabel(x_label)
         ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
@@ -88,21 +88,21 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
     if save:
         os.makedirs(plots_path, exist_ok=True)
         plt.savefig(f"""{plots_path}/{title}.png""")  # Specify the filename and extension
-    if show:
+    else:
         plt.show()
 
 
 if __name__ == "__main__":
-    plots_path = "plots/RealEstate/SVD_0__RE1_0__SED_0__ALG_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__predict_pose_False__use_reconstruction_True__Augmentation_True/"
+    plots_path = "plots/RealEstate/SED__0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augmentation_False__Conv_False__first_2_thirds_train"
     file_path = os.path.join(plots_path, "output.log")
     save = False
-    show = True
 
     process_epoch_stats(file_path)
-    plot_parameter(epochs, training_losses, val_losses, "Loss", plots_path, save=save, show=show)
-    plot_parameter(epochs, training_maes, val_maes, "MAE", plots_path, save=save, show=show)
-    plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic Distance", plots_path, save=save, show=show)
-    plot_parameter(epochs, re1_dists, val_re1_dists, "RE1 Distance", plots_path, save=save, show=show)
-    plot_parameter(epochs, sed_dists, val_sed_dists, "SED Distance", plots_path, save=save, show=show)
+    print(len(epochs), len(training_losses), len(val_losses), len(training_maes), len(val_maes), len(alg_dists), len(val_alg_dists), len(re1_dists), len(val_re1_dists), len(sed_dists), len(val_sed_dists))
+    plot_parameter(epochs, training_losses, val_losses, "Loss", plots_path, save=save)
+    plot_parameter(epochs, training_maes, val_maes, "MAE", plots_path, save=save)
+    plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic Distance", plots_path, save=save)
+    plot_parameter(epochs, re1_dists, val_re1_dists, "RE1 Distance", plots_path, save=save)
+    plot_parameter(epochs, sed_dists, val_sed_dists, "SED Distance", plots_path, save=save)
 
     

@@ -1,5 +1,6 @@
 from FunMatrix import *
 from utils import *
+from DatasetOneSequence import CustomDataset_first_two_thirds_train, CustomDataset_first_two_out_of_three_train
 from torch.utils.data import DataLoader, ConcatDataset
 from torchvision.transforms import v2
 import os
@@ -25,7 +26,6 @@ class Dataset(torch.utils.data.Dataset):
         original_first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
         original_second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
 
-        # Transform: Resize, center, grayscale
         first_image = self.transform(original_first_image)
         second_image = self.transform(original_second_image)
 
@@ -87,13 +87,22 @@ def get_dataloaders_RealEstate(batch_size):
             original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
             K = get_intrinsic_REALESTATE(specs_path, original_image_size)
             
-            custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K)
-            if len(custom_dataset) > 30:
-                if RealEstate_path == 'RealEstate10K/train_images':
-                    train_datasets.append(custom_dataset) 
-                else:    
-                    val_datasets.append(custom_dataset)
-                
+            if not FIRST_2_THRIDS_TRAIN and not FIRST_2_OF_3_TRAIN:
+                custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K)
+                if len(custom_dataset) > 30:
+                    if RealEstate_path == 'RealEstate10K/train_images':
+                        train_datasets.append(custom_dataset) 
+                    else:    
+                        val_datasets.append(custom_dataset)
+            else:
+                train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type="train") if FIRST_2_THRIDS_TRAIN else \
+                                CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type="train")
+                val_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type="val") if FIRST_2_THRIDS_TRAIN else \
+                                CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type="val")
+                if len(val_dataset) > 25:
+                    train_datasets.append(train_dataset)
+                    val_datasets.append(val_dataset)
+                    
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
     concat_val_dataset = ConcatDataset(val_datasets)

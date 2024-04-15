@@ -1,9 +1,9 @@
 import torch
 
 DEVICE_ID = 0
-if DEVICE_ID==0: DEVICE_ID=1
-elif DEVICE_ID==2: DEVICE_ID=1
-elif DEVICE_ID==1: DEVICE_ID==0
+# if DEVICE_ID==0: DEVICE_ID=1
+# elif DEVICE_ID==2: DEVICE_ID=1
+# elif DEVICE_ID==1: DEVICE_ID==0
 device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
 
 learning_rates_vit = [2e-5]
@@ -32,8 +32,8 @@ SED_DIST = True
 USE_RECONSTRUCTION_LAYER = True
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
-RE1_COEFF = [0.1, 0.01]
-SED_COEFF = [0]
+RE1_COEFF = [0]
+SED_COEFF = [0.1]
 PREDICT_POSE = False
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
 NUM_EPOCHS = 70
@@ -42,6 +42,7 @@ AUGMENTATION = False
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = True
 UNFROZEN_LAYERS = 0
-GROUP_CONV = {"use" : False, "out_channels": 256}g
+GROUP_CONV = {"use" : False, "out_channels": 256}
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
-
+FIRST_2_THRIDS_TRAIN = True
+FIRST_2_OF_3_TRAIN = False
