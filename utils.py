@@ -151,22 +151,22 @@ def init_main():
     np.seterr(over='warn')
 
 def find_coefficients(F):
-    # Assuming F is a PyTorch tensor of shape (3, 3)
+    # Assuming F is a PyTorch tensor of shape [batch_size, 3, 3]
     # Extract columns f1, f2, and f3 from F
-    f1 = F[:, 0:1]  # Column vector
-    f2 = F[:, 1:2]  # Column vector
-    f3 = F[:, 2]    # Vector
+    f1 = F[:, :, 0:1]  # Shape: [batch_size, 3, 1]
+    f2 = F[:, :, 1:2]  # Shape: [batch_size, 3, 1]
+    f3 = F[:, :, 2]    # Shape: [batch_size, 3]
 
-    # Stack f1 and f2 horizontally to form a 3x2 matrix
-    A = torch.hstack([f1, f2])
+    # Stack f1 and f2 horizontally to form a 3x2 matrix for each batch
+    A = torch.cat([f1, f2], dim=2)  # Shape: [batch_size, 3, 2]
 
-    # Solve for alpha and beta using the least squares method
+    # Solve for alpha and beta using the least squares method for each batch
     # lstsq returns a named tuple, where the solution is the first item
-    result  = torch.linalg.lstsq(A, f3)
+    result = torch.linalg.lstsq(A, f3.unsqueeze(-1))  # Ensure f3 is [batch_size, 3, 1] for broadcasting
 
     # Extract alpha and beta from the solution
-    alpha = result.solution[0].item()
-    beta = result.solution[1].item()
+    alpha = result.solution[:, 0, 0]  # Shape: [batch_size, 1]
+    beta = result.solution[:, 1, 0]  # Shape: [batch_size, 1]
 
     return alpha, beta
 
