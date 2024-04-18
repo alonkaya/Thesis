@@ -67,15 +67,15 @@ def process_epoch_stats(file_path):
 
 # Plotting function for each parameter
 def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=False):
-    fig, axs = plt.subplots(1, 2, figsize=(16, 7))  # 1 row, 2 columns
+    fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
         ax.plot(x, y1, color='steelblue', label="Train")
         if y2 and len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
 
         for i in range(0, len(y1), max(1, len(y1)//10)):
-            ax.text(x[i], y1[i], f'{y1[i]:.4g}', fontsize=9, color='blue', ha='center', va='bottom')
-            if y2: ax.text(x[i], y2[i], f'{y2[i]:.4g}', fontsize=9, color='red', ha='center', va='top')
+            ax.text(x[i], y1[i], f'{y1[i]:.3g}', fontsize=9, color='blue', ha='center', va='bottom')
+            if y2: ax.text(x[i], y2[i], f'{y2[i]:.3g}', fontsize=9, color='red', ha='center', va='top')
 
         ax.set_xlabel(x_label)
         ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
@@ -93,9 +93,9 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-    plots_path = "plots/RealEstate/SED__0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augmentation_False__Conv_False__first_2_thirds_train"
+    plots_path = "plots/RealEstate/ALG_sqr_0.1__lr_2e-05__avg_embeddings_False__model_CLIP__use_reconstruction_True__Augmentation_False__Conv_False"
     file_path = os.path.join(plots_path, "output.log")
-    save = False
+    save = True
 
     process_epoch_stats(file_path)
     print(len(epochs), len(training_losses), len(val_losses), len(training_maes), len(val_maes), len(alg_dists), len(val_alg_dists), len(re1_dists), len(val_re1_dists), len(sed_dists), len(val_sed_dists))
