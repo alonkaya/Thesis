@@ -159,6 +159,8 @@ class FMatrixRegressor(nn.Module):
         embeddings = self.get_embeddings(x1, x2)
 
         output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
+        alpha = output[:, 6].unsqueeze(1) # shape (batch_size, 1)
+        beta = output[:, 7].unsqueeze(1)  # shape (batch_size, 1)
 
         last_sv_sq = 0 if self.use_reconstruction else last_sing_value(output) 
 
@@ -166,7 +168,7 @@ class FMatrixRegressor(nn.Module):
 
         output = norm_layer(output.view(-1, 9)).view(-1,3,3) 
 
-        return output, last_sv_sq
+        return output, last_sv_sq, alpha, beta
 
 
     def train_model(self, train_loader, val_loader, num_epochs):
@@ -192,15 +194,16 @@ class FMatrixRegressor(nn.Module):
                 img1, img2, label = img1.to(device), img2.to(device), label.to(device)
 
                 # Forward pass
-                output, last_sv_sq = self.forward(img1, img2)
+                output, last_sv_sq, alpha, beta = self.forward(img1, img2)
                 epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + last_sv_sq
 
                 # Update epoch statistics
                 batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
                     epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, self.plots_path, epoch)
 
+                alpha_gt, beta_gt = find_coefficients(label)
                 # Compute loss
-                loss = self.L2_loss(output, label) + LAST_SV_COEFF*(last_sv_sq) + \
+                loss = self.L2_loss(output, label) + self.L2_loss(alpha, alpha_gt) + self.L2_loss(beta, beta_gt) + \
                        self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred +self.sed_coeff*batch_SED_pred
                 epoch_stats["loss"] = epoch_stats["loss"] + loss.detach()
 
@@ -220,15 +223,16 @@ class FMatrixRegressor(nn.Module):
                     val_img1, val_img2, val_label = val_img1.to(device), val_img2.to(device), val_label.to(device)
 
                     # Forward pass
-                    val_output,_ = self.forward(val_img1, val_img2)
-                    val_output_T,_ = self.forward(val_img2, val_img1)
-
+                    val_output,_, val_alpha, val_beta = self.forward(val_img1, val_img2)
+                    
                     # Update epoch statistics
                     val_batch_algebraic_pred, val_batch_RE1_pred, val_batch_SED_pred = update_epoch_stats(
                         epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output.detach(), val_output, self.plots_path, epoch, val=True)
                     
+                    val_alpha_gt, val_beta_gt = find_coefficients(val_label)
                     # Compute loss
                     epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) + \
+                                self.L2_loss(val_alpha, val_alpha_gt) + self.L2_loss(val_beta, val_beta_gt) + \
                                 self.alg_coeff*val_batch_algebraic_pred + self.re1_coeff*val_batch_RE1_pred + self.sed_coeff*val_batch_SED_pred
                     
                     # Extend lists with batch statistics
