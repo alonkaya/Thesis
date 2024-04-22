@@ -203,7 +203,8 @@ class FMatrixRegressor(nn.Module):
 
                 # alpha_gt, beta_gt = find_coefficients(label)
                 # Compute loss
-                loss = self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred +self.sed_coeff*batch_SED_pred
+                loss = self.L2_loss(output, label) + \
+                        self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred  +self.sed_coeff*batch_SED_pred
                 epoch_stats["loss"] = epoch_stats["loss"] + loss.detach()
 
                 # Compute Backward pass and gradients
@@ -230,7 +231,7 @@ class FMatrixRegressor(nn.Module):
                     
                     # val_alpha_gt, val_beta_gt = find_coefficients(val_label)
                     # Compute loss
-                    epoch_stats["val_loss"] = epoch_stats["val_loss"] + \
+                    epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) + \
                                 self.alg_coeff*val_batch_algebraic_pred + self.re1_coeff*val_batch_RE1_pred + self.sed_coeff*val_batch_SED_pred
                     
                     # Extend lists with batch statistics
@@ -258,7 +259,7 @@ class FMatrixRegressor(nn.Module):
 
 
             if epoch == 0: 
-                print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}     RE1_truth: {epoch_stats["RE1_truth"]}       SED_truth: {epoch_stats["SED_truth"]}
+                print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}       RE1_truth: {epoch_stats["RE1_truth"]}        SED_truth: {epoch_stats["SED_truth"]}
 val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}   val_RE1_truth: {epoch_stats["val_RE1_truth"]}    val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}: Training Loss: {all_train_loss[-1]}   Val Loss: {all_val_loss[-1]}
