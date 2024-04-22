@@ -269,7 +269,7 @@ val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}   val_RE1_truth: {epoc
             print_and_write(epoch_output, self.plots_path)
 
             # If the model is not learning or outputs nan, stop training
-            if check_nan(all_train_loss[-1], all_val_loss[-1], train_mae[-1], val_mae[-1], self.plots_path):
+            if check_nan(all_train_loss[-1], all_val_loss[-1], all_train_mae[-1], all_val_mae[-1], self.plots_path):
                 num_epochs = epoch + 1
                 break
         
