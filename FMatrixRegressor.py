@@ -10,7 +10,7 @@ class FMatrixRegressor(nn.Module):
                  average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO, freeze_model=FREEZE_PRETRAINED_MODEL,
                  augmentation=AUGMENTATION, model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, 
                  predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER,
-                 model_path=None, mlp_path=None, alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None):
+                 pretrained_path=None, alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None):
 
         """
         Initialize the ViTMLPRegressor model.
@@ -81,7 +81,9 @@ class FMatrixRegressor(nn.Module):
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
 
-        if model_path and mlp_path:
+        if pretrained_path:
+            model_path = os.path.join(pretrained_path, "model.pth")
+            mlp_path = os.path.join(pretrained_path, "mlp.pth")
             self.model.load_state_dict(torch.load(model_path))
             self.mlp.load_state_dict(torch.load(mlp_path))
 
@@ -297,34 +299,28 @@ val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}   val_RE1_truth: {epoc
 def use_pretrained_model():
     train_loader, val_loader = data_with_one_sequence(BATCH_SIZE)
 
-    model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5,
-                             model_path='plots/only_one_sequence/AAAAAAAAAAAAAAAASVD_coeff 1 A 0 SED_coeff 0 lr 2e-05 avg_embeddings True model CLIP Force_rank_2 False predict_pose False use_reconstruction False/model.pth',
-                             mlp_path='plots/only_one_sequence/AAAAAAAAAAAAAAAAAASVD_coeff 1 A 0 SED_coeff 0 lr 2e-05 avg_embeddings True model CLIP Force_rank_2 False predict_pose False use_reconstruction False/mlp.pth').to(device)
+    plots_path = 'plots/RealEstate/SED_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True'
+    model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
 
-    epoch_stats = {"algebraic_dist_truth": torch.tensor(0), "algebraic_dist_pred": torch.tensor(0),
-                   "algebraic_dist_pred_unormalized": torch.tensor(0),
-                   "RE1_dist_truth": torch.tensor(0), "RE1_dist_pred": torch.tensor(0),
-                   "RE1_dist_pred_unormalized": torch.tensor(0),
-                   "SED_dist_truth": torch.tensor(0), "SED_dist_pred": torch.tensor(0),
-                   "SED_dist_pred_unormalized": torch.tensor(0),
-                   "avg_loss": torch.tensor(0), "avg_loss_R": torch.tensor(0), "avg_loss_t": torch.tensor(0),
-                   "epoch_penalty": torch.tensor(0), "file_num": 0}
-    sed = 0
-    algebraic = 0
-    for img1, img2, label, unormalized_label, K in train_loader:
-        img1, img2, label, unormalized_label, K = img1.to(device), img2.to(device), label.to(device), unormalized_label.to(device), K.to(device)
+    epoch_stats = {"algebraic_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
+                    "val_algebraic_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
+                    "algebraic_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
+                    "val_algebraic_truth": torch.tensor(0), "val_RE1_truth": torch.tensor(0), "val_SED_truth": torch.tensor(0), 
+                    "loss": torch.tensor(0), "val_loss": torch.tensor(0),
+                    "epoch_penalty": torch.tensor(0), "file_num": 0}
 
-        unormalized_output, output, _ = model.forward(img1, img2)
+    for img1, img2, label in val_loader:
+        img1, img2, label = img1.to(device), img2.to(device), label.to(device)
 
-        unormalized_output = make_rank2(unormalized_output)
-        output = make_rank2(output)
+        # Forward pass
+        output, _, _, _ = model.forward(img1, img2)
 
-        batch_RE1_dist_pred, batch_SED_dist_pred = update_epoch_stats(epoch_stats, img1.detach(), img2.detach(),
-                                                                      unormalized_label.detach(), output.detach(),
-                                                                      unormalized_output.detach(), -1)
+        # Update epoch statistics
+        batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
+            epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, plots_path=plots_path, epoch=-1)
 
 
-    print(epoch_stats["SED_dist_pred"]/len(train_loader), epoch_stats["algebraic_dist_pred_unormalized"]/len(train_loader))
+
 
 
 def paramterization_layer(x, plots_path):
@@ -361,3 +357,6 @@ def paramterization_layer(x, plots_path):
 smallest_sv: {smallest_sv.cpu().item()}\n""", plots_path)
 
     return F
+
+if __name__ == "__main__":
+    use_pretrained_model()

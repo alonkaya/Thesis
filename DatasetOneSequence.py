@@ -134,8 +134,8 @@ def worker_init_fn(worker_id):
     sys.excepthook = worker_exception_handler
 
 
-def data_with_one_sequence(batch_size, sequence_name='0a610a129bdcc4e7'):
-    RealEstate_path = 'RealEstate10K/train_images'
+def data_with_one_sequence(batch_size, sequence_name='7b4f433a15f523aa'):
+    RealEstate_path = 'RealEstate10K/val_images'
     # sequence_name = '0cb8672999a42a05'
     # sequence_name = "0000cc6d8b108390"
 
