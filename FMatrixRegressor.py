@@ -207,7 +207,7 @@ class FMatrixRegressor(nn.Module):
                     epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, output_T, self.plots_path, epoch)
 
                 # Compute loss
-                loss = self.L2_loss(output, label) + self.L2_loss(output_T, label.transpose(1,2)) + self.L2_loss(output_T.transpose(1,2), output) + \
+                loss = 0.5 * (self.L2_loss(output, label) + self.L2_loss(output_T, label.transpose(1,2))) + \
                        self.alg_coeff*(batch_algebraic_pred+batch_algebraic_pred_T) + self.re1_coeff*(batch_RE1_pred+batch_RE1_pred_T) +self.sed_coeff*(batch_SED_pred+batch_SED_pred_T)
                 epoch_stats["loss"] = epoch_stats["loss"] + loss.detach()
 
@@ -238,8 +238,8 @@ class FMatrixRegressor(nn.Module):
                         epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output.detach(), val_output, val_output_T, self.plots_path, epoch, val=True)
                     
                     # Compute loss
-                    epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) +  self.L2_loss(val_output_T, val_label.transpose(1,2)) + \
-                            self.L2_loss(val_output_T.transpose(1,2), val_output) + self.alg_coeff*(val_batch_algebraic_pred+val_batch_algebraic_pred_T) + self.re1_coeff*(val_batch_RE1_pred+val_batch_RE1_pred_T) + self.sed_coeff*(val_batch_SED_pred+val_batch_SED_pred_T)
+                    epoch_stats["val_loss"] = epoch_stats["val_loss"] + 0.5 * (self.L2_loss(val_output, val_label) +  self.L2_loss(val_output_T, val_label.transpose(1,2))) + \
+                            self.alg_coeff*(val_batch_algebraic_pred+val_batch_algebraic_pred_T) + self.re1_coeff*(val_batch_RE1_pred+val_batch_RE1_pred_T) + self.sed_coeff*(val_batch_SED_pred+val_batch_SED_pred_T)
                     
                     # Extend lists with batch statistics
                     val_labels = torch.cat((val_labels, val_label), dim=0)

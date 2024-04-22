@@ -46,3 +46,4 @@ GROUP_CONV = {"use" : False, "out_channels": 256}
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
 FIRST_2_THRIDS_TRAIN = False
 FIRST_2_OF_3_TRAIN = False
+ADDITIONS = "__transposed_0.5__"
