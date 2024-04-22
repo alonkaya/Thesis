@@ -201,10 +201,9 @@ class FMatrixRegressor(nn.Module):
                 batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
                     epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, self.plots_path, epoch)
 
-                alpha_gt, beta_gt = find_coefficients(label)
+                # alpha_gt, beta_gt = find_coefficients(label)
                 # Compute loss
-                loss = self.L2_loss(output, label) + self.L2_loss(alpha, alpha_gt) + self.L2_loss(beta, beta_gt) + \
-                       self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred +self.sed_coeff*batch_SED_pred
+                loss = self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred +self.sed_coeff*batch_SED_pred
                 epoch_stats["loss"] = epoch_stats["loss"] + loss.detach()
 
                 # Compute Backward pass and gradients
@@ -229,10 +228,9 @@ class FMatrixRegressor(nn.Module):
                     val_batch_algebraic_pred, val_batch_RE1_pred, val_batch_SED_pred = update_epoch_stats(
                         epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output.detach(), val_output, self.plots_path, epoch, val=True)
                     
-                    val_alpha_gt, val_beta_gt = find_coefficients(val_label)
+                    # val_alpha_gt, val_beta_gt = find_coefficients(val_label)
                     # Compute loss
-                    epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) + \
-                                self.L2_loss(val_alpha, val_alpha_gt) + self.L2_loss(val_beta, val_beta_gt) + \
+                    epoch_stats["val_loss"] = epoch_stats["val_loss"] + \
                                 self.alg_coeff*val_batch_algebraic_pred + self.re1_coeff*val_batch_RE1_pred + self.sed_coeff*val_batch_SED_pred
                     
                     # Extend lists with batch statistics
