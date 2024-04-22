@@ -317,7 +317,7 @@ def use_pretrained_model():
 
         # Update epoch statistics
         batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
-            epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, plots_path=plots_path, epoch=-1)
+            epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, plots_path=plots_path, epoch=-1, val=True)
 
 
 

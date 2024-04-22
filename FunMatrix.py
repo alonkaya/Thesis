@@ -165,7 +165,6 @@ def update_epoch_stats(stats, first_image, second_image, label, output, output_g
             algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img_1, img_2, F_truth, algebraic_dist_truth, RE1_dist_truth, SED_dist_truth)
 
         if epoch == VISIUALIZE["epoch"] and val:
-            print(1)
             epipolar_geo_pred = EpipolarGeometry(img_1,img_2, F_pred)
             epipolar_geo_pred.visualize(sqResultDir=os.path.join(plots_path, VISIUALIZE["dir"]), file_num=stats["file_num"])
             stats["file_num"] = stats["file_num"] + 1
