@@ -1,0 +1,28 @@
+/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/utils/generic.py:260: UserWarning: torch.utils._pytree._register_pytree_node is deprecated. Please use torch.utils._pytree.register_pytree_node instead.
+  torch.utils._pytree._register_pytree_node(
+###########################################################################################################################################################
+
+SED_onlylearning rate vit: 2e-05, learning rate mlp: 2e-05, mlp_hidden_sizes: [512, 256], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 1, train_seqeunces: [0, 2], val_sequences: [1, 3, 4], RealEstate: True, batchnorm & dropout: False, 
+average embeddings: True, model: openai/clip-vit-base-patch32, augmentation: False, 
+predict pose: False, SVD coeff: 0, RE1 coeff: 0 SED coeff: 0.1, ALG_COEFF: 0, unforzen layers: 0, group conv: False
+Dataset: 
+
+
+algebraic_truth: 0.024610555119451448     RE1_truth: 0.0815554379366568       SED_truth: 0.33516259550523125
+val_algebraic_truth: 0.014488976461845531   val_RE1_truth: 0.13056560315583882    val_SED_truth: 0.5419180458470395
+
+
+Epoch 1/60: Training Loss: 1177.5385462555066   Val Loss: 1691.937894736842
+            Training MAE: 0.3638421297073364  Val MAE: 0.2995451092720032
+            Algebraic dist: 40676180.581497796  Val Algebraic dist: 551677.3501754386
+            RE1 dist: 2927.998898678414        Val RE1 dist: 4208.550877192983
+            SED dist: 11775.405286343612        Val SED dist: 16919.390877192982
+
+
+Traceback (most recent call last):
+  File "/home/alonkay/Thesis/Main.py", line 43, in <module>
+    model.train_model(train_loader, val_loader, num_epochs=NUM_EPOCHS)
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 272, in train_model
+    if check_nan(all_train_loss[-1], all_val_loss[-1], train_mae[-1], val_mae[-1], self.plots_path):
+IndexError: index -1 is out of bounds for dimension 0 with size 0
