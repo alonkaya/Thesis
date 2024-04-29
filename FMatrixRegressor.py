@@ -358,7 +358,7 @@ smallest_sv: {smallest_sv.cpu().item()}\n""", plots_path)
     return F
 
 if __name__ == "__main__":
-    seqs = os.listdir("RealEstate10K\\val_images")
+    seqs = os.listdir("RealEstate10K/val_images")
     for seq in seqs:
         VISIUALIZE["dir"] = os.path.join(VISIUALIZE["dir"], seq)
         use_pretrained_model(seq)
