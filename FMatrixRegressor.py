@@ -206,7 +206,7 @@ class FMatrixRegressor(nn.Module):
                 # alpha_gt, beta_gt = find_coefficients(label)
                 # Compute loss
                 loss = self.L2_loss(output, label) + \
-                        self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred  +self.sed_coeff*batch_SED_pred
+                        self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred + self.sed_coeff*batch_SED_pred
                 epoch_stats["loss"] = epoch_stats["loss"] + loss.detach()
 
                 # Compute Backward pass and gradients
@@ -357,9 +357,9 @@ smallest_sv: {smallest_sv.cpu().item()}\n""", plots_path)
 
     return F
 
-if __name__ == "__main__":
-    seqs = os.listdir("RealEstate10K/val_images")
-    path = VISIUALIZE["dir"]
-    for seq in seqs:
-        VISIUALIZE["dir"] = os.path.join(path, seq)
-        use_pretrained_model(seq)
+# if __name__ == "__main__":
+#     seqs = os.listdir("RealEstate10K/val_images")
+#     path = VISIUALIZE["dir"]
+#     for seq in seqs:
+#         VISIUALIZE["dir"] = os.path.join(path, seq)
+#         use_pretrained_model(seq)
