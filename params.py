@@ -21,7 +21,6 @@ CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 EPIPOLAR_THRESHOLD = 0.18
 DEEPF_NOCORRS = False
-MOVE_BAD_IMAGES = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 # Change Main.py if > 0
 BN_AND_DO = True if BATCH_SIZE > 1 else False

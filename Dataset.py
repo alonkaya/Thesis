@@ -11,14 +11,13 @@ import torchvision
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, sequence_path, poses, valid_indices, transform, K):
         self.sequence_path = sequence_path
-        self.sequence_num = sequence_path.split('/')[1]
         self.poses = poses
         self.transform = transform
         self.k = K
         self.valid_indices = valid_indices
 
     def __len__(self):
-        return max(len(self.poses) - JUMP_FRAMES, 0)
+        return len(self.valid_indices)
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
@@ -34,7 +33,7 @@ class Dataset(torch.utils.data.Dataset):
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-        return first_image, second_image, F
+        return first_image, second_image, F, idx, self.sequence_path
 
 def get_valid_indices(sequence_len, sequence_path):
     valid_indices = []
@@ -90,11 +89,11 @@ def get_dataloaders_RealEstate(batch_size):
             
             if not FIRST_2_THRIDS_TRAIN and not FIRST_2_OF_3_TRAIN:
                 custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K)
-                if len(custom_dataset) > 20:
-                    if RealEstate_path == 'RealEstate10K/train_images':
-                        train_datasets.append(custom_dataset) 
-                    else:    
-                        val_datasets.append(custom_dataset)
+                # if len(custom_dataset) > 20:
+                if RealEstate_path == 'RealEstate10K/train_images':
+                    train_datasets.append(custom_dataset) 
+                else:    
+                    val_datasets.append(custom_dataset)
             else:
                 train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type="train") if FIRST_2_THRIDS_TRAIN else \
                                 CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type="train")
@@ -158,26 +157,4 @@ def get_data_loaders(batch_size):
         return get_dataloaders_KITTI(batch_size)
 
 
-def move_bad_images():
-    # change dataset returns 6 params instead of 4. comment unnecessary lines in visualize
-    train_loader, val_loader = get_data_loaders(batch_size=1)
 
-    for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(val_loader):
-        if first_image[0].shape == ():
-            continue
-        dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
-        os.makedirs(dst_dir, exist_ok=True)
-
-        epipolar_geo = EpipolarGeometry(
-            first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
-        epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
-
-    for i, (first_image, second_image, label, unormalized_label, idx, sequence_num) in enumerate(train_loader):
-        if first_image[0].shape == ():
-            continue
-        dst_dir = os.path.join('sequences', sequence_num[0], "BadFrames")
-        os.makedirs(dst_dir, exist_ok=True)
-
-        epipolar_geo = EpipolarGeometry(
-            first_image[0], second_image[0], F=unormalized_label, idx=idx.item(), sequence_num=sequence_num[0])
-        epipolar_geo.visualize(sqResultDir='epipole_lines', img_idx=i)
