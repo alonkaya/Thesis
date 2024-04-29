@@ -1,4 +1,5 @@
 from Dataset import get_data_loaders
+from DatasetOneSequence import data_with_one_sequence
 from FunMatrix import EpipolarGeometry
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,10 +33,12 @@ def show_images(first_image, second_image):
 
 
 
-# if __name__ == "__main__":
-        
-        # epipolar_geo_pred = EpipolarGeometry(img_1[0],img_2[0], label[0]) 
-        # epipolar_geo_pred.visualize(sqResultDir='predicted_epipole_lines', file_num=i)
+if __name__ == "__main__":
+    # Get the train_loader
+    train_loader, val_loader = data_with_one_sequence(1, sequence_name='bc0ebb7482f14795')
+    for i,(img1, img2, label) in enumerate(val_loader):
+        epipolar_geo_pred = EpipolarGeometry(img1[0],img2[0], label[0]) 
+        epipolar_geo_pred.visualize(sqResultDir='predicted_epipole_lines_bc0ebb7482f14795', file_num=i)
     #     i+=1
     #     if epipolar_geo_pred.get_SED_distance() > thresh:
     #         sed+=1
