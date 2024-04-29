@@ -296,8 +296,8 @@ val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}   val_RE1_truth: {epoc
 
 
 
-def use_pretrained_model():
-    train_loader, val_loader = data_with_one_sequence(BATCH_SIZE)
+def use_pretrained_model(seq_name):
+    train_loader, val_loader = data_with_one_sequence(BATCH_SIZE, sequence_name=seq_name)
 
     plots_path = 'plots/RealEstate/SED_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True'
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
@@ -358,4 +358,7 @@ smallest_sv: {smallest_sv.cpu().item()}\n""", plots_path)
     return F
 
 if __name__ == "__main__":
-    use_pretrained_model()
+    seqs = os.listdir("RealEstate10K\\val_images")
+    for seq in seqs:
+        VISIUALIZE["dir"] = os.path.join(VISIUALIZE["dir"], seq)
+        use_pretrained_model(seq)
