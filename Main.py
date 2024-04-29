@@ -26,7 +26,7 @@ if __name__ == "__main__":
         plots_path = os.path.join('plots', 'RealEstate', 
                           f"""{coeff}{ADDITIONS}lr_{learning_rates_mlp[0]}__\
 avg_embeddings_{AVG_EMBEDDINGS}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
-use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augmentation_{AUGMENTATION}__Conv_{GROUP_CONV["use"]}{dataset}__Jump_{JUMP_FRAMES}""")\
+use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augmentation_{AUGMENTATION}__Conv_{GROUP_CONV["use"]}{dataset}""")\
         
         model = FMatrixRegressor(lr_vit=lr_vit, lr_mlp=lr_mlp, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path).to(device)
 

@@ -100,12 +100,9 @@ def normalize_L1(x):
 def normalize_L2(x):
     return x / torch.linalg.norm(x, dim=1, keepdim=True)
 
-def norm_layer(unnormalized_x, predict_t=False, predict_pose=PREDICT_POSE):
+def norm_layer(unnormalized_x):
     # Normalizes a batch of flattend 9-long vectors (i.e shape [-1, 9])
-    if predict_pose and not predict_t:
-        return normalize_L2(unnormalized_x)
-    else:
-        return normalize_L2(normalize_L1(unnormalized_x))
+    return normalize_L2(normalize_L1(unnormalized_x))
     
 
 def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, plots_path):

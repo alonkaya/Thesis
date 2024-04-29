@@ -35,14 +35,16 @@ def show_images(first_image, second_image):
 
 if __name__ == "__main__":
     # Get the train_loader
-    train_loader, val_loader = data_with_one_sequence(1, sequence_name='bc0ebb7482f14795')
-    for i,(img1, img2, label) in enumerate(val_loader):
-        epipolar_geo_pred = EpipolarGeometry(img1[0],img2[0], label[0]) 
-        epipolar_geo_pred.visualize(sqResultDir='predicted_epipole_lines_bc0ebb7482f14795', file_num=i)
-    #     i+=1
-    #     if epipolar_geo_pred.get_SED_distance() > thresh:
-    #         sed+=1
-    # print(sed, i)
+    total_sed = 0
+    for j,p in enumerate(os.listdir("RealEstate10K/val_images")):
+        train_loader, val_loader = data_with_one_sequence(1, sequence_name=p)
+        sed = 0
+        for i,(img1, img2, label) in enumerate(val_loader):
+            epipolar_geo_pred = EpipolarGeometry(img1[0],img2[0], label[0]) 
+            sed += epipolar_geo_pred.get_SED_distance()
+        sed /= i
+        print(f'Sequence name: {p}, sed: {sed}')
+
     
     # Iterate over the train_loader
     # for first_image, second_image, _ in train_loader:

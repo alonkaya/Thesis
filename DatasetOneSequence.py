@@ -25,9 +25,9 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
     def __len__(self):
             # Adjust the total count based on dataset type
             if self.dataset_type == 'train':
-                return ((len(self.valid_indices)-JUMP_FRAMES) // 3) * 2  # 2/3 if the set
+                return ((len(self.poses)-JUMP_FRAMES) // 3) * 2  # 2/3 if the set
             else:
-                return (len(self.valid_indices)-JUMP_FRAMES) // 3  # 1/3 if the set
+                return (len(self.poses)-JUMP_FRAMES) // 3  # 1/3 if the set
             
     def __getitem__(self, idx):
         if self.dataset_type == 'train':
@@ -64,9 +64,9 @@ class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):
     def __len__(self):
         # Adjust the total count based on dataset type
         if self.dataset_type == 'train':
-            return ((len(self.valid_indices)-JUMP_FRAMES) // 3) * 2  # 2 out of every 3 images
+            return ((len(self.poses)-JUMP_FRAMES) // 3) * 2  # 2 out of every 3 images
         else:
-            return (len(self.valid_indices)-JUMP_FRAMES) // 3  # Every 3rd image
+            return (len(self.poses)-JUMP_FRAMES) // 3  # Every 3rd image
             
     def __getitem__(self, idx):
         if self.dataset_type == 'train':
@@ -136,9 +136,6 @@ def worker_init_fn(worker_id):
 
 def data_with_one_sequence(batch_size, sequence_name='bc0ebb7482f14795'):
     RealEstate_path = 'RealEstate10K/val_images'
-    # sequence_name = '0cb8672999a42a05'
-    # sequence_name = "0000cc6d8b108390"
-
 
     specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
     sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
@@ -155,10 +152,10 @@ def data_with_one_sequence(batch_size, sequence_name='bc0ebb7482f14795'):
     
     train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
     val_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
-
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True, worker_init_fn=worker_init_fn)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True, worker_init_fn=worker_init_fn)
-
+    
+    if len(val_dataset) > 5:
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True, worker_init_fn=worker_init_fn)
+        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True, worker_init_fn=worker_init_fn)
     return train_loader, val_loader
 
 
