@@ -82,6 +82,7 @@ def get_dataloaders_RealEstate(batch_size):
 
             # Indices of 'good' image frames
             valid_indices = get_valid_indices(len(poses), sequence_path)
+            if len(valid_indices) == 0: continue
             
             # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
             original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
