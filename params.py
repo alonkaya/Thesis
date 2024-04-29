@@ -15,7 +15,7 @@ norm_std = torch.tensor([0.226, 0.226, 0.226]).to(device)
 
 BATCH_SIZE = 1 # TODO:  change pose_to_F if batch size > 1 ! 
 USE_REALESTATE = True
-JUMP_FRAMES = 6 if USE_REALESTATE else 2
+JUMP_FRAMES = 12 if USE_REALESTATE else 2
 MLP_HIDDEN_DIM = [512, 256]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
