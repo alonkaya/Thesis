@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from params import norm_mean, norm_std
 import os
+import torch
 
 # Function to denormalize image
 def denormalize(image, mean, std):
@@ -34,17 +35,43 @@ def show_images(first_image, second_image):
 def move_bad_images():
     # change dataset returns 6 params instead of 4. comment unnecessary lines in visualize
     train_loader, val_loader = get_data_loaders(batch_size=1)
-
-    for i, (first_image, second_image, label, idx, sequence_path) in enumerate(val_loader):
-        sequence_path = os.path.split(sequence_path[0])[0]
-        epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label[0])
-        epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
-
-    for i, (first_image, second_image, label, idx, sequence_path) in enumerate(train_loader):
-        sequence_path = os.path.split(sequence_path[0])[0]
-        epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label[0])
-        epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
-
+    try:
+        for i, (first_image, second_image, label, idx, sequence_path) in enumerate(val_loader):
+            sequence_path = os.path.split(sequence_path[0])[0]
+            epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label[0])
+            epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
+    except Exception as e:
+        aa(val_loader, idx)
+    try:
+        for i, (first_image, second_image, label, idx, sequence_path) in enumerate(train_loader):
+            sequence_path = os.path.split(sequence_path[0])[0]
+            epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label[0])
+            epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
+    except Exception as e:
+        aa(train_loader, idx)
+        
+def aa(train_loader, idx):
+    # Check if the DataLoader's dataset is a ConcatDataset
+    if isinstance(train_loader.dataset, torch.utils.data.ConcatDataset):
+        dataset_list = train_loader.dataset.datasets
+        # Determine which dataset the current batch is from based on the index
+        # This requires understanding the structure of indices in ConcatDataset
+        sample_dataset = None
+        cumulative_length = 0
+        for dataset in dataset_list:
+            cumulative_length += len(dataset)
+            if idx < cumulative_length:
+                sample_dataset = dataset
+                break
+    else:
+        # If it's not a ConcatDataset, it's straightforward
+        sample_dataset = train_loader.dataset
+    
+    # Now print the valid_indices of the determined dataset
+    if sample_dataset is not None:
+        print("Valid indices of the current batch's dataset:", sample_dataset.valid_indices)
+    else:
+        print("Dataset not found for the current batch")
 if __name__ == "__main__":
     # Get the train_loader
     move_bad_images()
