@@ -36,20 +36,15 @@ def move_bad_images():
     train_loader, val_loader = get_data_loaders(batch_size=1)
 
     for i, (first_image, second_image, label, idx, sequence_path) in enumerate(val_loader):
-        try:
-            sequence_path = os.path.split(sequence_path[0])[0]
-            epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label[0])
-            epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
-        except Exception as e:
-            print(val_loader.valid_indices)
-    try:
-        for i, (first_image, second_image, label, idx, sequence_path) in enumerate(train_loader):
-            sequence_path = os.path.split(sequence_path[0])[0]
-            epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label[0])
-            epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
-    except Exception as e:
-        print(train_loader.valid_indices)
-        
+        sequence_path = os.path.split(sequence_path[0])[0]
+        epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label[0])
+        epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
+
+    for i, (first_image, second_image, label, idx, sequence_path) in enumerate(train_loader):
+        sequence_path = os.path.split(sequence_path[0])[0]
+        epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label[0])
+        epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
+
 if __name__ == "__main__":
     # Get the train_loader
     move_bad_images()
