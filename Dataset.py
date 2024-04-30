@@ -33,7 +33,7 @@ class Dataset(torch.utils.data.Dataset):
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-        return first_image, second_image, F, idx, self.sequence_path
+        return first_image, second_image, F
 
 def get_valid_indices(sequence_len, sequence_path):
     valid_indices = []
