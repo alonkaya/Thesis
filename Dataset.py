@@ -1,3 +1,4 @@
+import random
 from FunMatrix import *
 from utils import *
 from DatasetOneSequence import CustomDataset_first_two_thirds_train, CustomDataset_first_two_out_of_three_train
@@ -6,6 +7,7 @@ from torchvision.transforms import v2
 import os
 from PIL import Image
 import torchvision
+import torchvision.transforms.functional as TF
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -25,6 +27,11 @@ class Dataset(torch.utils.data.Dataset):
         
         original_first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
         original_second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
+
+        # first_image, second_image = TF.resize(first_image, 256, 256, antialias=True), TF.resize(second_image, 256, 256, antialias=True)
+
+        # top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
+        # first_image, second_image = TF.crop(first_image, top_crop, left_crop, 224, 224), TF.crop(second_image, top_crop, left_crop, 224, 224)
 
         first_image = self.transform(original_first_image)
         second_image = self.transform(original_second_image)
@@ -70,8 +77,8 @@ else:
 
 def get_dataloaders_RealEstate(batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
+    train_datasets, val_datasets = [], []
     for jump_frames in [5,6,7]:
-        train_datasets, val_datasets = [], []
         for RealEstate_path in RealEstate_paths:
             for i, sequence_name in enumerate(os.listdir(RealEstate_path)):
                 specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')

@@ -84,8 +84,8 @@ class FMatrixRegressor(nn.Module):
         if pretrained_path:
             model_path = os.path.join(pretrained_path, "model.pth")
             mlp_path = os.path.join(pretrained_path, "mlp.pth")
-            self.model.load_state_dict(torch.load(model_path))
-            self.mlp.load_state_dict(torch.load(mlp_path))
+            self.model.load_state_dict(torch.load(model_path, map_location='cpu'))
+            self.mlp.load_state_dict(torch.load(mlp_path, map_location='cpu' ))
 
         params = [
             {'params': self.model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
@@ -294,10 +294,9 @@ val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}   val_RE1_truth: {epoc
 
 
 
-def use_pretrained_model(seq_name):
-    train_loader, val_loader = data_with_one_sequence(BATCH_SIZE, sequence_name=seq_name)
+def use_pretrained_model(sequence_name, plots_path):
+    train_loader, val_loader = data_with_one_sequence(sequence_name=sequence_name)
 
-    plots_path = 'plots/RealEstate/SED_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True'
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
 
     epoch_stats = {"algebraic_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
@@ -353,9 +352,17 @@ smallest_sv: {smallest_sv.cpu().item()}\n""", plots_path)
 
     return F
 
-# if __name__ == "__main__":
-#     seqs = os.listdir("RealEstate10K/val_images")
-#     path = VISIUALIZE["dir"]
-#     for seq in seqs:
-#         VISIUALIZE["dir"] = os.path.join(path, seq)
-#         use_pretrained_model(seq)
+if __name__ == "__main__":
+    plots_path = 'plots/RealEstate/SED_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True'
+    model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
+    
+    train_loader, val_loader = data_with_one_sequence(sequence_name="30b1d229ad4c6353")
+    for img1, img2, label, idx in val_loader:
+        if idx[0].item() == 157:
+            img1, img2, label = img1.to(device), img2.to(device), label.to(device)
+            output, _, _, _ = model.forward(img1, img2)
+
+            epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0])
+            SED_dist = epipolar_geo.get_SED_distance() 
+
+    print(SED_dist)
