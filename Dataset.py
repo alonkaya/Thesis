@@ -28,7 +28,7 @@ class Dataset(torch.utils.data.Dataset):
         original_first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
         original_second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
 
-        first_image, second_image = TF.resize(original_first_image, 256, 256, antialias=True), TF.resize(original_second_image, 256, 256, antialias=True)
+        first_image, second_image = TF.resize(original_first_image, (256, 256), antialias=True), TF.resize(original_second_image, (256, 256), antialias=True)
 
         top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
         first_image, second_image = TF.crop(first_image, top_crop, left_crop, 224, 224), TF.crop(second_image, top_crop, left_crop, 224, 224)
