@@ -378,7 +378,7 @@ class EpipolarGeometry:
         cv2.putText(vis, str(SED_dist), (5, 260), font,
                     0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
         
-        if(SED_dist > 0.06):
+        if(SED_dist > SED_BAD_THRESHOLD):
             if move_bad_images:
                 move_images(sequence_path, file_name)
             else:

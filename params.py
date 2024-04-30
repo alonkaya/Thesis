@@ -4,7 +4,7 @@ DEVICE_ID = 0
 # if DEVICE_ID==0: DEVICE_ID=1
 # elif DEVICE_ID==2: DEVICE_ID=1
 # elif DEVICE_ID==1: DEVICE_ID==0
-device = torch.device(f"cpu")
+device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
 
 learning_rates_vit = [2e-5]
 learning_rates_mlp = [2e-5]
@@ -25,6 +25,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 # Change Main.py if > 0
 BN_AND_DO = True if BATCH_SIZE > 1 else False
 SAVE_MODEL = True
+SED_BAD_THRESHOLD = 0.06
 
 RE1_DIST = True
 SED_DIST = True
@@ -45,4 +46,4 @@ GROUP_CONV = {"use" : False, "out_channels": 256}
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
 FIRST_2_THRIDS_TRAIN = False
 FIRST_2_OF_3_TRAIN = False
-ADDITIONS = "" 
+ADDITIONS = "MoveBad__" 
