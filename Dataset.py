@@ -9,12 +9,13 @@ import torchvision
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, poses, valid_indices, transform, K):
+    def __init__(self, sequence_path, poses, valid_indices, transform, K, jump_frames=JUMP_FRAMES):
         self.sequence_path = sequence_path
         self.poses = poses
         self.transform = transform
         self.k = K
         self.valid_indices = valid_indices
+        self.jump_frames = jump_frames
 
     def __len__(self):
         return len(self.valid_indices)
@@ -23,23 +24,23 @@ class Dataset(torch.utils.data.Dataset):
         idx = self.valid_indices[idx]
         
         original_first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-        original_second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}'))
+        original_second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
 
         first_image = self.transform(original_first_image)
         second_image = self.transform(original_second_image)
 
-        unnormalized_F = get_F(self.poses, idx, self.k)
+        unnormalized_F = get_F(self.poses, idx, self.k, self.jump_frames)
 
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
         return first_image, second_image, F
 
-def get_valid_indices(sequence_len, sequence_path):
+def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
     valid_indices = []
-    for idx in range(sequence_len - JUMP_FRAMES):
+    for idx in range(sequence_len - jump_frames):
         img1_path = os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')
-        img2_path = os.path.join(sequence_path, f'{idx+JUMP_FRAMES:06}.{IMAGE_TYPE}')
+        img2_path = os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')
 
         if os.path.exists(img1_path) and os.path.exists(img2_path):
             valid_indices.append(idx)
@@ -69,39 +70,39 @@ else:
 
 def get_dataloaders_RealEstate(batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
+    for jump_frames in [5,6,7]:
+        train_datasets, val_datasets = [], []
+        for RealEstate_path in RealEstate_paths:
+            for i, sequence_name in enumerate(os.listdir(RealEstate_path)):
+                specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
+                sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
 
-    train_datasets, val_datasets = [], []
-    for RealEstate_path in RealEstate_paths:
-        for i, sequence_name in enumerate(os.listdir(RealEstate_path)):
-            specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
-            sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
+                # Get a list of all poses [R,t] in this sequence
+                poses = read_poses(specs_path)
 
-            # Get a list of all poses [R,t] in this sequence
-            poses = read_poses(specs_path)
+                # Indices of 'good' image frames
+                valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames=jump_frames)
+                if len(valid_indices) == 0: continue
 
-            # Indices of 'good' image frames
-            valid_indices = get_valid_indices(len(poses), sequence_path)
-            if len(valid_indices) == 0: continue
-
-            # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-            original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
-            K = get_intrinsic_REALESTATE(specs_path, original_image_size)
-            
-            if not FIRST_2_THRIDS_TRAIN and not FIRST_2_OF_3_TRAIN:
-                custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K)
-                if len(custom_dataset) > 20:
-                    if RealEstate_path == 'RealEstate10K/train_images':
-                        train_datasets.append(custom_dataset) 
-                    else:    
-                        val_datasets.append(custom_dataset)
-            else:
-                train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type="train") if FIRST_2_THRIDS_TRAIN else \
-                                CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type="train")
-                val_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type="val") if FIRST_2_THRIDS_TRAIN else \
-                                CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type="val")
-                if len(val_dataset) > 25:
-                    train_datasets.append(train_dataset)
-                    val_datasets.append(val_dataset)
+                # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
+                original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
+                K = get_intrinsic_REALESTATE(specs_path, original_image_size)
+                
+                if not FIRST_2_THRIDS_TRAIN and not FIRST_2_OF_3_TRAIN:
+                    custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K, jump_frames=jump_frames)
+                    if len(custom_dataset) > 20:
+                        if RealEstate_path == 'RealEstate10K/train_images':
+                            train_datasets.append(custom_dataset) 
+                        else:    
+                            val_datasets.append(custom_dataset)
+                else:
+                    train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type="train") if FIRST_2_THRIDS_TRAIN else \
+                                    CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type="train")
+                    val_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type="val") if FIRST_2_THRIDS_TRAIN else \
+                                    CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type="val")
+                    if len(val_dataset) > 25:
+                        train_datasets.append(train_dataset)
+                        val_datasets.append(val_dataset)
                     
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)

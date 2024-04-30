@@ -101,9 +101,9 @@ def compute_fundamental(E, K1, K2):
     return F
 
 
-def get_F(poses, idx, K):
+def get_F(poses, idx, K, jump_frames=JUMP_FRAMES):
     R_relative, t_relative = compute_relative_transformations(
-        poses[idx], poses[idx+JUMP_FRAMES])
+        poses[idx], poses[idx+jump_frames])
     E = compute_essential(R_relative, t_relative)
     F = compute_fundamental(E, K, K)
 

@@ -318,8 +318,6 @@ def use_pretrained_model(seq_name):
             epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, plots_path=plots_path, epoch=-1, val=True)
 
 
-
-
 def paramterization_layer(x, plots_path):
     """
     Constructs a batch of 3x3 fundamental matrices from a batch of 8-element vectors based on the described parametrization.
