@@ -42,6 +42,7 @@ def move_bad_images():
             epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
     except Exception as e:
         aa(val_loader, idx)
+        print(e)
     try:
         for i, (first_image, second_image, label, idx, sequence_path) in enumerate(train_loader):
             sequence_path = os.path.split(sequence_path[0])[0]
@@ -49,7 +50,8 @@ def move_bad_images():
             epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
     except Exception as e:
         aa(train_loader, idx)
-        
+        print(e)
+
 def aa(train_loader, idx):
     # Check if the DataLoader's dataset is a ConcatDataset
     if isinstance(train_loader.dataset, torch.utils.data.ConcatDataset):
