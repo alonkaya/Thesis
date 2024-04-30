@@ -32,6 +32,7 @@ class Dataset(torch.utils.data.Dataset):
 
         top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
         first_image, second_image = TF.crop(first_image, top_crop, left_crop, 224, 224), TF.crop(second_image, top_crop, left_crop, 224, 224)
+        print(first_image.size(), second_image.size())
         self.k = adjust_crop(self.k, top_crop, left_crop)
 
         first_image = self.transform(original_first_image)
