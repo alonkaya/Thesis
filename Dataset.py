@@ -82,18 +82,18 @@ def get_dataloaders_RealEstate(batch_size):
             # Indices of 'good' image frames
             valid_indices = get_valid_indices(len(poses), sequence_path)
             if len(valid_indices) == 0: continue
-
+            print(valid_indices)
             # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
             original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
             K = get_intrinsic_REALESTATE(specs_path, original_image_size)
             
             if not FIRST_2_THRIDS_TRAIN and not FIRST_2_OF_3_TRAIN:
                 custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K)
-                # if len(custom_dataset) > 20:
-                if RealEstate_path == 'RealEstate10K/train_images':
-                    train_datasets.append(custom_dataset) 
-                else:    
-                    val_datasets.append(custom_dataset)
+                if len(custom_dataset) > 20:
+                    if RealEstate_path == 'RealEstate10K/train_images':
+                        train_datasets.append(custom_dataset) 
+                    else:    
+                        val_datasets.append(custom_dataset)
             else:
                 train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type="train") if FIRST_2_THRIDS_TRAIN else \
                                 CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type="train")
