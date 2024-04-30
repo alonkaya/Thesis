@@ -28,14 +28,15 @@ class Dataset(torch.utils.data.Dataset):
         original_first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
         original_second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
 
-        # first_image, second_image = TF.resize(first_image, 256, 256, antialias=True), TF.resize(second_image, 256, 256, antialias=True)
+        first_image, second_image = TF.resize(first_image, 256, 256, antialias=True), TF.resize(second_image, 256, 256, antialias=True)
 
-        # top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
-        # first_image, second_image = TF.crop(first_image, top_crop, left_crop, 224, 224), TF.crop(second_image, top_crop, left_crop, 224, 224)
+        top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
+        first_image, second_image = TF.crop(first_image, top_crop, left_crop, 224, 224), TF.crop(second_image, top_crop, left_crop, 224, 224)
+        self.k = adjust_crop(self.k, top_crop, left_crop)
 
         first_image = self.transform(original_first_image)
         second_image = self.transform(original_second_image)
-
+        
         unnormalized_F = get_F(self.poses, idx, self.k, self.jump_frames)
 
         # Normalize F-Matrix
@@ -66,8 +67,8 @@ if AUGMENTATION:
     ])    
 else:
     transform = v2.Compose([
-        v2.Resize((256, 256), antialias=True),
-        v2.CenterCrop(224),
+        # v2.Resize((256, 256), antialias=True),
+        # v2.CenterCrop(224),
         v2.Grayscale(num_output_channels=3),
         v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
         v2.Normalize(mean=norm_mean,  # Normalize each channel
@@ -78,7 +79,7 @@ else:
 def get_dataloaders_RealEstate(batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
     train_datasets, val_datasets = [], []
-    for jump_frames in [5,6,7]:
+    for jump_frames in [JUMP_FRAMES]:
         for RealEstate_path in RealEstate_paths:
             for i, sequence_name in enumerate(os.listdir(RealEstate_path)):
                 specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
@@ -88,7 +89,7 @@ def get_dataloaders_RealEstate(batch_size):
                 poses = read_poses(specs_path)
 
                 # Indices of 'good' image frames
-                valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames=jump_frames)
+                valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
                 if len(valid_indices) == 0: continue
 
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
@@ -96,7 +97,7 @@ def get_dataloaders_RealEstate(batch_size):
                 K = get_intrinsic_REALESTATE(specs_path, original_image_size)
                 
                 if not FIRST_2_THRIDS_TRAIN and not FIRST_2_OF_3_TRAIN:
-                    custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K, jump_frames=jump_frames)
+                    custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K, jump_frames)
                     if len(custom_dataset) > 20:
                         if RealEstate_path == 'RealEstate10K/train_images':
                             train_datasets.append(custom_dataset) 
