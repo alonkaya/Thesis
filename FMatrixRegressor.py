@@ -119,10 +119,9 @@ class FMatrixRegressor(nn.Module):
 
             x1['pixel_values'] = x1['pixel_values'].to(device)
             x2['pixel_values'] = x2['pixel_values'].to(device)
-            print(x1['pixel_values'].size(), num_channels)
+            
             # Run ViT. Input shape is (batch_size, 3, 224, 224). Output shape is (batch_size, 49*hidden_size)
-            x1_embeddings = model(**x1)
-            print(x1_embeddings.last_hidden_state.size(), num_channels)
+            x1_embeddings = model(**x1).last_hidden_state[:, 1:, :].reshape(-1, 7*7*num_channels)
             x2_embeddings = model(**x2).last_hidden_state[:, 1:, :].reshape(-1, 7*7*num_channels)
 
         else:

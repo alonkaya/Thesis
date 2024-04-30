@@ -28,15 +28,14 @@ class Dataset(torch.utils.data.Dataset):
         original_first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
         original_second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
 
-        # first_image, second_image = TF.resize(original_first_image, (256, 256), antialias=True), TF.resize(original_second_image, (256, 256), antialias=True)
+        first_image, second_image = TF.resize(original_first_image, (256, 256), antialias=True), TF.resize(original_second_image, (256, 256), antialias=True)
 
-        # top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
-        # first_image, second_image = TF.crop(first_image, top_crop, left_crop, 224, 224), TF.crop(second_image, top_crop, left_crop, 224, 224)
-        # print(first_image.size(), second_image.size())
-        # self.k = adjust_crop(self.k, top_crop, left_crop)
+        top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
+        first_image, second_image = TF.crop(first_image, top_crop, left_crop, 224, 224), TF.crop(second_image, top_crop, left_crop, 224, 224)
+        self.k = adjust_crop(self.k, top_crop, left_crop)
 
-        first_image = self.transform(original_first_image)
-        second_image = self.transform(original_second_image)
+        first_image = self.transform(first_image)
+        second_image = self.transform(second_image)
         
         unnormalized_F = get_F(self.poses, idx, self.k, self.jump_frames)
 
@@ -68,8 +67,8 @@ if AUGMENTATION:
     ])    
 else:
     transform = v2.Compose([
-        v2.Resize((256, 256), antialias=True),
-        v2.CenterCrop(224),
+        # v2.Resize((256, 256), antialias=True),
+        # v2.CenterCrop(224),
         v2.Grayscale(num_output_channels=3),
         v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
         v2.Normalize(mean=norm_mean,  # Normalize each channel
