@@ -42,7 +42,10 @@ class GroupedConvolution(nn.Module):
     
 
 def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
-    
+    if len(y1) > 3 and (y1[0] > y1[3] + 2000 or y2[0] > y2[3] + 2000):
+        y1 = y1[3:]
+        y2 = y2[3:]
+        x = x[3:]
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
@@ -100,16 +103,13 @@ def normalize_L1(x):
 def normalize_L2(x):
     return x / torch.linalg.norm(x, dim=1, keepdim=True)
 
-def norm_layer(unnormalized_x, predict_t=False, predict_pose=PREDICT_POSE):
+def norm_layer(unnormalized_x):
     # Normalizes a batch of flattend 9-long vectors (i.e shape [-1, 9])
-    if predict_pose and not predict_t:
-        return normalize_L2(unnormalized_x)
-    else:
-        return normalize_L2(normalize_L1(unnormalized_x))
+    return normalize_L2(normalize_L1(unnormalized_x))
     
 
-def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, ec_err_pred_unoramlized_last, val_ec_err_pred_unormalized_last, ec_err_pred_last, all_penalty_last, plots_path):
-    if math.isnan(all_train_loss_last) or math.isnan(all_val_loss_last) or math.isnan(train_mae_last) or math.isnan(val_mae_last) or math.isnan(ec_err_pred_unoramlized_last) or math.isnan(val_ec_err_pred_unormalized_last) or math.isnan(ec_err_pred_last) or math.isnan(all_penalty_last):
+def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, plots_path):
+    if math.isnan(all_train_loss_last) or math.isnan(all_val_loss_last) or math.isnan(train_mae_last) or math.isnan(val_mae_last):
         print_and_write("found nan\n", plots_path)                
         return True
     return False
@@ -151,22 +151,22 @@ def init_main():
     np.seterr(over='warn')
 
 def find_coefficients(F):
-    # Assuming F is a PyTorch tensor of shape (3, 3)
+    # Assuming F is a PyTorch tensor of shape [batch_size, 3, 3]
     # Extract columns f1, f2, and f3 from F
-    f1 = F[:, 0:1]  # Column vector
-    f2 = F[:, 1:2]  # Column vector
-    f3 = F[:, 2]    # Vector
+    f1 = F[:, :, 0:1]  # Shape: [batch_size, 3, 1]
+    f2 = F[:, :, 1:2]  # Shape: [batch_size, 3, 1]
+    f3 = F[:, :, 2]    # Shape: [batch_size, 3]
 
-    # Stack f1 and f2 horizontally to form a 3x2 matrix
-    A = torch.hstack([f1, f2])
+    # Stack f1 and f2 horizontally to form a 3x2 matrix for each batch
+    A = torch.cat([f1, f2], dim=2)  # Shape: [batch_size, 3, 2]
 
-    # Solve for alpha and beta using the least squares method
+    # Solve for alpha and beta using the least squares method for each batch
     # lstsq returns a named tuple, where the solution is the first item
-    result  = torch.linalg.lstsq(A, f3)
+    result = torch.linalg.lstsq(A, f3.unsqueeze(-1))  # Ensure f3 is [batch_size, 3, 1] for broadcasting
 
     # Extract alpha and beta from the solution
-    alpha = result.solution[0].item()
-    beta = result.solution[1].item()
+    alpha = result.solution[:, 0, 0]  # Shape: [batch_size, 1]
+    beta = result.solution[:, 1, 0]  # Shape: [batch_size, 1]
 
     return alpha, beta
 

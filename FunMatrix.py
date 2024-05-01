@@ -17,9 +17,10 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size):
     ])
 
     # Adjust K according to resize and center crop transforms   
-    adjusted_K = adjust_intrinsic(K, original_image_size, torch.tensor([256, 256]), torch.tensor([224, 224]))
+    k = adjust_k_resize(K, original_image_size, torch.tensor([256, 256]))
+    k = adjust_k_crop(k, 16, 16) if not RANDOM_CROP else k
 
-    return adjusted_K
+    return k
 
 def get_intrinsic_KITTI(calib_path, original_image_size):
     projection_matrix = read_camera_intrinsic(calib_path).reshape(3,4)
@@ -38,23 +39,25 @@ def get_intrinsic_KITTI(calib_path, original_image_size):
     K = K / K[2, 2]
 
     # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-    adjusted_K = adjust_intrinsic(torch.tensor(K), original_image_size, torch.tensor([256, 256]), torch.tensor([224, 224]))
+    k = adjust_k_resize(K, original_image_size, torch.tensor([256, 256]))
+    k = adjust_k_crop(k, 16, 16) if not RANDOM_CROP else k
 
-    return adjusted_K
+    return k
 
-
-
-def adjust_intrinsic(k, original_size, resized_size, ceter_crop_size):
-    # Adjust the intrinsic matrix K according to the transformations resize and center crop
+def adjust_k_resize(k, original_size, resized_size):
+    # Adjust the intrinsic matrix K according to the resize
     scale_factor = resized_size / original_size
     k[0, 0] = k[0, 0] * scale_factor[0]  # fx
     k[1, 1] = k[1, 1] * scale_factor[1]  # fy
     k[0, 2] = k[0, 2] * scale_factor[0]  # cx
     k[1, 2] = k[1, 2] * scale_factor[1]  # cy
 
-    crop_offset = (resized_size - ceter_crop_size) / 2
-    k[0, 2] = k[0, 2] - crop_offset[0]  # cx
-    k[1, 2] = k[1, 2] - crop_offset[1]  # cy
+    return k
+
+def adjust_k_crop(k, top, left):
+    # Adjust the intrinsic matrix K according to the crop
+    k[0, 2] = k[0, 2] - left # cx
+    k[1, 2] = k[1, 2] - top  # cy
 
     return k
 
@@ -101,9 +104,9 @@ def compute_fundamental(E, K1, K2):
     return F
 
 
-def get_F(poses, idx, K):
+def get_F(poses, idx, K, jump_frames=JUMP_FRAMES):
     R_relative, t_relative = compute_relative_transformations(
-        poses[idx], poses[idx+JUMP_FRAMES])
+        poses[idx], poses[idx+jump_frames])
     E = compute_essential(R_relative, t_relative)
     F = compute_fundamental(E, K, K)
 
@@ -166,9 +169,9 @@ def update_epoch_stats(stats, first_image, second_image, label, output, output_g
 
         if epoch == VISIUALIZE["epoch"] and val:
             epipolar_geo_pred = EpipolarGeometry(img_1,img_2, F_pred)
-            epipolar_geo_pred.visualize(sqResultDir=os.path.join(plots_path, VISIUALIZE["dir"]), file_num=stats["file_num"])
+            epipolar_geo_pred.visualize(idx=stats["file_num"], lines_path=os.path.join(plots_path, VISIUALIZE["dir"]))
             stats["file_num"] = stats["file_num"] + 1
-
+ 
     algebraic_dist_pred, RE1_dist_pred, SED_dist_pred, algebraic_dist_truth, RE1_dist_truth, SED_dist_truth =\
         (v/len(first_image) for v in [algebraic_dist_pred, RE1_dist_pred, SED_dist_pred, algebraic_dist_truth, RE1_dist_truth, SED_dist_truth])
     
@@ -183,7 +186,7 @@ def update_epoch_stats(stats, first_image, second_image, label, output, output_g
     return algebraic_dist_pred, RE1_dist_pred, SED_dist_pred
 
 class EpipolarGeometry:
-    def __init__(self, image1_tensors, image2_tensors, F, sequence_num=None, idx=None):
+    def __init__(self, image1_tensors, image2_tensors, F, sequence_path=None, idx=None):
         self.F = F.view(3, 3)
 
         # Convert images back to original
@@ -191,10 +194,6 @@ class EpipolarGeometry:
         self.image2_numpy = reverse_transforms(image2_tensors)
 
         self.pts1, self.pts2 = self.get_keypoints()
-
-        self.sequence_path = os.path.join(
-            'sequences', sequence_num) if sequence_num else None
-        self.file_name1 = f'{idx:06}.{IMAGE_TYPE}' if idx != None else None
 
         self.colors = [
             (255, 102, 102),
@@ -305,11 +304,9 @@ class EpipolarGeometry:
         c = array[2]
         return int((-c - a * x) / b)
 
-    def visualize(self, sqResultDir, file_num):
-        bad_frames_path = os.path.join(sqResultDir, "bad_frames")
-        good_frames_path = os.path.join(sqResultDir, "good_frames")
-        os.makedirs(bad_frames_path, exist_ok=True)
-        os.makedirs(good_frames_path, exist_ok=True)
+    def visualize(self, idx, lines_path=None, sequence_path=None, move_bad_images=False):
+        """ Pass lines_path when showing epipolar lines otherwise pass seqeunce_path to move bad images"""
+        file_name = f'{idx:06}.{IMAGE_TYPE}' if idx != None else None
 
         F = self.F.cpu().numpy()
         pts1, pts2 = self.pts1.cpu().numpy(), self.pts2.cpu().numpy()
@@ -384,22 +381,28 @@ class EpipolarGeometry:
         cv2.putText(vis, str(SED_dist), (5, 260), font,
                     0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
         
-        if(SED_dist > 0.3):
-            if MOVE_BAD_IMAGES:
-                src_path1 = os.path.join(
-                    self.sequence_path, "image_0", self.file_name1)
-                dst_path1 = os.path.join(
-                    self.sequence_path, "BadFrames", self.file_name1)
-                if os.path.exists(src_path1):
-                    print(f'moved {src_path1} to {dst_path1}')
-                    os.rename(src_path1, dst_path1)
+        if(SED_dist > SED_BAD_THRESHOLD):
+            if move_bad_images:
+                move_images(sequence_path, file_name)
             else:
-                cv2.imwrite(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}'), vis)
-                print(os.path.join(sqResultDir, "bad_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}\n'))
+                bad_frames_path = os.path.join(lines_path, "bad_frames")
+                os.makedirs(bad_frames_path, exist_ok=True)
+                cv2.imwrite(os.path.join(lines_path, "bad_frames", f'epipoLine_sift_{file_name}.{IMAGE_TYPE}'), vis)
+                print(os.path.join(lines_path, "bad_frames", f'epipoLine_sift_{file_name}.{IMAGE_TYPE}\n'))
 
-        elif not MOVE_BAD_IMAGES:
-            cv2.imwrite(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}'), vis)
-            print(os.path.join(sqResultDir, "good_frames", f'epipoLine_sift_{file_num}.{IMAGE_TYPE}\n'))
+        elif not move_bad_images:
+            good_frames_path = os.path.join(lines_path, "good_frames")
+            os.makedirs(good_frames_path, exist_ok=True)
+            cv2.imwrite(os.path.join(lines_path, "good_frames", f'epipoLine_sift_{file_name}.{IMAGE_TYPE}'), vis)
+            print(os.path.join(lines_path, "good_frames", f'epipoLine_sift_{file_name}.{IMAGE_TYPE}\n'))
 
         return SED_dist
-        
+
+def move_images(sequence_path, file_name):
+    src_path = os.path.join(sequence_path, "image_0", file_name)
+    os.makedirs(os.path.join(sequence_path, "bad_frames"), exist_ok=True)
+    dst_path = os.path.join(sequence_path, "bad_frames", file_name)
+
+    if os.path.exists(src_path):
+        print(f'moved {src_path} to {dst_path}')
+        os.rename(src_path, dst_path)

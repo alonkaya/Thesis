@@ -25,9 +25,9 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
     def __len__(self):
             # Adjust the total count based on dataset type
             if self.dataset_type == 'train':
-                return ((len(self.valid_indices)-JUMP_FRAMES) // 3) * 2  # 2/3 if the set
+                return ((len(self.poses)-JUMP_FRAMES) // 3) * 2  # 2/3 if the set
             else:
-                return (len(self.valid_indices)-JUMP_FRAMES) // 3  # 1/3 if the set
+                return (len(self.poses)-JUMP_FRAMES) // 3  # 1/3 if the set
             
     def __getitem__(self, idx):
         if self.dataset_type == 'train':
@@ -46,7 +46,7 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-        return first_image, second_image, F
+        return first_image, second_image, F, idx
 
  
 class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):
@@ -64,9 +64,9 @@ class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):
     def __len__(self):
         # Adjust the total count based on dataset type
         if self.dataset_type == 'train':
-            return ((len(self.valid_indices)-JUMP_FRAMES) // 3) * 2  # 2 out of every 3 images
+            return ((len(self.poses)-JUMP_FRAMES) // 3) * 2  # 2 out of every 3 images
         else:
-            return (len(self.valid_indices)-JUMP_FRAMES) // 3  # Every 3rd image
+            return (len(self.poses)-JUMP_FRAMES) // 3  # Every 3rd image
             
     def __getitem__(self, idx):
         if self.dataset_type == 'train':
@@ -113,7 +113,7 @@ if AUGMENTATION:
 else:
     transform = v2.Compose([
         v2.Resize((256, 256), antialias=True),
-        v2.CenterCrop(224),
+        v2.RandomCrop(224),
         v2.Grayscale(num_output_channels=3),
         v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
         v2.Normalize(mean=norm_mean,  # Normalize each channel
@@ -134,11 +134,8 @@ def worker_init_fn(worker_id):
     sys.excepthook = worker_exception_handler
 
 
-def data_with_one_sequence(batch_size, sequence_name='0a610a129bdcc4e7'):
-    RealEstate_path = 'RealEstate10K/train_images'
-    # sequence_name = '0cb8672999a42a05'
-    # sequence_name = "0000cc6d8b108390"
-
+def data_with_one_sequence(sequence_name='bc0ebb7482f14795', batch_size=BATCH_SIZE):
+    RealEstate_path = 'RealEstate10K/val_images'
 
     specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
     sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
@@ -155,10 +152,10 @@ def data_with_one_sequence(batch_size, sequence_name='0a610a129bdcc4e7'):
     
     train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='train')
     val_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type='val')
-
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True, worker_init_fn=worker_init_fn)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True, worker_init_fn=worker_init_fn)
-
+    
+    if len(val_dataset) > 5:
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True, worker_init_fn=worker_init_fn)
+        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True, worker_init_fn=worker_init_fn)
     return train_loader, val_loader
 
 
@@ -193,15 +190,15 @@ def vis():
 
 
 # if __name__ == "__main__":
-#     vis()
-        # train_loader, val_loader = data_with_one_sequence(batch_size=1,CustomDataset_type=CUSTOMDATASET_TYPE, sequence_name="0000cc6d8b108390")
+    # vis()
+        # train_loader, val_loader = data_with_one_sequence(batch_size=1, sequence_name="0000cc6d8b108390")
         # it = iter(train_loader)
         # first_image, second_image, label = next(it)
-        # alpha, beta = find_coefficients(label[0])
+        # alpha, beta = find_coefficients(label)
         # f1 = label[0][:, 0]
         # f2 = label[0][:, 1]
         # f3 = label[0][:, 2]
-        # print(alpha*f1 + beta*f2 - f3)
+        # print(torch.mean(alpha*f1 + beta*f2 - f3))
 #
 #         epoch_stats = {"algebraic_dist_truth": 0, "algebraic_dist_pred": 0, "algebraic_dist_pred_unormalized": 0,
 #                                 "RE1_dist_truth": 0, "RE1_dist_pred": 0, "RE1_dist_pred_unormalized": 0,
