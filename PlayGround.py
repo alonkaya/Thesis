@@ -74,9 +74,19 @@ def aa(train_loader, idx):
         print("Valid indices of the current batch's dataset:", sample_dataset.valid_indices)
     else:
         print("Dataset not found for the current batch")
+
+def sed_distance():
+    train_loader, val_loader = get_data_loaders(batch_size=1)
+    total_sed = 0
+    for i, (first_image, second_image, label) in enumerate(val_loader):
+        epipolar_geo_pred = EpipolarGeometry(first_image[0], second_image[0], label[0]) 
+        total_sed += epipolar_geo_pred.get_SED_distance()
+    total_sed /= i
+    print(f'SED distance: {total_sed}') 
+
 if __name__ == "__main__":
-    # Get the train_loader
-    move_bad_images()
+    sed_distance()
+    # move_bad_images()
     # total_sed = 0
     # for j,p in enumerate(os.listdir("RealEstate10K/val_images")):
     #     train_loader, val_loader = data_with_one_sequence(1, sequence_name=p)
@@ -87,12 +97,3 @@ if __name__ == "__main__":
     #     sed /= i
     #     print(f'Sequence name: {p}, sed: {sed}')
 
-    
-    # Iterate over the train_loader
-    # for first_image, second_image, _ in train_loader:
-    #     show_images(first_image, second_image)
-        
-    #     # Break or wait for user input to continue showing images
-    #     input("Press Enter to continue...")  # Wait for user input to continue
-    #     # If you want to break after the first batch, uncomment the following line
-    #     # break
