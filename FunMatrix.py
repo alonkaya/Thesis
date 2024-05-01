@@ -17,9 +17,10 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size):
     ])
 
     # Adjust K according to resize and center crop transforms   
-    adjusted_K = adjust_intrinsic(K, original_image_size, torch.tensor([256, 256]), torch.tensor([224, 224]))
+    k = adjust_k_resize(K, original_image_size, torch.tensor([256, 256]))
+    k = adjust_k_crop(k, 16, 16) if not RANDOM_CROP else k
 
-    return adjusted_K
+    return k
 
 def get_intrinsic_KITTI(calib_path, original_image_size):
     projection_matrix = read_camera_intrinsic(calib_path).reshape(3,4)
@@ -38,29 +39,25 @@ def get_intrinsic_KITTI(calib_path, original_image_size):
     K = K / K[2, 2]
 
     # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-    adjusted_K = adjust_intrinsic(torch.tensor(K), original_image_size, torch.tensor([256, 256]), torch.tensor([224, 224]))
-
-    return adjusted_K
-
-
-def adjust_crop(k, top, left):
-    # Adjust the intrinsic matrix K according to the crop
-    k[0, 2] = k[0, 2] - left
-    k[1, 2] = k[1, 2] - top
+    k = adjust_k_resize(K, original_image_size, torch.tensor([256, 256]))
+    k = adjust_k_crop(k, 16, 16) if not RANDOM_CROP else k
 
     return k
 
-def adjust_intrinsic(k, original_size, resized_size, ceter_crop_size):
-    # Adjust the intrinsic matrix K according to the transformations resize and center crop
+def adjust_k_resize(k, original_size, resized_size):
+    # Adjust the intrinsic matrix K according to the resize
     scale_factor = resized_size / original_size
     k[0, 0] = k[0, 0] * scale_factor[0]  # fx
     k[1, 1] = k[1, 1] * scale_factor[1]  # fy
     k[0, 2] = k[0, 2] * scale_factor[0]  # cx
     k[1, 2] = k[1, 2] * scale_factor[1]  # cy
 
-    crop_offset = (resized_size - ceter_crop_size) / 2
-    k[0, 2] = k[0, 2] - crop_offset[0]  # cx
-    k[1, 2] = k[1, 2] - crop_offset[1]  # cy
+    return k
+
+def adjust_k_crop(k, top, left):
+    # Adjust the intrinsic matrix K according to the crop
+    k[0, 2] = k[0, 2] - left # cx
+    k[1, 2] = k[1, 2] - top  # cy
 
     return k
 

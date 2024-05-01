@@ -27,16 +27,18 @@ class Dataset(torch.utils.data.Dataset):
         
         first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
         second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
-
-        # first_image, second_image = TF.resize(original_first_image, (256, 256), antialias=True), TF.resize(original_second_image, (256, 256), antialias=True)
-        # top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
-        # first_image, second_image = TF.crop(first_image, top_crop, left_crop, 224, 224), TF.crop(second_image, top_crop, left_crop, 224, 224)
-        # self.k = adjust_crop(self.k, top_crop, left_crop)
+        
+        k=self.k
+        if RANDOM_CROP:
+            first_image, second_image = TF.resize(first_image, (256, 256), antialias=True), TF.resize(second_image, (256, 256), antialias=True)
+            top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
+            first_image, second_image = TF.crop(first_image, top_crop, left_crop, 224, 224), TF.crop(second_image, top_crop, left_crop, 224, 224)
+            k = adjust_k_crop(self.k.clone(), top_crop, left_crop)
 
         first_image = self.transform(first_image)
         second_image = self.transform(second_image)
         
-        unnormalized_F = get_F(self.poses, idx, self.k, self.jump_frames)
+        unnormalized_F = get_F(self.poses, idx, k, self.jump_frames)
 
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
@@ -64,6 +66,13 @@ if AUGMENTATION:
         v2.Normalize(mean=norm_mean,  # Normalize each channel
                             std=norm_std),
     ])    
+elif RANDOM_CROP:
+    transform = v2.Compose([
+        v2.Grayscale(num_output_channels=3),
+        v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
+        v2.Normalize(mean=norm_mean,  # Normalize each channel
+                            std=norm_std),
+    ])    
 else:
     transform = v2.Compose([
         v2.Resize((256, 256), antialias=True),
@@ -72,7 +81,7 @@ else:
         v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
         v2.Normalize(mean=norm_mean,  # Normalize each channel
                             std=norm_std),
-    ])     
+    ])
 
 
 def get_dataloaders_RealEstate(batch_size):

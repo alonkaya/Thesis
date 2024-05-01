@@ -81,11 +81,18 @@ def sed_distance():
     for i, (first_image, second_image, label) in enumerate(val_loader):
         epipolar_geo_pred = EpipolarGeometry(first_image[0], second_image[0], label[0]) 
         total_sed += epipolar_geo_pred.get_SED_distance()
+    
     total_sed /= i
     print(f'SED distance: {total_sed}') 
 
 if __name__ == "__main__":
     sed_distance()
+    # train_loader, val_loader = get_data_loaders(batch_size=1)
+    # it = iter(val_loader)
+    # first_image, second_image, label = next(it)
+    # epipolar_geo_pred = EpipolarGeometry(first_image[0], second_image[0], label[0]) 
+    # sed = epipolar_geo_pred.get_SED_distance()
+    # print(sed)
     # move_bad_images()
     # total_sed = 0
     # for j,p in enumerate(os.listdir("RealEstate10K/val_images")):
