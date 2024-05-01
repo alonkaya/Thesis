@@ -31,15 +31,14 @@ class Dataset(torch.utils.data.Dataset):
         k=self.k
         if RANDOM_CROP:
             first_image, second_image = TF.resize(first_image, (256, 256), antialias=True), TF.resize(second_image, (256, 256), antialias=True)
-            top_crop1, left_crop1, top_crop2, left_crop2 = random.randint(0, 32), random.randint(0, 32), random.randint(0, 32), random.randint(0, 32)
-            first_image, second_image = TF.crop(first_image, top_crop1, left_crop1, 224, 224), TF.crop(second_image, top_crop2, left_crop2, 224, 224)
-            k1 = adjust_k_crop(self.k.clone(), top_crop1, left_crop1)
-            k2 = adjust_k_crop(self.k.clone(), top_crop2, left_crop2)
+            top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
+            first_image, second_image = TF.crop(first_image, top_crop, left_crop, 224, 224), TF.crop(second_image, top_crop, left_crop, 224, 224)
+            k = adjust_k_crop(self.k.clone(), top_crop, left_crop)
 
         first_image = self.transform(first_image)
         second_image = self.transform(second_image)
         
-        unnormalized_F = get_F(self.poses, idx, k1, k2, self.jump_frames)
+        unnormalized_F = get_F(self.poses, idx, k, k, self.jump_frames)
 
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
@@ -88,7 +87,7 @@ else:
 def get_dataloaders_RealEstate(batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
     train_datasets, val_datasets = [], []
-    for jump_frames in [JUMP_FRAMES]:
+    for jump_frames in [5,6,7]:
         for RealEstate_path in RealEstate_paths:
             for i, sequence_name in enumerate(os.listdir(RealEstate_path)):
                 specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
