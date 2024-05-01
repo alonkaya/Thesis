@@ -365,4 +365,4 @@ if __name__ == "__main__":
             epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0])
             SED_dist = epipolar_geo.get_SED_distance() 
 
-    print(SED_dist)
+    print(SED_dist) 

@@ -97,18 +97,21 @@ def compute_fundamental(E, K1, K2):
 
     # Compute the Fundamental matrix
     F = torch.matmul(K2_inv_T, torch.matmul(E, K1_inv))
-    
+
     if torch.linalg.matrix_rank(F) != 2:
-        print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
+        U, S, V = torch.svd(F[0])
+        smallest_sv = S[-1]  # Select the smallest singular value
+        print(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(F)}
+smallest_sv: {smallest_sv.cpu().item()}\n""")
 
     return F
 
 
-def get_F(poses, idx, K, jump_frames=JUMP_FRAMES):
+def get_F(poses, idx, k1, k2, jump_frames=JUMP_FRAMES):
     R_relative, t_relative = compute_relative_transformations(
         poses[idx], poses[idx+jump_frames])
     E = compute_essential(R_relative, t_relative)
-    F = compute_fundamental(E, K, K)
+    F = compute_fundamental(E, k1, k2)
 
     return F
 

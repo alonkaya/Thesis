@@ -3,7 +3,7 @@ from DatasetOneSequence import data_with_one_sequence
 from FunMatrix import EpipolarGeometry
 import numpy as np
 import matplotlib.pyplot as plt
-from params import norm_mean, norm_std
+from params import *
 import os
 import torch
 
@@ -79,6 +79,7 @@ def sed_distance():
     train_loader, val_loader = get_data_loaders(batch_size=1)
     total_sed = 0
     for i, (first_image, second_image, label) in enumerate(val_loader):
+        first_image, second_image, label = first_image.to(device), second_image.to(device), label.to(device)
         epipolar_geo_pred = EpipolarGeometry(first_image[0], second_image[0], label[0]) 
         total_sed += epipolar_geo_pred.get_SED_distance()
     
