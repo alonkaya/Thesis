@@ -99,8 +99,8 @@ def compute_fundamental(E, K1, K2):
     F = torch.matmul(K2_inv_T, torch.matmul(E, K1_inv))
 
     if torch.linalg.matrix_rank(F) != 2:
-        U, S, V = torch.svd(F[0])
-        smallest_sv = S[-1]  # Select the smallest singular value
+        U, S, V = torch.svd(F)
+        smallest_sv = S  # Select the smallest singular value
         print(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(F)}
 smallest_sv: {smallest_sv.cpu().item()}\n""")
 
