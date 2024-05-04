@@ -27,7 +27,7 @@ BN_AND_DO = True if BATCH_SIZE > 1 else False
 SAVE_MODEL = True
 SED_BAD_THRESHOLD = 0.06
 
-TRIM = True
+TRIM = False
 RANDOM_CROP = False
 RE1_DIST = True
 SED_DIST = True
