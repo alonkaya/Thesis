@@ -41,7 +41,7 @@ class CustomDataset_first_two_thirds_train(torch.utils.data.Dataset):
         first_image = self.transform(original_first_image)
         second_image = self.transform(original_second_image)
 
-        unnormalized_F = get_F(self.poses, idx, self.k)
+        unnormalized_F = get_F(self.poses, idx, self.k, self.k)
 
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
@@ -82,12 +82,12 @@ class CustomDataset_first_two_out_of_three_train(torch.utils.data.Dataset):
         first_image = self.transform(original_first_image)
         second_image = self.transform(original_second_image)
 
-        unnormalized_F = get_F(self.poses, idx, self.k)
+        unnormalized_F = get_F(self.poses, idx, self.k, self.k)
 
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-        return first_image, second_image, F
+        return first_image, second_image, F, idx
     
 def get_valid_indices(sequence_len, sequence_path):
     valid_indices = []

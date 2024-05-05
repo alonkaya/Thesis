@@ -180,3 +180,43 @@ def divide_by_dataloader(epoch_stats, len_train_loader, len_val_loader):
             # Assuming that 'file_num' should not be processed, we'll skip it
             if key != "file_num":
                 epoch_stats[key] = value.cpu().item() / len_train_loader
+
+from matplotlib.ticker import MaxNLocator
+
+def points_histogram(distances, plots_path):
+
+    # Define bins, ensuring they are monotonically increasing
+    bin_edges = torch.tensor([0,2,4,6, 10, 20, 50, 100, 200, 300,400])
+
+    # Calculate histogram counts
+    counts, edges = np.histogram(distances, bins=bin_edges)
+
+    # Set a uniform bar width
+    uniform_width = 0.5  # Reduce the width for better visibility in equally spaced plot
+
+    # Calculate the centers of bins for labeling
+    bin_centers = np.arange(len(counts))  # Using integer locations for bin centers
+
+    # Plotting the histogram
+    plt.figure(figsize=(10, 5))
+    plt.bar(bin_centers, counts, width=uniform_width, align='center', edgecolor='black')
+
+    # Customize x-ticks to show ranges and prevent overlap
+    plt.xticks(ticks=bin_centers, labels=[f"{int(edges[i])}-{int(edges[i+1]-1)}" for i in range(len(edges)-1)])
+
+    # Adding labels and title
+    plt.xlabel('SED Distance')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of SED distances')
+
+    # Show the plot
+    plt.show()
+    # plt.savefig(f"""{plots_path}/histogram.png""")
+
+
+def trim(data, precent):
+    # Calculate the 95th percentile threshold
+    threshold = torch.quantile(data, 1-precent)
+
+    # Filter the data to keep only values below the threshold
+    return data[data < threshold]

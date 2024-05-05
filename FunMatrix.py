@@ -1,5 +1,5 @@
 from params import *
-from utils import read_camera_intrinsic, reverse_transforms, print_and_write, norm_layer
+from utils import read_camera_intrinsic, reverse_transforms, print_and_write, norm_layer, points_histogram, trim
 import cv2
 import os
 from scipy.linalg import rq
@@ -100,9 +100,8 @@ def compute_fundamental(E, K1, K2):
 
     if torch.linalg.matrix_rank(F) != 2:
         U, S, V = torch.svd(F)
-        smallest_sv = S  # Select the smallest singular value
         print(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(F)}
-smallest_sv: {smallest_sv.cpu().item()}\n""")
+singular values: {S.cpu().tolist()}\n""")
 
     return F
 
@@ -189,7 +188,7 @@ def update_epoch_stats(stats, first_image, second_image, label, output, output_g
     return algebraic_dist_pred, RE1_dist_pred, SED_dist_pred
 
 class EpipolarGeometry:
-    def __init__(self, image1_tensors, image2_tensors, F, sequence_path=None, idx=None):
+    def __init__(self, image1_tensors, image2_tensors, F):
         self.F = F.view(3, 3)
 
         # Convert images back to original
@@ -267,7 +266,7 @@ class EpipolarGeometry:
 
         return torch.mean(RE1)
     
-    def get_SED_distance(self):
+    def get_SED_distance(self, show_histogram=False, plots_path=None):
         lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
         lines2 = self.compute_epipolar_lines(self.F, self.pts1)   # shape (n,3)
         
@@ -276,6 +275,11 @@ class EpipolarGeometry:
         distances2 = self.point_2_line_distance_all_points(self.pts2, lines2)
 
         sed = distances1**2 + distances2**2  # shape (n)
+        if TRIM:
+            sed = trim(sed, 0.05)
+
+        if show_histogram:
+            points_histogram(sed.cpu(), plots_path)
 
         return torch.mean(sed)
     
@@ -307,7 +311,7 @@ class EpipolarGeometry:
         c = array[2]
         return int((-c - a * x) / b)
 
-    def visualize(self, idx, lines_path=None, sequence_path=None, move_bad_images=False):
+    def visualize(self, idx, epipolar_lines_path=None, sequence_path=None, move_bad_images=False):
         """ Pass lines_path when showing epipolar lines otherwise pass seqeunce_path to move bad images"""
         file_name = f'{idx:06}.{IMAGE_TYPE}' if idx != None else None
 
@@ -384,20 +388,14 @@ class EpipolarGeometry:
         cv2.putText(vis, str(SED_dist), (5, 260), font,
                     0.6, color=(130, 0, 150), lineType=cv2.LINE_AA)
         
-        if(SED_dist > SED_BAD_THRESHOLD):
-            if move_bad_images:
-                move_images(sequence_path, file_name)
-            else:
-                bad_frames_path = os.path.join(lines_path, "bad_frames")
-                os.makedirs(bad_frames_path, exist_ok=True)
-                cv2.imwrite(os.path.join(lines_path, "bad_frames", f'epipoLine_sift_{file_name}.{IMAGE_TYPE}'), vis)
-                print(os.path.join(lines_path, "bad_frames", f'epipoLine_sift_{file_name}.{IMAGE_TYPE}\n'))
-
-        elif not move_bad_images:
-            good_frames_path = os.path.join(lines_path, "good_frames")
-            os.makedirs(good_frames_path, exist_ok=True)
-            cv2.imwrite(os.path.join(lines_path, "good_frames", f'epipoLine_sift_{file_name}.{IMAGE_TYPE}'), vis)
-            print(os.path.join(lines_path, "good_frames", f'epipoLine_sift_{file_name}.{IMAGE_TYPE}\n'))
+        if SED_dist > SED_BAD_THRESHOLD and move_bad_images:
+            move_images(sequence_path, file_name)
+        
+        dir_name = "good_frames" if SED_dist < SED_BAD_THRESHOLD else "bad_frames"
+        epipolar_lines_path = os.path.join(epipolar_lines_path, dir_name)
+        os.makedirs(epipolar_lines_path, exist_ok=True)
+        cv2.imwrite(os.path.join(epipolar_lines_path, f'{file_name}'), vis)
+        print(os.path.join(epipolar_lines_path, f'{file_name}\n'))
 
         return SED_dist
 

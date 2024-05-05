@@ -11,8 +11,9 @@ import torchvision.transforms.functional as TF
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, poses, valid_indices, transform, K, jump_frames=JUMP_FRAMES):
+    def __init__(self, sequence_path, poses, valid_indices, transform, K, sequence_name, jump_frames=JUMP_FRAMES):
         self.sequence_path = sequence_path
+        self.seq_name = sequence_name
         self.poses = poses
         self.transform = transform
         self.k = K
@@ -87,7 +88,7 @@ else:
 def get_dataloaders_RealEstate(batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
     train_datasets, val_datasets = [], []
-    for jump_frames in [5,6,7]:
+    for jump_frames in [JUMP_FRAMES]:
         for RealEstate_path in RealEstate_paths:
             for i, sequence_name in enumerate(os.listdir(RealEstate_path)):
                 specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
@@ -105,7 +106,7 @@ def get_dataloaders_RealEstate(batch_size):
                 K = get_intrinsic_REALESTATE(specs_path, original_image_size)
                 
                 if not FIRST_2_THRIDS_TRAIN and not FIRST_2_OF_3_TRAIN:
-                    custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K, jump_frames)
+                    custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K, sequence_name, jump_frames)
                     if len(custom_dataset) > 20:
                         if RealEstate_path == 'RealEstate10K/train_images':
                             train_datasets.append(custom_dataset) 

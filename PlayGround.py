@@ -1,6 +1,8 @@
 from Dataset import get_data_loaders
 from DatasetOneSequence import data_with_one_sequence
+from FMatrixRegressor import FMatrixRegressor
 from FunMatrix import EpipolarGeometry
+from utils import points_histogram
 import numpy as np
 import matplotlib.pyplot as plt
 from params import *
@@ -36,23 +38,23 @@ def move_bad_images():
     # change dataset returns 6 params instead of 4. comment unnecessary lines in visualize
     train_loader, val_loader = get_data_loaders(batch_size=1)
     try:
-        for i, (first_image, second_image, label, idx, sequence_path) in enumerate(val_loader):
+        for i, (img1, img2, label, idx, sequence_path) in enumerate(val_loader):
             sequence_path = os.path.split(sequence_path[0])[0]
-            epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label[0])
+            epipolar_geo = EpipolarGeometry(img1[0], img2[0], F=label[0])
             epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
     except Exception as e:
-        aa(val_loader, idx)
+        valid_indices_of_dataset(val_loader, idx)
         print(e)
     try:
-        for i, (first_image, second_image, label, idx, sequence_path) in enumerate(train_loader):
+        for i, (img1, img2, label, idx, sequence_path) in enumerate(train_loader):
             sequence_path = os.path.split(sequence_path[0])[0]
-            epipolar_geo = EpipolarGeometry(first_image[0], second_image[0], F=label[0])
+            epipolar_geo = EpipolarGeometry(img1[0], img2[0], F=label[0])
             epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
     except Exception as e:
-        aa(train_loader, idx)
+        valid_indices_of_dataset(train_loader, idx)
         print(e)
 
-def aa(train_loader, idx):
+def valid_indices_of_dataset(train_loader, idx):
     # Check if the DataLoader's dataset is a ConcatDataset
     if isinstance(train_loader.dataset, torch.utils.data.ConcatDataset):
         dataset_list = train_loader.dataset.datasets
@@ -75,33 +77,64 @@ def aa(train_loader, idx):
     else:
         print("Dataset not found for the current batch")
 
-def sed_distance():
+def vis_gt():
+    train_loader, val_loader = get_data_loaders(batch_size=1)
+
+    for i, (img1, img2, label, seq_name) in enumerate(val_loader):
+        epipolar_geo = EpipolarGeometry(img1[0], img2[0], F=label[0])
+        epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("predicted_epipole_lines_18", seq_name[0]))
+
+def vis_trained(plots_path):
+    model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
+    
+    train_loader, val_loader = get_data_loaders(batch_size=1)
+    for i, (img1, img2, label, seq_name) in enumerate(val_loader):
+        img1, img2 = img1.to(device), img2.to(device)
+        output, _, _, _ = model.forward(img1, img2)
+
+        epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach())
+        epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("predicted_epipole_lines_2", seq_name[0]))
+
+
+def sed_distance_gt():
     train_loader, val_loader = get_data_loaders(batch_size=1)
     total_sed = 0
-    for i, (first_image, second_image, label) in enumerate(val_loader):
-        first_image, second_image, label = first_image.to(device), second_image.to(device), label.to(device)
-        epipolar_geo_pred = EpipolarGeometry(first_image[0], second_image[0], label[0]) 
+    for i, (img1, img2, label) in enumerate(val_loader):
+        img1, img2, label = img1.to(device), img2.to(device), label.to(device)
+        epipolar_geo_pred = EpipolarGeometry(img1[0], img2[0], label[0]) 
         total_sed += epipolar_geo_pred.get_SED_distance()
     
     total_sed /= i
     print(f'SED distance: {total_sed}') 
 
-if __name__ == "__main__":
-    sed_distance()
-    # train_loader, val_loader = get_data_loaders(batch_size=1)
-    # it = iter(val_loader)
-    # first_image, second_image, label = next(it)
-    # epipolar_geo_pred = EpipolarGeometry(first_image[0], second_image[0], label[0]) 
-    # sed = epipolar_geo_pred.get_SED_distance()
-    # print(sed)
-    # move_bad_images()
-    # total_sed = 0
-    # for j,p in enumerate(os.listdir("RealEstate10K/val_images")):
-    #     train_loader, val_loader = data_with_one_sequence(1, sequence_name=p)
-    #     sed = 0
-    #     for i,(img1, img2, label) in enumerate(val_loader):
-    #         epipolar_geo_pred = EpipolarGeometry(img1[0],img2[0], label[0]) 
-    #         sed += epipolar_geo_pred.get_SED_distance()
-    #     sed /= i
-    #     print(f'Sequence name: {p}, sed: {sed}')
+def sed_distance_trained(plots_path):
+    model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
+    
+    train_loader, val_loader = get_data_loaders(batch_size=1)
+    total_sed = 0
+    for i, (img1, img2, label) in enumerate(val_loader):
+        img1, img2 = img1.to(device), img2.to(device)
+        output, _, _, _ = model.forward(img1, img2)
+        epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach())
+        total_sed += epipolar_geo.get_SED_distance()
+    
+    total_sed /= i
+    print(f'SED distance: {total_sed}')
 
+
+
+def sed_histogram_trained(plots_path):
+    model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
+    
+    train_loader, val_loader = get_data_loaders(batch_size=1)
+    for i, (img1, img2, label, seq_name) in enumerate(val_loader):
+        img1, img2 = img1.to(device), img2.to(device)
+        output, _, _, _ = model.forward(img1, img2)
+        print(seq_name[0])
+        epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach())
+        sed = epipolar_geo.get_SED_distance(show_histogram=True, plots_path=plots_path)
+
+
+if __name__ == "__main__":
+    plots_path = 'plots/RealEstate/SED_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True'
+    sed_distance_trained(plots_path)
