@@ -132,8 +132,8 @@ def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
     # The mean and std have to be reshaped to [3, 1, 1] to match the tensor dimensions for broadcasting
     mean = mean.view(-1, 1, 1)
     std = std.view(-1, 1, 1)
+    print(img_tensor.device, std.device, mean.device)
     img_tensor = img_tensor * std + mean
-    
     return (img_tensor.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
 
 def init_main():
