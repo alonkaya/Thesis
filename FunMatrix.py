@@ -203,8 +203,8 @@ class EpipolarGeometry:
         self.F = F.view(3, 3)
 
         # Convert images back to original
-        self.image1_numpy = reverse_transforms(image1_tensors)
-        self.image2_numpy = reverse_transforms(image2_tensors)
+        self.image1_numpy = reverse_transforms(image1_tensors.cpu())
+        self.image2_numpy = reverse_transforms(image2_tensors.cpu())
 
         if pts1 is None:
             self.get_keypoints()
