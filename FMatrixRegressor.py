@@ -168,15 +168,15 @@ class FMatrixRegressor(nn.Module):
 
         output = norm_layer(output.view(-1, 9)).view(-1,3,3) 
 
-        return output, last_sv_sq, alpha, beta
+        return output
 
 
     def train_model(self, train_loader, val_loader, num_epochs):
         # Lists to store training statistics
-        all_train_loss, all_val_loss, all_penalty, \
+        all_train_loss, all_val_loss, \
         all_train_mae, all_val_mae, \
         all_algberaic_pred, all_RE1_pred, all_SED_pred, \
-        all_val_algberaic_pred, all_val_RE1_pred, all_val_SED_pred = [], [], [], [], [], [], [], [], [], [], []
+        all_val_algberaic_pred, all_val_RE1_pred, all_val_SED_pred = [], [], [], [], [], [], [], [], [], []
 
         for epoch in range(num_epochs):
             self.train()
@@ -188,18 +188,19 @@ class FMatrixRegressor(nn.Module):
                             "algebraic_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
                             "val_algebraic_truth": torch.tensor(0), "val_RE1_truth": torch.tensor(0), "val_SED_truth": torch.tensor(0), 
                             "loss": torch.tensor(0), "val_loss": torch.tensor(0),
-                            "epoch_penalty": torch.tensor(0), "file_num": 0}
+                            "file_num": 0}
             
-            for img1, img2, label in train_loader:
-                img1, img2, label = img1.to(device), img2.to(device), label.to(device)
+            for img1, img2, label, pts1, pts2, _ in train_loader:
+                img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
                 # Forward pass
-                output, last_sv_sq, alpha, beta = self.forward(img1, img2)
-                epoch_stats["epoch_penalty"] = epoch_stats["epoch_penalty"] + last_sv_sq
+                output = self.forward(img1, img2)
 
+                pts1.requires_grad = True
+                pts2.requires_grad = True
                 # Update epoch statistics
                 batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
-                    epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, self.plots_path, epoch)
+                    epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, epoch)
 
                 # alpha_gt, beta_gt = find_coefficients(label)
                 # Compute loss
@@ -219,15 +220,15 @@ class FMatrixRegressor(nn.Module):
             # Validation
             self.eval()
             with torch.no_grad():
-                for val_img1, val_img2, val_label in val_loader:
-                    val_img1, val_img2, val_label = val_img1.to(device), val_img2.to(device), val_label.to(device)
+                for val_img1, val_img2, val_label, val_pts1, val_pts2, _ in val_loader:
+                    val_img1, val_img2, val_label, val_pts1, val_pts2 = val_img1.to(device), val_img2.to(device), val_label.to(device), val_pts1.to(device), val_pts2.to(device)
 
                     # Forward pass
-                    val_output,_, val_alpha, val_beta = self.forward(val_img1, val_img2)
+                    val_output = self.forward(val_img1, val_img2)
                     
                     # Update epoch statistics
                     val_batch_algebraic_pred, val_batch_RE1_pred, val_batch_SED_pred = update_epoch_stats(
-                        epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output.detach(), val_output, self.plots_path, epoch, val=True)
+                        epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output, val_pts1, val_pts2, self.plots_path, epoch, val=True)
                     
                     # val_alpha_gt, val_beta_gt = find_coefficients(val_label)
                     # Compute loss
@@ -249,7 +250,6 @@ class FMatrixRegressor(nn.Module):
             all_algberaic_pred.append(epoch_stats["algebraic_pred"])  
             all_RE1_pred.append(epoch_stats["RE1_pred"])
             all_SED_pred.append(epoch_stats["SED_pred"])
-            all_penalty.append(epoch_stats["epoch_penalty"])
 
             all_val_mae.append(val_mae.cpu().item())
             all_val_loss.append(epoch_stats["val_loss"])
@@ -363,6 +363,6 @@ if __name__ == "__main__":
             output, _, _, _ = model.forward(img1, img2)
 
             epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0])
-            SED_dist = epipolar_geo.get_SED_distance() 
+            SED_dist = epipolar_geo.get_mean_SED_distance() 
 
     print(SED_dist) 

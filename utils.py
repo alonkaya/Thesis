@@ -77,9 +77,10 @@ def read_camera_intrinsic(path_to_intrinsic):
      with open(path_to_intrinsic, 'r') as f:
         lines = f.readlines()  # Read all lines into a list
 
-        intrinsic_strings = lines[1].split()[1:5] if USE_REALESTATE else lines[0].split()[1:]
+        intrinsic_strings_cam0 = lines[1].split()[1:5] if USE_REALESTATE else lines[0].split()[1:]
+        intrinsic_strings_cam1 = "" if USE_REALESTATE else lines[1].split()[1:]
 
-        return torch.tensor([float(x) for x in intrinsic_strings])
+        return torch.tensor([float(x) for x in intrinsic_strings_cam0]), torch.tensor([float(x) for x in intrinsic_strings_cam1])
 
 # Define a function to read the pose files in the poses folder
 def read_poses(poses_path):
@@ -87,7 +88,6 @@ def read_poses(poses_path):
     with open(poses_path, 'r') as f:
         for i, line in enumerate(f):
             if USE_REALESTATE and i == 0: continue
-
             line = torch.tensor([float(x) for x in line.strip().split()])
             pose = line[7:] if USE_REALESTATE else line
             poses.append(pose.view(3, 4))

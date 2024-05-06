@@ -11,40 +11,44 @@ import torchvision.transforms.functional as TF
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, poses, valid_indices, transform, K, sequence_name, jump_frames=JUMP_FRAMES):
+    def __init__(self, sequence_path, poses, valid_indices, transform, k, val, seq_name, jump_frames=JUMP_FRAMES):
         self.sequence_path = sequence_path
-        self.seq_name = sequence_name
         self.poses = poses
         self.transform = transform
-        self.k = K
+        self.k = k
         self.valid_indices = valid_indices
+        self.val = val
+        self.seq_name = seq_name
         self.jump_frames = jump_frames
 
     def __len__(self):
-        return len(self.valid_indices)
+        return (len(self.valid_indices) - VAL_LENGTH if not self.val else VAL_LENGTH) - self.jump_frames
 
     def __getitem__(self, idx):
-        idx = self.valid_indices[idx]
+        idx = self.valid_indices[idx] + VAL_LENGTH if not self.val else self.valid_indices[idx]
         
-        first_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-        second_image = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
+        img1 = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+        img2 = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
         
-        k=self.k
+        k=self.k.clone()
         if RANDOM_CROP:
-            first_image, second_image = TF.resize(first_image, (256, 256), antialias=True), TF.resize(second_image, (256, 256), antialias=True)
+            img1, img2 = TF.resize(img1, (256, 256), antialias=True), TF.resize(img2, (256, 256), antialias=True)
             top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
-            first_image, second_image = TF.crop(first_image, top_crop, left_crop, 224, 224), TF.crop(second_image, top_crop, left_crop, 224, 224)
-            k = adjust_k_crop(self.k.clone(), top_crop, left_crop)
+            img1, img2 = TF.crop(img1, top_crop, left_crop, 224, 224), TF.crop(img2, top_crop, left_crop, 224, 224)
+            k = adjust_k_crop(k, top_crop, left_crop)
 
-        first_image = self.transform(first_image)
-        second_image = self.transform(second_image)
+        img1 = self.transform(img1)
+        img2 = self.transform(img2)
         
         unnormalized_F = get_F(self.poses, idx, k, k, self.jump_frames)
-
+        
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-        return first_image, second_image, F
+        epi = EpipolarGeometry(img1, img2, F=F)
+        pts1, pts2 = epi.pts1, epi.pts2
+
+        return img1, img2, F, pts1, pts2, self.seq_name
 
 def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
     valid_indices = []
@@ -85,7 +89,7 @@ else:
     ])
 
 
-def get_dataloaders_RealEstate(batch_size):
+def get_dataloaders_RealEstate(batch_size=BATCH_SIZE):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
     train_datasets, val_datasets = [], []
     for jump_frames in [JUMP_FRAMES]:
@@ -106,7 +110,7 @@ def get_dataloaders_RealEstate(batch_size):
                 K = get_intrinsic_REALESTATE(specs_path, original_image_size)
                 
                 if not FIRST_2_THRIDS_TRAIN and not FIRST_2_OF_3_TRAIN:
-                    custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K, sequence_name, jump_frames)
+                    custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K, val=False, seq_name=sequence_name, jump_frames=jump_frames)
                     if len(custom_dataset) > 20:
                         if RealEstate_path == 'RealEstate10K/train_images':
                             train_datasets.append(custom_dataset) 
@@ -131,31 +135,34 @@ def get_dataloaders_RealEstate(batch_size):
 
     return train_loader, val_loader
 
-def get_dataloaders_KITTI(batch_size):
-    sequence_paths = [f'sequences/0{i}/image_0' for i in range(9)]
-    poses_paths = [f'poses/0{i}.txt' for i in range(9)]
-    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(9)]
+def get_dataloaders_KITTI(batch_size=BATCH_SIZE):
+    sequence_paths = [f'sequences/0{i}' for i in range(11)]
+    poses_paths = [f'poses/0{i}.txt' for i in range(11)]
+    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(11)]
 
     train_datasets, val_datasets = [], []
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
         if i not in train_seqeunces and i not in val_sequences: continue
-        
+        cam0_seq = os.path.join(sequence_path, 'image_0')
+        cam1_seq = os.path.join(sequence_path, 'image_1')
+
         # Get a list of all poses [R,t] in this sequence
         poses = read_poses(poses_path)
-
+        
         # Indices of 'good' image frames
-        valid_indices = get_valid_indices(len(poses), sequence_path)
+        valid_indices = get_valid_indices(len(poses), cam0_seq)
     
         # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-        original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
-        K = get_intrinsic_KITTI(calib_path, original_image_size)
+        orginal_image_size = torch.tensor(Image.open(os.path.join(cam0_seq, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
+        k0, k1 = get_intrinsic_KITTI(calib_path, orginal_image_size)
 
         # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
-        custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K)
+        dataset_cam0 = Dataset(cam0_seq, poses, valid_indices, transform, k0, val=False, seq_name= f'0{i}')
+        dataset_cam1 = Dataset(cam1_seq, poses, valid_indices, transform, k1, val=True, seq_name= f'0{i}')
         if i in train_seqeunces:
-            train_datasets.append(custom_dataset)        
-        elif i in val_sequences:
-            val_datasets.append(custom_dataset)
+            train_datasets.append(dataset_cam0)        
+        if i in val_sequences:
+            val_datasets.append(dataset_cam1)
 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
@@ -168,11 +175,8 @@ def get_dataloaders_KITTI(batch_size):
     return train_loader, val_loader
 
 
-def get_data_loaders(batch_size):
+def get_data_loaders(batch_size=BATCH_SIZE):
     if USE_REALESTATE:
         return get_dataloaders_RealEstate(batch_size)
     else: # KITTI
         return get_dataloaders_KITTI(batch_size)
-
-
-

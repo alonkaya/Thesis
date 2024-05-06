@@ -6,7 +6,7 @@ from scipy.linalg import rq
 import numpy as np
 
 def get_intrinsic_REALESTATE(specs_path, original_image_size):
-    intrinsics = read_camera_intrinsic(specs_path)
+    intrinsics, _ = read_camera_intrinsic(specs_path)
     width = original_image_size[0]
     height = original_image_size[1]
 
@@ -23,8 +23,17 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size):
     return k
 
 def get_intrinsic_KITTI(calib_path, original_image_size):
-    projection_matrix = read_camera_intrinsic(calib_path).reshape(3,4)
+    projection_matrix_cam0, projection_matrix_cam1 = read_camera_intrinsic(calib_path)
 
+    k0, k1 = decompose_k(projection_matrix_cam0.reshape(3, 4)), decompose_k(projection_matrix_cam1.reshape(3, 4))
+
+    # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
+    k0, k1 = adjust_k_resize(k0, original_image_size, torch.tensor([256, 256])), adjust_k_resize(k1, original_image_size, torch.tensor([256, 256]))
+    k0, k1 = adjust_k_crop(k0, 16, 16) if not RANDOM_CROP else k0, adjust_k_crop(k1, 16, 16) if not RANDOM_CROP else k1
+
+    return k0, k1
+
+def decompose_k(projection_matrix):
     # Extract the 3x3 part of the matrix (ignoring the last column)
     M = projection_matrix[:, :3]
 
@@ -38,11 +47,7 @@ def get_intrinsic_KITTI(calib_path, original_image_size):
     # Normalize K to ensure the bottom-right value is 1
     K = K / K[2, 2]
 
-    # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-    k = adjust_k_resize(K, original_image_size, torch.tensor([256, 256]))
-    k = adjust_k_crop(k, 16, 16) if not RANDOM_CROP else k
-
-    return k
+    return torch.from_numpy(K)
 
 def adjust_k_resize(k, original_size, resized_size):
     # Adjust the intrinsic matrix K according to the resize
@@ -69,9 +74,12 @@ def compute_relative_transformations(pose1, pose2):
     R2 = pose2[:, :3]
 
     R1_T = torch.transpose(R1, 0, 1)
-    R_relative = torch.matmul(R2, R1_T) # TODO: Check again if moving to KITTI! (maybe should be torch.matmul(R1_T, R2, ))
-    
-    t_image_2_world_coor = torch.matmul(R1_T, (t2 - t1))
+    R2_T = torch.transpose(R2, 0, 1)
+    R_image_2_world_coor = torch.matmul(R2_T, R1)
+    R_world_2_image_coor = torch.matmul(R2, R1_T)
+    R_relative = R_world_2_image_coor if USE_REALESTATE else R_image_2_world_coor
+
+    t_image_2_world_coor = torch.matmul(R2_T, (t1 - t2))
     t_world_2_image_coor = t2 - torch.matmul(R_relative, t1)
     t_relative = t_world_2_image_coor if USE_REALESTATE else t_image_2_world_coor
     
@@ -109,6 +117,9 @@ singular values: {S.cpu().tolist()}\n""")
 def get_F(poses, idx, k1, k2, jump_frames=JUMP_FRAMES):
     R_relative, t_relative = compute_relative_transformations(
         poses[idx], poses[idx+jump_frames])
+        # torch.tensor(poses[idx][:3,:], dtype=torch.float32), torch.tensor(poses[idx+jump_frames][:3,:], dtype=torch.float32))
+    # R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32)
+    # t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32)
     E = compute_essential(R_relative, t_relative)
     F = compute_fundamental(E, k1, k2)
 
@@ -150,27 +161,27 @@ def make_rank2(F, is_batch=True):
         print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
     return output
 
-def update_distances(img_1, img_2, F, algebraic_dist, RE1_dist, SED_dist):
-    epipolar_geo = EpipolarGeometry(img_1, img_2, F)
+def update_distances(img_1, img_2, F, algebraic_dist, RE1_dist, SED_dist, pts1, pts2):
+    epipolar_geo = EpipolarGeometry(img_1, img_2, F, pts1, pts2)
     algebraic_dist = algebraic_dist + epipolar_geo.get_sqr_algebraic_distance()
     RE1_dist = RE1_dist + epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
-    SED_dist = SED_dist + epipolar_geo.get_SED_distance() if SED_DIST else SED_dist
+    SED_dist = SED_dist + epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
     return algebraic_dist, RE1_dist, SED_dist
 
-def update_epoch_stats(stats, first_image, second_image, label, output, output_grad, plots_path, epoch=0, val=False):
+def update_epoch_stats(stats, first_image, second_image, label, output, pts1, pts2, plots_path, epoch=0, val=False):
     # TODO: change from squared to abs in evalutation
     algebraic_dist_truth, algebraic_dist_pred, \
     RE1_dist_truth, RE1_dist_pred, \
     SED_dist_truth, SED_dist_pred = torch.tensor(0), torch.tensor(0), torch.tensor(0), \
                                     torch.tensor(0), torch.tensor(0), torch.tensor(0)
-    for img_1, img_2, F_truth, F_pred, F_pred_grad in zip(first_image, second_image, label, output, output_grad):
-        algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img_1, img_2, F_pred_grad, algebraic_dist_pred, RE1_dist_pred, SED_dist_pred)
+    for img_1, img_2, F_truth, F_pred in zip(first_image, second_image, label, output):
+        algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img_1, img_2, F_pred, algebraic_dist_pred, RE1_dist_pred, SED_dist_pred, pts1, pts2)
 
         if epoch == 0:
-            algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img_1, img_2, F_truth, algebraic_dist_truth, RE1_dist_truth, SED_dist_truth)
+            algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img_1, img_2, F_truth, algebraic_dist_truth, RE1_dist_truth, SED_dist_truth, pts1, pts2)
 
         if epoch == VISIUALIZE["epoch"] and val:
-            epipolar_geo_pred = EpipolarGeometry(img_1,img_2, F_pred)
+            epipolar_geo_pred = EpipolarGeometry(img_1, img_2, F_pred.detach(), pts1, pts2)
             epipolar_geo_pred.visualize(idx=stats["file_num"], lines_path=os.path.join(plots_path, VISIUALIZE["dir"]))
             stats["file_num"] = stats["file_num"] + 1
  
@@ -188,14 +199,18 @@ def update_epoch_stats(stats, first_image, second_image, label, output, output_g
     return algebraic_dist_pred, RE1_dist_pred, SED_dist_pred
 
 class EpipolarGeometry:
-    def __init__(self, image1_tensors, image2_tensors, F):
+    def __init__(self, image1_tensors, image2_tensors, F, pts1=None, pts2=None):
         self.F = F.view(3, 3)
 
         # Convert images back to original
         self.image1_numpy = reverse_transforms(image1_tensors)
         self.image2_numpy = reverse_transforms(image2_tensors)
 
-        self.pts1, self.pts2 = self.get_keypoints()
+        if pts1 is None:
+            self.get_keypoints()
+        else:
+            self.pts1 = pts1
+            self.pts2 = pts2
 
         self.colors = [
             (255, 102, 102),
@@ -221,20 +236,22 @@ class EpipolarGeometry:
         min_distance_index = 0
         for i, (m, n) in enumerate(matches):
             distances.append(m.distance / n.distance)
-            if distances[-1] < threshold / ((len(self.good) // 15)+1):
+            if distances[-1] < threshold:
+            # if distances[-1] < threshold / ((len(self.good) // 15)+1):
                 self.good.append(m)
             min_distance_index = i if distances[i] < distances[min_distance_index] else min_distance_index
         # If no point passed the threshold, add the smallest distance ratio point
         if len(self.good) == 0:
             self.good.append(matches[min_distance_index][0])
 
-        pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32).to(device)
-        pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32).to(device)
+        pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32)
+        pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32)
 
-        pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1).to(device)), dim=-1)
-        pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1).to(device)), dim=-1)
+        self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1)
+        self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1)
 
-        return pts1, pts2
+        self.pts1, self.pts2 = self.trim_by_sed()
+
     
     def algebraic_distance(self, F, pt1, pt2):
         return np.abs(pt2.T.dot(F).dot(pt1))        
@@ -244,11 +261,10 @@ class EpipolarGeometry:
         return torch.matmul(F, points.view(-1, 3, 1)).view(-1,3)
     
     def point_2_line_distance(self, point, l):
-        l = l.flatten()
-        result = abs(np.dot(point, l.T) / np.sqrt(l[0]**2 + l[1]**2))
-
-        return result
-    
+        # Both point and line are 3x1 vectors
+        l = l.flatten() # shape (3,)
+        return abs(np.dot(l, point) / np.sqrt(l[0]**2 + l[1]**2))
+        
     def point_2_line_distance_all_points(self, points, lines):
         numerators = abs(torch.sum(lines * points, axis=1))  # Element-wise multiplication and sum over rows
         denominators = torch.sqrt(lines[:, 0]**2 + lines[:, 1]**2)
@@ -265,7 +281,11 @@ class EpipolarGeometry:
         RE1 = (Ri**2) / denominator
 
         return torch.mean(RE1)
-    
+
+    def trim_by_sed(self, threshold=SED_TRIM_THRESHOLD):
+        sed = self.get_SED_distance()
+        return self.pts1[sed < threshold], self.pts2[sed < threshold]
+
     def get_SED_distance(self, show_histogram=False, plots_path=None):
         lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
         lines2 = self.compute_epipolar_lines(self.F, self.pts1)   # shape (n,3)
@@ -275,13 +295,11 @@ class EpipolarGeometry:
         distances2 = self.point_2_line_distance_all_points(self.pts2, lines2)
 
         sed = distances1**2 + distances2**2  # shape (n)
-        if TRIM:
-            sed = trim(sed, 0.05)
 
         if show_histogram:
             points_histogram(sed.cpu(), plots_path)
 
-        return torch.mean(sed)
+        return sed
     
     def get_SED_distance2(self):
         lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
@@ -294,6 +312,9 @@ class EpipolarGeometry:
 
         return torch.mean(sed)
 
+    def get_mean_SED_distance(self):
+        return torch.mean(self.get_SED_distance())
+    
     def get_algebraic_distance(self):
         return torch.abs(torch.matmul(torch.matmul(
             self.pts2.view(-1, 1, 3), self.F), self.pts1.view(-1, 3, 1))) # Returns shape (n,1,1)
@@ -317,7 +338,7 @@ class EpipolarGeometry:
 
         F = self.F.cpu().numpy()
         pts1, pts2 = self.pts1.cpu().numpy(), self.pts2.cpu().numpy()
-
+        
         img1_line = self.image1_numpy.copy()
         img2_line = self.image2_numpy.copy()
 
@@ -327,12 +348,12 @@ class EpipolarGeometry:
 
         img_W = self.image1_numpy.shape[1] - 1
         epip_test_err = 0
-        for color_idx, (pt1, pt2) in enumerate(zip(pts1, pts2)):
+        for color_idx, (pt1, pt2) in enumerate(zip(pts1, pts2)): # pt1, pt2 of shape (3,)   
             x1, y1, _ = pt1
             x2, y2, _ = pt2
 
-            line_1 = np.dot(np.transpose(F), pt2)
-            line_2 = np.dot(F, pt1)
+            line_1 = np.dot(F, pt2)
+            line_2 = np.dot(np.transpose(F), pt1)
 
             # Get ditance from point to line error
             avg_distance_err_img1 += self.point_2_line_distance(pt1, line_1)
@@ -372,7 +393,7 @@ class EpipolarGeometry:
         epip_test_err /= self.pts1.shape[0]
 
         RE1_dist = self.get_RE1_distance().cpu().item()
-        SED_dist = self.get_SED_distance().cpu().item()
+        SED_dist = self.get_mean_SED_distance().cpu().item()
         vis = np.concatenate((img1_line, img2_line), axis=0)
         font = cv2.FONT_HERSHEY_SIMPLEX
 
