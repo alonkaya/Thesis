@@ -178,10 +178,10 @@ def update_epoch_stats(stats, first_image, second_image, label, output, pts1_bat
         algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img_1, img_2, F_pred, algebraic_dist_pred, RE1_dist_pred, SED_dist_pred, pts1, pts2)
 
         if epoch == 0:
-            algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img_1, img_2, F_truth, algebraic_dist_truth, RE1_dist_truth, SED_dist_truth, pts1, pts2)
+            algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img_1, img_2, F_truth, algebraic_dist_truth, RE1_dist_truth, SED_dist_truth, pts1.detach(), pts2.detach())
 
         if epoch == VISIUALIZE["epoch"] and val:
-            epipolar_geo_pred = EpipolarGeometry(img_1, img_2, F_pred.detach(), pts1, pts2)
+            epipolar_geo_pred = EpipolarGeometry(img_1, img_2, F_pred.detach(), pts1.detach(), pts2.detach())
             epipolar_geo_pred.visualize(idx=stats["file_num"], lines_path=os.path.join(plots_path, VISIUALIZE["dir"]))
             stats["file_num"] = stats["file_num"] + 1
  
@@ -297,10 +297,22 @@ class EpipolarGeometry:
 
         return torch.mean(RE1)
 
-
-    def trim_by_sed(self, threshold=SED_TRIM_THRESHOLD):
+    def trim_by_sed(self, threshold=SED_TRIM_THRESHOLD, min_keypoints=5):
         sed = self.get_SED_distance()
-        return self.pts1[sed < threshold].view(-1,3), self.pts2[sed < threshold].view(-1,3)
+        sorted_indices = torch.argsort(sed)
+        
+        # Find indices of keypoints with SED values below threshold
+        selected_indices = sorted_indices[sed[sorted_indices] < threshold]
+        
+        # If there are fewer than min_keypoints below threshold, select the smallest min_keypoints keypoints
+        if len(selected_indices) < min_keypoints:
+            selected_indices = sorted_indices[:min_keypoints]
+        
+        # Select corresponding keypoints
+        trimmed_pts1 = self.pts1[selected_indices].view(-1, 3)
+        trimmed_pts2 = self.pts2[selected_indices].view(-1, 3)
+        
+        return trimmed_pts1, trimmed_pts2
 
     def get_SED_distance(self, show_histogram=False, plots_path=None):
         lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
