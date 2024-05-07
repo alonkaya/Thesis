@@ -200,22 +200,22 @@ class FMatrixRegressor(nn.Module):
                 # Update epoch statistics
                 batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
                     epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, epoch)
-                # print(epoch_stats["algebraic_truth"].cpu().item(), epoch_stats["RE1_truth"].cpu().item(), epoch_stats["SED_truth"].cpu().item())
+                print(epoch_stats["algebraic_truth"].cpu().item(), epoch_stats["RE1_truth"].cpu().item(), epoch_stats["SED_truth"].cpu().item())
                 
-            #     # alpha_gt, beta_gt = find_coefficients(label)
-            #     # Compute loss
-            #     loss = self.L2_loss(output, label) + \
-            #             self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred + self.sed_coeff*batch_SED_pred
-            #     epoch_stats["loss"] = epoch_stats["loss"] + loss.detach()
+                # alpha_gt, beta_gt = find_coefficients(label)
+                # Compute loss
+                loss = self.L2_loss(output, label) + \
+                        self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred + self.sed_coeff*batch_SED_pred
+                epoch_stats["loss"] = epoch_stats["loss"] + loss.detach()
 
-            #     # Compute Backward pass and gradients
-            #     self.optimizer.zero_grad()
-            #     loss.backward()
-            #     self.optimizer.step()
+                # Compute Backward pass and gradients
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
 
-            #     # Extend lists with batch statistics
-            #     labels = torch.cat((labels, label.detach()), dim=0)
-            #     outputs = torch.cat((outputs, output.detach()), dim=0)
+                # Extend lists with batch statistics
+                labels = torch.cat((labels, label.detach()), dim=0)
+                outputs = torch.cat((outputs, output.detach()), dim=0)
 
             # # Validation
             # self.eval()

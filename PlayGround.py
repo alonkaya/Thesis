@@ -140,6 +140,5 @@ def sed_histogram_trained(plots_path):
 
 if __name__ == "__main__":
     # plots_path = 'plots/RealEstate/SED_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True'
-    os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
     vis_gt()
