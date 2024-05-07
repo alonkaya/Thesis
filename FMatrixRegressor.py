@@ -200,6 +200,7 @@ class FMatrixRegressor(nn.Module):
                 # Update epoch statistics
                 batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
                     epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, epoch)
+                print(epoch_stats["algebraic_truth"], epoch_stats["RE1_truth"], epoch_stats["SED_truth"])
                 return
                 
                 # alpha_gt, beta_gt = find_coefficients(label)

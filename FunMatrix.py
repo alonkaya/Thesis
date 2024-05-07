@@ -180,8 +180,6 @@ def update_epoch_stats(stats, first_image, second_image, label, output, pts1_bat
 
         if epoch == 0:
             algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img_1, img_2, F_truth, algebraic_dist_truth, RE1_dist_truth, SED_dist_truth, pts1, pts2)
-            print(f'alg_truth: {algebraic_dist_truth}\nRE1_truth: {RE1_dist_truth}\nSED_truth: {SED_dist_truth}\n')
-            return
 
         if epoch == VISIUALIZE["epoch"] and val:
             epipolar_geo_pred = EpipolarGeometry(img_1, img_2, F_pred.detach(), pts1, pts2)
