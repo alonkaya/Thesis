@@ -175,7 +175,6 @@ def update_epoch_stats(stats, first_image, second_image, label, output, pts1_bat
     SED_dist_truth, SED_dist_pred = torch.tensor(0), torch.tensor(0), torch.tensor(0), \
                                     torch.tensor(0), torch.tensor(0), torch.tensor(0)
     for img_1, img_2, F_truth, F_pred, pts1, pts2 in zip(first_image, second_image, label, output, pts1_batch, pts2_batch):
-        print(f'img1: {img_1}\nimg2: {img_2}\nF_truth: {F_truth}\nF_pred: {F_pred}\npts1: {pts1}\npts2: {pts2}\n')
         algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img_1, img_2, F_pred, algebraic_dist_pred, RE1_dist_pred, SED_dist_pred, pts1, pts2)
 
         if epoch == 0:
