@@ -289,7 +289,7 @@ class EpipolarGeometry:
     def get_SED_distance(self, show_histogram=False, plots_path=None):
         lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
         lines2 = self.compute_epipolar_lines(self.F, self.pts1)   # shape (n,3)
-        
+        print(self.pts1.shape, lines1.shape)
         # Compute the distances from each point to its corresponding epipolar line
         distances1 = self.point_2_line_distance_all_points(self.pts1, lines1)
         distances2 = self.point_2_line_distance_all_points(self.pts2, lines2)
