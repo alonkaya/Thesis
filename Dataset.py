@@ -47,7 +47,7 @@ class Dataset(torch.utils.data.Dataset):
 
         epi = EpipolarGeometry(img1, img2, F=F)
         pts1, pts2 = epi.pts1, epi.pts2
-
+        
         return img1, img2, F, pts1, pts2, self.seq_name
 
 def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
