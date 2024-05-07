@@ -192,7 +192,6 @@ class FMatrixRegressor(nn.Module):
             
             for img1, img2, label, pts1, pts2, _ in train_loader:
                 img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
-                print(pts1.shape)
                 # Forward pass
                 output = self.forward(img1, img2)
 

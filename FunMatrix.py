@@ -249,9 +249,9 @@ class EpipolarGeometry:
 
         self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1)
         self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1)
-
+        print(f' 1  {self.pts2.shape}')
         self.pts1, self.pts2 = self.trim_by_sed()
-
+        print(f' 1  {self.pts2.shape}')
     
     def algebraic_distance(self, F, pt1, pt2):
         return np.abs(pt2.T.dot(F).dot(pt1))        
