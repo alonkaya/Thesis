@@ -195,8 +195,8 @@ class FMatrixRegressor(nn.Module):
                 # Forward pass
                 output = self.forward(img1, img2)
 
-                pts1.requires_grad = True
-                pts2.requires_grad = True
+                # pts1.requires_grad = True
+                # pts2.requires_grad = True
                 # Update epoch statistics
                 batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
                     epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, epoch)
