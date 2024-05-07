@@ -163,13 +163,9 @@ def make_rank2(F, is_batch=True):
 
 def update_distances(img_1, img_2, F, algebraic_dist, RE1_dist, SED_dist, pts1, pts2):
     epipolar_geo = EpipolarGeometry(img_1, img_2, F, pts1, pts2)
-    print(f'1: {epipolar_geo.pts1.shape}')
     algebraic_dist = algebraic_dist + epipolar_geo.get_sqr_algebraic_distance()
-    print(f'2: {epipolar_geo.pts1.shape}')
     RE1_dist = RE1_dist + epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
-    print(f'3: {epipolar_geo.pts1.shape}')
     SED_dist = SED_dist + epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
-    print(f'4: {epipolar_geo.pts1.shape}')
     return algebraic_dist, RE1_dist, SED_dist
 
 def update_epoch_stats(stats, first_image, second_image, label, output, pts1, pts2, plots_path, epoch=0, val=False):
@@ -253,7 +249,7 @@ class EpipolarGeometry:
 
         self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1)
         self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1)
-        print(self.pts1.shape)
+
         self.pts1, self.pts2 = self.trim_by_sed()
 
     
@@ -288,7 +284,7 @@ class EpipolarGeometry:
 
     def trim_by_sed(self, threshold=SED_TRIM_THRESHOLD):
         sed = self.get_SED_distance()
-        return self.pts1[sed < threshold], self.pts2[sed < threshold]
+        return self.pts1[sed < threshold].view(-1,3), self.pts2[sed < threshold].view(-1,3)
 
     def get_SED_distance(self, show_histogram=False, plots_path=None):
         lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
