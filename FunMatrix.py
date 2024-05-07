@@ -173,7 +173,6 @@ def update_distances(img_1, img_2, F, algebraic_dist, RE1_dist, SED_dist, pts1, 
     return algebraic_dist, RE1_dist, SED_dist
 
 def update_epoch_stats(stats, first_image, second_image, label, output, pts1, pts2, plots_path, epoch=0, val=False):
-    print(pts1.shape, pts2.shape)
     # TODO: change from squared to abs in evalutation
     algebraic_dist_truth, algebraic_dist_pred, \
     RE1_dist_truth, RE1_dist_pred, \
@@ -254,7 +253,7 @@ class EpipolarGeometry:
 
         self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1)
         self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1)
-
+        print(self.pts1.shape)
         self.pts1, self.pts2 = self.trim_by_sed()
 
     
