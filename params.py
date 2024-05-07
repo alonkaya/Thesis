@@ -49,4 +49,4 @@ GROUP_CONV = {"use" : False, "out_channels": 256}
 VISIUALIZE = {"epoch" : NUM_EPOCHS-1, "dir": 'predicted_epipole_lines'}
 FIRST_2_THRIDS_TRAIN = False
 FIRST_2_OF_3_TRAIN = False
-ADDITIONS = "RightCamVal__pts_wo_grad__"
+ADDITIONS = "RightCamVal__"
