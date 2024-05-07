@@ -168,13 +168,13 @@ def update_distances(img_1, img_2, F, algebraic_dist, RE1_dist, SED_dist, pts1, 
     SED_dist = SED_dist + epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
     return algebraic_dist, RE1_dist, SED_dist
 
-def update_epoch_stats(stats, first_image, second_image, label, output, pts1, pts2, plots_path, epoch=0, val=False):
+def update_epoch_stats(stats, first_image, second_image, label, output, pts1_batch, pts2_batch, plots_path, epoch=0, val=False):
     # TODO: change from squared to abs in evalutation
     algebraic_dist_truth, algebraic_dist_pred, \
     RE1_dist_truth, RE1_dist_pred, \
     SED_dist_truth, SED_dist_pred = torch.tensor(0), torch.tensor(0), torch.tensor(0), \
                                     torch.tensor(0), torch.tensor(0), torch.tensor(0)
-    for img_1, img_2, F_truth, F_pred in zip(first_image, second_image, label, output):
+    for img_1, img_2, F_truth, F_pred, pts1, pts2 in zip(first_image, second_image, label, output, pts1_batch, pts2_batch):
         algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img_1, img_2, F_pred, algebraic_dist_pred, RE1_dist_pred, SED_dist_pred, pts1, pts2)
 
         if epoch == 0:
