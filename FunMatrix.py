@@ -163,13 +163,13 @@ def make_rank2(F, is_batch=True):
 
 def update_distances(img_1, img_2, F, algebraic_dist, RE1_dist, SED_dist, pts1, pts2):
     epipolar_geo = EpipolarGeometry(img_1, img_2, F, pts1, pts2)
-    print(f'1: {self.pts1.shape}, {lines1.shape}')
+    print(f'1: {epipolar_geo.pts1.shape}')
     algebraic_dist = algebraic_dist + epipolar_geo.get_sqr_algebraic_distance()
-    print(f'2: {self.pts1.shape}, {lines1.shape}')
+    print(f'2: {epipolar_geo.pts1.shape}')
     RE1_dist = RE1_dist + epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
-    print(f'3: {self.pts1.shape}, {lines1.shape}')
+    print(f'3: {epipolar_geo.pts1.shape}')
     SED_dist = SED_dist + epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
-    print(f'4: {self.pts1.shape}, {lines1.shape}')
+    print(f'4: {epipolar_geo.pts1.shape}')
     return algebraic_dist, RE1_dist, SED_dist
 
 def update_epoch_stats(stats, first_image, second_image, label, output, pts1, pts2, plots_path, epoch=0, val=False):
