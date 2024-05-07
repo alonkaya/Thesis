@@ -162,7 +162,7 @@ def make_rank2(F, is_batch=True):
     return output
 
 def update_distances(img_1, img_2, F, algebraic_dist, RE1_dist, SED_dist, pts1, pts2):
-    print(epipolar_geo.pts1.shape)
+    print(pts1.shape)
 
     epipolar_geo = EpipolarGeometry(img_1, img_2, F, pts1, pts2)
     algebraic_dist = algebraic_dist + epipolar_geo.get_sqr_algebraic_distance()
