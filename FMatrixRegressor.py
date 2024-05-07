@@ -200,7 +200,7 @@ class FMatrixRegressor(nn.Module):
                 # Update epoch statistics
                 batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
                     epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, epoch)
-
+                
                 # alpha_gt, beta_gt = find_coefficients(label)
                 # Compute loss
                 loss = self.L2_loss(output, label) + \
@@ -305,15 +305,15 @@ def use_pretrained_model(sequence_name, plots_path):
                     "loss": torch.tensor(0), "val_loss": torch.tensor(0),
                     "epoch_penalty": torch.tensor(0), "file_num": 0}
 
-    for img1, img2, label in val_loader:
-        img1, img2, label = img1.to(device), img2.to(device), label.to(device)
+    for img1, img2, label, pts1, pts2, _ in val_loader:
+        img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
         # Forward pass
-        output, _, _, _ = model.forward(img1, img2)
+        output = model.forward(img1, img2)
 
         # Update epoch statistics
         batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
-            epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach(), output, plots_path=plots_path, epoch=-1, val=True)
+            epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, plots_path=plots_path, epoch=VISIUALIZE["epoch"], val=True)
 
 
 def paramterization_layer(x, plots_path):
