@@ -78,9 +78,9 @@ def valid_indices_of_dataset(train_loader, idx):
 def vis_gt():
     train_loader, val_loader = get_data_loaders()
     total_sed = 0
-    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
         epipolar_geo = EpipolarGeometry(img1[0], img2[0], F=label[0], pts1=pts1[0], pts2=pts2[0])
-        total_sed += epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("gt_epipole_lines_KITTI_cam0", seq_name[0]))
+        total_sed += epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("gt_epipole_lines_KITTI_cam1", seq_name[0]))
         if i == 300: break
     total_sed /= i
     print(f'SED distance: {total_sed}') 
@@ -142,4 +142,4 @@ if __name__ == "__main__":
     # plots_path = 'plots/RealEstate/SED_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True'
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
-    sed_distance_gt()
+    vis_gt()

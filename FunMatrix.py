@@ -117,7 +117,6 @@ singular values: {S.cpu().tolist()}\n""")
 def get_F(poses, idx, k1, k2, jump_frames=JUMP_FRAMES):
     R_relative, t_relative = compute_relative_transformations(
         poses[idx], poses[idx+jump_frames])
-        # torch.tensor(poses[idx][:3,:], dtype=torch.float32), torch.tensor(poses[idx+jump_frames][:3,:], dtype=torch.float32))
     # R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32)
     # t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32)
     E = compute_essential(R_relative, t_relative)
