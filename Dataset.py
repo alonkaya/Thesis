@@ -22,7 +22,7 @@ class Dataset(torch.utils.data.Dataset):
         self.jump_frames = jump_frames
 
     def __len__(self):
-        return (len(self.valid_indices) - VAL_LENGTH if not self.val else VAL_LENGTH) - self.jump_frames
+        return len(self.valid_indices) - VAL_LENGTH if not self.val else VAL_LENGTH
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx] + VAL_LENGTH if not self.val else self.valid_indices[idx]
@@ -46,9 +46,8 @@ class Dataset(torch.utils.data.Dataset):
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
         epi = EpipolarGeometry(img1, img2, F=F)
-        pts1, pts2 = epi.pts1, epi.pts2
 
-        return img1, img2, F, pts1, pts2, self.seq_name
+        return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
 
 def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
     valid_indices = []
@@ -61,32 +60,26 @@ def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
 
     return valid_indices
 
-if AUGMENTATION:
-    transform = v2.Compose([
-        v2.Resize((256, 256), antialias=True),
-        v2.CenterCrop(224),
-        v2.Grayscale(num_output_channels=3),
-        v2.ColorJitter(brightness=(0.85, 1.15), contrast=(0.85, 1.15)),
+
+def get_transform():
+    transforms = []
+    
+    if not RANDOM_CROP:
+        transforms.extend([
+            v2.Resize((256, 256), antialias=True),
+            v2.CenterCrop(224)
+        ])
+    transforms.append(v2.Grayscale(num_output_channels=3))
+    if AUGMENTATION:
+        transforms.append(v2.ColorJitter(brightness=(0.85, 1.15), contrast=(0.85, 1.15)),)
+    transforms.extend([
         v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
-        v2.Normalize(mean=norm_mean,  # Normalize each channel
-                            std=norm_std),
-    ])    
-elif RANDOM_CROP:
-    transform = v2.Compose([
-        v2.Grayscale(num_output_channels=3),
-        v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
-        v2.Normalize(mean=norm_mean,  # Normalize each channel
-                            std=norm_std),
-    ])    
-else:
-    transform = v2.Compose([
-        v2.Resize((256, 256), antialias=True),
-        v2.CenterCrop(224),
-        v2.Grayscale(num_output_channels=3),
-        v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
-        v2.Normalize(mean=norm_mean,  # Normalize each channel
-                            std=norm_std),
+        v2.Normalize(mean=norm_mean, std=norm_std),  # Normalize each channel
     ])
+    
+    return v2.Compose(transforms)
+
+transform = get_transform()    
 
 
 def get_dataloaders_RealEstate(batch_size=BATCH_SIZE):

@@ -27,7 +27,7 @@ if __name__ == "__main__":
         plots_path = os.path.join('plots', dataset, 
                           f"""{coeff}{ADDITIONS}lr_{learning_rates_mlp[0]}__\
 avg_embeddings_{AVG_EMBEDDINGS}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
-use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augmentation_{AUGMENTATION}{dataset_class}""")\
+use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augment_{AUGMENTATION}__rc_{RANDOM_CROP}{dataset_class}""")\
         
         model = FMatrixRegressor(lr_vit=lr_vit, lr_mlp=lr_mlp, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path).to(device)
 
@@ -36,7 +36,7 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augmentation_{AUGMENTATION}{datas
         parameters = f"""###########################################################################################################################################################\n
 {ADDITIONS}learning rate vit: {lr_vit}, learning rate mlp: {lr_mlp}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
 batch_size: {BATCH_SIZE}, train_seqeunces: {train_seqeunces}, val_sequences: {val_sequences}, RealEstate: {USE_REALESTATE}, batchnorm & dropout: {BN_AND_DO}, 
-average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, 
+average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP},
 predict pose: {PREDICT_POSE}, SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}
 Dataset: {dataset_class}\n\n"""
         print_and_write(parameters, plots_path)

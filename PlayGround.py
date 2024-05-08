@@ -101,7 +101,7 @@ def sed_distance_gt():
     train_loader, val_loader = get_data_loaders(batch_size=1)
     total_sed = 0
 
-    for i, (img1, img2, label, pts1, pts2, _) in enumerate(train_loader):
+    for i, (img1, img2, label, pts1, pts2, _) in enumerate(val_loader):
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
         epipolar_geo_gt = EpipolarGeometry(img1[0], img2[0], label[0], pts1[0], pts2[0]) 
