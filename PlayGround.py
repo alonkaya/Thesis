@@ -80,7 +80,7 @@ def vis_gt():
     total_sed = 0
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
         epipolar_geo = EpipolarGeometry(img1[0], img2[0], F=label[0], pts1=pts1[0], pts2=pts2[0])
-        total_sed += epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("gt_epipole_lines_KITTI_cam1", seq_name[0]))
+        total_sed += epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("gt_epipole_lines_KITTI_stereo", seq_name[0]))
         if i == 400: break
     total_sed /= i
     print(f'SED distance: {total_sed}') 
