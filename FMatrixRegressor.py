@@ -93,6 +93,7 @@ class FMatrixRegressor(nn.Module):
         ]
         
         self.L2_loss = nn.MSELoss().to(device)
+        self.huber_loss = nn.HuberLoss().to(device)
         self.optimizer = optim.Adam(params, lr=lr_vit)
 
         if self.predict_pose:
@@ -203,7 +204,7 @@ class FMatrixRegressor(nn.Module):
                 
                 # alpha_gt, beta_gt = find_coefficients(label)
                 # Compute loss
-                loss = self.L2_loss(output, label) + \
+                loss = self.L2_loss(output, label) + self.huber_loss(output, label) + \
                         self.alg_coeff*batch_algebraic_pred + self.re1_coeff*batch_RE1_pred + self.sed_coeff*batch_SED_pred
                 epoch_stats["loss"] = epoch_stats["loss"] + loss.detach()
 
@@ -231,7 +232,7 @@ class FMatrixRegressor(nn.Module):
                     
                     # val_alpha_gt, val_beta_gt = find_coefficients(val_label)
                     # Compute loss
-                    epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) + \
+                    epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) + self.huber_loss(val_output, val_label) + \
                                 self.alg_coeff*val_batch_algebraic_pred + self.re1_coeff*val_batch_RE1_pred + self.sed_coeff*val_batch_SED_pred
                     
                     # Extend lists with batch statistics

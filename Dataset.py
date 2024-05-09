@@ -71,9 +71,9 @@ def get_transform():
         ])
     transforms.append(v2.Grayscale(num_output_channels=3))
     if AUGMENTATION:
-        transforms.append(v2.ColorJitter(brightness=(0.85, 1.15), contrast=(0.85, 1.15)),)
+        transforms.append(v2.ColorJitter(brightness=(0.85, 1.15), contrast=(0.85, 1.15)))
     transforms.extend([
-        v2.ToDtype(torch.float32, scale=True),  # Converts to torch.float32 and scales [0,255] -> [0,1]
+        v2.ToDtype(torch.float32, scale=True),       # Converts to torch.float32 and scales [0,255] -> [0,1]
         v2.Normalize(mean=norm_mean, std=norm_std),  # Normalize each channel
     ])
     

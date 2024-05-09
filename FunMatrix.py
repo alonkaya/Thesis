@@ -181,7 +181,7 @@ def update_epoch_stats(stats, first_image, second_image, label, output, pts1_bat
 
         if epoch == VISIUALIZE["epoch"] and val:
             epipolar_geo_pred = EpipolarGeometry(img_1, img_2, F_pred.detach(), pts1.detach(), pts2.detach())
-            epipolar_geo_pred.visualize(idx=stats["file_num"], lines_path=os.path.join(plots_path, VISIUALIZE["dir"]))
+            epipolar_geo_pred.visualize(idx=stats["file_num"], epipolar_lines_path=os.path.join(plots_path, VISIUALIZE["dir"]))
             stats["file_num"] = stats["file_num"] + 1
  
     algebraic_dist_pred, RE1_dist_pred, SED_dist_pred, algebraic_dist_truth, RE1_dist_truth, SED_dist_truth =\
@@ -257,18 +257,15 @@ class EpipolarGeometry:
         return torch.matmul(F, points.view(-1, 3, 1)).view(-1,3)
     
     def point_2_line_distance(self, point, l):
-        # Both point and line are 3x1 vectors
-        l = l.flatten() # shape (3,)
-        return abs(np.dot(l, point) / np.sqrt(l[0]**2 + l[1]**2))
+        # Both point and line are of shape (3,) 
+        return abs(np.sum(l * point) / np.sqrt(l[0]**2 + l[1]**2))
         
     def point_2_line_distance_all_points(self, points, lines):
+        # Both points and lines are of shape (n,3)
         numerators = abs(torch.sum(lines * points, axis=1))  # Element-wise multiplication and sum over rows
         denominators = torch.sqrt(lines[:, 0]**2 + lines[:, 1]**2)
 
         return numerators / denominators
-
-    def get_mean_SED_distance(self):
-        return torch.mean(self.get_SED_distance())
 
 
     def algebraic_distance_single_point(self, F, pt1, pt2):
@@ -283,7 +280,6 @@ class EpipolarGeometry:
     
     def get_sqr_algebraic_distance(self):
         return torch.mean(self.get_algebraic_distance()**2)
-    
     
     def get_RE1_distance(self):
         inhomogeneous_l1 = self.compute_epipolar_lines(self.F.T, self.pts2)[:,0:2]
@@ -313,6 +309,9 @@ class EpipolarGeometry:
         
         return trimmed_pts1, trimmed_pts2
 
+    def get_mean_SED_distance(self):
+        return torch.mean(self.get_SED_distance())
+    
     def get_SED_distance(self, show_histogram=False, plots_path=None):
         lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
         lines2 = self.compute_epipolar_lines(self.F, self.pts1)   # shape (n,3)
@@ -337,7 +336,7 @@ class EpipolarGeometry:
         Ri = self.get_algebraic_distance()
         sed = (Ri**2) * denominator.view(-1,1,1) # shape (n)
 
-        return torch.mean(sed)
+        return sed.view(-1)
 
 
     def epipoline(self, x, formula):
@@ -348,7 +347,7 @@ class EpipolarGeometry:
         return int((-c - a * x) / b)
 
     def visualize(self, idx, epipolar_lines_path=None, sequence_path=None, move_bad_images=False):
-        """ Pass lines_path when showing epipolar lines otherwise pass seqeunce_path to move bad images"""
+        """ Pass epipolar_lines_path when showing epipolar lines otherwise pass seqeunce_path to move bad images"""
         file_name = f'{idx:06}.{IMAGE_TYPE}' if idx != None else None
 
         F = self.F.cpu().numpy()
@@ -367,8 +366,8 @@ class EpipolarGeometry:
             x1, y1, _ = pt1
             x2, y2, _ = pt2
 
-            line_1 = np.dot(F, pt2)
-            line_2 = np.dot(np.transpose(F), pt1)
+            line_1 = np.dot(np.transpose(F), pt2)
+            line_2 = np.dot(F, pt1)
 
             # Get ditance from point to line error
             avg_distance_err_img1 += self.point_2_line_distance(pt1, line_1)
