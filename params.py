@@ -8,8 +8,8 @@ device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu
 
 learning_rates_vit = [2e-5]
 learning_rates_mlp = [2e-5]
-train_seqeunces = [2]
-val_sequences = [2]
+train_seqeunces = [0,1,2,3,5,6]
+val_sequences = [0,1,2,3,5,6]
 VAL_LENGTH = 600
 norm_mean = torch.tensor([0.449, 0.449, 0.449])
 norm_std = torch.tensor([0.226, 0.226, 0.226])

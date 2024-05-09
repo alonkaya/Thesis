@@ -114,13 +114,11 @@ singular values: {S.cpu().tolist()}\n""")
     return F
 
 
-def get_F(poses, idx, k1, k2, jump_frames=JUMP_FRAMES):
-    R_relative, t_relative = compute_relative_transformations(
-        poses[idx], poses[idx+jump_frames])
-    # R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32)
-    # t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32)
+def get_F(poses, idx, k0, k1, jump_frames=JUMP_FRAMES, R_relative=None, t_relative=None):
+    if R_relative == None:
+        R_relative, t_relative = compute_relative_transformations(poses[idx], poses[idx+jump_frames])
     E = compute_essential(R_relative, t_relative)
-    F = compute_fundamental(E, k1, k2)
+    F = compute_fundamental(E, k0, k1)
 
     return F
 
