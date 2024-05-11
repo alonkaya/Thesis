@@ -1,6 +1,6 @@
 import torch
 
-DEVICE_ID = 0
+DEVICE_ID = 2
 # if DEVICE_ID==0: DEVICE_ID=1
 # elif DEVICE_ID==2: DEVICE_ID=1
 # elif DEVICE_ID==1: DEVICE_ID==0
