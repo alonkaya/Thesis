@@ -17,7 +17,7 @@ norm_mean = torch.tensor([0.449, 0.449, 0.449])
 norm_std = torch.tensor([0.226, 0.226, 0.226])
 
 USE_REALESTATE = False
-STEREO = True
+STEREO = False
 BATCH_SIZE = 1 # TODO:  change pose_to_F if batch size > 1 ! 
 JUMP_FRAMES = 6 if USE_REALESTATE else 2
 MLP_HIDDEN_DIM = [512, 256]
