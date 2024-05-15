@@ -425,7 +425,7 @@ class EpipolarGeometry:
             move_images(sequence_path, file_name)
         
         dir_name = "good_frames" if SED_dist < SED_BAD_THRESHOLD else "bad_frames"
-        epipolar_lines_path = os.path.join(epipolar_lines_path, dir_name)
+        epipolar_lines_path = os.path.join("epipole_lines", epipolar_lines_path, dir_name)
         os.makedirs(epipolar_lines_path, exist_ok=True)
         cv2.imwrite(os.path.join(epipolar_lines_path, f'{file_name}'), vis)
         print(os.path.join(epipolar_lines_path, f'{file_name}\n'))

@@ -42,6 +42,7 @@ class Dataset(torch.utils.data.Dataset):
         img2 = self.transform(img2)
         
         unnormalized_F = get_F(self.poses, idx, k, k, self.jump_frames)
+        # R_relative, t_relative = compute_relative_transformations(self.poses[idx], self.poses[idx+JUMP_FRAMES])
         
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)

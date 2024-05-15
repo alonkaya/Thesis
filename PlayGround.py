@@ -1,3 +1,4 @@
+import cv2
 from Dataset import get_data_loaders
 from FMatrixRegressor import FMatrixRegressor
 from FunMatrix import EpipolarGeometry
@@ -6,6 +7,8 @@ import matplotlib.pyplot as plt
 from params import *
 import os
 import torch
+
+from utils import points_histogram
 
 # Function to denormalize image
 def denormalize(image, mean, std):
@@ -89,12 +92,12 @@ def vis_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
     
     train_loader, val_loader = get_data_loaders(batch_size=1)
-    for i, (img1, img2, label, seq_name) in enumerate(val_loader):
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
         img1, img2 = img1.to(device), img2.to(device)
-        output, _, _, _ = model.forward(img1, img2)
+        output = model.forward(img1, img2)
 
         epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach())
-        epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("predicted_epipole_lines_2", seq_name[0]))
+        epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("predicted_KITTI_rightcamval_2", seq_name[0]))
 
 
 def sed_distance_gt():
@@ -113,17 +116,27 @@ def sed_distance_gt():
 
 def sed_distance_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
-    
+    source_dir = 'epipole_lines\predicted_KITTI_rightcamval/00'
+
     train_loader, val_loader = get_data_loaders(batch_size=1)
-    total_sed = 0
-    for i, (img1, img2, label) in enumerate(val_loader):
+    sed_list = []
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
         img1, img2 = img1.to(device), img2.to(device)
-        output, _, _, _ = model.forward(img1, img2)
+        output = model.forward(img1, img2)
         epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach())
-        total_sed += epipolar_geo.get_mean_SED_distance()
-    
-    total_sed /= i
-    print(f'SED distance: {total_sed}')
+        sed = epipolar_geo.get_mean_SED_distance()
+        sed_list.append(sed)
+        if i == 1500:
+            break
+        # with open(os.path.join(source_dir, 'stats2.txt'), 'a') as f:
+        #     f.write(f'idx: {i:06}\n')
+        #     f.write(f'SED: {sed}\n')
+        #     f.write(f'R: {R_relative[0].numpy()}\n')
+        #     f.write(f't: {t_relative[0].numpy()}\n\n')
+
+    points_histogram(sed_list)
+    sorted_sed = sorted(sed_list)[:1400]
+    print(f'SED distance: {np.mean(sorted_sed)}')
 
 
 def sed_histogram_trained(plots_path):
@@ -136,10 +149,9 @@ def sed_histogram_trained(plots_path):
         print(seq_name[0])
         epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach())
         sed = epipolar_geo.get_mean_SED_distance(show_histogram=True, plots_path=plots_path)
-
-
+            
 if __name__ == "__main__":
-    # plots_path = 'plots/RealEstate/SED_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True'
+    plots_path = 'plots/KITTI/SED_0.1__RightCamVal__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_True'
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
-    vis_gt()
+    sed_distance_trained(plots_path)

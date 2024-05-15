@@ -257,6 +257,8 @@ class FMatrixRegressor(nn.Module):
             all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
             all_val_SED_pred.append(epoch_stats["val_SED_pred"])
 
+            if SAVE_MODEL:
+                self.save_model() 
 
             if epoch == 0: 
                 print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}       RE1_truth: {epoch_stats["RE1_truth"]}        SED_truth: {epoch_stats["SED_truth"]}
@@ -274,23 +276,16 @@ val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}   val_RE1_truth: {epoc
                 num_epochs = epoch + 1
                 break
         
-        
         plot(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, title="Loss" if not self.predict_pose else "Loss R", plots_path=self.plots_path)
         plot(x=range(1, num_epochs + 1), y1=all_train_mae, y2=all_val_mae, title="MAE" if not self.predict_pose else "MAE R", plots_path=self.plots_path)
         plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred, y2=all_val_algberaic_pred, title="Algebraic distance", plots_path=self.plots_path)
         plot(x=range(1, num_epochs + 1), y1=all_RE1_pred, y2=all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
         plot(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
 
-        if SAVE_MODEL:
-            self.save_model() 
-
     def save_model(self):
         os.makedirs(self.plots_path, exist_ok=True)
         torch.save(self.model.state_dict(), os.path.join(self.plots_path, "model.pth"))
         torch.save(self.mlp.state_dict(), os.path.join(self.plots_path, "mlp.pth"))    
-        if self.predict_pose:
-            torch.save(self.model_t.state_dict(), os.path.join(self.plots_path, "model_t.pth"))
-            torch.save(self.t_mlp.state_dict(), os.path.join(self.plots_path, "mlp_t.pth"))   
 
 
 
@@ -311,7 +306,7 @@ def use_pretrained_model(sequence_name, plots_path):
 
         # Forward pass
         output = model.forward(img1, img2)
-
+        
         # Update epoch statistics
         batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
             epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, plots_path=plots_path, epoch=VISIUALIZE["epoch"], val=True)

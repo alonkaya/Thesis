@@ -182,26 +182,27 @@ def divide_by_dataloader(epoch_stats, len_train_loader, len_val_loader):
 
 from matplotlib.ticker import MaxNLocator
 
-def points_histogram(distances, plots_path):
+def points_histogram(distances):
 
     # Define bins, ensuring they are monotonically increasing
-    bin_edges = torch.tensor([0,2,4,6, 10, 20, 50, 100, 200, 300,400])
+    bin_edges = torch.tensor([0, 0.5, 1, 2, 3, 4, 6, 10, 20, 50, 100, 200, 300,400])
 
     # Calculate histogram counts
     counts, edges = np.histogram(distances, bins=bin_edges)
 
-    # Set a uniform bar width
-    uniform_width = 0.5  # Reduce the width for better visibility in equally spaced plot
+    # Calculate the uniform width for each bar
+    uniform_width = 0.7  # Fixed width for all bars
 
-    # Calculate the centers of bins for labeling
-    bin_centers = np.arange(len(counts))  # Using integer locations for bin centers
+    # Using integer locations for bin centers
+    bin_centers = np.arange(len(counts))
 
     # Plotting the histogram
     plt.figure(figsize=(10, 5))
-    plt.bar(bin_centers, counts, width=uniform_width, align='center', edgecolor='black')
+    plt.bar(bin_centers, counts, width=uniform_width, align='center', edgecolor='black', color='blue')
 
     # Customize x-ticks to show ranges and prevent overlap
-    plt.xticks(ticks=bin_centers, labels=[f"{int(edges[i])}-{int(edges[i+1]-1)}" for i in range(len(edges)-1)])
+    labels = [f"{int(edges[i])}-{int(edges[i+1])}" for i in range(len(edges)-1)]
+    plt.xticks(ticks=bin_centers, labels=labels)
 
     # Adding labels and title
     plt.xlabel('SED Distance')
