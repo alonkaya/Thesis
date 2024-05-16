@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from params import *
 import os
 import torch
+import re
 
 from utils import points_histogram
 
@@ -96,8 +97,8 @@ def vis_trained(plots_path):
         img1, img2 = img1.to(device), img2.to(device)
         output = model.forward(img1, img2)
 
-        epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach())
-        epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("predicted_KITTI_rightcamval_2", seq_name[0]))
+        epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach(), pts1=pts1[0], pts2=pts2[0])
+        epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("predicted_RealEstate", seq_name[0]))
 
 
 def sed_distance_gt():
@@ -116,27 +117,34 @@ def sed_distance_gt():
 
 def sed_distance_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
-    source_dir = 'epipole_lines\predicted_KITTI_rightcamval/00'
-
+    source_dir = 'epipole_lines\predicted_RealEstate'
+    os.makedirs(source_dir, exist_ok=True)
     train_loader, val_loader = get_data_loaders(batch_size=1)
+
     sed_list = []
-    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
+    for i, (img1, img2, label, pts1, pts2, seq_name, R, t) in enumerate(val_loader):
         img1, img2 = img1.to(device), img2.to(device)
         output = model.forward(img1, img2)
-        epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach())
+        epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach(), pts1=pts1[0], pts2=pts2[0])
         sed = epipolar_geo.get_mean_SED_distance()
+
         sed_list.append(sed)
+
+        with open(os.path.join(source_dir, 'stats_RealEstate2.txt'), 'a') as f:
+            f.write(f'idx: {i+745:06}\n')
+            f.write(f'SED: {sed}\n')
+            f.write(f'R: {R[0].numpy()}\n')
+            f.write(f't: {t[0].numpy()}\n\n')
         if i == 1500:
             break
-        # with open(os.path.join(source_dir, 'stats2.txt'), 'a') as f:
-        #     f.write(f'idx: {i:06}\n')
-        #     f.write(f'SED: {sed}\n')
-        #     f.write(f'R: {R_relative[0].numpy()}\n')
-        #     f.write(f't: {t_relative[0].numpy()}\n\n')
 
-    points_histogram(sed_list)
-    sorted_sed = sorted(sed_list)[:1400]
-    print(f'SED distance: {np.mean(sorted_sed)}')
+    # points_histogram(sed_list)
+    # sorted_sed = sorted(sed_list)[:950]
+    # print(f'SED distance: {np.mean(sorted_sed)}')
+
+    # points_histogram(sed_list_T)
+    # sorted_sed_T = sorted(sed_list_T)[:950]
+    # print(f'SED distance T: {np.mean(sorted_sed_T)}')
 
 
 def sed_histogram_trained(plots_path):
@@ -149,9 +157,106 @@ def sed_histogram_trained(plots_path):
         print(seq_name[0])
         epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach())
         sed = epipolar_geo.get_mean_SED_distance(show_histogram=True, plots_path=plots_path)
-            
-if __name__ == "__main__":
-    plots_path = 'plots/KITTI/SED_0.1__RightCamVal__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_True'
-    os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
-    sed_distance_trained(plots_path)
+
+def sed_vs_rotation_translation(file_path):
+    # Load the data
+    with open(file_path, 'r') as file:
+        data = file.read()
+
+    # Regular expressions to match the necessary data
+    idx_pattern = re.compile(r'idx:\s*(\d+)')
+    sed_pattern = re.compile(r'SED:\s*([\d\.]+)')
+    r_pattern = re.compile(r'R:\s*\[\[([-\d\.\se\s\[\]\n]+)\]\]')
+    t_pattern = re.compile(r't:\s*\[([-\d\.\se\s]+)\]')
+
+    # Extract the data
+    indices = idx_pattern.findall(data)
+    seds = sed_pattern.findall(data)
+    rotations = r_pattern.findall(data)
+    translations = t_pattern.findall(data)
+
+    # Convert extracted data to appropriate types
+    indices = list(map(int, indices))
+    seds = list(map(float, seds))
+
+    def clean_matrix_str(matrix_str):
+        matrix_str = matrix_str.replace('\n', ' ').replace('] [', '];[').replace('[', '').replace(']', '')
+        return matrix_str
+
+    def parse_matrix(matrix_str):
+        cleaned_str = clean_matrix_str(matrix_str)
+        return np.array([list(map(float, row.split())) for row in cleaned_str.split(';')])
+
+    rotations = [parse_matrix(rot) for rot in rotations]
+    translations = [np.array(list(map(float, t.split()))) for t in translations]
+
+    # Ensure all lists are of the same length
+    lengths = [len(indices), len(seds), len(rotations), len(translations)]
+    min_length = min(lengths)
+    indices = indices[:min_length]
+    seds = seds[:min_length]
+    rotations = rotations[:min_length]
+    translations = translations[:min_length]
+
+    # Calculate the rotation angles (in degrees) from the rotation matrices using angle-axis representation
+    def rotation_angle_from_matrix(matrix):
+        angle = np.arccos((np.trace(matrix) - 1) / 2)
+        if np.isnan(angle):
+            angle = 0  # Handle numerical errors for very small rotations
+        return np.degrees(angle)
+
+    rotation_angles = [rotation_angle_from_matrix(r) for r in rotations]
+    translation_magnitudes = [np.linalg.norm(t) for t in translations]
+
+    # Calculate correlation coefficients
+    rotation_angle_corr = np.corrcoef(rotation_angles, seds)[0, 1]
+    translation_magnitude_corr = np.corrcoef(translation_magnitudes, seds)[0, 1]
+
+    print("Correlation between SED and Rotation Angle:", rotation_angle_corr)
+    print("Correlation between SED and Translation Magnitude:", translation_magnitude_corr)
+
+    # Normalize rotation angles and translation magnitudes for better visualization
+    normalized_rotation_angles = np.array(rotation_angles) - 90
+    normalized_translation_magnitudes = np.array(translation_magnitudes) - np.mean(translation_magnitudes)
+
+    # Plotting the normalized data
+    plt.figure(figsize=(12, 6))
+
+    plt.subplot(1, 2, 1)
+    plt.scatter(normalized_rotation_angles, seds, c='blue', label='SED vs Normalized Rotation Angle')
+    plt.xlabel('Normalized Rotation Angle (degrees)')
+    plt.ylabel('SED')
+    plt.legend()
+
+    plt.subplot(1, 2, 2)
+    plt.scatter(normalized_translation_magnitudes, seds, c='red', label='SED vs Normalized Translation Magnitude')
+    plt.xlabel('Normalized Translation Magnitude')
+    plt.ylabel('SED')
+    plt.legend()
+
+    plt.suptitle('SED Error Analysis with Normalized Metrics')
+    plt.show()
+
+def move():
+    for seq in os.listdir("sequences"):
+        os.makedirs(os.path.join("sequences", seq, "image_1_moving"), exist_ok=True)
+
+        src_dir = os.path.join("sequences", seq, "image_1")
+        dst_dir = os.path.join("sequences", seq, "image_1_moving")
+
+        for img in os.listdir(os.path.join("sequences", seq, "images_0_moving")):
+            print(img)
+            # os.rename(os.path.join(src_dir, img), os.path.join(dst_dir, img))
+
+if __name__ == "__main__":
+    # plots_path = 'plots\KITTI\SED_0.1__RightCamVal__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_True'
+    # plots_path = 'plots\RealEstate\SED_0.1__RandomCrop__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augmentation_False__Conv_False'
+    # file_path = 'epipole_lines\predicted_RealEstate\stats_RealEstate2.txt'
+    # # file_path = 'epipole_lines\predicted_KITTI_rightcamval\stats_KITTI.txt'
+
+    # os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+
+    # # sed_distance_trained(plots_path)
+    # sed_vs_rotation_translation(file_path)
+    move()

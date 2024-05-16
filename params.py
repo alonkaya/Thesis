@@ -4,8 +4,7 @@ DEVICE_ID = 0
 # if DEVICE_ID==0: DEVICE_ID=1
 # elif DEVICE_ID==2: DEVICE_ID=1
 # elif DEVICE_ID==1: DEVICE_ID==0
-# device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
 
 learning_rates_vit = [2e-5]
 learning_rates_mlp = [2e-5]
@@ -17,7 +16,7 @@ VAL_LENGTH = 600
 norm_mean = torch.tensor([0.449, 0.449, 0.449])
 norm_std = torch.tensor([0.226, 0.226, 0.226])
 
-USE_REALESTATE = False
+USE_REALESTATE = True
 STEREO = False
 BATCH_SIZE = 1 # TODO:  change pose_to_F if batch size > 1 ! 
 JUMP_FRAMES = 6 if USE_REALESTATE else 2
@@ -33,7 +32,7 @@ SAVE_MODEL = True
 RE1_DIST = True
 SED_DIST = True
 SED_BAD_THRESHOLD = 0.1
-EPIPOLAR_THRESHOLD = 0.3
+EPIPOLAR_THRESHOLD = 0.2
 SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 USE_RECONSTRUCTION_LAYER = True
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
@@ -44,8 +43,8 @@ PREDICT_POSE = False
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
 NUM_EPOCHS = 70
 MODEL = CLIP_MODEL_NAME
-AUGMENTATION = True
-RANDOM_CROP = True
+AUGMENTATION = False
+RANDOM_CROP = False
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = True
 UNFROZEN_LAYERS = 0

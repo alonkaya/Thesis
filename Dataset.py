@@ -23,7 +23,7 @@ class Dataset(torch.utils.data.Dataset):
         self.jump_frames = jump_frames
 
     def __len__(self):
-        return len(self.valid_indices) - VAL_LENGTH if not self.val else VAL_LENGTH
+        return len(self.valid_indices) if USE_REALESTATE else len(self.valid_indices) - VAL_LENGTH if not self.val else VAL_LENGTH
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx] + VAL_LENGTH if not self.val else self.valid_indices[idx]
@@ -141,7 +141,7 @@ def get_dataloaders_RealEstate(batch_size=BATCH_SIZE):
                 K = get_intrinsic_REALESTATE(specs_path, original_image_size)
                 
                 if not FIRST_2_THRIDS_TRAIN and not FIRST_2_OF_3_TRAIN:
-                    custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K, val=False, seq_name=sequence_name, jump_frames=jump_frames)
+                    custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K, val=True, seq_name=sequence_name, jump_frames=jump_frames)
                     if len(custom_dataset) > 20:
                         if RealEstate_path == 'RealEstate10K/train_images':
                             train_datasets.append(custom_dataset) 
