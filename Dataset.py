@@ -26,7 +26,7 @@ class Dataset(torch.utils.data.Dataset):
         return len(self.valid_indices) if USE_REALESTATE else len(self.valid_indices) - VAL_LENGTH if not self.val else VAL_LENGTH
 
     def __getitem__(self, idx):
-        idx = self.valid_indices[idx] + VAL_LENGTH if not self.val else self.valid_indices[idx]
+        idx = self.valid_indices[idx + VAL_LENGTH]  if not self.val else self.valid_indices[idx]
         
         img1 = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
         img2 = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
