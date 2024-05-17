@@ -172,28 +172,29 @@ def get_dataloaders_KITTI(batch_size=BATCH_SIZE):
     calib_paths = [f'sequences/0{i}/calib.txt' for i in range(11)]
 
     train_datasets, val_datasets = [], []
-    for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
-        if i not in train_seqeunces and i not in val_sequences: continue
-        cam0_seq = os.path.join(sequence_path, 'image_0')
-        cam1_seq = os.path.join(sequence_path, 'image_1')
+    for jump_frames in [JUMP_FRAMES-1, JUMP_FRAMES, JUMP_FRAMES+1]:
+        for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
+            if i not in train_seqeunces and i not in val_sequences: continue
+            cam0_seq = os.path.join(sequence_path, 'image_0')
+            cam1_seq = os.path.join(sequence_path, 'image_1')
 
-        # Get a list of all poses [R,t] in this sequence
-        poses = read_poses(poses_path)
+            # Get a list of all poses [R,t] in this sequence
+            poses = read_poses(poses_path)
+            
+            # Indices of 'good' image frames
+            valid_indices = get_valid_indices(len(poses), cam0_seq)
         
-        # Indices of 'good' image frames
-        valid_indices = get_valid_indices(len(poses), cam0_seq)
-    
-        # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-        orginal_image_size = torch.tensor(Image.open(os.path.join(cam0_seq, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
-        k0, k1 = get_intrinsic_KITTI(calib_path, orginal_image_size)
+            # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
+            orginal_image_size = torch.tensor(Image.open(os.path.join(cam0_seq, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
+            k0, k1 = get_intrinsic_KITTI(calib_path, orginal_image_size)
 
-        # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
-        dataset_cam0 = Dataset(cam0_seq, poses, valid_indices, transform, k0, val=False, seq_name= f'0{i}')
-        dataset_cam1 = Dataset(cam1_seq, poses, valid_indices, transform, k1, val=True, seq_name= f'0{i}')
-        if i in train_seqeunces:
-            train_datasets.append(dataset_cam0)        
-        if i in val_sequences:
-            val_datasets.append(dataset_cam1)
+            # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
+            dataset_cam0 = Dataset(cam0_seq, poses, valid_indices, transform, k0, val=False, seq_name= f'0{i}', jump_frames=jump_frames)
+            dataset_cam1 = Dataset(cam1_seq, poses, valid_indices, transform, k1, val=True, seq_name= f'0{i}', jump_frames=jump_frames)
+            if i in train_seqeunces:
+                train_datasets.append(dataset_cam0)        
+            if i in val_sequences:
+                val_datasets.append(dataset_cam1)
 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
