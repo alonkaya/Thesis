@@ -245,9 +245,11 @@ def move():
         src_dir = os.path.join("sequences", seq, "image_1")
         dst_dir = os.path.join("sequences", seq, "image_1_moving")
 
-        for img in os.listdir(os.path.join("sequences", seq, "images_0_moving")):
-            print(img)
-            # os.rename(os.path.join(src_dir, img), os.path.join(dst_dir, img))
+        if not os.path.exists(os.path.join("sequences", seq, "image_0_moving")):
+            continue
+
+        for img in os.listdir(os.path.join("sequences", seq, "image_0_moving")):
+            os.rename(os.path.join(src_dir, img), os.path.join(dst_dir, img))
 
 if __name__ == "__main__":
     # plots_path = 'plots\KITTI\SED_0.1__RightCamVal__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_True'
