@@ -12,7 +12,7 @@ train_seqeunces = [0, 2, 3, 5, 6, 7, 8]
 val_sequences = [0, 2, 3, 5, 6, 7, 8]
 train_seqeunces_stereo = [0,1,2,3]
 val_sequences_stereo = [4,5,6]
-VAL_LENGTH = 600
+VAL_LENGTH = 400
 norm_mean = torch.tensor([0.449, 0.449, 0.449])
 norm_std = torch.tensor([0.226, 0.226, 0.226])
 
