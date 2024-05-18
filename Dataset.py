@@ -182,7 +182,7 @@ def get_dataloaders_KITTI(batch_size=BATCH_SIZE):
             poses = read_poses(poses_path)
             
             # Indices of 'good' image frames
-            valid_indices = get_valid_indices(len(poses), cam0_seq)
+            valid_indices = get_valid_indices(len(poses), cam0_seq, jump_frames)
         
             # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
             orginal_image_size = torch.tensor(Image.open(os.path.join(cam0_seq, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
