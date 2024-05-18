@@ -110,8 +110,8 @@ class FMatrixRegressor(nn.Module):
 
 
     def get_embeddings(self, x1, x2, predict_t=False):
-        num_channels = model.config.hidden_size
         model = self.model_t if predict_t else self.model
+        num_channels = model.config.hidden_size
         processor = self.clip_image_processor_t if predict_t else self.clip_image_processor
         if self.clip:  
             x1 = processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
