@@ -67,7 +67,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
-        print(self.seq_name, idx)
+
         img1 = self.dataset.get_cam0(idx)
         img2 = self.dataset.get_cam1(idx)
 
@@ -254,3 +254,7 @@ def get_data_loaders(batch_size=BATCH_SIZE):
         return get_dataloaders_RealEstate(batch_size)
     else: # KITTI
         return get_dataloaders_KITTI(batch_size)
+
+if __name__ == "__main__":
+    dataset = odometry(base_path='.', sequence="02")
+    dataset.get_cam0(4549)
