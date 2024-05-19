@@ -33,15 +33,15 @@ class Dataset(torch.utils.data.Dataset):
         
         k=self.k.clone()
         if RANDOM_CROP:
-            img1, img2 = TF.resize(img1, (256, 256), antialias=True), TF.resize(img2, (256, 256), antialias=True)
             top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
+            img1, img2 = TF.resize(img1, (256, 256), antialias=True), TF.resize(img2, (256, 256), antialias=True)
             img1, img2 = TF.crop(img1, top_crop, left_crop, 224, 224), TF.crop(img2, top_crop, left_crop, 224, 224)
             k = adjust_k_crop(k, top_crop, left_crop)
 
         img1 = self.transform(img1)
         img2 = self.transform(img2)
         
-        unnormalized_F = get_F(self.poses, idx, k, k, self.jump_frames)
+        unnormalized_F = get_F(self.poses, k, k, idx, self.jump_frames)
         # R_relative, t_relative = compute_relative_transformations(self.poses[idx], self.poses[idx+JUMP_FRAMES])
         
         # Normalize F-Matrix
@@ -52,30 +52,30 @@ class Dataset(torch.utils.data.Dataset):
         return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
-    def __init__(self, dataset, transform, seq_name, R, t, valid_indices):
+    def __init__(self, dataset, transform, seq_name, k0, k1, R, t, valid_indices):
         self.dataset = dataset
         self.transform = transform
-        self.k0 = torch.tensor(dataset.calib.K_cam0, dtype=torch.float32)
-        self.k1 = torch.tensor(dataset.calib.K_cam1, dtype=torch.float32)
         self.seq_name = seq_name
+        self.k0 = k0
+        self.k1 = k1
         self.R=R
         self.t=t
         self.valid_indices = valid_indices
 
     def __len__(self):
-        return len(self.dataset)
+        return len(self.valid_indices)
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
+
         img1 = self.dataset.get_cam0(idx)
         img2 = self.dataset.get_cam1(idx)
 
         k0=self.k0.clone()
         k1=self.k1.clone()
-
         if RANDOM_CROP:
-            img1, img2 = TF.resize(img1, (256, 256), antialias=True), TF.resize(img2, (256, 256), antialias=True)
             top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
+            img1, img2 = TF.resize(img1, (256, 256), antialias=True), TF.resize(img2, (256, 256), antialias=True)
             img1, img2 = TF.crop(img1, top_crop, left_crop, 224, 224), TF.crop(img2, top_crop, left_crop, 224, 224)
             k0 = adjust_k_crop(k0, top_crop, left_crop)
             k1 = adjust_k_crop(k1, top_crop, left_crop)
@@ -83,7 +83,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
         img1 = self.transform(img1)
         img2 = self.transform(img2)
         
-        unnormalized_F = get_F(self.dataset.poses, idx, k0, k1, R_relative=self.R, t_relative=self.t)
+        unnormalized_F = get_F(self.dataset.poses, k0, k1, R_relative=self.R, t_relative=self.t)
         
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
@@ -187,8 +187,8 @@ def get_dataloaders_KITTI(batch_size=BATCH_SIZE):
             valid_indices = get_valid_indices(len(poses), cam0_seq, jump_frames)
         
             # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-            orginal_image_size = torch.tensor(Image.open(os.path.join(cam0_seq, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
-            k0, k1 = get_intrinsic_KITTI(calib_path, orginal_image_size)
+            original_image_size = torch.tensor(Image.open(os.path.join(cam0_seq, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
+            k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
             # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
             dataset_cam0 = Dataset(cam0_seq, poses, valid_indices, transform, k0, val=False, seq_name= f'0{i}', jump_frames=jump_frames)
@@ -209,22 +209,33 @@ def get_dataloaders_KITTI(batch_size=BATCH_SIZE):
     return train_loader, val_loader
 
 def get_dataloader_stereo(batch_size=BATCH_SIZE):
-
     train_datasets, val_datasets = [], []
+    R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32)
+    t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32)    
+    
     for seq in range(11):
         if seq not in train_seqeunces_stereo and seq not in val_sequences_stereo: continue
 
-        dataset = odometry(base_path='.', sequence=f'{seq:02}')
-        R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32)
-        t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32)
+        seq_name = f'{seq:02}'
+        image_0_path = os.path.join('sequences', seq_name, 'image_0')
+
+        dataset = odometry(base_path='.', sequence=seq_name)
         
-        dataset_stereo_train = Dataset_stereo(dataset, transform, f'{seq:02}', R_relative, t_relative)
-        dataset_stereo_val = Dataset_stereo(dataset, transform, f'{seq:02}', R_relative, t_relative)
+        valid_indices = get_valid_indices(len(dataset), image_0_path, jump_frames=0)
+
+        # Get intrinsic K and adjust K according to transformations
+        k0 = torch.tensor(dataset.calib.K_cam0, dtype=torch.float32)
+        k1 = torch.tensor(dataset.calib.K_cam1, dtype=torch.float32)
+        original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
+        k0, k1 = adjust_k_resize(k0, original_image_size, torch.tensor([256, 256])), adjust_k_resize(k1, original_image_size, torch.tensor([256, 256]))
+        k0, k1 = adjust_k_crop(k0, 16, 16) if not RANDOM_CROP else k0, adjust_k_crop(k1, 16, 16) if not RANDOM_CROP else k1
+
+        dataset_stereo = Dataset_stereo(dataset, transform, seq_name, k0, k1, R_relative, t_relative, valid_indices)
 
         if seq in train_seqeunces_stereo:
-            train_datasets.append(dataset_stereo_train)        
+            train_datasets.append(dataset_stereo)        
         if seq in val_sequences_stereo:
-            val_datasets.append(dataset_stereo_val)
+            val_datasets.append(dataset_stereo)
 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)

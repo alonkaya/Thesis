@@ -10,16 +10,16 @@ learning_rates_vit = [2e-5]
 learning_rates_mlp = [2e-5]
 train_seqeunces = [0, 2, 3, 5, 6, 7, 8]
 val_sequences = [0, 2, 3, 5, 6, 7, 8]
-train_seqeunces_stereo = [0,1,2,3]
-val_sequences_stereo = [4,5,6]
+train_seqeunces_stereo = [0, 2, 3, 5]
+val_sequences_stereo = [6, 7, 8]
 VAL_LENGTH = 400
 norm_mean = torch.tensor([0.449, 0.449, 0.449])
 norm_std = torch.tensor([0.226, 0.226, 0.226])
 
 # Dataset
 USE_REALESTATE = False
-STEREO = False
-RIGHTCAMVAL = True
+STEREO = True
+RIGHTCAMVAL = False
 
 BATCH_SIZE = 1 # TODO:  change pose_to_F if batch size > 1 ! 
 JUMP_FRAMES = 6 if USE_REALESTATE else 2
@@ -47,7 +47,7 @@ PREDICT_POSE = False
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
 NUM_EPOCHS = 110
 AUGMENTATION = True
-RANDOM_CROP = True
+RANDOM_CROP = False
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = True
 UNFROZEN_LAYERS = 0

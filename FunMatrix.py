@@ -29,6 +29,7 @@ def get_intrinsic_KITTI(calib_path, original_image_size):
 
     # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
     k0, k1 = adjust_k_resize(k0, original_image_size, torch.tensor([256, 256])), adjust_k_resize(k1, original_image_size, torch.tensor([256, 256]))
+
     k0, k1 = adjust_k_crop(k0, 16, 16) if not RANDOM_CROP else k0, adjust_k_crop(k1, 16, 16) if not RANDOM_CROP else k1
 
     return k0, k1
@@ -114,7 +115,7 @@ singular values: {S.cpu().tolist()}\n""")
     return F
 
 
-def get_F(poses, idx, k0, k1, jump_frames=JUMP_FRAMES, R_relative=None, t_relative=None):
+def get_F(poses, k0, k1, idx=None, jump_frames=JUMP_FRAMES, R_relative=None, t_relative=None):
     if R_relative == None:
         R_relative, t_relative = compute_relative_transformations(poses[idx], poses[idx+jump_frames])
     E = compute_essential(R_relative, t_relative)
