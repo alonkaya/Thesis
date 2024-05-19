@@ -249,7 +249,13 @@ def move():
             continue
 
         for img in os.listdir(os.path.join("sequences", seq, "image_0_moving")):
-            os.rename(os.path.join(src_dir, img), os.path.join(dst_dir, img))
+            os.rename(os.path.join(src_dir, img), os.path.join(dst_dir, img))\
+
+def bad_frame_to_txt():
+    for seq in os.listdir('sequences'):
+        for bad_frame_num in os.listdir(os.path.join('sequences', seq, 'image_0_moving')):
+            with open('bad_frames.txt', 'a') as f:
+                f.write(f'{bad_frame_num} ')
 
 if __name__ == "__main__":
     # plots_path = 'plots\KITTI\SED_0.1__RightCamVal__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_True'
@@ -261,4 +267,4 @@ if __name__ == "__main__":
 
     # # sed_distance_trained(plots_path)
     # sed_vs_rotation_translation(file_path)
-    move()
+    bad_frame_to_txt()
