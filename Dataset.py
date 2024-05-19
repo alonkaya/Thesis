@@ -41,7 +41,7 @@ class Dataset(torch.utils.data.Dataset):
         img1 = self.transform(img1)
         img2 = self.transform(img2)
         
-        unnormalized_F = get_F(self.poses, k, k, idx, self.jump_frames)
+        unnormalized_F = get_F(k, k, self.poses, idx, self.jump_frames)
         # R_relative, t_relative = compute_relative_transformations(self.poses[idx], self.poses[idx+JUMP_FRAMES])
         
         # Normalize F-Matrix
@@ -52,15 +52,16 @@ class Dataset(torch.utils.data.Dataset):
         return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
-    def __init__(self, dataset, transform, seq_name, k0, k1, R, t, valid_indices):
-        self.dataset = dataset
+    def __init__(self, sequence_path, poses, transform, k0, k1, R, t, valid_indices, seq_name):
+        self.sequence_path = sequence_path
+        self.poses = poses
         self.transform = transform
-        self.seq_name = seq_name
         self.k0 = k0
         self.k1 = k1
         self.R=R
-        self.t=t
+        self.t=t        
         self.valid_indices = valid_indices
+        self.seq_name = seq_name
 
     def __len__(self):
         return len(self.valid_indices)
@@ -68,8 +69,8 @@ class Dataset_stereo(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
 
-        img1 = self.dataset.get_cam0(idx)
-        img2 = self.dataset.get_cam1(idx)
+        img1 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}'))
+        img2 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}'))
 
         k0=self.k0.clone()
         k1=self.k1.clone()
@@ -83,7 +84,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
         img1 = self.transform(img1)
         img2 = self.transform(img2)
         
-        unnormalized_F = get_F(self.dataset.poses, k0, k1, R_relative=self.R, t_relative=self.t)
+        unnormalized_F = get_F(k0, k1, R_relative=self.R, t_relative=self.t)
         
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
@@ -209,32 +210,34 @@ def get_dataloaders_KITTI(batch_size=BATCH_SIZE):
     return train_loader, val_loader
 
 def get_dataloader_stereo(batch_size=BATCH_SIZE):
-    train_datasets, val_datasets = [], []
+    sequence_paths = [f'sequences/0{i}' for i in range(11)]
+    poses_paths = [f'poses/0{i}.txt' for i in range(11)]
+    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(11)]  
+      
     R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32)
     t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32)    
-    
-    for seq in range(11):
-        if seq not in train_seqeunces_stereo and seq not in val_sequences_stereo: continue
 
-        seq_name = f'{seq:02}'
-        image_0_path = os.path.join('sequences', seq_name, 'image_0')
+    train_datasets, val_datasets = [], []    
+    for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
+        if i not in train_seqeunces_stereo and i not in val_sequences_stereo: continue
 
-        dataset = odometry(base_path='.', sequence=seq_name)
+        image_0_path = os.path.join(sequence_path, 'image_0')
 
-        valid_indices = get_valid_indices(len(dataset), image_0_path, jump_frames=0)
+        # Get a list of all poses [R,t] in this sequence
+        poses = read_poses(poses_path)
+        
+        # Indices of 'good' image frames
+        valid_indices = get_valid_indices(len(poses), image_0_path, jump_frames=0)
 
-        # Get intrinsic K and adjust K according to transformations
-        k0 = torch.tensor(dataset.calib.K_cam0, dtype=torch.float32)
-        k1 = torch.tensor(dataset.calib.K_cam1, dtype=torch.float32)
+        # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
-        k0, k1 = adjust_k_resize(k0, original_image_size, torch.tensor([256, 256])), adjust_k_resize(k1, original_image_size, torch.tensor([256, 256]))
-        k0, k1 = adjust_k_crop(k0, 16, 16) if not RANDOM_CROP else k0, adjust_k_crop(k1, 16, 16) if not RANDOM_CROP else k1
+        k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
-        dataset_stereo = Dataset_stereo(dataset, transform, seq_name, k0, k1, R_relative, t_relative, valid_indices)
+        dataset_stereo = Dataset_stereo(sequence_path, poses, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}')
 
-        if seq in train_seqeunces_stereo:
+        if i in train_seqeunces_stereo:
             train_datasets.append(dataset_stereo)        
-        if seq in val_sequences_stereo:
+        if i in val_sequences_stereo:
             val_datasets.append(dataset_stereo)
 
     # Concatenate datasets

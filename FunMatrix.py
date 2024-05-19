@@ -115,7 +115,7 @@ singular values: {S.cpu().tolist()}\n""")
     return F
 
 
-def get_F(poses, k0, k1, idx=None, jump_frames=JUMP_FRAMES, R_relative=None, t_relative=None):
+def get_F(k0, k1, poses=None, idx=None, jump_frames=JUMP_FRAMES, R_relative=None, t_relative=None):
     if R_relative == None:
         R_relative, t_relative = compute_relative_transformations(poses[idx], poses[idx+jump_frames])
     E = compute_essential(R_relative, t_relative)
