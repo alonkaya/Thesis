@@ -220,7 +220,7 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
         image_0_path = os.path.join('sequences', seq_name, 'image_0')
 
         dataset = odometry(base_path='.', sequence=seq_name)
-        
+        dataset.get_cam0(4176)
         valid_indices = get_valid_indices(len(dataset), image_0_path, jump_frames=0)
 
         # Get intrinsic K and adjust K according to transformations
