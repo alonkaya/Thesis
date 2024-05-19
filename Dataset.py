@@ -23,10 +23,10 @@ class Dataset(torch.utils.data.Dataset):
         self.jump_frames = jump_frames
 
     def __len__(self):
-        return len(self.valid_indices) if USE_REALESTATE else len(self.valid_indices) - VAL_LENGTH if not self.val else VAL_LENGTH
+        return len(self.valid_indices) if not self.val else VAL_LENGTH
 
     def __getitem__(self, idx):
-        idx = self.valid_indices[idx + VAL_LENGTH]  if not self.val else self.valid_indices[idx]
+        idx = self.valid_indices[idx]
         
         img1 = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
         img2 = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
@@ -52,7 +52,7 @@ class Dataset(torch.utils.data.Dataset):
         return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
-    def __init__(self, dataset, transform, seq_name, R, t):
+    def __init__(self, dataset, transform, seq_name, R, t, valid_indices):
         self.dataset = dataset
         self.transform = transform
         self.k0 = torch.tensor(dataset.calib.K_cam0, dtype=torch.float32)
@@ -60,11 +60,13 @@ class Dataset_stereo(torch.utils.data.Dataset):
         self.seq_name = seq_name
         self.R=R
         self.t=t
+        self.valid_indices = valid_indices
 
     def __len__(self):
         return len(self.dataset)
 
     def __getitem__(self, idx):
+        idx = self.valid_indices[idx]
         img1 = self.dataset.get_cam0(idx)
         img2 = self.dataset.get_cam1(idx)
 
@@ -141,7 +143,7 @@ def get_dataloaders_RealEstate(batch_size=BATCH_SIZE):
                 K = get_intrinsic_REALESTATE(specs_path, original_image_size)
                 
                 if not FIRST_2_THRIDS_TRAIN and not FIRST_2_OF_3_TRAIN:
-                    custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K, val=True, seq_name=sequence_name, jump_frames=jump_frames)
+                    custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K, val=False, seq_name=sequence_name, jump_frames=jump_frames)
                     if len(custom_dataset) > 20:
                         if RealEstate_path == 'RealEstate10K/train_images':
                             train_datasets.append(custom_dataset) 
@@ -172,7 +174,7 @@ def get_dataloaders_KITTI(batch_size=BATCH_SIZE):
     calib_paths = [f'sequences/0{i}/calib.txt' for i in range(11)]
 
     train_datasets, val_datasets = [], []
-    for jump_frames in [JUMP_FRAMES-1, JUMP_FRAMES, JUMP_FRAMES+1]:
+    for jump_frames in [JUMP_FRAMES]:
         for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
             if i not in train_seqeunces and i not in val_sequences: continue
             cam0_seq = os.path.join(sequence_path, 'image_0')
