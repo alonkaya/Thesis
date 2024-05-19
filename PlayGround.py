@@ -280,9 +280,9 @@ def move_based_on_txt():
         os.makedirs(os.path.join(dst_dir1), exist_ok=True)
 
         for file_name in bad_frames:
-            # os.rename(os.path.join(src_dir0, file_name), os.path.join(dst_dir0, file_name))
-            # os.rename(os.path.join(src_dir1, file_name), os.path.join(dst_dir1, file_name))
-            print(os.path.join(src_dir0, file_name),  os.path.join(dst_dir0, file_name))
+            os.rename(os.path.join(src_dir0, file_name), os.path.join(dst_dir0, file_name))
+            os.rename(os.path.join(src_dir1, file_name), os.path.join(dst_dir1, file_name))
+            # print(os.path.join(src_dir0, file_name),  os.path.join(dst_dir0, file_name))
 
 
 if __name__ == "__main__":
