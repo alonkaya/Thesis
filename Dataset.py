@@ -67,7 +67,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
-        print(idx)
+        print(self.seq_name, idx)
         img1 = self.dataset.get_cam0(idx)
         img2 = self.dataset.get_cam1(idx)
 
