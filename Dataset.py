@@ -257,4 +257,4 @@ def get_data_loaders(batch_size=BATCH_SIZE):
 
 if __name__ == "__main__":
     dataset = odometry(base_path='.', sequence="02")
-    dataset.get_cam0(4549)
+    print(len(dataset))
