@@ -238,7 +238,7 @@ def sed_vs_rotation_translation(file_path):
     plt.suptitle('SED Error Analysis with Normalized Metrics')
     plt.show()
 
-def move():
+def move_based_on_image_0():
     for seq in os.listdir("sequences"):
         os.makedirs(os.path.join("sequences", seq, "image_1_moving"), exist_ok=True)
 
@@ -249,13 +249,41 @@ def move():
             continue
 
         for img in os.listdir(os.path.join("sequences", seq, "image_0_moving")):
-            os.rename(os.path.join(src_dir, img), os.path.join(dst_dir, img))\
+            if not os.path.exists(os.path.join("sequences", seq, "image_1", img)):
+                continue
+            os.rename(os.path.join(src_dir, img), os.path.join(dst_dir, img))
 
 def bad_frame_to_txt():
     for seq in os.listdir('sequences'):
+        if not os.path.exists(os.path.join('sequences', seq, 'image_0_moving')): continue
+
         for bad_frame_num in os.listdir(os.path.join('sequences', seq, 'image_0_moving')):
-            with open('bad_frames.txt', 'a') as f:
+            txt_path = os.path.join('sequences', seq, 'bad_frames.txt')
+            with open(txt_path, 'a') as f:
                 f.write(f'{bad_frame_num} ')
+
+def move_based_on_txt():
+    no_move = ["01","04"]
+    for seq in os.listdir('sequences'):
+        if seq in no_move: continue
+
+        txt_path = os.path.join('sequences', seq, 'bad_frames.txt')
+        with open(txt_path, 'r') as file:
+            bad_frames = file.readline().strip().split()
+
+        src_dir0 = os.path.join("sequences", seq, "image_0")
+        dst_dir0 = os.path.join("sequences", seq, "image_0_moving")
+        src_dir1 = os.path.join("sequences", seq, "image_1")
+        dst_dir1 = os.path.join("sequences", seq, "image_1_moving")
+
+        os.makedirs(os.path.join(dst_dir0), exist_ok=True)
+        os.makedirs(os.path.join(dst_dir1), exist_ok=True)
+
+        for file_name in bad_frames:
+            # os.rename(os.path.join(src_dir0, file_name), os.path.join(dst_dir0, file_name))
+            # os.rename(os.path.join(src_dir1, file_name), os.path.join(dst_dir1, file_name))
+            print(os.path.join(src_dir0, file_name),  os.path.join(dst_dir0, file_name))
+
 
 if __name__ == "__main__":
     # plots_path = 'plots\KITTI\SED_0.1__RightCamVal__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_True'
@@ -267,4 +295,4 @@ if __name__ == "__main__":
 
     # # sed_distance_trained(plots_path)
     # sed_vs_rotation_translation(file_path)
-    bad_frame_to_txt()
+    move_based_on_txt()
