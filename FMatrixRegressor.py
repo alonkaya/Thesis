@@ -3,7 +3,7 @@ from params import *
 from utils import *
 from FunMatrix import *
 import torch.optim as optim
-from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
+from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel, CLIPVisionConfig
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
@@ -41,26 +41,21 @@ class FMatrixRegressor(nn.Module):
         self.sed_coeff = sed_coeff
         self.plots_path = plots_path
 
-        # Check if CLIP model is specified
+        
         if model_name == "openai/clip-vit-base-patch32":
-            self.clip = True
-
             # Initialize CLIP processor and pretrained model
-            self.clip_image_processor = CLIPImageProcessor.from_pretrained(
-                model_name)
-            self.model = CLIPVisionModel.from_pretrained(
-                model_name).to(device)
+            self.clip = True
             
-            if self.predict_pose:
-                self.clip_image_processor_t = CLIPImageProcessor.from_pretrained(
-                    model_name)
-                self.model_t = CLIPVisionModel.from_pretrained(
-                    model_name).to(device)
+            if TRAIN_FROM_SCRATCH:
+                config = CLIPVisionConfig()
+                self.model = CLIPVisionModel(config).to(device)
+            else:
+                self.model = CLIPVisionModel.from_pretrained(model_name).to(device)
+            
 
         else:
-            self.clip = False
-
             # Initialize ViT pretrained model
+            self.clip = False
             self.model = ViTModel.from_pretrained(
                 model_name).to(device)
 
@@ -96,37 +91,15 @@ class FMatrixRegressor(nn.Module):
         self.huber_loss = nn.HuberLoss().to(device)
         self.optimizer = optim.Adam(params, lr=lr_vit)
 
-        if self.predict_pose:
-            self.t_mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
-                        3, batchnorm_and_dropout).to(device)
-            params_t = [
-                    {'params': self.model_t.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
-                    {'params': self.t_mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
-                ]  
-
-            self.L2_loss_t = nn.MSELoss().to(device)
-            self.optimizer_t = optim.Adam(params_t, lr=lr_mlp)
 
 
 
-    def get_embeddings(self, x1, x2, predict_t=False):
-        model = self.model_t if predict_t else self.model
+    def get_embeddings(self, x1, x2):
         num_channels = model.config.hidden_size
-        if self.clip:  
-            processor = self.clip_image_processor_t if predict_t else self.clip_image_processor
-            x1 = processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
-            x2 = processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
 
-            x1['pixel_values'] = x1['pixel_values'].to(device)
-            x2['pixel_values'] = x2['pixel_values'].to(device)
-            
-            # Run ViT. Input shape is (batch_size, 3, 224, 224). Output shape is (batch_size, 49*hidden_size)
-            x1_embeddings = model(**x1).last_hidden_state[:, 1:, :].reshape(-1, 7*7*num_channels)
-            x2_embeddings = model(**x2).last_hidden_state[:, 1:, :].reshape(-1, 7*7*num_channels)
-
-        else:
-            x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :].reshape(-1,  7*7*num_channels)
-            x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :].reshape(-1,  7*7*num_channels)
+        # Run ViT. Input shape x1,x2 are (batch_size, 3, 224, 224). Output shape is (batch_size, 49*hidden_size)
+        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :].reshape(-1, 7*7*num_channels)
+        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :].reshape(-1, 7*7*num_channels)
 
         if GROUP_CONV["use"]:
             # Apply grouped convolution to reduce channels. 

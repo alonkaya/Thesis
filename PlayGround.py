@@ -108,9 +108,9 @@ def sed_distance_gt():
     for i, (img1, img2, label, pts1, pts2, _) in enumerate(val_loader):
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
-        epipolar_geo_gt = EpipolarGeometry(img1[0], img2[0], label[0], pts1[0], pts2[0]) 
+        epipolar_geo_gt = EpipolarGeometry(img1[0], img2[0], label[0], pts1=pts1[0], pts2=pts2[0]) 
         total_sed += epipolar_geo_gt.get_mean_SED_distance()
-        if i == 300: break
+        if i == 100: break
 
     total_sed /= i
     print(f'SED distance: {total_sed}') 
@@ -291,7 +291,7 @@ if __name__ == "__main__":
     # file_path = 'epipole_lines\predicted_RealEstate\stats_RealEstate2.txt'
     # # file_path = 'epipole_lines\predicted_KITTI_rightcamval\stats_KITTI.txt'
 
-    # os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
     # # sed_distance_trained(plots_path)
     # sed_vs_rotation_translation(file_path)

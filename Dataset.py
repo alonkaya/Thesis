@@ -81,9 +81,9 @@ class Dataset_stereo(torch.utils.data.Dataset):
             k0 = adjust_k_crop(k0, top_crop, left_crop)
             k1 = adjust_k_crop(k1, top_crop, left_crop)
 
-        img1 = self.transform(img1)
-        img2 = self.transform(img2)
-        
+        img1 = self.transform(img1) # shape (3, 224, 224)
+        img2 = self.transform(img2) # shape (3, 224, 224)
+
         unnormalized_F = get_F(k0, k1, R_relative=self.R, t_relative=self.t)
         
         # Normalize F-Matrix
