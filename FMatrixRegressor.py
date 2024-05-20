@@ -95,7 +95,7 @@ class FMatrixRegressor(nn.Module):
 
 
     def get_embeddings(self, x1, x2):
-        num_channels = model.config.hidden_size
+        num_channels = self.model.config.hidden_size
 
         # Run ViT. Input shape x1,x2 are (batch_size, 3, 224, 224). Output shape is (batch_size, 49*hidden_size)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :].reshape(-1, 7*7*num_channels)
