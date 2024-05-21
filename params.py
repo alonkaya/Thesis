@@ -10,7 +10,7 @@ train_seqeunces = [0, 2, 3, 5, 6, 7, 8]
 val_sequences = [0, 2, 3, 5, 6, 7, 8]
 train_seqeunces_stereo = [0, 2, 3, 5]
 val_sequences_stereo = [6, 7, 8]
-CROP = 336
+CROP = 224
 RESIZE = 512
 USE_REALESTATE = False
 STEREO = True
@@ -52,7 +52,7 @@ SED_COEFF = [0.1]
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512, 256]
 # CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
-CLIP_MODEL_NAME = "openai/clip-vit-large-patch14-336"
+CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
