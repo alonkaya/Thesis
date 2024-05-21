@@ -33,9 +33,9 @@ class Dataset(torch.utils.data.Dataset):
         
         k=self.k.clone()
         if RANDOM_CROP:
-            top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
-            img1, img2 = TF.resize(img1, (256, 256), antialias=True), TF.resize(img2, (256, 256), antialias=True)
-            img1, img2 = TF.crop(img1, top_crop, left_crop, 224, 224), TF.crop(img2, top_crop, left_crop, 224, 224)
+            top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
+            img1, img2 = TF.resize(img1, (RESIZE, RESIZE), antialias=True), TF.resize(img2, (RESIZE, RESIZE), antialias=True)
+            img1, img2 = TF.crop(img1, top_crop, left_crop, CROP, CROP), TF.crop(img2, top_crop, left_crop, CROP, CROP)
             k = adjust_k_crop(k, top_crop, left_crop)
 
         img1 = self.transform(img1)
@@ -52,9 +52,8 @@ class Dataset(torch.utils.data.Dataset):
         return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, poses, transform, k0, k1, R, t, valid_indices, seq_name):
+    def __init__(self, sequence_path, transform, k0, k1, R, t, valid_indices, seq_name):
         self.sequence_path = sequence_path
-        self.poses = poses
         self.transform = transform
         self.k0 = k0
         self.k1 = k1
@@ -75,14 +74,14 @@ class Dataset_stereo(torch.utils.data.Dataset):
         k0=self.k0.clone()
         k1=self.k1.clone()
         if RANDOM_CROP:
-            top_crop, left_crop = random.randint(0, 32), random.randint(0, 32)
-            img1, img2 = TF.resize(img1, (256, 256), antialias=True), TF.resize(img2, (256, 256), antialias=True)
-            img1, img2 = TF.crop(img1, top_crop, left_crop, 224, 224), TF.crop(img2, top_crop, left_crop, 224, 224)
+            top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
+            img1, img2 = TF.resize(img1, (RESIZE, RESIZE), antialias=True), TF.resize(img2, (RESIZE, RESIZE), antialias=True)
+            img1, img2 = TF.crop(img1, top_crop, left_crop, CROP, CROP), TF.crop(img2, top_crop, left_crop, CROP, CROP)
             k0 = adjust_k_crop(k0, top_crop, left_crop)
             k1 = adjust_k_crop(k1, top_crop, left_crop)
 
-        img1 = self.transform(img1) # shape (3, 224, 224)
-        img2 = self.transform(img2) # shape (3, 224, 224)
+        img1 = self.transform(img1) # shape (channels, height, width)
+        img2 = self.transform(img2) # shape (channels, height, width)
 
         unnormalized_F = get_F(k0, k1, R_relative=self.R, t_relative=self.t)
         
@@ -108,10 +107,10 @@ def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
 def get_transform():
     transforms = []
     
-    if not RANDOM_CROP:
+    if not RANDOM_CROP: # original image size ~ 1200 * 700
         transforms.extend([
-            v2.Resize((256, 256), antialias=True),
-            v2.CenterCrop(224)
+            v2.Resize((RESIZE, RESIZE), antialias=True),
+            v2.CenterCrop(CROP)
         ])
     transforms.append(v2.Grayscale(num_output_channels=3))
     if AUGMENTATION:
@@ -233,7 +232,7 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
-        dataset_stereo = Dataset_stereo(sequence_path, poses, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}')
+        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}')
 
         if i in train_seqeunces_stereo:
             train_datasets.append(dataset_stereo)        

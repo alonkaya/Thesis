@@ -3,7 +3,7 @@ from params import *
 from utils import *
 from FunMatrix import *
 import torch.optim as optim
-from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel, CLIPVisionConfig
+from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
@@ -42,16 +42,14 @@ class FMatrixRegressor(nn.Module):
         self.plots_path = plots_path
 
         
-        if model_name == "openai/clip-vit-base-patch32":
+        if model_name == CLIP_MODEL_NAME:
             # Initialize CLIP processor and pretrained model
             self.clip = True
-            
             if TRAIN_FROM_SCRATCH:
                 config = CLIPVisionConfig()
                 self.model = CLIPVisionModel(config).to(device)
             else:
                 self.model = CLIPVisionModel.from_pretrained(model_name).to(device)
-            
 
         else:
             # Initialize ViT pretrained model
@@ -59,6 +57,11 @@ class FMatrixRegressor(nn.Module):
             self.model = ViTModel.from_pretrained(
                 model_name).to(device)
 
+        if pretrained_path:
+            model_path = os.path.join(pretrained_path, "model.pth")
+            mlp_path = os.path.join(pretrained_path, "mlp.pth")
+            self.model.load_state_dict(torch.load(model_path, map_location='cpu'))
+            self.mlp.load_state_dict(torch.load(mlp_path, map_location='cpu' ))
 
         # print(len(self.pretrained_model.encoder.layer))
         # for layer in self.pretrained_model.encoder.layer[len(self.pretrained_model.encoder.layer)-unfrozen_layers:]:
@@ -66,21 +69,16 @@ class FMatrixRegressor(nn.Module):
         #         param.requires_grad = True
 
         # Get input dimension for the MLP based on ViT configuration
-
-        mlp_input_shape = 2 * 7*7 * self.model.config.hidden_size
+        self.num_patches = self.model.config.image_size // self.model.config.patch_size
+        mlp_input_shape = 2 * (self.num_patches**2) * self.model.config.hidden_size
+        
         if GROUP_CONV["use"]: 
-            mlp_input_shape = 2 * 7*7 * GROUP_CONV["out_channels"] 
+            mlp_input_shape = 2 * (self.num_patches**2) * GROUP_CONV["out_channels"] 
         if self.average_embeddings:
-            mlp_input_shape //= 49        
+            mlp_input_shape //= (self.num_patches**2)     
 
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
-
-        if pretrained_path:
-            model_path = os.path.join(pretrained_path, "model.pth")
-            mlp_path = os.path.join(pretrained_path, "mlp.pth")
-            self.model.load_state_dict(torch.load(model_path, map_location='cpu'))
-            self.mlp.load_state_dict(torch.load(mlp_path, map_location='cpu' ))
 
         params = [
             {'params': self.model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
@@ -93,32 +91,31 @@ class FMatrixRegressor(nn.Module):
 
 
 
-
     def get_embeddings(self, x1, x2):
-        num_channels = self.model.config.hidden_size
+        hidden_size = self.model.config.hidden_size
 
-        # Run ViT. Input shape x1,x2 are (batch_size, 3, 224, 224). Output shape is (batch_size, 49*hidden_size)
-        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :].reshape(-1, 7*7*num_channels)
-        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :].reshape(-1, 7*7*num_channels)
+        # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width). Output shape is (batch_size, self.num_patches**2 * hidden_size)
+        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :].reshape(-1, (self.num_patches**2)*hidden_size)
+        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :].reshape(-1, (self.num_patches**2)*hidden_size)
 
         if GROUP_CONV["use"]:
             # Apply grouped convolution to reduce channels. 
-            # Input shape is (batch_size, hidden_size, 49). Output shape is (batch_size, 49*out_channels)
+            # Input shape is (batch_size, hidden_size, self.num_patches**2). Output shape is (batch_size, self.num_patches**2 *out_channels)
             out_channels = GROUP_CONV["out_channels"]
             grouped_conv_layer = GroupedConvolution(in_channels=num_channels,     # Total input channels
                                                     out_channels=out_channels,  # Total output channels you want
                                                     kernel_size=1,
                                                     groups=out_channels)
-            x1_embeddings = grouped_conv_layer(x1_embeddings.view(-1, num_channels, 7, 7)).view(-1, 7*7*out_channels)
-            x2_embeddings = grouped_conv_layer(x2_embeddings.view(-1, num_channels, 7, 7)).view(-1, 7*7*out_channels)
+            x1_embeddings = grouped_conv_layer(x1_embeddings.view(-1, num_channels, self.num_patches, self.num_patches)).view(-1, (self.num_patches**2)*out_channels)
+            x2_embeddings = grouped_conv_layer(x2_embeddings.view(-1, num_channels, self.num_patches, self.num_patches)).view(-1, (self.num_patches**2)*out_channels)
             num_channels = out_channels
 
         if self.average_embeddings:
             # Average embeddings over spatial dimensions. 
-            # Input shape is (batch_size, hidden_size, 49). Output shape is (batch_size, out_channels)
+            # Input shape is (batch_size, hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, hidden_size)
             avg_patches = nn.AdaptiveAvgPool2d(1)
-            x1_embeddings = avg_patches(x1_embeddings.view(-1, num_channels, 7, 7)).view(-1, num_channels)
-            x2_embeddings = avg_patches(x2_embeddings.view(-1, num_channels, 7, 7)).view(-1, num_channels)
+            x1_embeddings = avg_patches(x1_embeddings.view(-1, hidden_size, self.num_patches, self.num_patches)).view(-1, hidden_size)
+            x2_embeddings = avg_patches(x2_embeddings.view(-1, hidden_size, self.num_patches, self.num_patches)).view(-1, hidden_size)
 
         embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
 
@@ -134,8 +131,6 @@ class FMatrixRegressor(nn.Module):
         output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
         alpha = output[:, 6].unsqueeze(1) # shape (batch_size, 1)
         beta = output[:, 7].unsqueeze(1)  # shape (batch_size, 1)
-
-        # last_sv_sq = 0 if self.use_reconstruction else last_sing_value(output) 
 
         output = paramterization_layer(output, self.plots_path) 
 
