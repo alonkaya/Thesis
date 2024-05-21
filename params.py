@@ -36,7 +36,7 @@ SAVE_MODEL = True
 PREDICT_POSE = False
 NUM_EPOCHS = 140
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
-ADDITIONS = ""
+ADDITIONS = "Enlarged_CLIP__"
 
 ### Epipolar geometry ###
 RE1_DIST = True
