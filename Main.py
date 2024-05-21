@@ -14,7 +14,7 @@ from DatasetOneSequence import *
 
 
 if __name__ == "__main__":
-    os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+#     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
     init_main()
 
     # Iterate over each combination
