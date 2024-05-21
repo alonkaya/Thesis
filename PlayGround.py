@@ -295,4 +295,4 @@ if __name__ == "__main__":
 
     # # sed_distance_trained(plots_path)
     # sed_vs_rotation_translation(file_path)
-    sed_distance_gt()
+    vis_gt()
