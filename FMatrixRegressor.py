@@ -7,10 +7,10 @@ from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
-                 average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO, freeze_model=FREEZE_PRETRAINED_MODEL,
+                 average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO,
                  augmentation=AUGMENTATION, model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, 
                  predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER,
-                 pretrained_path=None, alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None):
+                 pretrained_path=None, alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV):
 
         """
         Initialize the ViTMLPRegressor model.
@@ -40,6 +40,7 @@ class FMatrixRegressor(nn.Module):
         self.alg_coeff = alg_coeff
         self.sed_coeff = sed_coeff
         self.plots_path = plots_path
+        self.use_conv = use_conv
 
         
         if model_name == CLIP_MODEL_NAME:
@@ -69,13 +70,17 @@ class FMatrixRegressor(nn.Module):
         #         param.requires_grad = True
 
         # Get input dimension for the MLP based on ViT configuration
+        self.hidden_size = self.model.config.hidden_size
         self.num_patches = self.model.config.image_size // self.model.config.patch_size
-        mlp_input_shape = 2 * (self.num_patches**2) * self.model.config.hidden_size
+        mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size
         
         if GROUP_CONV["use"]: 
             mlp_input_shape = 2 * (self.num_patches**2) * GROUP_CONV["out_channels"] 
         if self.average_embeddings:
             mlp_input_shape //= (self.num_patches**2)     
+        if self.use_conv:
+            self.conv = ConvNet(input_dim= 2*self.hidden_size).to(device)
+            mlp_input_shape = self.conv.hidden_dims[-1] * self.num_patches**2
 
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
@@ -90,47 +95,30 @@ class FMatrixRegressor(nn.Module):
         self.optimizer = optim.Adam(params, lr=lr_vit)
 
 
+    def forward(self, x1, x2):
+        # if deepF_nocors:
+            # net = HomographyNet(use_reconstruction_module=False).to(device)
+            # output = net.foward(x1, x2).to(device)
+            # return output
 
-    def get_embeddings(self, x1, x2):
-        hidden_size = self.model.config.hidden_size
+        # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
+        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :].reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
+        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :].reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
 
-        # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width). Output shape is (batch_size, self.num_patches**2 * hidden_size)
-        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :].reshape(-1, (self.num_patches**2)*hidden_size)
-        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :].reshape(-1, (self.num_patches**2)*hidden_size)
-
-        if GROUP_CONV["use"]:
-            # Apply grouped convolution to reduce channels. 
-            # Input shape is (batch_size, hidden_size, self.num_patches**2). Output shape is (batch_size, self.num_patches**2 *out_channels)
-            out_channels = GROUP_CONV["out_channels"]
-            grouped_conv_layer = GroupedConvolution(in_channels=num_channels,     # Total input channels
-                                                    out_channels=out_channels,  # Total output channels you want
-                                                    kernel_size=1,
-                                                    groups=out_channels)
-            x1_embeddings = grouped_conv_layer(x1_embeddings.view(-1, num_channels, self.num_patches, self.num_patches)).view(-1, (self.num_patches**2)*out_channels)
-            x2_embeddings = grouped_conv_layer(x2_embeddings.view(-1, num_channels, self.num_patches, self.num_patches)).view(-1, (self.num_patches**2)*out_channels)
-            num_channels = out_channels
-
-        if self.average_embeddings:
+        # if self.average_embeddings:
             # Average embeddings over spatial dimensions. 
-            # Input shape is (batch_size, hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, hidden_size)
-            avg_patches = nn.AdaptiveAvgPool2d(1)
-            x1_embeddings = avg_patches(x1_embeddings.view(-1, hidden_size, self.num_patches, self.num_patches)).view(-1, hidden_size)
-            x2_embeddings = avg_patches(x2_embeddings.view(-1, hidden_size, self.num_patches, self.num_patches)).view(-1, hidden_size)
+            # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
+            # avg_patches = nn.AdaptiveAvgPool2d(1)
+            # x1_embeddings = avg_patches(x1_embeddings.view(-1, self.hidden_size, self.num_patches, self.num_patches)).view(-1, self.hidden_size)
+            # x2_embeddings = avg_patches(x2_embeddings.view(-1, self.hidden_size, self.num_patches, self.num_patches)).view(-1, self.hidden_size)
 
         embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
 
-        return embeddings
-
-    def forward(self, x1, x2):
-        # If deepF_nocors
-        # net = HomographyNet(use_reconstruction_module=False).to(device)
-        # output = net.foward(x1, x2).to(device)
-        # return output
-        embeddings = self.get_embeddings(x1, x2)
+        if self.use_conv:
+            # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, CONV_HIDDEN_DIM[-1] * self.num_patches**2)
+            embeddings = self.conv(embeddings) #
 
         output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
-        alpha = output[:, 6].unsqueeze(1) # shape (batch_size, 1)
-        beta = output[:, 7].unsqueeze(1)  # shape (batch_size, 1)
 
         output = paramterization_layer(output, self.plots_path) 
 

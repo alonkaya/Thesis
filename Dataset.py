@@ -52,7 +52,7 @@ class Dataset(torch.utils.data.Dataset):
         return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, transform, k0, k1, R, t, valid_indices, seq_name):
+    def __init__(self, sequence_path, transform, k0, k1, R, t, valid_indices, seq_name, val):
         self.sequence_path = sequence_path
         self.transform = transform
         self.k0 = k0
@@ -61,9 +61,10 @@ class Dataset_stereo(torch.utils.data.Dataset):
         self.t=t        
         self.valid_indices = valid_indices
         self.seq_name = seq_name
+        self.val = val
 
     def __len__(self):
-        return len(self.valid_indices)
+        return min(len(self.valid_indices), VAL_LENGTH) if self.val else len(self.valid_indices)
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
@@ -232,11 +233,11 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
-        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}')
-
         if i in train_seqeunces_stereo:
+            dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', val=False)
             train_datasets.append(dataset_stereo)        
         if i in val_sequences_stereo:
+            dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', val=True)
             val_datasets.append(dataset_stereo)
 
     # Concatenate datasets

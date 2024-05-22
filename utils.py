@@ -39,7 +39,24 @@ class GroupedConvolution(nn.Module):
     
     def forward(self, x):
         return self.grouped_conv(x)
-    
+
+class ConvNet(nn.Module):
+    def __init__(self, input_dim, hidden_dims=CONV_HIDDEN_DIM):
+        super(ConvNet, self).__init__()
+        self.hidden_dims = hidden_dims
+        #TODO: use layernorm?     
+        self.conv1 = nn.Conv2d(input_dim, hidden_dims[0], kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(hidden_dims[0], hidden_dims[1], kernel_size=3, padding=1)
+        self.conv3 = nn.Conv2d(hidden_dims[1], hidden_dims[2], kernel_size=3, padding=1)
+        self.flatten = nn.Flatten()
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        x = self.relu(self.conv1(x))
+        x = self.relu(self.conv2(x))
+        x = self.relu(self.conv3(x))
+        x = self.flatten(x)
+        return x
 
 def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
     if len(y1) > 3 and (y1[0] > y1[3] + 2000 or y2[0] > y2[3] + 2000):
@@ -105,7 +122,7 @@ def normalize_L2(x):
 
 def norm_layer(unnormalized_x):
     # Normalizes a batch of flattend 9-long vectors (i.e shape [-1, 9])
-    return normalize_L2(normalize_L1(unnormalized_x))
+    return normalize_L2(unnormalized_x)
     
 
 def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, plots_path):

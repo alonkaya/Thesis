@@ -10,12 +10,12 @@ train_seqeunces = [0, 2, 3, 5, 6, 7, 8]
 val_sequences = [0, 2, 3, 5, 6, 7, 8]
 train_seqeunces_stereo = [0, 2, 3, 5]
 val_sequences_stereo = [6, 7, 8]
-CROP = 336
-RESIZE = 512
+CROP = 224
+RESIZE = 256
 USE_REALESTATE = False
 STEREO = True
 RIGHTCAMVAL = False
-VAL_LENGTH = 400
+VAL_LENGTH = 900
 FIRST_2_THRIDS_TRAIN = False
 FIRST_2_OF_3_TRAIN = False
 JUMP_FRAMES = 6 if USE_REALESTATE else 2
@@ -36,7 +36,7 @@ SAVE_MODEL = True
 PREDICT_POSE = False
 NUM_EPOCHS = 140
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
-ADDITIONS = "Enlarged_CLIP2__"
+ADDITIONS = "Enlarged_CLIP__"
 
 ### Epipolar geometry ###
 RE1_DIST = True
@@ -51,14 +51,15 @@ SED_COEFF = [0.1]
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512, 256]
+CONV_HIDDEN_DIM = [1024, 2048, 1024, 512]
 # CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
-CLIP_MODEL_NAME = "openai/clip-vit-large-patch14-336"
+CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
-UNFROZEN_LAYERS = 0
+USE_CONV = True
 GROUP_CONV = {"use" : False, "out_channels": 256}
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
-
+UNFROZEN_LAYERS = 0
 
