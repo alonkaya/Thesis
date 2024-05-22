@@ -71,6 +71,7 @@ class FMatrixRegressor(nn.Module):
 
         # Get input dimension for the MLP based on ViT configuration
         self.hidden_size = self.model.config.hidden_size
+        print(f"hidden_size: {self.hidden_size}")
         self.num_patches = self.model.config.image_size // self.model.config.patch_size
         mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size
         
