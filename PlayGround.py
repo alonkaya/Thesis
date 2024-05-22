@@ -110,7 +110,7 @@ def sed_distance_gt():
 
         epipolar_geo_gt = EpipolarGeometry(img1[0], img2[0], label[0], pts1[0], pts2[0]) 
         total_sed += epipolar_geo_gt.get_mean_SED_distance()
-        if i == 300: break
+        if i == 2000: break
 
     total_sed /= i
     print(f'SED distance: {total_sed}') 
