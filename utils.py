@@ -43,18 +43,21 @@ class GroupedConvolution(nn.Module):
 class ConvNet(nn.Module):
     def __init__(self, input_dim, hidden_dims=CONV_HIDDEN_DIM):
         super(ConvNet, self).__init__()
+
+        layers = []
+        prev_dim = input_dim
         self.hidden_dims = hidden_dims
-        #TODO: use layernorm?     
-        self.conv1 = nn.Conv2d(input_dim, hidden_dims[0], kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(hidden_dims[0], hidden_dims[1], kernel_size=3, padding=1)
-        self.conv3 = nn.Conv2d(hidden_dims[1], hidden_dims[2], kernel_size=3, padding=1)
+
+        for hidden_dim in hidden_dims:
+            layers.append(nn.Conv2d(prev_dim, hidden_dim, kernel_size=3, padding=1))
+            layers.append(nn.ReLU())
+            prev_dim = hidden_dim
+
+        self.conv_layers = nn.Sequential(*layers)
         self.flatten = nn.Flatten()
-        self.relu = nn.ReLU()
 
     def forward(self, x):
-        x = self.relu(self.conv1(x))
-        x = self.relu(self.conv2(x))
-        x = self.relu(self.conv3(x))
+        x = self.conv_layers(x)
         x = self.flatten(x)
         return x
 

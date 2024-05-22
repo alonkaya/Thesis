@@ -116,7 +116,7 @@ class FMatrixRegressor(nn.Module):
 
         if self.use_conv:
             # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * (self.num_patches**2) * CONV_HIDDEN_DIM[-1])
-            embeddings = self.conv(embeddings) #
+            embeddings = self.conv(embeddings) 
 
         output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
 
