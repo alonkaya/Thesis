@@ -39,7 +39,27 @@ class GroupedConvolution(nn.Module):
     
     def forward(self, x):
         return self.grouped_conv(x)
-    
+
+class ConvNet(nn.Module):
+    def __init__(self, input_dim, hidden_dims=CONV_HIDDEN_DIM):
+        super(ConvNet, self).__init__()
+
+        layers = []
+        prev_dim = input_dim
+        self.hidden_dims = hidden_dims
+
+        for hidden_dim in hidden_dims:
+            layers.append(nn.Conv2d(prev_dim, hidden_dim, kernel_size=3, padding=1))
+            layers.append(nn.ReLU())
+            prev_dim = hidden_dim
+
+        self.conv_layers = nn.Sequential(*layers)
+        self.flatten = nn.Flatten()
+
+    def forward(self, x):
+        x = self.conv_layers(x)
+        x = self.flatten(x)
+        return x
 
 def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
     if len(y1) > 3 and (y1[0] > y1[3] + 2000 or y2[0] > y2[3] + 2000):
@@ -105,7 +125,7 @@ def normalize_L2(x):
 
 def norm_layer(unnormalized_x):
     # Normalizes a batch of flattend 9-long vectors (i.e shape [-1, 9])
-    return normalize_L2(normalize_L1(unnormalized_x))
+    return normalize_L2(unnormalized_x)
     
 
 def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, plots_path):

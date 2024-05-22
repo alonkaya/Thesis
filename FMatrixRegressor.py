@@ -3,14 +3,14 @@ from params import *
 from utils import *
 from FunMatrix import *
 import torch.optim as optim
-from transformers import ViTModel, CLIPImageProcessor, CLIPVisionModel
+from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
-                 average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO, freeze_model=FREEZE_PRETRAINED_MODEL,
+                 average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO,
                  augmentation=AUGMENTATION, model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, 
                  predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER,
-                 pretrained_path=None, alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None):
+                 pretrained_path=None, alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV):
 
         """
         Initialize the ViTMLPRegressor model.
@@ -40,30 +40,29 @@ class FMatrixRegressor(nn.Module):
         self.alg_coeff = alg_coeff
         self.sed_coeff = sed_coeff
         self.plots_path = plots_path
+        self.use_conv = use_conv
 
-        # Check if CLIP model is specified
-        if model_name == "openai/clip-vit-base-patch32":
-            self.clip = True
-
+        
+        if model_name == CLIP_MODEL_NAME:
             # Initialize CLIP processor and pretrained model
-            self.clip_image_processor = CLIPImageProcessor.from_pretrained(
-                model_name)
-            self.model = CLIPVisionModel.from_pretrained(
-                model_name).to(device)
-            
-            if self.predict_pose:
-                self.clip_image_processor_t = CLIPImageProcessor.from_pretrained(
-                    model_name)
-                self.model_t = CLIPVisionModel.from_pretrained(
-                    model_name).to(device)
+            self.clip = True
+            if TRAIN_FROM_SCRATCH:
+                config = CLIPVisionConfig()
+                self.model = CLIPVisionModel(config).to(device)
+            else:
+                self.model = CLIPVisionModel.from_pretrained(model_name).to(device)
 
         else:
-            self.clip = False
-
             # Initialize ViT pretrained model
+            self.clip = False
             self.model = ViTModel.from_pretrained(
                 model_name).to(device)
 
+        if pretrained_path:
+            model_path = os.path.join(pretrained_path, "model.pth")
+            mlp_path = os.path.join(pretrained_path, "mlp.pth")
+            self.model.load_state_dict(torch.load(model_path, map_location='cpu'))
+            self.mlp.load_state_dict(torch.load(mlp_path, map_location='cpu' ))
 
         # print(len(self.pretrained_model.encoder.layer))
         # for layer in self.pretrained_model.encoder.layer[len(self.pretrained_model.encoder.layer)-unfrozen_layers:]:
@@ -71,21 +70,20 @@ class FMatrixRegressor(nn.Module):
         #         param.requires_grad = True
 
         # Get input dimension for the MLP based on ViT configuration
-
-        mlp_input_shape = 2 * 7*7 * self.model.config.hidden_size
+        self.hidden_size = self.model.config.hidden_size
+        self.num_patches = self.model.config.image_size // self.model.config.patch_size
+        mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size
+        
         if GROUP_CONV["use"]: 
-            mlp_input_shape = 2 * 7*7 * GROUP_CONV["out_channels"] 
+            mlp_input_shape = 2 * (self.num_patches**2) * GROUP_CONV["out_channels"] 
         if self.average_embeddings:
-            mlp_input_shape //= 49        
+            mlp_input_shape //= (self.num_patches**2)     
+        if self.use_conv:
+            self.conv = ConvNet(input_dim= 2*self.hidden_size).to(device)
+            mlp_input_shape = (self.num_patches**2) * self.conv.hidden_dims[-1] 
 
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
-
-        if pretrained_path:
-            model_path = os.path.join(pretrained_path, "model.pth")
-            mlp_path = os.path.join(pretrained_path, "mlp.pth")
-            self.model.load_state_dict(torch.load(model_path, map_location='cpu'))
-            self.mlp.load_state_dict(torch.load(mlp_path, map_location='cpu' ))
 
         params = [
             {'params': self.model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
@@ -96,73 +94,31 @@ class FMatrixRegressor(nn.Module):
         self.huber_loss = nn.HuberLoss().to(device)
         self.optimizer = optim.Adam(params, lr=lr_vit)
 
-        if self.predict_pose:
-            self.t_mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
-                        3, batchnorm_and_dropout).to(device)
-            params_t = [
-                    {'params': self.model_t.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
-                    {'params': self.t_mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
-                ]  
 
-            self.L2_loss_t = nn.MSELoss().to(device)
-            self.optimizer_t = optim.Adam(params_t, lr=lr_mlp)
+    def forward(self, x1, x2):
+        # if deepF_nocors:
+            # net = HomographyNet(use_reconstruction_module=False).to(device)
+            # output = net.foward(x1, x2).to(device)
+            # return output
 
+        # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
+        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :].reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
+        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :].reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
 
-
-    def get_embeddings(self, x1, x2, predict_t=False):
-        model = self.model_t if predict_t else self.model
-        num_channels = model.config.hidden_size
-        if self.clip:  
-            processor = self.clip_image_processor_t if predict_t else self.clip_image_processor
-            x1 = processor(images=x1, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
-            x2 = processor(images=x2, return_tensors="pt", do_resize=False, do_normalize=False, do_center_crop=False, do_rescale=False, do_convert_rgb=False)
-
-            x1['pixel_values'] = x1['pixel_values'].to(device)
-            x2['pixel_values'] = x2['pixel_values'].to(device)
-            
-            # Run ViT. Input shape is (batch_size, 3, 224, 224). Output shape is (batch_size, 49*hidden_size)
-            x1_embeddings = model(**x1).last_hidden_state[:, 1:, :].reshape(-1, 7*7*num_channels)
-            x2_embeddings = model(**x2).last_hidden_state[:, 1:, :].reshape(-1, 7*7*num_channels)
-
-        else:
-            x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :].reshape(-1,  7*7*num_channels)
-            x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :].reshape(-1,  7*7*num_channels)
-
-        if GROUP_CONV["use"]:
-            # Apply grouped convolution to reduce channels. 
-            # Input shape is (batch_size, hidden_size, 49). Output shape is (batch_size, 49*out_channels)
-            out_channels = GROUP_CONV["out_channels"]
-            grouped_conv_layer = GroupedConvolution(in_channels=num_channels,     # Total input channels
-                                                    out_channels=out_channels,  # Total output channels you want
-                                                    kernel_size=1,
-                                                    groups=out_channels)
-            x1_embeddings = grouped_conv_layer(x1_embeddings.view(-1, num_channels, 7, 7)).view(-1, 7*7*out_channels)
-            x2_embeddings = grouped_conv_layer(x2_embeddings.view(-1, num_channels, 7, 7)).view(-1, 7*7*out_channels)
-            num_channels = out_channels
-
-        if self.average_embeddings:
+        # if self.average_embeddings:
             # Average embeddings over spatial dimensions. 
-            # Input shape is (batch_size, hidden_size, 49). Output shape is (batch_size, out_channels)
-            avg_patches = nn.AdaptiveAvgPool2d(1)
-            x1_embeddings = avg_patches(x1_embeddings.view(-1, num_channels, 7, 7)).view(-1, num_channels)
-            x2_embeddings = avg_patches(x2_embeddings.view(-1, num_channels, 7, 7)).view(-1, num_channels)
+            # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
+            # avg_patches = nn.AdaptiveAvgPool2d(1)
+            # x1_embeddings = avg_patches(x1_embeddings.view(-1, self.hidden_size, self.num_patches, self.num_patches)).view(-1, self.hidden_size)
+            # x2_embeddings = avg_patches(x2_embeddings.view(-1, self.hidden_size, self.num_patches, self.num_patches)).view(-1, self.hidden_size)
 
         embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
 
-        return embeddings
-
-    def forward(self, x1, x2):
-        # If deepF_nocors
-        # net = HomographyNet(use_reconstruction_module=False).to(device)
-        # output = net.foward(x1, x2).to(device)
-        # return output
-        embeddings = self.get_embeddings(x1, x2)
+        if self.use_conv:
+            # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, (self.num_patches**2) * CONV_HIDDEN_DIM[-1])
+            embeddings = self.conv(embeddings) 
 
         output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
-        alpha = output[:, 6].unsqueeze(1) # shape (batch_size, 1)
-        beta = output[:, 7].unsqueeze(1)  # shape (batch_size, 1)
-
-        # last_sv_sq = 0 if self.use_reconstruction else last_sing_value(output) 
 
         output = paramterization_layer(output, self.plots_path) 
 

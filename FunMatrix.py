@@ -17,8 +17,10 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size):
     ])
 
     # Adjust K according to resize and center crop transforms   
-    k = adjust_k_resize(K, original_image_size, torch.tensor([256, 256]))
-    k = adjust_k_crop(k, 16, 16) if not RANDOM_CROP else k
+    k = adjust_k_resize(K, original_image_size, torch.tensor([RESIZE, RESIZE]))
+
+    center_crop_size = (RESIZE - CROP) // 2
+    k = adjust_k_crop(k, center_crop_size, center_crop_size) if not RANDOM_CROP else k
 
     return k
 
@@ -28,9 +30,10 @@ def get_intrinsic_KITTI(calib_path, original_image_size):
     k0, k1 = decompose_k(projection_matrix_cam0.reshape(3, 4)), decompose_k(projection_matrix_cam1.reshape(3, 4))
 
     # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-    k0, k1 = adjust_k_resize(k0, original_image_size, torch.tensor([256, 256])), adjust_k_resize(k1, original_image_size, torch.tensor([256, 256]))
+    k0, k1 = adjust_k_resize(k0, original_image_size, torch.tensor([RESIZE, RESIZE])), adjust_k_resize(k1, original_image_size, torch.tensor([RESIZE, RESIZE]))
 
-    k0, k1 = adjust_k_crop(k0, 16, 16) if not RANDOM_CROP else k0, adjust_k_crop(k1, 16, 16) if not RANDOM_CROP else k1
+    center_crop_size = (RESIZE - CROP) // 2
+    k0, k1 = adjust_k_crop(k0, center_crop_size, center_crop_size) if not RANDOM_CROP else k0, adjust_k_crop(k1, center_crop_size, center_crop_size) if not RANDOM_CROP else k1
 
     return k0, k1
 
