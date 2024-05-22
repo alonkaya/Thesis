@@ -82,7 +82,7 @@ class FMatrixRegressor(nn.Module):
         if self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size).to(device)
             mlp_input_shape = self.conv.hidden_dims[-1] * self.num_patches**2
-
+            print( self.conv.hidden_dims[-1], self.num_patches**2)
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
 
