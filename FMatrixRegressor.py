@@ -71,7 +71,6 @@ class FMatrixRegressor(nn.Module):
 
         # Get input dimension for the MLP based on ViT configuration
         self.hidden_size = self.model.config.hidden_size
-        print(f"hidden_size: {self.hidden_size}")
         self.num_patches = self.model.config.image_size // self.model.config.patch_size
         mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size
         
@@ -81,8 +80,8 @@ class FMatrixRegressor(nn.Module):
             mlp_input_shape //= (self.num_patches**2)     
         if self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size).to(device)
-            mlp_input_shape = self.conv.hidden_dims[-1] * self.num_patches**2
-            print( self.conv.hidden_dims[-1], self.num_patches**2)
+            mlp_input_shape = 2 * (self.num_patches**2) * self.conv.hidden_dims[-1] 
+
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
 
@@ -116,9 +115,9 @@ class FMatrixRegressor(nn.Module):
         embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
 
         if self.use_conv:
-            # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, CONV_HIDDEN_DIM[-1] * self.num_patches**2)
+            # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * (self.num_patches**2) * CONV_HIDDEN_DIM[-1])
             embeddings = self.conv(embeddings) #
-        print(embeddings.shape)
+
         output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
 
         output = paramterization_layer(output, self.plots_path) 
