@@ -102,8 +102,8 @@ class FMatrixRegressor(nn.Module):
             # return output
 
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
-        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :].reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
-        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :].reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
+        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :]
+        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :]
 
         # if self.average_embeddings:
             # Average embeddings over spatial dimensions. 
@@ -111,11 +111,13 @@ class FMatrixRegressor(nn.Module):
             # avg_patches = nn.AdaptiveAvgPool2d(1)
             # x1_embeddings = avg_patches(x1_embeddings.view(-1, self.hidden_size, self.num_patches, self.num_patches)).view(-1, self.hidden_size)
             # x2_embeddings = avg_patches(x2_embeddings.view(-1, self.hidden_size, self.num_patches, self.num_patches)).view(-1, self.hidden_size)
-
+        
+        x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches) if self.use_conv else x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
+        x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches) if self.use_conv else x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)     
         embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
 
+        # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, (self.num_patches**2) * CONV_HIDDEN_DIM[-1])
         if self.use_conv:
-            # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, (self.num_patches**2) * CONV_HIDDEN_DIM[-1])
             embeddings = self.conv(embeddings) 
 
         output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
