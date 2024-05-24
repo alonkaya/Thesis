@@ -33,10 +33,9 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 # Change Main.py if > 0
 BN_AND_DO = True if BATCH_SIZE > 1 else False
 SAVE_MODEL = True
-PREDICT_POSE = False
 NUM_EPOCHS = 140
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
-ADDITIONS = "Enlarged_CLIP__"
+ADDITIONS = "2"
 
 ### Epipolar geometry ###
 RE1_DIST = True
@@ -55,6 +54,7 @@ CONV_HIDDEN_DIM = [1024, 2048, 1024, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
+PRETRAINED_PATH = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_False"
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False

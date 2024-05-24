@@ -32,7 +32,7 @@ if __name__ == "__main__":
 avg_embeddings_{AVG_EMBEDDINGS}__conv_{USE_CONV}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
 use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augment_{AUGMENTATION}__rc_{RANDOM_CROP}{dataset_class}""")\
         
-        model = FMatrixRegressor(lr_vit=lr_vit, lr_mlp=lr_mlp, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path).to(device)
+        model = FMatrixRegressor(lr_vit=lr_vit, lr_mlp=lr_mlp, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
 
         train_loader, val_loader = get_data_loaders(BATCH_SIZE)
 
@@ -40,7 +40,7 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augment_{AUGMENTATION}__rc_{RANDO
 {ADDITIONS}learning rate vit: {lr_vit}, learning rate mlp: {lr_mlp}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
 batch_size: {BATCH_SIZE}, train_seqeunces: {train_seqeunces}, val_sequences: {val_sequences}, dataset: {dataset}, batchnorm & dropout: {BN_AND_DO}, 
 average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP},
-predict pose: {PREDICT_POSE}, SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}
+SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}
 crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV}\n\n"""
         print_and_write(parameters, plots_path)
 
