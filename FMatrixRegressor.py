@@ -8,8 +8,7 @@ from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
                  average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO,
-                 augmentation=AUGMENTATION, model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, 
-                 predict_pose=PREDICT_POSE, use_reconstruction=USE_RECONSTRUCTION_LAYER,
+                 augmentation=AUGMENTATION, model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER,
                  pretrained_path=None, alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV):
 
         """
@@ -35,7 +34,6 @@ class FMatrixRegressor(nn.Module):
         self.model_name = model_name
         self.augmentation = augmentation
         self.use_reconstruction=use_reconstruction
-        self.predict_pose = predict_pose
         self.re1_coeff = re1_coeff
         self.alg_coeff = alg_coeff
         self.sed_coeff = sed_coeff
@@ -58,11 +56,7 @@ class FMatrixRegressor(nn.Module):
             self.model = ViTModel.from_pretrained(
                 model_name).to(device)
 
-        if pretrained_path:
-            model_path = os.path.join(pretrained_path, "model.pth")
-            mlp_path = os.path.join(pretrained_path, "mlp.pth")
-            self.model.load_state_dict(torch.load(model_path, map_location='cpu'))
-            self.mlp.load_state_dict(torch.load(mlp_path, map_location='cpu' ))
+        
 
         # print(len(self.pretrained_model.encoder.layer))
         # for layer in self.pretrained_model.encoder.layer[len(self.pretrained_model.encoder.layer)-unfrozen_layers:]:
@@ -89,7 +83,13 @@ class FMatrixRegressor(nn.Module):
             {'params': self.model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
             {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
         ]
-        
+
+        if pretrained_path:
+            model_path = os.path.join(pretrained_path, "model.pth")
+            mlp_path = os.path.join(pretrained_path, "mlp.pth")
+            self.model.load_state_dict(torch.load(model_path, map_location='cpu'))
+            self.mlp.load_state_dict(torch.load(mlp_path, map_location='cpu' ))
+
         self.L2_loss = nn.MSELoss().to(device)
         self.huber_loss = nn.HuberLoss().to(device)
         self.optimizer = optim.Adam(params, lr=lr_vit)
@@ -102,8 +102,8 @@ class FMatrixRegressor(nn.Module):
             # return output
 
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
-        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :].reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
-        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :].reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
+        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :]
+        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :]
 
         # if self.average_embeddings:
             # Average embeddings over spatial dimensions. 
@@ -111,11 +111,13 @@ class FMatrixRegressor(nn.Module):
             # avg_patches = nn.AdaptiveAvgPool2d(1)
             # x1_embeddings = avg_patches(x1_embeddings.view(-1, self.hidden_size, self.num_patches, self.num_patches)).view(-1, self.hidden_size)
             # x2_embeddings = avg_patches(x2_embeddings.view(-1, self.hidden_size, self.num_patches, self.num_patches)).view(-1, self.hidden_size)
-
+        
+        x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches) if self.use_conv else x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
+        x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches) if self.use_conv else x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)     
         embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
 
+        # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, (self.num_patches**2) * CONV_HIDDEN_DIM[-1])
         if self.use_conv:
-            # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, (self.num_patches**2) * CONV_HIDDEN_DIM[-1])
             embeddings = self.conv(embeddings) 
 
         output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
@@ -231,8 +233,8 @@ val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}   val_RE1_truth: {epoc
                 num_epochs = epoch + 1
                 break
         
-        plot(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, title="Loss" if not self.predict_pose else "Loss R", plots_path=self.plots_path)
-        plot(x=range(1, num_epochs + 1), y1=all_train_mae, y2=all_val_mae, title="MAE" if not self.predict_pose else "MAE R", plots_path=self.plots_path)
+        plot(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, title="Loss")
+        plot(x=range(1, num_epochs + 1), y1=all_train_mae, y2=all_val_mae, title="MAE")
         plot(x=range(1, num_epochs + 1), y1=all_algberaic_pred, y2=all_val_algberaic_pred, title="Algebraic distance", plots_path=self.plots_path)
         plot(x=range(1, num_epochs + 1), y1=all_RE1_pred, y2=all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
         plot(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None

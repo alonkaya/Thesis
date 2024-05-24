@@ -93,9 +93,13 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     plots_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_False"
+=======
+    plots_path = "plots\Stereo\SED_0.05__Scratch__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_False"
+>>>>>>> 9d4c1a2103a1e2eb0d3cca148e21af95c44e7d08
     file_path = os.path.join(plots_path, "output.log")
-    save = True
+    save = False
 
     process_epoch_stats(file_path)
     print(len(epochs), len(training_losses), len(val_losses), len(training_maes), len(val_maes), len(alg_dists), len(val_alg_dists), len(re1_dists), len(val_re1_dists), len(sed_dists), len(val_sed_dists))
