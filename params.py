@@ -44,15 +44,15 @@ SED_BAD_THRESHOLD = 0.01 if STEREO else 0.1
 EPIPOLAR_THRESHOLD = 0.3 if STEREO else 0.22
 SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
-ALG_COEFF = [0.1]
+ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0]
+SED_COEFF = [0.05]
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512, 256]
 CONV_HIDDEN_DIM = [1024, 2048, 1024, 512]
-CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
-# CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
+# CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
+CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 PRETRAINED_PATH = None
 MODEL = CLIP_MODEL_NAME
