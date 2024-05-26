@@ -42,7 +42,7 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augment_{AUGMENTATION}__rc_{RANDO
 batch_size: {BATCH_SIZE}, train_seqeunces: {train_seqeunces}, val_sequences: {val_sequences}, dataset: {dataset}, batchnorm & dropout: {BN_AND_DO}, 
 average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP},
 SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}
-crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV}\n\n"""
+crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} {continued}\n\n"""
         print_and_write(parameters, plots_path)
 
         model.train_model(train_loader, val_loader, num_epochs=NUM_EPOCHS)

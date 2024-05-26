@@ -35,7 +35,7 @@ BN_AND_DO = True if BATCH_SIZE > 1 else False
 SAVE_MODEL = True
 NUM_EPOCHS = 200
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
-ADDITIONS = "2__"
+ADDITIONS = ""
 
 ### Epipolar geometry ###
 RE1_DIST = True
