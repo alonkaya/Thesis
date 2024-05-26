@@ -99,8 +99,11 @@ class FMatrixRegressor(nn.Module):
             # return output
 
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
-        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :].reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
-        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :].reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
+        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :]
+        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :]
+
+        x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
+        x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
 
         if self.average_embeddings:
             # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
@@ -216,16 +219,16 @@ class FMatrixRegressor(nn.Module):
 
             if epoch == 0: 
                 print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}\t val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}
-                                    algebraic_sqr_truth: {epoch_stats["algebraic_sqr_truth"]}\t val_algebraic_sqr_truth: {epoch_stats["val_algebraic_sqr_truth"]}                                
-                                    RE1_truth: {epoch_stats["RE1_truth"]}\t val_RE1_truth: {epoch_stats["val_RE1_truth"]}
-                                    SED_truth: {epoch_stats["SED_truth"]}\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
+algebraic_sqr_truth: {epoch_stats["algebraic_sqr_truth"]}\t val_algebraic_sqr_truth: {epoch_stats["val_algebraic_sqr_truth"]}                                
+RE1_truth: {epoch_stats["RE1_truth"]}\t val_RE1_truth: {epoch_stats["val_RE1_truth"]}
+SED_truth: {epoch_stats["SED_truth"]}\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
             epoch_output = f"""Epoch {epoch+1}/{num_epochs}: Training Loss: {all_train_loss[-1]}\t Val Loss: {all_val_loss[-1]}
-                            Training MAE: {all_train_mae[-1]}\t Val MAE: {all_val_mae[-1]}
-                            Algebraic dist: {all_algebraic_pred[-1]}\t Val Algebraic dist: {all_val_algebraic_pred[-1]}
-                            Algebraic sqr dist: {all_algebraic_sqr_pred[-1]}  Val Algebraic sqr dist: {all_val_algebraic_sqr_pred[-1]}
-                            RE1 dist: {all_RE1_pred[-1]}\t Val RE1 dist: {all_val_RE1_pred[-1]}
-                            SED dist: {all_SED_pred[-1]}\t Val SED dist: {all_val_SED_pred[-1]}\n\n"""
+            Training MAE: {all_train_mae[-1]}\t Val MAE: {all_val_mae[-1]}
+            Algebraic dist: {all_algebraic_pred[-1]}\t Val Algebraic dist: {all_val_algebraic_pred[-1]}
+            Algebraic sqr dist: {all_algebraic_sqr_pred[-1]}  Val Algebraic sqr dist: {all_val_algebraic_sqr_pred[-1]}
+            RE1 dist: {all_RE1_pred[-1]}\t Val RE1 dist: {all_val_RE1_pred[-1]}
+            SED dist: {all_SED_pred[-1]}\t Val SED dist: {all_val_SED_pred[-1]}\n\n"""
             print_and_write(epoch_output, self.plots_path)
 
             # If the model is not learning or outputs nan, stop training

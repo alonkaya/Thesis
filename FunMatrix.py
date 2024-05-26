@@ -193,11 +193,11 @@ def update_epoch_stats(stats, first_image, second_image, label, output, pts1_bat
     
     prefix = "val_" if val else ""
     stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred)
-    stats[f"{prefix}algebraic_sqr_pred"] = stats[f"{prefix}algebraic_sqr_pred"] + (algebraic_dist_pred)
+    stats[f"{prefix}algebraic_sqr_pred"] = stats[f"{prefix}algebraic_sqr_pred"] + (algebraic_dist_sqr_pred)
     stats[f"{prefix}RE1_pred"] = stats[f"{prefix}RE1_pred"] + (RE1_dist_pred) if RE1_DIST else stats[f"{prefix}RE1_pred"]
     stats[f"{prefix}SED_pred"] = stats[f"{prefix}SED_pred"] + (SED_dist_pred) if SED_DIST else stats[f"{prefix}SED_pred"]
     stats[f"{prefix}algebraic_truth"] = stats[f"{prefix}algebraic_truth"] + (algebraic_dist_truth)
-    stats[f"{prefix}algebraic_sqr_truth"] = stats[f"{prefix}algebraic_sqr_truth"] + (algebraic_dist_truth)
+    stats[f"{prefix}algebraic_sqr_truth"] = stats[f"{prefix}algebraic_sqr_truth"] + (algebraic_dist_sqr_truth)
     stats[f"{prefix}RE1_truth"] = stats[f"{prefix}RE1_truth"] + (RE1_dist_truth) if RE1_DIST else stats[f"{prefix}RE1_truth"]
     stats[f"{prefix}SED_truth"] = stats[f"{prefix}SED_truth"] + (SED_dist_truth) if SED_DIST else stats[f"{prefix}SED_truth"]
 
