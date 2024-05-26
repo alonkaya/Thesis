@@ -84,15 +84,12 @@ class FMatrixRegressor(nn.Module):
             {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
         ]
 
-        if pretrained_path:
-            model_path = os.path.join(pretrained_path, "model.pth")
-            mlp_path = os.path.join(pretrained_path, "mlp.pth")
-            self.model.load_state_dict(torch.load(model_path, map_location='cpu'))
-            self.mlp.load_state_dict(torch.load(mlp_path, map_location='cpu' ))
-
         self.L2_loss = nn.MSELoss().to(device)
         self.huber_loss = nn.HuberLoss().to(device)
         self.optimizer = optim.Adam(params, lr=lr_vit)
+        
+        if pretrained_path:
+            self.load_model(path=pretrained_path)
 
 
     def forward(self, x1, x2):
@@ -102,23 +99,23 @@ class FMatrixRegressor(nn.Module):
             # return output
 
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
-        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :]
-        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :]
+        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :].reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
+        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :].reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
 
-        # if self.average_embeddings:
-            # Average embeddings over spatial dimensions. 
+        if self.average_embeddings:
             # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
-            # avg_patches = nn.AdaptiveAvgPool2d(1)
-            # x1_embeddings = avg_patches(x1_embeddings.view(-1, self.hidden_size, self.num_patches, self.num_patches)).view(-1, self.hidden_size)
-            # x2_embeddings = avg_patches(x2_embeddings.view(-1, self.hidden_size, self.num_patches, self.num_patches)).view(-1, self.hidden_size)
-        
-        x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches) if self.use_conv else x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
-        x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches) if self.use_conv else x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)     
-        embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
+            avg_patches = nn.AdaptiveAvgPool2d(1)
+            x1_embeddings = avg_patches(x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
+            x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
 
-        # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, (self.num_patches**2) * CONV_HIDDEN_DIM[-1])
         if self.use_conv:
-            embeddings = self.conv(embeddings) 
+            # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, (self.num_patches**2) * CONV_HIDDEN_DIM[-1])
+            x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
+            x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
+            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
+            embeddings = self.conv(embeddings)
+        else:
+            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
 
         output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
 
@@ -240,10 +237,24 @@ val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}   val_RE1_truth: {epoc
         plot(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
 
     def save_model(self):
-        os.makedirs(self.plots_path, exist_ok=True)
-        torch.save(self.model.state_dict(), os.path.join(self.plots_path, "model.pth"))
-        torch.save(self.mlp.state_dict(), os.path.join(self.plots_path, "mlp.pth"))    
+        os.makedirs(os.path.join(self.plots_path, "model.pth"), exist_ok=True)
+        torch.save({
+            'vit': self.model.state_dict(),
+            'mlp': self.mlp.state_dict(),
+            'optimizer': self.optimizer.state_dict(),
+            'conv': self.conv.state_dict() if self.use_conv else ''
+        }, self.plots_path) 
 
+    def load_model(self, path=None):
+        checkpoint = torch.load(os.path.join(path, "model.pth"), map_location='cpu')
+        self.model.load_state_dict(checkpoint['vit'])
+        self.mlp.load_state_dict(checkpoint['mlp'])
+        self.optimizer.load_state_dict(checkpoint['optimizer'])
+        if self.use_conv:
+            self.conv.load_state_dict(checkpoint['conv'])
+            self.conv.to(device)
+        self.model.to(device)
+        self.mlp.to(device)
 
 
 def use_pretrained_model(sequence_name, plots_path):
