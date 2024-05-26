@@ -34,7 +34,7 @@ avg_embeddings_{AVG_EMBEDDINGS}__conv_{USE_CONV}__model_{"CLIP" if MODEL == CLIP
 use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augment_{AUGMENTATION}__rc_{RANDOM_CROP}{dataset_class}""")\
         
         model = FMatrixRegressor(lr_vit=lr_vit, lr_mlp=lr_mlp, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
-
+        model.save_model()
         train_loader, val_loader = get_data_loaders(BATCH_SIZE)
 
         parameters = f"""###########################################################################################################################################################\n

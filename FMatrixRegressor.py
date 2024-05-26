@@ -241,13 +241,13 @@ class FMatrixRegressor(nn.Module):
         plot(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
 
     def save_model(self):
-        os.makedirs(os.path.join(self.plots_path, "model.pth"), exist_ok=True)
+        checkpoint_path = os.path.join(self.plots_path, "model.pth")
         torch.save({
             'vit': self.model.state_dict(),
             'mlp': self.mlp.state_dict(),
             'optimizer': self.optimizer.state_dict(),
             'conv': self.conv.state_dict() if self.use_conv else ''
-        }, self.plots_path) 
+        }, checkpoint_path) 
 
     def load_model(self, path=None):
         checkpoint = torch.load(os.path.join(path, "model.pth"), map_location='cpu')
