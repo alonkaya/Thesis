@@ -175,8 +175,8 @@ def update_epoch_stats(stats, first_image, second_image, label, output, pts1_bat
     algebraic_dist_truth, algebraic_dist_pred, \
     algebraic_dist_sqr_truth, algebraic_dist_sqr_pred, \
     RE1_dist_truth, RE1_dist_pred, \
-    SED_dist_truth, SED_dist_pred = torch.tensor(0), torch.tensor(0), torch.tensor(0), \
-                                    torch.tensor(0), torch.tensor(0), torch.tensor(0)
+    SED_dist_truth, SED_dist_pred = torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0), \
+                                    torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0)
     for img_1, img_2, F_truth, F_pred, pts1, pts2 in zip(first_image, second_image, label, output, pts1_batch, pts2_batch):
         algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred = update_distances(img_1, img_2, F_pred, algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred, pts1, pts2)
 
@@ -201,7 +201,7 @@ def update_epoch_stats(stats, first_image, second_image, label, output, pts1_bat
     stats[f"{prefix}RE1_truth"] = stats[f"{prefix}RE1_truth"] + (RE1_dist_truth) if RE1_DIST else stats[f"{prefix}RE1_truth"]
     stats[f"{prefix}SED_truth"] = stats[f"{prefix}SED_truth"] + (SED_dist_truth) if SED_DIST else stats[f"{prefix}SED_truth"]
 
-    return algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred
+    return algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred
 
 class EpipolarGeometry:
     def __init__(self, image1_tensors, image2_tensors, F, pts1=None, pts2=None):

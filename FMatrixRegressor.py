@@ -153,7 +153,7 @@ class FMatrixRegressor(nn.Module):
                 pts1.requires_grad = True
                 pts2.requires_grad = True
                 # Update epoch statistics
-                batch_algebraic_pred, batch_algebraic_sqr_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
+                batch_algebraic_sqr_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
                     epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, epoch)
                 
                 # Compute loss
@@ -180,7 +180,7 @@ class FMatrixRegressor(nn.Module):
                     val_output = self.forward(val_img1, val_img2)
                     
                     # Update epoch statistics
-                    val_batch_algebraic_pred, val_batch_algebraic_sqr_pred, val_batch_RE1_pred, val_batch_SED_pred = update_epoch_stats(
+                    val_batch_algebraic_sqr_pred, val_batch_RE1_pred, val_batch_SED_pred = update_epoch_stats(
                         epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output, val_pts1, val_pts2, self.plots_path, epoch, val=True)
                     
                     # Compute loss
