@@ -1,7 +1,7 @@
 import torch
 
 DEVICE_ID = 1
-device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
+device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 ### Dataset ###
 norm_mean = torch.tensor([0.449, 0.449, 0.449])
@@ -44,9 +44,9 @@ SED_BAD_THRESHOLD = 0.01 if STEREO else 0.1
 EPIPOLAR_THRESHOLD = 0.3 if STEREO else 0.22
 SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
-ALG_COEFF = [0.1]
+ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0]
+SED_COEFF = [0.05]
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512, 256]
@@ -54,7 +54,7 @@ CONV_HIDDEN_DIM = [1024, 2048, 1024, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-PRETRAINED_PATH = None
+PRETRAINED_PATH = "plots\Stereo\SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = True

@@ -10,6 +10,8 @@ training_maes = []
 val_maes = []
 alg_dists = []
 val_alg_dists = []
+alg_sqr_dists = []
+val_alg_sqr_dists = []
 re1_dists = []
 val_re1_dists = []
 sed_dists = []
@@ -47,6 +49,14 @@ def process_epoch_stats(file_path):
                 alg_dists.append(float(alg_dist_match.group(1)))
             if val_alg_dist_match:
                 val_alg_dists.append(float(val_alg_dist_match.group(1)))
+                
+            # Extract and append the algebraic sqr distances
+            alg_sqr_dist_match = re.search(r'Algebraic sqr dist: ([\d.]+)', line, re.IGNORECASE)
+            val_alg_sqr_dist_match = re.search(r'Val Algebraic sqr dist: ([\d.]+)', line, re.IGNORECASE)
+            if alg_sqr_dist_match:
+                alg_sqr_dists.append(float(alg_sqr_dist_match.group(1)))
+            if val_alg_sqr_dist_match:
+                val_alg_sqr_dists.append(float(val_alg_sqr_dist_match.group(1)))                
 
             # Extract and append the RE1 distances
             re1_dist_match = re.search(r'RE1 dist: ([\d.]+)', line)
@@ -67,6 +77,12 @@ def process_epoch_stats(file_path):
 
 # Plotting function for each parameter
 def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=False):
+    sliced = ""
+    if len(y1) > 3 and (y1[0] > y1[3] + 2000 or y2[0] > y2[3] + 2000):
+        y1 = y1[3:]
+        y2 = y2[3:]
+        x = x[3:]
+        sliced = " scliced"
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
@@ -79,7 +95,7 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
         ax.set_xlabel(x_label)
         ax.set_ylabel(title if y_scale == 'linear' else f'{title} log scale')
-        ax.set_title(f'{title} {y_scale} scale')
+        ax.set_title(f'{title} {y_scale} scale{sliced}')
     
         ax.set_yscale(y_scale)
         ax.grid(True)
@@ -93,19 +109,17 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-    plots_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_False"
-=======
-    plots_path = "plots\Stereo\SED_0.05__Scratch__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_False"
->>>>>>> 9d4c1a2103a1e2eb0d3cca148e21af95c44e7d08
+    plots_path = "plots\Stereo\ALG_sqr_0.1__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
     file_path = os.path.join(plots_path, "output.log")
-    save = False
+    save = True
 
     process_epoch_stats(file_path)
-    print(len(epochs), len(training_losses), len(val_losses), len(training_maes), len(val_maes), len(alg_dists), len(val_alg_dists), len(re1_dists), len(val_re1_dists), len(sed_dists), len(val_sed_dists))
+    print(len(epochs), len(training_losses), len(val_losses), len(training_maes), len(val_maes), len(alg_dists), len(val_alg_dists), len(re1_dists), len(val_re1_dists), len(sed_dists), len(val_sed_dists), len(alg_sqr_dists), len(val_alg_sqr_dists))
+    
     plot_parameter(epochs, training_losses, val_losses, "Loss", plots_path, save=save)
     plot_parameter(epochs, training_maes, val_maes, "MAE", plots_path, save=save)
     plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic Distance", plots_path, save=save)
+    plot_parameter(epochs, alg_sqr_dists, val_alg_sqr_dists, "Algebraic Sqr Distance", plots_path, save=save)
     plot_parameter(epochs, re1_dists, val_re1_dists, "RE1 Distance", plots_path, save=save)
     plot_parameter(epochs, sed_dists, val_sed_dists, "SED Distance", plots_path, save=save)
 

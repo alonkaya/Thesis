@@ -218,17 +218,17 @@ class FMatrixRegressor(nn.Module):
                 self.save_model() 
 
             if epoch == 0: 
-                print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}\t val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}
-algebraic_sqr_truth: {epoch_stats["algebraic_sqr_truth"]}\t val_algebraic_sqr_truth: {epoch_stats["val_algebraic_sqr_truth"]}                                
-RE1_truth: {epoch_stats["RE1_truth"]}\t val_RE1_truth: {epoch_stats["val_RE1_truth"]}
-SED_truth: {epoch_stats["SED_truth"]}\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
+                print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}\t\t val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}
+algebraic_sqr_truth: {epoch_stats["algebraic_sqr_truth"]}\t\t val_algebraic_sqr_truth: {epoch_stats["val_algebraic_sqr_truth"]}                                
+RE1_truth: {epoch_stats["RE1_truth"]}\t\t val_RE1_truth: {epoch_stats["val_RE1_truth"]}
+SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
-            epoch_output = f"""Epoch {epoch+1}/{num_epochs}: Training Loss: {all_train_loss[-1]}\t Val Loss: {all_val_loss[-1]}
-            Training MAE: {all_train_mae[-1]}\t Val MAE: {all_val_mae[-1]}
-            Algebraic dist: {all_algebraic_pred[-1]}\t Val Algebraic dist: {all_val_algebraic_pred[-1]}
-            Algebraic sqr dist: {all_algebraic_sqr_pred[-1]}  Val Algebraic sqr dist: {all_val_algebraic_sqr_pred[-1]}
-            RE1 dist: {all_RE1_pred[-1]}\t Val RE1 dist: {all_val_RE1_pred[-1]}
-            SED dist: {all_SED_pred[-1]}\t Val SED dist: {all_val_SED_pred[-1]}\n\n"""
+            epoch_output = f"""Epoch {epoch+1}/{num_epochs}: Training Loss: {all_train_loss[-1]}\t\t Val Loss: {all_val_loss[-1]}
+             Training MAE: {all_train_mae[-1]}\t\t Val MAE: {all_val_mae[-1]}
+             Algebraic dist: {all_algebraic_pred[-1]}\t\t Val Algebraic dist: {all_val_algebraic_pred[-1]}
+             Algebraic sqr dist: {all_algebraic_sqr_pred[-1]}\t\t  Val Algebraic sqr dist: {all_val_algebraic_sqr_pred[-1]}
+             RE1 dist: {all_RE1_pred[-1]}\t\t Val RE1 dist: {all_val_RE1_pred[-1]}
+             SED dist: {all_SED_pred[-1]}\t\t Val SED dist: {all_val_SED_pred[-1]}\n\n"""
             print_and_write(epoch_output, self.plots_path)
 
             # If the model is not learning or outputs nan, stop training
@@ -316,9 +316,8 @@ def paramterization_layer(x, plots_path):
 
     if torch.linalg.matrix_rank(F[0]) != 2:
         U, S, V = torch.svd(F[0])
-        smallest_sv = S[-1]  # Select the smallest singular value
         print_and_write(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(F)}
-smallest_sv: {smallest_sv.cpu().item()}\n""", plots_path)
+singular values: {S.cpu().tolist()}\n""", plots_path)
 
     return F
 
