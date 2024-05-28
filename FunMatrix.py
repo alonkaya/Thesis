@@ -112,7 +112,7 @@ def compute_fundamental(E, K1, K2):
 
     if torch.linalg.matrix_rank(F) != 2:
         U, S, V = torch.svd(F)
-        print(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(F)}
+        print(f"""rank of gt F not 2: {torch.linalg.matrix_rank(F)}
 singular values: {S.cpu().tolist()}\n""")
 
     return F
@@ -148,26 +148,15 @@ def last_sing_value(output):
 
     return last_sv_sq
 
-def make_rank2(F, is_batch=True):
-    U1, S1, Vt1 = torch.linalg.svd(F, full_matrices=False)
-
-    if is_batch:
-        S1[:, -1] = 0
-    else:
-        S1[-1] = 0
-
-    output = torch.matmul(torch.matmul(U1, torch.diag_embed(S1)), Vt1)
-
-    if torch.linalg.matrix_rank(output) != 2:
-        print(f'rank of ground-truth not 2: {torch.linalg.matrix_rank(F)}')
-    return output
 
 def update_distances(img_1, img_2, F, algebraic_dist, algebraic_dist_sqr, RE1_dist, SED_dist, pts1, pts2):
     epipolar_geo = EpipolarGeometry(img_1, img_2, F, pts1, pts2)
+
     algebraic_dist = algebraic_dist + epipolar_geo.get_mean_algebraic_distance()
     algebraic_dist_sqr = algebraic_dist_sqr + epipolar_geo.get_sqr_algebraic_distance()
     RE1_dist = RE1_dist + epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
     SED_dist = SED_dist + epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
+    
     return algebraic_dist, algebraic_dist_sqr, RE1_dist, SED_dist
 
 def update_epoch_stats(stats, first_image, second_image, label, output, pts1_batch, pts2_batch, plots_path, epoch=0, val=False):
