@@ -35,7 +35,7 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augment_{AUGMENTATION}__rc_{RANDO
         
         model = FMatrixRegressor(lr_vit=lr_vit, lr_mlp=lr_mlp, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
         os.makedirs(plots_path, exist_ok=True)
-        model.save_model()
+
         train_loader, val_loader = get_data_loaders(BATCH_SIZE)
 
         parameters = f"""###########################################################################################################################################################\n
