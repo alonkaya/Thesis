@@ -46,7 +46,7 @@ SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_C
 crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} {continued}\n\n"""
         print_and_write(parameters, plots_path)
 
-        model.train_model(train_loader, val_loader, num_epochs=NUM_EPOCHS)
+        model.train_model(train_loader, val_loader)
 
 
 
