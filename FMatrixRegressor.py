@@ -41,6 +41,14 @@ class FMatrixRegressor(nn.Module):
         self.use_conv = use_conv
         self.num_epochs = num_epochs
         self.start_epoch = 0
+
+        # Lists to store training statistics
+        self.all_train_loss, self.all_val_loss, \
+        self.all_train_mae, self.all_val_mae, \
+        self.all_algebraic_pred, self.all_val_algebraic_pred, \
+        self.all_algebraic_sqr_pred, self.all_val_algebraic_sqr_pred, \
+        self.all_RE1_pred, self.all_val_RE1_pred, \
+        self.all_SED_pred, self.all_val_SED_pred = [], [], [], [], [], [], [], [], [], [], [], []
         
         if model_name == CLIP_MODEL_NAME:
             # Initialize CLIP processor and pretrained model
@@ -122,12 +130,6 @@ class FMatrixRegressor(nn.Module):
 
 
     def train_model(self, train_loader, val_loader):
-        # Lists to store training statistics
-        all_train_loss, all_val_loss, \
-        all_train_mae, all_val_mae, \
-        all_algebraic_pred, all_algebraic_sqr_pred, all_RE1_pred, all_SED_pred, \
-        all_val_algebraic_pred, all_val_algebraic_sqr_pred, all_val_RE1_pred, all_val_SED_pred = [], [], [], [], [], [], [], [], [], [], [], []
-
         for epoch in range(self.start_epoch, self.num_epochs):
             self.train()
             labels, outputs, val_labels, val_outputs = torch.tensor([]).to(device), torch.tensor([]).to(device), \
@@ -192,19 +194,19 @@ class FMatrixRegressor(nn.Module):
 
             divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
 
-            all_train_mae.append(train_mae.cpu().item())
-            all_train_loss.append(epoch_stats["loss"])
-            all_algebraic_pred.append(epoch_stats["algebraic_pred"])  
-            all_algebraic_sqr_pred.append(epoch_stats["algebraic_sqr_pred"])
-            all_RE1_pred.append(epoch_stats["RE1_pred"])
-            all_SED_pred.append(epoch_stats["SED_pred"])
+            self.all_train_mae.append(train_mae.cpu().item())
+            self.all_train_loss.append(epoch_stats["loss"])
+            self.all_algebraic_pred.append(epoch_stats["algebraic_pred"])  
+            self.all_algebraic_sqr_pred.append(epoch_stats["algebraic_sqr_pred"])
+            self.all_RE1_pred.append(epoch_stats["RE1_pred"])
+            self.all_SED_pred.append(epoch_stats["SED_pred"])
 
-            all_val_mae.append(val_mae.cpu().item())
-            all_val_loss.append(epoch_stats["val_loss"])
-            all_val_algebraic_pred.append(epoch_stats["val_algebraic_pred"])
-            all_val_algebraic_sqr_pred.append(epoch_stats["val_algebraic_sqr_pred"])
-            all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
-            all_val_SED_pred.append(epoch_stats["val_SED_pred"])
+            self.all_val_mae.append(val_mae.cpu().item())
+            self.all_val_loss.append(epoch_stats["val_loss"])
+            self.all_val_algebraic_pred.append(epoch_stats["val_algebraic_pred"])
+            self.all_val_algebraic_sqr_pred.append(epoch_stats["val_algebraic_sqr_pred"])
+            self.all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
+            self.all_val_SED_pred.append(epoch_stats["val_SED_pred"])
 
             if epoch == 0: 
                 print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}\t\t val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}
@@ -212,30 +214,30 @@ algebraic_sqr_truth: {epoch_stats["algebraic_sqr_truth"]}\t val_algebraic_sqr_tr
 RE1_truth: {epoch_stats["RE1_truth"]}\t\t val_RE1_truth: {epoch_stats["val_RE1_truth"]}
 SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
-            epoch_output = f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {all_train_loss[-1]}\t\t Val Loss: {all_val_loss[-1]}
-             Training MAE: {all_train_mae[-1]}\t\t Val MAE: {all_val_mae[-1]}
-             Algebraic dist: {all_algebraic_pred[-1]}\t\t Val Algebraic dist: {all_val_algebraic_pred[-1]}
-             Algebraic sqr dist: {all_algebraic_sqr_pred[-1]}\t  Val Algebraic sqr dist: {all_val_algebraic_sqr_pred[-1]}
-             RE1 dist: {all_RE1_pred[-1]}\t\t Val RE1 dist: {all_val_RE1_pred[-1]}
-             SED dist: {all_SED_pred[-1]}\t\t Val SED dist: {all_val_SED_pred[-1]}\n\n"""
+            epoch_output = f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}
+             Training MAE: {self.all_train_mae[-1]}\t\t Val MAE: {self.all_val_mae[-1]}
+             Algebraic dist: {self.all_algebraic_pred[-1]}\t\t Val Algebraic dist: {self.all_val_algebraic_pred[-1]}
+             Algebraic sqr dist: {self.all_algebraic_sqr_pred[-1]}\t  Val Algebraic sqr dist: {self.all_val_algebraic_sqr_pred[-1]}
+             RE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}
+             SED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n"""
             print_and_write(epoch_output, self.plots_path)
 
             # If the model is not learning or outputs nan, stop training
-            if check_nan(all_train_loss[-1], all_val_loss[-1], all_train_mae[-1], all_val_mae[-1], self.plots_path):
+            if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.all_train_mae[-1], self.all_val_mae[-1], self.plots_path):
                 self.num_epochs = epoch + 1
                 break
 
             if SAVE_MODEL:
-                self.save_model(epoch+1, all_train_loss, all_val_loss, all_train_mae, all_val_mae, all_algebraic_pred, all_algebraic_sqr_pred, all_RE1_pred, all_SED_pred, all_val_algebraic_pred, all_val_algebraic_sqr_pred, all_val_RE1_pred, all_val_SED_pred)            
+                self.save_model(epoch+1)
         
-        plot(x=range(1, self.num_epochs + 1), y1=all_train_loss, y2=all_val_loss, title="Loss")
-        plot(x=range(1, self.num_epochs + 1), y1=all_train_mae, y2=all_val_mae, title="MAE")
-        plot(x=range(1, self.num_epochs + 1), y1=all_algebraic_pred, y2=all_val_algebraic_pred, title="Algebraic distance", plots_path=self.plots_path)
-        plot(x=range(1, self.num_epochs + 1), y1=all_algebraic_sqr_pred, y2=all_val_algebraic_sqr_pred, title="Algebraic sqr distance", plots_path=self.plots_path)
-        plot(x=range(1, self.num_epochs + 1), y1=all_RE1_pred, y2=all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
-        plot(x=range(1, self.num_epochs + 1), y1=all_SED_pred, y2=all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_train_loss, y2=self.all_val_loss, title="Loss")
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae, y2=self.all_val_mae, title="MAE")
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_algebraic_pred, y2=self.all_val_algebraic_pred, title="Algebraic distance", plots_path=self.plots_path)
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_algebraic_sqr_pred, y2=self.all_val_algebraic_sqr_pred, title="Algebraic sqr distance", plots_path=self.plots_path)
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_RE1_pred, y2=self.all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_SED_pred, y2=self.all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
 
-    def save_model(self, epoch, all_train_loss, all_val_loss, all_train_mae, all_val_mae, all_algebraic_pred, all_algebraic_sqr_pred, all_RE1_pred, all_SED_pred, all_val_algebraic_pred, all_val_algebraic_sqr_pred, all_val_RE1_pred, all_val_SED_pred):
+    def save_model(self, epoch):
         checkpoint_path = os.path.join(self.plots_path, "model.pth")
         torch.save({
             'vit': self.model.state_dict(),
@@ -260,18 +262,18 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             "num_patches" : self.num_patches,
             "num_epochs" : self.num_epochs,    
             'epoch' : epoch,
-            "all_train_loss" : all_train_loss, 
-            "all_val_loss" : all_val_loss, 
-            "all_train_mae" : all_train_mae, 
-            "all_val_mae" : all_val_mae, 
-            "all_algebraic_pred" : all_algebraic_pred, 
-            "all_algebraic_sqr_pred" : all_algebraic_sqr_pred, 
-            "all_RE1_pred" : all_RE1_pred, 
-            "all_SED_pred" : all_SED_pred, 
-            "all_val_algebraic_pred" : all_val_algebraic_pred, 
-            "all_val_algebraic_sqr_pred" : all_val_algebraic_sqr_pred, 
-            "all_val_RE1_pred" : all_val_RE1_pred, 
-            "all_val_SED_pred" : all_val_SED_pred
+            "all_train_loss" : self.all_train_loss, 
+            "all_val_loss" : self.all_val_loss, 
+            "all_train_mae" : self.all_train_mae, 
+            "all_val_mae" : self.all_val_mae, 
+            "all_algebraic_pred" : self.all_algebraic_pred, 
+            "all_algebraic_sqr_pred" : self.all_algebraic_sqr_pred, 
+            "all_RE1_pred" : self.all_RE1_pred, 
+            "all_SED_pred" : self.all_SED_pred, 
+            "all_val_algebraic_pred" : self.all_val_algebraic_pred, 
+            "all_val_algebraic_sqr_pred" : self.all_val_algebraic_sqr_pred, 
+            "all_val_RE1_pred" : self.all_val_RE1_pred, 
+            "all_val_SED_pred" : self.all_val_SED_pred
         }, checkpoint_path) 
 
     def load_model(self, path=None):
@@ -309,7 +311,14 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
         self.model.load_state_dict(checkpoint['vit'])
         self.mlp.load_state_dict(checkpoint['mlp'])
-        self.optimizer.load_state_dict(checkpoint['optimizer'])
+        try:
+            self.optimizer.load_state_dict(checkpoint['optimizer'])
+        except:
+            self.optimizer = optim.Adam([
+                {'params': self.model.parameters(), 'lr': 2e-5}, 
+                {'params': self.mlp.parameters(), 'lr': 2e-5}, 
+            ])
+            self.optimizer.load_state_dict(checkpoint['optimizer'])
         if self.use_conv:
             self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
