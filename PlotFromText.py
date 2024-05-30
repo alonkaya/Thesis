@@ -109,7 +109,7 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-    plots_path = "plots\Stereo\ALG_sqr_0.1__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
+    plots_path = "plots\Stereo\SED_0.05__Scratch__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_False"
     file_path = os.path.join(plots_path, "output.log")
     save = True
 
@@ -119,8 +119,8 @@ if __name__ == "__main__":
     plot_parameter(epochs, training_losses, val_losses, "Loss", plots_path, save=save)
     plot_parameter(epochs, training_maes, val_maes, "MAE", plots_path, save=save)
     plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic Distance", plots_path, save=save)
-    plot_parameter(epochs, alg_sqr_dists, val_alg_sqr_dists, "Algebraic Sqr Distance", plots_path, save=save)
     plot_parameter(epochs, re1_dists, val_re1_dists, "RE1 Distance", plots_path, save=save)
     plot_parameter(epochs, sed_dists, val_sed_dists, "SED Distance", plots_path, save=save)
+    plot_parameter(epochs, alg_sqr_dists, val_alg_sqr_dists, "Algebraic Sqr Distance", plots_path, save=save)
 
     

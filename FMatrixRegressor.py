@@ -2,12 +2,13 @@ from DatasetOneSequence import data_with_one_sequence
 from params import *
 from utils import *
 from FunMatrix import *
+from deepF_nocors import FeatureExtractorDeepF
 import torch.optim as optim
 from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
-                 average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO,
+                 average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO, deepF_noCorrs=DEEPF_NOCORRS,
                  augmentation=AUGMENTATION, model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER,
                  pretrained_path=None, alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
@@ -30,6 +31,7 @@ class FMatrixRegressor(nn.Module):
         self.lr_vit = lr_vit
         self.lr_mlp = lr_mlp
         self.batchnorm_and_dropout = batchnorm_and_dropout
+        self.deepF_noCorrs = deepF_noCorrs
         self.average_embeddings = average_embeddings
         self.model_name = model_name
         self.augmentation = augmentation
@@ -63,11 +65,8 @@ class FMatrixRegressor(nn.Module):
             self.model = ViTModel.from_pretrained(model_name).to(device)
 
         
-
-        # print(len(self.pretrained_model.encoder.layer))
-        # for layer in self.pretrained_model.encoder.layer[len(self.pretrained_model.encoder.layer)-unfrozen_layers:]:
-        #     for param in layer.parameters():
-        #         param.requires_grad = True
+        if self.deepF_noCorrs:
+            self.feat_ext_deepF = FeatureExtractorDeepF(in_channels=3, img_shape=(224, 224, 3)).to(device)
 
         # Get input dimension for the MLP based on ViT configuration
         self.hidden_size = self.model.config.hidden_size
@@ -96,8 +95,7 @@ class FMatrixRegressor(nn.Module):
         if pretrained_path:
             self.load_model(path=pretrained_path)
 
-
-    def forward(self, x1, x2):
+    def FeatureExtractor(self, x1, x2):
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :]
         x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :]
@@ -119,6 +117,11 @@ class FMatrixRegressor(nn.Module):
             embeddings = self.conv(embeddings)
         else:
             embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
+        
+        return embeddings
+
+    def forward(self, x1, x2):
+        embeddings = self.FeatureExtractor(x1, x2) if not self.deepFnoCorrs else self.feat_ext_deepF(x1, x2)
 
         output = self.mlp(embeddings)
 

@@ -2,7 +2,7 @@
 # mp.set_start_method('spawn', force=True)
 
 import os
-os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+# os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 # os.environ['TORCH_USE_CUDA_DSA'] = '1'
 # os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
