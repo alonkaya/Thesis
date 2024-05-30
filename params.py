@@ -1,7 +1,7 @@
 import torch
 
 DEVICE_ID = 2
-device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
+device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 ### Dataset ###
 norm_mean = torch.tensor([0.449, 0.449, 0.449])

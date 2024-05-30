@@ -121,7 +121,7 @@ class FMatrixRegressor(nn.Module):
         return embeddings
 
     def forward(self, x1, x2):
-        embeddings = self.FeatureExtractor(x1, x2) if not self.deepFnoCorrs else self.feat_ext_deepF(x1, x2)
+        embeddings = self.FeatureExtractor(x1, x2) if not self.deepF_noCorrs else self.feat_ext_deepF(x1, x2)
 
         output = self.mlp(embeddings)
 
