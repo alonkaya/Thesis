@@ -35,7 +35,7 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__Augment_{AUGMENTATION}__rc_{RANDO
         
         model = FMatrixRegressor(lr_vit=lr_vit, lr_mlp=lr_mlp, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
         os.makedirs(plots_path, exist_ok=True)
-        model.save_model()
+
         train_loader, val_loader = get_data_loaders(BATCH_SIZE)
 
         parameters = f"""###########################################################################################################################################################\n
@@ -46,7 +46,7 @@ SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_C
 crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} {continued}\n\n"""
         print_and_write(parameters, plots_path)
 
-        model.train_model(train_loader, val_loader, num_epochs=NUM_EPOCHS)
+        model.train_model(train_loader, val_loader)
 
 
 

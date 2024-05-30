@@ -9,7 +9,7 @@ class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, lr_mlp, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
                  average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO,
                  augmentation=AUGMENTATION, model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER,
-                 pretrained_path=None, alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV):
+                 pretrained_path=None, alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
         """
         Initialize the ViTMLPRegressor model.
@@ -39,11 +39,19 @@ class FMatrixRegressor(nn.Module):
         self.sed_coeff = sed_coeff
         self.plots_path = plots_path
         self.use_conv = use_conv
+        self.num_epochs = num_epochs
+        self.start_epoch = 0
 
+        # Lists to store training statistics
+        self.all_train_loss, self.all_val_loss, \
+        self.all_train_mae, self.all_val_mae, \
+        self.all_algebraic_pred, self.all_val_algebraic_pred, \
+        self.all_algebraic_sqr_pred, self.all_val_algebraic_sqr_pred, \
+        self.all_RE1_pred, self.all_val_RE1_pred, \
+        self.all_SED_pred, self.all_val_SED_pred = [], [], [], [], [], [], [], [], [], [], [], []
         
         if model_name == CLIP_MODEL_NAME:
             # Initialize CLIP processor and pretrained model
-            self.clip = True
             if TRAIN_FROM_SCRATCH:
                 config = CLIPVisionConfig()
                 self.model = CLIPVisionModel(config).to(device)
@@ -52,9 +60,7 @@ class FMatrixRegressor(nn.Module):
 
         else:
             # Initialize ViT pretrained model
-            self.clip = False
-            self.model = ViTModel.from_pretrained(
-                model_name).to(device)
+            self.model = ViTModel.from_pretrained(model_name).to(device)
 
         
 
@@ -66,8 +72,8 @@ class FMatrixRegressor(nn.Module):
         # Get input dimension for the MLP based on ViT configuration
         self.hidden_size = self.model.config.hidden_size
         self.num_patches = self.model.config.image_size // self.model.config.patch_size
-        mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size
-        
+        mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
+
         if GROUP_CONV["use"]: 
             mlp_input_shape = 2 * (self.num_patches**2) * GROUP_CONV["out_channels"] 
         if self.average_embeddings:
@@ -79,25 +85,19 @@ class FMatrixRegressor(nn.Module):
         self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
                        num_output, batchnorm_and_dropout).to(device)
 
-        params = [
-            {'params': self.model.parameters(), 'lr': lr_vit},  # Lower learning rate for the pre-trained vision transformer
-            {'params': self.mlp.parameters(), 'lr': lr_mlp}   # Potentially higher learning rate for the MLP
-        ]
-
         self.L2_loss = nn.MSELoss().to(device)
         self.huber_loss = nn.HuberLoss().to(device)
-        self.optimizer = optim.Adam(params, lr=lr_vit)
+        self.optimizer = optim.Adam([
+            {'params': self.model.parameters(), 'lr': lr_vit, 'weight_decay': 1e-5},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.mlp.parameters(), 'lr': lr_mlp, 'weight_decay': 1e-5},   # Potentially higher learning rate for the MLP
+            {'params': self.conv.parameters(), 'lr': lr_mlp, 'weight_decay': 1e-5} if self.use_conv else {'params': []}
+        ])
         
         if pretrained_path:
             self.load_model(path=pretrained_path)
 
 
     def forward(self, x1, x2):
-        # if deepF_nocors:
-            # net = HomographyNet(use_reconstruction_module=False).to(device)
-            # output = net.foward(x1, x2).to(device)
-            # return output
-
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :]
         x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :]
@@ -120,23 +120,17 @@ class FMatrixRegressor(nn.Module):
         else:
             embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
 
-        output = self.mlp(embeddings).view(-1,8) if self.use_reconstruction else self.mlp(embeddings).view(-1,3,3)
+        output = self.mlp(embeddings)
 
-        output = paramterization_layer(output, self.plots_path) 
+        output = paramterization_layer(output.view(-1,8), self.plots_path) if self.use_reconstruction else output
 
         output = norm_layer(output.view(-1, 9)).view(-1,3,3) 
 
         return output
 
 
-    def train_model(self, train_loader, val_loader, num_epochs):
-        # Lists to store training statistics
-        all_train_loss, all_val_loss, \
-        all_train_mae, all_val_mae, \
-        all_algebraic_pred, all_algebraic_sqr_pred, all_RE1_pred, all_SED_pred, \
-        all_val_algebraic_pred, all_val_algebraic_sqr_pred, all_val_RE1_pred, all_val_SED_pred = [], [], [], [], [], [], [], [], [], [], [], []
-
-        for epoch in range(num_epochs):
+    def train_model(self, train_loader, val_loader):
+        for epoch in range(self.start_epoch, self.num_epochs):
             self.train()
             labels, outputs, val_labels, val_outputs = torch.tensor([]).to(device), torch.tensor([]).to(device), \
                                                        torch.tensor([]).to(device), torch.tensor([]).to(device)
@@ -200,69 +194,136 @@ class FMatrixRegressor(nn.Module):
 
             divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
 
-            all_train_mae.append(train_mae.cpu().item())
-            all_train_loss.append(epoch_stats["loss"])
-            all_algebraic_pred.append(epoch_stats["algebraic_pred"])  
-            all_algebraic_sqr_pred.append(epoch_stats["algebraic_sqr_pred"])
-            all_RE1_pred.append(epoch_stats["RE1_pred"])
-            all_SED_pred.append(epoch_stats["SED_pred"])
+            self.all_train_mae.append(train_mae.cpu().item())
+            self.all_train_loss.append(epoch_stats["loss"])
+            self.all_algebraic_pred.append(epoch_stats["algebraic_pred"])  
+            self.all_algebraic_sqr_pred.append(epoch_stats["algebraic_sqr_pred"])
+            self.all_RE1_pred.append(epoch_stats["RE1_pred"])
+            self.all_SED_pred.append(epoch_stats["SED_pred"])
 
-            all_val_mae.append(val_mae.cpu().item())
-            all_val_loss.append(epoch_stats["val_loss"])
-            all_val_algebraic_pred.append(epoch_stats["val_algebraic_pred"])
-            all_val_algebraic_sqr_pred.append(epoch_stats["val_algebraic_sqr_pred"])
-            all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
-            all_val_SED_pred.append(epoch_stats["val_SED_pred"])
-
-            if SAVE_MODEL:
-                self.save_model() 
+            self.all_val_mae.append(val_mae.cpu().item())
+            self.all_val_loss.append(epoch_stats["val_loss"])
+            self.all_val_algebraic_pred.append(epoch_stats["val_algebraic_pred"])
+            self.all_val_algebraic_sqr_pred.append(epoch_stats["val_algebraic_sqr_pred"])
+            self.all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
+            self.all_val_SED_pred.append(epoch_stats["val_SED_pred"])
 
             if epoch == 0: 
                 print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}\t\t val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}
-algebraic_sqr_truth: {epoch_stats["algebraic_sqr_truth"]}\t\t val_algebraic_sqr_truth: {epoch_stats["val_algebraic_sqr_truth"]}                                
+algebraic_sqr_truth: {epoch_stats["algebraic_sqr_truth"]}\t val_algebraic_sqr_truth: {epoch_stats["val_algebraic_sqr_truth"]}                                
 RE1_truth: {epoch_stats["RE1_truth"]}\t\t val_RE1_truth: {epoch_stats["val_RE1_truth"]}
 SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
-            epoch_output = f"""Epoch {epoch+1}/{num_epochs}: Training Loss: {all_train_loss[-1]}\t\t Val Loss: {all_val_loss[-1]}
-             Training MAE: {all_train_mae[-1]}\t\t Val MAE: {all_val_mae[-1]}
-             Algebraic dist: {all_algebraic_pred[-1]}\t\t Val Algebraic dist: {all_val_algebraic_pred[-1]}
-             Algebraic sqr dist: {all_algebraic_sqr_pred[-1]}\t\t  Val Algebraic sqr dist: {all_val_algebraic_sqr_pred[-1]}
-             RE1 dist: {all_RE1_pred[-1]}\t\t Val RE1 dist: {all_val_RE1_pred[-1]}
-             SED dist: {all_SED_pred[-1]}\t\t Val SED dist: {all_val_SED_pred[-1]}\n\n"""
+            epoch_output = f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}
+             Training MAE: {self.all_train_mae[-1]}\t\t Val MAE: {self.all_val_mae[-1]}
+             Algebraic dist: {self.all_algebraic_pred[-1]}\t\t Val Algebraic dist: {self.all_val_algebraic_pred[-1]}
+             Algebraic sqr dist: {self.all_algebraic_sqr_pred[-1]}\t  Val Algebraic sqr dist: {self.all_val_algebraic_sqr_pred[-1]}
+             RE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}
+             SED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n"""
             print_and_write(epoch_output, self.plots_path)
 
             # If the model is not learning or outputs nan, stop training
-            if check_nan(all_train_loss[-1], all_val_loss[-1], all_train_mae[-1], all_val_mae[-1], self.plots_path):
-                num_epochs = epoch + 1
+            if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.all_train_mae[-1], self.all_val_mae[-1], self.plots_path):
+                self.num_epochs = epoch + 1
                 break
-        
-        plot(x=range(1, num_epochs + 1), y1=all_train_loss, y2=all_val_loss, title="Loss")
-        plot(x=range(1, num_epochs + 1), y1=all_train_mae, y2=all_val_mae, title="MAE")
-        plot(x=range(1, num_epochs + 1), y1=all_algebraic_pred, y2=all_val_algebraic_pred, title="Algebraic distance", plots_path=self.plots_path)
-        plot(x=range(1, num_epochs + 1), y1=all_algebraic_sqr_pred, y2=all_val_algebraic_sqr_pred, title="Algebraic sqr distance", plots_path=self.plots_path)
-        plot(x=range(1, num_epochs + 1), y1=all_RE1_pred, y2=all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
-        plot(x=range(1, num_epochs + 1), y1=all_SED_pred, y2=all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
 
-    def save_model(self):
+            if SAVE_MODEL:
+                self.save_model(epoch+1)
+        
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_train_loss, y2=self.all_val_loss, title="Loss")
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae, y2=self.all_val_mae, title="MAE")
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_algebraic_pred, y2=self.all_val_algebraic_pred, title="Algebraic distance", plots_path=self.plots_path)
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_algebraic_sqr_pred, y2=self.all_val_algebraic_sqr_pred, title="Algebraic sqr distance", plots_path=self.plots_path)
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_RE1_pred, y2=self.all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_SED_pred, y2=self.all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
+
+    def save_model(self, epoch):
         checkpoint_path = os.path.join(self.plots_path, "model.pth")
         torch.save({
             'vit': self.model.state_dict(),
             'mlp': self.mlp.state_dict(),
             'optimizer': self.optimizer.state_dict(),
-            'conv': self.conv.state_dict() if self.use_conv else ''
+            'conv': self.conv.state_dict() if self.use_conv else '',
+
+            "batch_size" : self.batch_size,
+            "lr_vit" : self.lr_vit,
+            "lr_mlp" : self.lr_mlp,
+            "batchnorm_and_dropout" : self.batchnorm_and_dropout,
+            "average_embeddings" : self.average_embeddings,
+            "model_name" : self.model_name,
+            "augmentation" : self.augmentation,
+            "use_reconstruction" : self.use_reconstruction,
+            "re1_coeff" : self.re1_coeff,
+            "alg_coeff" : self.alg_coeff,
+            "sed_coeff" : self.sed_coeff,
+            "plots_path" : self.plots_path,
+            "use_conv" : self.use_conv,
+            "hidden_size" : self.hidden_size,
+            "num_patches" : self.num_patches,
+            "num_epochs" : self.num_epochs,    
+            'epoch' : epoch,
+            "all_train_loss" : self.all_train_loss, 
+            "all_val_loss" : self.all_val_loss, 
+            "all_train_mae" : self.all_train_mae, 
+            "all_val_mae" : self.all_val_mae, 
+            "all_algebraic_pred" : self.all_algebraic_pred, 
+            "all_algebraic_sqr_pred" : self.all_algebraic_sqr_pred, 
+            "all_RE1_pred" : self.all_RE1_pred, 
+            "all_SED_pred" : self.all_SED_pred, 
+            "all_val_algebraic_pred" : self.all_val_algebraic_pred, 
+            "all_val_algebraic_sqr_pred" : self.all_val_algebraic_sqr_pred, 
+            "all_val_RE1_pred" : self.all_val_RE1_pred, 
+            "all_val_SED_pred" : self.all_val_SED_pred
         }, checkpoint_path) 
 
     def load_model(self, path=None):
         checkpoint = torch.load(os.path.join(path, "model.pth"), map_location='cpu')
+
+        self.batch_size = checkpoint.get("batch_size", self.batch_size)
+        self.lr_vit = checkpoint.get("lr_vit", self.lr_vit)
+        self.lr_mlp = checkpoint.get("lr_mlp", self.lr_mlp)
+        self.batchnorm_and_dropout = checkpoint.get("batchnorm_and_dropout", self.batchnorm_and_dropout)
+        self.average_embeddings = checkpoint.get("average_embeddings", self.average_embeddings)
+        self.model_name = checkpoint.get("model_name", self.model_name)
+        self.augmentation = checkpoint.get("augmentation", self.augmentation)
+        self.use_reconstruction = checkpoint.get("use_reconstruction", self.use_reconstruction)
+        self.re1_coeff = checkpoint.get("re1_coeff", self.re1_coeff)
+        self.alg_coeff = checkpoint.get("alg_coeff", self.alg_coeff)
+        self.sed_coeff = checkpoint.get("sed_coeff", self.sed_coeff)
+        self.plots_path = checkpoint.get("plots_path", self.plots_path)
+        self.use_conv = checkpoint.get("use_conv", self.use_conv)
+        self.hidden_size = checkpoint.get("hidden_size", self.hidden_size)
+        self.num_patches = checkpoint.get("num_patches", self.num_patches)
+        self.num_epochs = checkpoint.get("num_epochs", self.num_epochs) 
+        self.start_epoch = checkpoint.get("epoch", 0)
+        self.all_train_loss = checkpoint.get("all_train_loss", [])
+        self.all_val_loss = checkpoint.get("all_val_loss", [])
+        self.all_train_mae = checkpoint.get("all_train_mae", [])
+        self.all_val_mae = checkpoint.get("all_val_mae", [])
+        self.all_algebraic_pred = checkpoint.get("all_algebraic_pred", [])
+        self.all_algebraic_sqr_pred = checkpoint.get("all_algebraic_sqr_pred", [])
+        self.all_RE1_pred = checkpoint.get("all_RE1_pred", [])
+        self.all_SED_pred = checkpoint.get("all_SED_pred", [])
+        self.all_val_algebraic_pred = checkpoint.get("all_val_algebraic_pred", [])
+        self.all_val_algebraic_sqr_pred = checkpoint.get("all_val_algebraic_sqr_pred", [])
+        self.all_val_RE1_pred = checkpoint.get("all_val_RE1_pred", [])
+        self.all_val_SED_pred = checkpoint.get("all_val_SED_pred", [])
+
         self.model.load_state_dict(checkpoint['vit'])
         self.mlp.load_state_dict(checkpoint['mlp'])
-        self.optimizer.load_state_dict(checkpoint['optimizer'])
+        try:
+            self.optimizer.load_state_dict(checkpoint['optimizer'])
+        except:
+            self.optimizer = optim.Adam([
+                {'params': self.model.parameters(), 'lr': 2e-5}, 
+                {'params': self.mlp.parameters(), 'lr': 2e-5}, 
+            ])
+            self.optimizer.load_state_dict(checkpoint['optimizer'])
         if self.use_conv:
             self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
         self.model.to(device)
         self.mlp.to(device)
-
 
 def use_pretrained_model(sequence_name, plots_path):
     train_loader, val_loader = data_with_one_sequence(sequence_name=sequence_name)
