@@ -144,7 +144,10 @@ class FMatrixRegressor(nn.Module):
                             "val_algebraic_truth": torch.tensor(0), "val_algebraic_sqr_truth": torch.tensor(0), "val_RE1_truth": torch.tensor(0), "val_SED_truth": torch.tensor(0), 
                             "loss": torch.tensor(0), "val_loss": torch.tensor(0),
                             "file_num": 0}
-            
+            for key, value in epoch_stats.items():
+                if isinstance(value, torch.Tensor):
+                    epoch_stats[key] = value.to(device)
+
             for img1, img2, label, pts1, pts2, _ in train_loader:
                 img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
                 # Forward pass
@@ -218,11 +221,11 @@ RE1_truth: {epoch_stats["RE1_truth"]}\t\t val_RE1_truth: {epoch_stats["val_RE1_t
 SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
             epoch_output = f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}
-             Training MAE: {self.all_train_mae[-1]}\t\t Val MAE: {self.all_val_mae[-1]}
-             Algebraic dist: {self.all_algebraic_pred[-1]}\t\t Val Algebraic dist: {self.all_val_algebraic_pred[-1]}
-             Algebraic sqr dist: {self.all_algebraic_sqr_pred[-1]}\t  Val Algebraic sqr dist: {self.all_val_algebraic_sqr_pred[-1]}
-             RE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}
-             SED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n"""
+              Training MAE: {self.all_train_mae[-1]}\t\t Val MAE: {self.all_val_mae[-1]}
+              Algebraic dist: {self.all_algebraic_pred[-1]}\t\t Val Algebraic dist: {self.all_val_algebraic_pred[-1]}
+              Algebraic sqr dist: {self.all_algebraic_sqr_pred[-1]}\t  Val Algebraic sqr dist: {self.all_val_algebraic_sqr_pred[-1]}
+              RE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}
+              SED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n"""
             print_and_write(epoch_output, self.plots_path)
 
             # If the model is not learning or outputs nan, stop training
@@ -324,6 +327,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             self.optimizer.load_state_dict(checkpoint['optimizer'])
         if self.use_conv:
             self.conv.load_state_dict(checkpoint['conv'])
+            
             self.conv.to(device)
         self.model.to(device)
         self.mlp.to(device)
