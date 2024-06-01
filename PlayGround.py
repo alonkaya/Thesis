@@ -107,7 +107,6 @@ def sed_distance_gt():
 
     for i, (img1, img2, label, pts1, pts2, _) in enumerate(val_loader):
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
-
         epipolar_geo_gt = EpipolarGeometry(img1[0], img2[0], label[0], pts1=pts1[0], pts2=pts2[0]) 
         total_sed += epipolar_geo_gt.get_mean_SED_distance()
         if i == 100: break
@@ -307,9 +306,10 @@ def update_epochs(file_path, increment):
 
 if __name__ == "__main__":
     file_path = "plots\Stereo\SED_0.05__Enlarged__Continued__lr_2e-05__avg_embeddings_False__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True\output.log"
-    update_epochs(file_path, 114)
+    # update_epochs(file_path, 114)
     # os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
     # # sed_distance_trained(plots_path)
     # sed_vs_rotation_translation(file_path)
     # vis_gt()
+    sed_distance_gt()

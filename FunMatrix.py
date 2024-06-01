@@ -216,7 +216,6 @@ class EpipolarGeometry:
 
     def get_keypoints(self, threshold=EPIPOLAR_THRESHOLD):
         """Recives numpy images and returns numpy points"""
-        # sift = cv2.xfeatures2d.SIFT_create()
         sift = cv2.SIFT_create()
         bf = cv2.BFMatcher()
 
@@ -246,10 +245,6 @@ class EpipolarGeometry:
 
         self.pts1, self.pts2 = self.trim_by_sed()
       
-
-    def compute_epipolar_lines(self, F, points):
-        """Compute the epipolar_lines for multiple points using vectorized operations."""
-        return torch.matmul(F, points.view(-1, 3, 1)).view(-1,3)
     
     def point_2_line_distance(self, point, l):
         # Both point and line are of shape (3,) 
@@ -277,8 +272,8 @@ class EpipolarGeometry:
         return torch.mean(self.get_algebraic_distance()**2)
     
     def get_RE1_distance(self):
-        inhomogeneous_l1 = self.compute_epipolar_lines(self.F.T, self.pts2)[:,0:2]
-        inhomogeneous_l2 = self.compute_epipolar_lines(self.F, self.pts1)[:,0:2]
+        inhomogeneous_l1 = cv2.computeCorrespondEpilines(self.pts2[:, :2], 2, self.F)[:,0:2]
+        inhomogeneous_l2 = cv2.computeCorrespondEpilines(self.pts1[:, :2], 1, self.F)[:,0:2]
 
         denominator = (torch.sum(inhomogeneous_l1**2, dim=1) + torch.sum(inhomogeneous_l2**2, dim=1)).view(-1,1,1)
 
@@ -307,9 +302,9 @@ class EpipolarGeometry:
     def get_mean_SED_distance(self):
         return torch.mean(self.get_SED_distance())
     
-    def get_SED_distance(self, show_histogram=False, plots_path=None):
-        lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
-        lines2 = self.compute_epipolar_lines(self.F, self.pts1)   # shape (n,3)
+    def get_SED_distance(self, show_histogram=False, plots_path=None):    
+        lines1 = cv2.computeCorrespondEpilines(self.pts2[:, :2], 2, self.F) # shape (n,3)
+        lines2 = cv2.computeCorrespondEpilines(self.pts1[:, :2], 1, self.F) # shape (n,3)
 
         # Compute the distances from each point to its corresponding epipolar line
         distances1 = self.point_2_line_distance_all_points(self.pts1, lines1)
@@ -323,8 +318,8 @@ class EpipolarGeometry:
         return sed
     
     def get_SED_distance2(self):
-        lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
-        lines2 = self.compute_epipolar_lines(self.F, self.pts1)   # shape (n,3)
+        lines1 = cv2.computeCorrespondEpilines(self.pts2[:, :2], 2, self.F) # shape (n,3)
+        lines2 = cv2.computeCorrespondEpilines(self.pts1[:, :2], 1, self.F) # shape (n,3)
 
         denominator = 1/(lines1[:,0]**2 + lines1[:,1]**2) + 1/(lines2[:,0]**2 + lines2[:,1]**2)
 
