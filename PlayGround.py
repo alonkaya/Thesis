@@ -116,8 +116,8 @@ def sed_distance_gt():
 
 def sed_distance_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
-    source_dir = 'epipole_lines\predicted_RealEstate'
-    os.makedirs(source_dir, exist_ok=True)
+    # source_dir = 'epipole_lines\predicted_RealEstate'
+    # os.makedirs(source_dir, exist_ok=True)
     train_loader, val_loader = get_data_loaders(batch_size=1)
 
     sed_list = []
@@ -128,15 +128,15 @@ def sed_distance_trained(plots_path):
         sed = epipolar_geo.get_mean_SED_distance()
 
         sed_list.append(sed)
-
-        with open(os.path.join(source_dir, 'stats_RealEstate2.txt'), 'a') as f:
-            f.write(f'idx: {i+745:06}\n')
-            f.write(f'SED: {sed}\n')
-            f.write(f'R: {R[0].numpy()}\n')
-            f.write(f't: {t[0].numpy()}\n\n')
-        if i == 1500:
-            break
-
+        break
+        # with open(os.path.join(source_dir, 'stats_RealEstate2.txt'), 'a') as f:
+        #     f.write(f'idx: {i+745:06}\n')
+        #     f.write(f'SED: {sed}\n')
+        #     f.write(f'R: {R[0].numpy()}\n')
+        #     f.write(f't: {t[0].numpy()}\n\n')
+        # if i == 1500:
+        #     break
+    print(np.mean(sed_list))
     # points_histogram(sed_list)
     # sorted_sed = sorted(sed_list)[:950]
     # print(f'SED distance: {np.mean(sorted_sed)}')
@@ -305,7 +305,7 @@ def update_epochs(file_path, increment):
 
 
 if __name__ == "__main__":
-    file_path = "plots\Stereo\SED_0.05__Enlarged__Continued__lr_2e-05__avg_embeddings_False__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True\output.log"
+    file_path = "plots/Stereo/SED_0.05__Continued__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
     # update_epochs(file_path, 114)
     # os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
