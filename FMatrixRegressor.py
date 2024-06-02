@@ -248,9 +248,10 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
     def save_model(self, epoch):
         checkpoint_path = os.path.join(self.plots_path, "model.pth")
         torch.save({
-            'vit': self.model.state_dict(),
             'mlp': self.mlp.state_dict(),
             'optimizer': self.optimizer.state_dict(),
+            'vit': self.model.state_dict() if not self.deepF_noCorrs else '',
+            'feat_ext_deepF': self.feat_ext_deepF.state_dict() if self.deepF_noCorrs else '',
             'conv': self.conv.state_dict() if self.use_conv else '',
 
             "batch_size" : self.batch_size,
@@ -313,22 +314,18 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.all_val_RE1_pred = checkpoint.get("all_val_RE1_pred", [])
         self.all_val_SED_pred = checkpoint.get("all_val_SED_pred", [])
 
-        self.model.load_state_dict(checkpoint['vit'])
+        self.optimizer.load_state_dict(checkpoint['optimizer'])
         self.mlp.load_state_dict(checkpoint['mlp'])
-        try:
-            self.optimizer.load_state_dict(checkpoint['optimizer'])
-        except:
-            self.optimizer = optim.Adam([
-                {'params': self.model.parameters(), 'lr': 2e-5}, 
-                {'params': self.mlp.parameters(), 'lr': 2e-5}, 
-            ])
-            self.optimizer.load_state_dict(checkpoint['optimizer'])
+        self.mlp.to(device)
         if self.use_conv:
             self.conv.load_state_dict(checkpoint['conv'])
-            
             self.conv.to(device)
-        self.model.to(device)
-        self.mlp.to(device)
+        if self.deepF_noCorrs:
+            self.feat_ext_deepF.load_state_dict(checkpoint['feat_ext_deepF'])
+            self.feat_ext_deepF.to(device)
+        else:
+            self.model.load_state_dict(checkpoint['vit']) 
+            self.model.to(device)
 
 def use_pretrained_model(sequence_name, plots_path):
     train_loader, val_loader = data_with_one_sequence(sequence_name=sequence_name)
