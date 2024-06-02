@@ -5,21 +5,20 @@ import os
 import math
 import numpy as np
 import warnings
-import torch.multiprocessing as mp
 import os
 import faulthandler
 
 class MLP(nn.Module):
-    def __init__(self, num_input, mlp_hidden_sizes, num_output, batchnorm_and_dropout):
+    def __init__(self, input_dim, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT):
         super(MLP, self).__init__()
         mlp_layers = []
-        prev_size = num_input
+        prev_size = input_dim
         for hidden_size in mlp_hidden_sizes:
             mlp_layers.append(nn.Linear(prev_size, hidden_size))
-            if batchnorm_and_dropout:
+            if BN_AND_DO:
                 mlp_layers.append(nn.BatchNorm1d(hidden_size))  # Batch Normalization
             mlp_layers.append(nn.ReLU())
-            if batchnorm_and_dropout:
+            if BN_AND_DO:
                 mlp_layers.append(nn.Dropout())  # Dropout
             prev_size = hidden_size
         mlp_layers.append(nn.Linear(prev_size, num_output))

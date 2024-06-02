@@ -250,8 +250,7 @@ class EpipolarGeometry:
         lines = torch.matmul(F, points.view(-1, 3, 1)).view(-1,3)
 
         norm_factor = torch.sqrt(lines[:, 0]**2 + lines[:, 1]**2).view(-1, 1)
-        norm_factor[norm_factor == 0] = 1.0  # To avoid division by zero
-
+        
         return lines / norm_factor
     
     def point_2_line_distance(self, point, l):

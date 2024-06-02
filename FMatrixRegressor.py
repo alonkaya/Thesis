@@ -7,10 +7,10 @@ import torch.optim as optim
 from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, lr_vit, lr_mlp, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT, 
-                 average_embeddings=AVG_EMBEDDINGS, batch_size=BATCH_SIZE, batchnorm_and_dropout=BN_AND_DO, deepF_noCorrs=DEEPF_NOCORRS,
-                 augmentation=AUGMENTATION, model_name=MODEL, unfrozen_layers=UNFROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER,
-                 pretrained_path=None, alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
+    def __init__(self, lr_vit, lr_mlp, average_embeddings=AVG_EMBEDDINGS, 
+                 batch_size=BATCH_SIZE, deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, 
+                 unfrozen_layers=UNFROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
+                 alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
         """
         Initialize the ViTMLPRegressor model.
@@ -30,7 +30,6 @@ class FMatrixRegressor(nn.Module):
         self.batch_size = batch_size
         self.lr_vit = lr_vit
         self.lr_mlp = lr_mlp
-        self.batchnorm_and_dropout = batchnorm_and_dropout
         self.deepF_noCorrs = deepF_noCorrs
         self.average_embeddings = average_embeddings
         self.model_name = model_name
@@ -65,8 +64,7 @@ class FMatrixRegressor(nn.Module):
             self.model = ViTModel.from_pretrained(model_name).to(device)
 
         
-        if self.deepF_noCorrs:
-            self.feat_ext_deepF = FeatureExtractorDeepF(in_channels=3, img_shape=(224, 224, 3)).to(device)
+
 
         # Get input dimension for the MLP based on ViT configuration
         self.hidden_size = self.model.config.hidden_size
@@ -80,14 +78,17 @@ class FMatrixRegressor(nn.Module):
         if self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size).to(device)
             mlp_input_shape = (self.num_patches**2) * self.conv.hidden_dims[-1] 
+        if self.deepF_noCorrs:
+            self.feat_ext_deepF = FeatureExtractorDeepF().to(device)
+            mlp_input_shape = 256 * 7 * 7
 
-        self.mlp = MLP(mlp_input_shape, mlp_hidden_sizes,
-                       num_output, batchnorm_and_dropout).to(device)
+        self.mlp = MLP(input_dim=mlp_input_shape).to(device)
 
         self.L2_loss = nn.MSELoss().to(device)
         self.huber_loss = nn.HuberLoss().to(device)
         self.optimizer = optim.Adam([
-            {'params': self.model.parameters(), 'lr': lr_vit, 'weight_decay': 1e-5},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.model.parameters(), 'lr': lr_vit, 'weight_decay': 1e-5} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.feat_ext_deepF.parameters(), 'lr': lr_vit, 'weight_decay': 1e-5} if self.deepF_noCorrs else {'params': []},
             {'params': self.mlp.parameters(), 'lr': lr_mlp, 'weight_decay': 1e-5},   # Potentially higher learning rate for the MLP
             {'params': self.conv.parameters(), 'lr': lr_mlp, 'weight_decay': 1e-5} if self.use_conv else {'params': []}
         ])
@@ -121,7 +122,8 @@ class FMatrixRegressor(nn.Module):
         return embeddings
 
     def forward(self, x1, x2):
-        embeddings = self.FeatureExtractor(x1, x2) if not self.deepF_noCorrs else self.feat_ext_deepF(x1, x2)
+        # x1, x2 shape is (batch_size, channels, height, width)
+        embeddings = self.FeatureExtractor(x1, x2) if not self.deepF_noCorrs else self.feat_ext_deepF(x1, x2) # Output shape is (batch_size, -1)
 
         output = self.mlp(embeddings)
 
@@ -254,7 +256,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             "batch_size" : self.batch_size,
             "lr_vit" : self.lr_vit,
             "lr_mlp" : self.lr_mlp,
-            "batchnorm_and_dropout" : self.batchnorm_and_dropout,
             "average_embeddings" : self.average_embeddings,
             "model_name" : self.model_name,
             "augmentation" : self.augmentation,
@@ -287,7 +288,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.batch_size = checkpoint.get("batch_size", self.batch_size)
         self.lr_vit = checkpoint.get("lr_vit", self.lr_vit)
         self.lr_mlp = checkpoint.get("lr_mlp", self.lr_mlp)
-        self.batchnorm_and_dropout = checkpoint.get("batchnorm_and_dropout", self.batchnorm_and_dropout)
         self.average_embeddings = checkpoint.get("average_embeddings", self.average_embeddings)
         self.model_name = checkpoint.get("model_name", self.model_name)
         self.augmentation = checkpoint.get("augmentation", self.augmentation)
