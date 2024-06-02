@@ -236,8 +236,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             if SAVE_MODEL:
                 self.save_model(epoch+1)
         
-        plot(x=range(1, self.num_epochs + 1), y1=self.all_train_loss, y2=self.all_val_loss, title="Loss")
-        plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae, y2=self.all_val_mae, title="MAE")
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_train_loss, y2=self.all_val_loss, title="Loss", plots_path=self.plots_path)
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae, y2=self.all_val_mae, title="MAE", plots_path=self.plots_path)
         plot(x=range(1, self.num_epochs + 1), y1=self.all_algebraic_pred, y2=self.all_val_algebraic_pred, title="Algebraic distance", plots_path=self.plots_path)
         plot(x=range(1, self.num_epochs + 1), y1=self.all_algebraic_sqr_pred, y2=self.all_val_algebraic_sqr_pred, title="Algebraic sqr distance", plots_path=self.plots_path)
         plot(x=range(1, self.num_epochs + 1), y1=self.all_RE1_pred, y2=self.all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
@@ -266,7 +266,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             "use_conv" : self.use_conv,
             "hidden_size" : self.hidden_size,
             "num_patches" : self.num_patches,
-            "num_epochs" : self.num_epochs,    
             'epoch' : epoch,
             "all_train_loss" : self.all_train_loss, 
             "all_val_loss" : self.all_val_loss, 
@@ -300,7 +299,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.use_conv = checkpoint.get("use_conv", self.use_conv)
         self.hidden_size = checkpoint.get("hidden_size", self.hidden_size)
         self.num_patches = checkpoint.get("num_patches", self.num_patches)
-        self.num_epochs = checkpoint.get("num_epochs", self.num_epochs) 
         self.start_epoch = checkpoint.get("epoch", 0)
         self.all_train_loss = checkpoint.get("all_train_loss", [])
         self.all_val_loss = checkpoint.get("all_val_loss", [])

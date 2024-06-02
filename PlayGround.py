@@ -107,7 +107,6 @@ def sed_distance_gt():
 
     for i, (img1, img2, label, pts1, pts2, _) in enumerate(val_loader):
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
-
         epipolar_geo_gt = EpipolarGeometry(img1[0], img2[0], label[0], pts1=pts1[0], pts2=pts2[0]) 
         total_sed += epipolar_geo_gt.get_mean_SED_distance()
         if i == 100: break
@@ -284,15 +283,33 @@ def move_based_on_txt():
             os.rename(os.path.join(src_dir1, file_name), os.path.join(dst_dir1, file_name))
             # print(os.path.join(src_dir0, file_name),  os.path.join(dst_dir0, file_name))
 
+def update_epochs(file_path, increment):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    updated_lines = []
+    
+    for line in lines:
+        if line.startswith("Epoch "):
+            parts = line.split(" ")
+            epoch_number = int(parts[1].split('/')[0])
+            new_epoch_number = epoch_number + increment
+            updated_line = line.replace(f"Epoch {epoch_number}/", f"Epoch {new_epoch_number}/")
+            updated_lines.append(updated_line)
+
+        else:
+            updated_lines.append(line)
+
+    with open(file_path, 'w') as file:
+        file.writelines(updated_lines)
+
 
 if __name__ == "__main__":
-    # plots_path = 'plots\KITTI\SED_0.1__RightCamVal__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augment_True__rc_True'
-    # plots_path = 'plots\RealEstate\SED_0.1__RandomCrop__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True__Augmentation_False__Conv_False'
-    # file_path = 'epipole_lines\predicted_RealEstate\stats_RealEstate2.txt'
-    # # file_path = 'epipole_lines\predicted_KITTI_rightcamval\stats_KITTI.txt'
-
-    os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+    file_path = "plots\Stereo\SED_0.05__Enlarged__Continued__lr_2e-05__avg_embeddings_False__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True\output.log"
+    # update_epochs(file_path, 114)
+    # os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
     # # sed_distance_trained(plots_path)
     # sed_vs_rotation_translation(file_path)
-    vis_gt()
+    # vis_gt()
+    sed_distance_gt()
