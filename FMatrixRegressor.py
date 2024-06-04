@@ -95,7 +95,7 @@ class FMatrixRegressor(nn.Module):
         
         if pretrained_path:
             self.load_model(path=pretrained_path)
-
+        self.to(device)
     def FeatureExtractor(self, x1, x2):
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :]
