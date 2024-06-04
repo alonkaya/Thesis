@@ -305,7 +305,7 @@ def update_epochs(file_path, increment):
 
 
 if __name__ == "__main__":
-    file_path = "plots\Stereo\SED_0.05__Continued__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True\output.log"
+    file_path = "plots\Stereo\SED_0.05__Enlarged__Continued__lr_2e-05__avg_embeddings_False__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True\output.log"
     # update_epochs(file_path, 114)
     # os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
@@ -313,4 +313,4 @@ if __name__ == "__main__":
     # sed_vs_rotation_translation(file_path)
     # vis_gt()
     # sed_distance_gt()
-    update_epochs(file_path, 71)
+    update_epochs(file_path, 114)
