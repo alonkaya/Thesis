@@ -88,9 +88,9 @@ class FMatrixRegressor(nn.Module):
         self.huber_loss = nn.HuberLoss().to(device)
         self.optimizer = optim.Adam([
             {'params': self.model.parameters(), 'lr': lr_vit, 'weight_decay': 1e-5} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
-            {'params': self.feat_ext_deepF.parameters(), 'lr': lr_vit, 'weight_decay': 1e-5} if self.deepF_noCorrs else {'params': []},
+            # {'params': self.feat_ext_deepF.parameters(), 'lr': lr_vit, 'weight_decay': 1e-5} if self.deepF_noCorrs else {'params': []},
             {'params': self.mlp.parameters(), 'lr': lr_mlp, 'weight_decay': 1e-5},   # Potentially higher learning rate for the MLP
-            {'params': self.conv.parameters(), 'lr': lr_mlp, 'weight_decay': 1e-5} if self.use_conv else {'params': []}
+            # {'params': self.conv.parameters(), 'lr': lr_mlp, 'weight_decay': 1e-5} if self.use_conv else {'params': []}
         ])
         
         if pretrained_path:
