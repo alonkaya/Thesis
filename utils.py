@@ -209,6 +209,7 @@ def divide_by_dataloader(epoch_stats, len_train_loader, len_val_loader, len_test
             # For all other keys, divide by the length of train_loader
             # Assuming that 'file_num' should not be processed, we'll skip it
             if key != "file_num":
+                print(key, value.cpu())
                 epoch_stats[key] = value.cpu().item() / len_train_loader
 
 from matplotlib.ticker import MaxNLocator
