@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from params import BATCH_SIZE
 
 class Inception(nn.Module):
     def __init__(self, in_channels, conv11_size, conv33_reduce_size, conv33_size,
@@ -84,9 +85,9 @@ class FeatureExtractorDeepF(nn.Module):
         self.ucn = UniversalCorrespondenceNetwork() # img shape is (batch_size, 3, 224, 224)
 
         self.conv_3x3 = nn.Conv2d(256, 128, kernel_size=3, padding=1)
-        self.bn_3x3 = nn.BatchNorm2d(128)
+        self.bn_3x3 = nn.BatchNorm2d(128) if BATCH_SIZE > 1 else nn.LayerNorm([128, 7, 7])
         self.conv_1x1 = nn.Conv2d(128, 128, kernel_size=1)
-        self.bn_1x1 = nn.BatchNorm2d(128)
+        self.bn_1x1 = nn.BatchNorm2d(128) if BATCH_SIZE > 1 else nn.LayerNorm([128, 7, 7])
 
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2, return_indices=True)
 

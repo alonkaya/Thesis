@@ -8,8 +8,8 @@ norm_mean = torch.tensor([0.449, 0.449, 0.449])
 norm_std = torch.tensor([0.226, 0.226, 0.226])
 train_seqeunces = [0, 2, 3, 5, 6, 7, 8]
 val_sequences = [0, 2, 3, 5, 6, 7, 8]
-train_seqeunces_stereo = [0]
-val_sequences_stereo = [6]
+train_seqeunces_stereo = [0,2,3,5]
+val_sequences_stereo = [6,7,8]
 test_sequences_stereo = [9]
 CROP = 224
 RESIZE = 256
@@ -29,13 +29,13 @@ learning_rates_mlp = [2e-5]
 USE_RECONSTRUCTION_LAYER = True
 BATCH_SIZE = 8
 TRAIN_FROM_SCRATCH = False
-DEEPF_NOCORRS = True
+DEEPF_NOCORRS = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 # Change Main.py if > 0
 SAVE_MODEL = True
 NUM_EPOCHS = 600
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
-ADDITIONS = "train_only_0"
+ADDITIONS = ""
 
 ### Epipolar geometry ###
 RE1_DIST = True
