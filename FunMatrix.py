@@ -167,7 +167,6 @@ def update_epoch_stats(stats, first_image, second_image, label, output, plots_pa
                                     torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0)
     for img1, img2, F_truth, F_pred in zip(first_image, second_image, label, output):
         epi = EpipolarGeometry(img1, img2, F=F_truth)
-        epi.pts1, epi.pts2 = epi.pts1.to(device), epi.pts2.to(device)
         epi.pts1.requires_grad = True
         epi.pts2.requires_grad = True
 
@@ -245,8 +244,8 @@ class EpipolarGeometry:
         if len(self.good) == 0:
             self.good.append(matches[min_distance_index][0])
 
-        pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32)
-        pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32)
+        pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32).to(device)
+        pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32).to(device)
 
         self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1)
         self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1)
