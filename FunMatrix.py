@@ -163,8 +163,8 @@ def update_epoch_stats(stats, first_image, second_image, label, output, plots_pa
     algebraic_dist_truth, algebraic_dist_pred, \
     algebraic_dist_sqr_truth, algebraic_dist_sqr_pred, \
     RE1_dist_truth, RE1_dist_pred, \
-    SED_dist_truth, SED_dist_pred = torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0), \
-                                    torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0)
+    SED_dist_truth, SED_dist_pred = torch.tensor(0).to(device), torch.tensor(0).to(device), torch.tensor(0).to(device), torch.tensor(0).to(device), \
+                                    torch.tensor(0).to(device), torch.tensor(0).to(device), torch.tensor(0).to(device), torch.tensor(0).to(device)
     for img1, img2, F_truth, F_pred in zip(first_image, second_image, label, output):
         epi = EpipolarGeometry(img1, img2, F=F_truth)
         epi.pts1.requires_grad = True
@@ -186,10 +186,10 @@ def update_epoch_stats(stats, first_image, second_image, label, output, plots_pa
         (v/len(first_image) for v in [algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred, algebraic_dist_truth, algebraic_dist_sqr_truth, RE1_dist_truth, SED_dist_truth])
     
     prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
-    stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred)
-    stats[f"{prefix}algebraic_sqr_pred"] = stats[f"{prefix}algebraic_sqr_pred"] + (algebraic_dist_sqr_pred)
-    stats[f"{prefix}RE1_pred"] = stats[f"{prefix}RE1_pred"] + (RE1_dist_pred) if RE1_DIST else stats[f"{prefix}RE1_pred"]
-    stats[f"{prefix}SED_pred"] = stats[f"{prefix}SED_pred"] + (SED_dist_pred) if SED_DIST else stats[f"{prefix}SED_pred"]
+    stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred.detach())
+    stats[f"{prefix}algebraic_sqr_pred"] = stats[f"{prefix}algebraic_sqr_pred"] + (algebraic_dist_sqr_pred.detach())
+    stats[f"{prefix}RE1_pred"] = stats[f"{prefix}RE1_pred"] + (RE1_dist_pred.detach()) if RE1_DIST else stats[f"{prefix}RE1_pred"]
+    stats[f"{prefix}SED_pred"] = stats[f"{prefix}SED_pred"] + (SED_dist_pred.detach()) if SED_DIST else stats[f"{prefix}SED_pred"]
 
     if epoch == 0 or data_type == "test":
         stats[f"{prefix}algebraic_truth"] = stats[f"{prefix}algebraic_truth"] + (algebraic_dist_truth)

@@ -199,20 +199,15 @@ def find_coefficients(F):
 
 def divide_by_dataloader(epoch_stats, len_train_loader, len_val_loader, len_test_loader):
     for key, value in epoch_stats.items():
+        if key == "file_num" or value.numel() == 1: continue
+
         if key.startswith("val_"):
             epoch_stats[key] = value.cpu().item() / len_val_loader
-
         elif key.startswith("test_"):
             epoch_stats[key] = value.cpu().item() / len_test_loader
-
         else:
-            # For all other keys, divide by the length of train_loader
-            # Assuming that 'file_num' should not be processed, we'll skip it
-            if key != "file_num" and value.numel() == 1:
-                print(key, value.cpu())
-                epoch_stats[key] = value.cpu().item() / len_train_loader
+            epoch_stats[key] = value.cpu().item() / len_train_loader
 
-from matplotlib.ticker import MaxNLocator
 
 def points_histogram(distances):
 
