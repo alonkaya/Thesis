@@ -90,6 +90,8 @@ class FeatureExtractorDeepF(nn.Module):
 
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2, return_indices=True)
 
+        self.flatten = nn.Flatten()
+
     def forward(self, x1, x2):
         # UCN
         feature1 = self.ucn(x1) # Output shape is (batch_size, 128, 14, 14)
@@ -110,6 +112,7 @@ class FeatureExtractorDeepF(nn.Module):
         indices = indices.expand_as(pooled_features)
         
         pooled_features_with_position = torch.cat((pooled_features, indices), dim=1) # Output shape: (batch_size, 256, 7, 7)
-        
-        return pooled_features_with_position.flatten()
+        pooled_features_with_position = self.flatten(pooled_features_with_position)
+
+        return pooled_features_with_position
         
