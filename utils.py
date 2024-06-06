@@ -199,7 +199,7 @@ def find_coefficients(F):
 
 def divide_by_dataloader(epoch_stats, len_train_loader, len_val_loader, len_test_loader):
     for key, value in epoch_stats.items():
-        if key == "file_num" or value.numel() == 1: continue
+        if key == "file_num" or value.shape != torch.Size([]): continue
 
         if key.startswith("val_"):
             epoch_stats[key] = value.cpu().item() / len_val_loader
