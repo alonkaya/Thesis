@@ -13,16 +13,23 @@ class FMatrixRegressor(nn.Module):
                  alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
         """
-        Initialize the ViTMLPRegressor model.
-
         Args:
-        - mlp_hidden_sizes (list): List of hidden layer sizes for the MLP.
-        - num_output (int): Number of output units in the final layer.
-        - model_name (str): Name of the pretrained model to use.
-        - lr (float): Learning rate for the optimizer.
-        - device (str): Device to which the model should be moved (e.g., "cuda" or "cpu").
-        - regress (bool): If True, use Mean Squared Error loss; if False, use Cross Entropy Loss.
-        - freeze_model (bool): If True, freeze the parameters of the pretrained model.
+        - lr_vit: learning rate for the vision transformer
+        - lr_mlp: learning rate for the MLP
+        - average_embeddings: whether to average the embeddings of the patches
+        - batch_size: batch size for training
+        - deepF_noCorrs: whether to use the deepF_noCorrs model
+        - augmentation: whether to use data augmentation
+        - model_name: name of the model to use
+        - unfrozen_layers: number of layers to unfreeze
+        - use_reconstruction: whether to use the reconstruction layer
+        - pretrained_path: path to a pretrained model
+        - alg_coeff: coefficient for the algebraic distance
+        - re1_coeff: coefficient for the RE1 distance
+        - sed_coeff: coefficient for the SED distance
+        - plots_path: path to save the plots
+        - use_conv: whether to use a convolutional layer
+        - num_epochs: number of epochs to train
         """
 
         super(FMatrixRegressor, self).__init__()
@@ -63,8 +70,6 @@ class FMatrixRegressor(nn.Module):
             # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
 
-        
-
 
         # Get input dimension for the MLP based on ViT configuration
         self.hidden_size = self.model.config.hidden_size
@@ -77,7 +82,7 @@ class FMatrixRegressor(nn.Module):
             mlp_input_shape //= (self.num_patches**2)     
         if self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size).to(device)
-            mlp_input_shape = (self.num_patches**2) * self.conv.hidden_dims[-1] 
+            mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
         if self.deepF_noCorrs:
             self.feat_ext_deepF = FeatureExtractorDeepF().to(device)
             mlp_input_shape = 256 * 7 * 7
@@ -96,6 +101,7 @@ class FMatrixRegressor(nn.Module):
         if pretrained_path:
             self.load_model(path=pretrained_path)
         self.to(device)
+
     def FeatureExtractor(self, x1, x2):
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :]
@@ -111,7 +117,7 @@ class FMatrixRegressor(nn.Module):
             x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
 
         if self.use_conv:
-            # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, (self.num_patches**2) * CONV_HIDDEN_DIM[-1])
+            # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
             x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
             x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
             embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
@@ -134,87 +140,38 @@ class FMatrixRegressor(nn.Module):
         return output
 
 
-    def train_model(self, train_loader, val_loader):
+    def train_model(self, train_loader, val_loader, test_loader):
         for epoch in range(self.start_epoch, self.num_epochs):
-            self.train()
-            labels, outputs, val_labels, val_outputs = torch.tensor([]).to(device), torch.tensor([]).to(device), \
-                                                       torch.tensor([]).to(device), torch.tensor([]).to(device)
-            
             epoch_stats = {"algebraic_pred": torch.tensor(0), "algebraic_sqr_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
                             "val_algebraic_pred": torch.tensor(0), "val_algebraic_sqr_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
+                            "test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
                             "algebraic_truth": torch.tensor(0), "algebraic_sqr_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
                             "val_algebraic_truth": torch.tensor(0), "val_algebraic_sqr_truth": torch.tensor(0), "val_RE1_truth": torch.tensor(0), "val_SED_truth": torch.tensor(0), 
-                            "loss": torch.tensor(0), "val_loss": torch.tensor(0),
+                            "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
+                            "loss": torch.tensor(0), "val_loss": torch.tensor(0), "test_loss": torch.tensor(0), 
+                            "labels": torch.tensor([]), "outputs": torch.tensor([]), "val_labels": torch.tensor([]), "val_outputs": torch.tensor([]), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([]),
                             "file_num": 0}
-            for key, value in epoch_stats.items():
-                if isinstance(value, torch.Tensor):
-                    epoch_stats[key] = value.to(device)
+            send_to_device(epoch_stats)
 
-            for img1, img2, label, pts1, pts2, _ in train_loader:
-                img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
-                # Forward pass
-                output = self.forward(img1, img2)
+            # Training
+            self.train()
+            self.dataloader_step(train_loader, epoch, epoch_stats, data_type="train")
 
-                pts1.requires_grad = True
-                pts2.requires_grad = True
-                # Update epoch statistics
-                batch_algebraic_sqr_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
-                    epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, epoch)
-                
-                # Compute loss
-                loss = self.L2_loss(output, label) + self.huber_loss(output, label) + \
-                        self.alg_coeff*batch_algebraic_sqr_pred + self.re1_coeff*batch_RE1_pred + self.sed_coeff*batch_SED_pred
-                epoch_stats["loss"] = epoch_stats["loss"] + loss.detach()
-
-                # Compute Backward pass and gradients
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
-
-                # Extend lists with batch statistics
-                labels = torch.cat((labels, label.detach()), dim=0)
-                outputs = torch.cat((outputs, output.detach()), dim=0)
-
-            # Validation
+            # Validation and Test
             self.eval()
             with torch.no_grad():
-                for val_img1, val_img2, val_label, val_pts1, val_pts2, _ in val_loader:
-                    val_img1, val_img2, val_label, val_pts1, val_pts2 = val_img1.to(device), val_img2.to(device), val_label.to(device), val_pts1.to(device), val_pts2.to(device)
+                self.dataloader_step(val_loader, epoch, epoch_stats, data_type="val")
 
-                    # Forward pass
-                    val_output = self.forward(val_img1, val_img2)
+                if epoch == self.num_epochs - 1:
+                    self.dataloader_step(test_loader, epoch, epoch_stats, data_type="test")
+                    test_MAE = torch.mean(torch.abs(epoch_stats["test_labels"] - epoch_stats["test_outputs"]))
                     
-                    # Update epoch statistics
-                    val_batch_algebraic_sqr_pred, val_batch_RE1_pred, val_batch_SED_pred = update_epoch_stats(
-                        epoch_stats, val_img1.detach(), val_img2.detach(), val_label.detach(), val_output, val_pts1, val_pts2, self.plots_path, epoch, val=True)
-                    
-                    # Compute loss
-                    epoch_stats["val_loss"] = epoch_stats["val_loss"] + self.L2_loss(val_output, val_label) + self.huber_loss(val_output, val_label) + \
-                                self.alg_coeff*val_batch_algebraic_sqr_pred + self.re1_coeff*val_batch_RE1_pred + self.sed_coeff*val_batch_SED_pred
-                    
-                    # Extend lists with batch statistics
-                    val_labels = torch.cat((val_labels, val_label), dim=0)
-                    val_outputs = torch.cat((val_outputs, val_output), dim=0)
-                    
+            train_mae = torch.mean(torch.abs(epoch_stats["labels"] - epoch_stats["outputs"]))
+            val_mae = torch.mean(torch.abs(epoch_stats["val_labels"] - epoch_stats["val_outputs"]))
 
-            train_mae = torch.mean(torch.abs(labels - outputs))
-            val_mae = torch.mean(torch.abs(val_labels - val_outputs))
+            divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader), len(test_loader))
 
-            divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
-
-            self.all_train_mae.append(train_mae.cpu().item())
-            self.all_train_loss.append(epoch_stats["loss"])
-            self.all_algebraic_pred.append(epoch_stats["algebraic_pred"])  
-            self.all_algebraic_sqr_pred.append(epoch_stats["algebraic_sqr_pred"])
-            self.all_RE1_pred.append(epoch_stats["RE1_pred"])
-            self.all_SED_pred.append(epoch_stats["SED_pred"])
-
-            self.all_val_mae.append(val_mae.cpu().item())
-            self.all_val_loss.append(epoch_stats["val_loss"])
-            self.all_val_algebraic_pred.append(epoch_stats["val_algebraic_pred"])
-            self.all_val_algebraic_sqr_pred.append(epoch_stats["val_algebraic_sqr_pred"])
-            self.all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
-            self.all_val_SED_pred.append(epoch_stats["val_SED_pred"])
+            self.append_epoch_stats(train_mae.cpu().item(), val_mae.cpu().item(), epoch_stats)
 
             if epoch == 0: 
                 print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}\t\t val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}
@@ -222,14 +179,21 @@ algebraic_sqr_truth: {epoch_stats["algebraic_sqr_truth"]}\t val_algebraic_sqr_tr
 RE1_truth: {epoch_stats["RE1_truth"]}\t\t val_RE1_truth: {epoch_stats["val_RE1_truth"]}
 SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
-            epoch_output = f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}
-              Training MAE: {self.all_train_mae[-1]}\t\t Val MAE: {self.all_val_mae[-1]}
-              Algebraic dist: {self.all_algebraic_pred[-1]}\t\t Val Algebraic dist: {self.all_val_algebraic_pred[-1]}
-              Algebraic sqr dist: {self.all_algebraic_sqr_pred[-1]}\t  Val Algebraic sqr dist: {self.all_val_algebraic_sqr_pred[-1]}
-              RE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}
-              SED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n"""
-            print_and_write(epoch_output, self.plots_path)
+            print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}
+Training MAE: {self.all_train_mae[-1]}\t\t Val MAE: {self.all_val_mae[-1]}
+Algebraic dist: {self.all_algebraic_pred[-1]}\t\t Val Algebraic dist: {self.all_val_algebraic_pred[-1]}
+Algebraic sqr dist: {self.all_algebraic_sqr_pred[-1]}\t  Val Algebraic sqr dist: {self.all_val_algebraic_sqr_pred[-1]}
+RE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}
+SED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n""", self.plots_path)
 
+            if epoch == self.num_epochs - 1:
+                print_and_write(f"""## TEST RESULTS: ##
+Test Loss: {epoch_stats["test_loss"]}\t\t Test MAE: {test_MAE}
+Test Algebraic dist: {epoch_stats["test_algebraic_pred"]}\t\t Test Algebraic Truth: {epoch_stats["test_algebraic_truth"]}
+Test Algebraic sqr dist: {epoch_stats["test_algebraic_sqr_pred"]}\t  Test Algebraic sqr Truth: {epoch_stats["test_algebraic_sqr_truth"]}
+Test RE1 dist: {epoch_stats["test_RE1_pred"]}\t\t Test RE1 Truth: {epoch_stats["test_RE1_truth"]}
+Test SED dist: {epoch_stats["test_SED_pred"]}\t\t Test SED Truth: {epoch_stats["test_SED_truth"]}\n\n""", self.plots_path)
+                
             # If the model is not learning or outputs nan, stop training
             if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.all_train_mae[-1], self.all_val_mae[-1], self.plots_path):
                 self.num_epochs = epoch + 1
@@ -327,74 +291,45 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             self.model.load_state_dict(checkpoint['vit']) 
             self.model.to(device)
 
-def use_pretrained_model(sequence_name, plots_path):
-    train_loader, val_loader = data_with_one_sequence(sequence_name=sequence_name)
-
-    model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
-
-    epoch_stats = {"algebraic_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
-                    "val_algebraic_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
-                    "algebraic_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
-                    "val_algebraic_truth": torch.tensor(0), "val_RE1_truth": torch.tensor(0), "val_SED_truth": torch.tensor(0), 
-                    "loss": torch.tensor(0), "val_loss": torch.tensor(0),
-                    "epoch_penalty": torch.tensor(0), "file_num": 0}
-
-    for img1, img2, label, pts1, pts2, _ in val_loader:
-        img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
-
-        # Forward pass
-        output = model.forward(img1, img2)
-        
-        # Update epoch statistics
-        batch_algebraic_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
-            epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, plots_path=plots_path, epoch=VISIUALIZE["epoch"], val=True)
-
-
-def paramterization_layer(x, plots_path):
-    """
-    Constructs a batch of 3x3 fundamental matrices from a batch of 8-element vectors based on the described parametrization.
-
-    Parameters:
-    outputs (torch.Tensor): A tensor of shape (batch_size, 8) where each row is an 8-element vector.
-                            The first 6 elements of each vector represent the first two columns
-                            of a fundamental matrix, and the last 2 elements are the coefficients for
-                            combining these columns to get the third column.
-
-    Returns:
-    torch.Tensor: A tensor of shape (batch_size, 3, 3) representing a batch of 3x3 fundamental matrices.
-    """
-
-    # Split the tensor into the first two columns (f1, f2) and the coefficients (alpha, beta)
-    f1 = x[:, :3]  # First three elements of each vector for the first column
-    f2 = x[:, 3:6]  # Next three elements of each vector for the second column
-    alpha, beta = x[:, 6].unsqueeze(1), x[:, 7].unsqueeze(1)  # Last two elements of each vector for the coefficients
-
-    # Compute the third column as a linear combination: f3 = alpha * f1 + beta * f2
-    # We need to use broadcasting to correctly multiply the coefficients with the columns
-    f3 = alpha * f1 + beta * f2
-
-    # Construct the batch of 3x3 fundamental matrices
-    # We need to reshape the columns to concatenate them correctly
-    F = torch.cat((f1.view(-1, 3, 1), f2.view(-1, 3, 1), f3.view(-1, 3, 1)), dim=-1)
-
-    if torch.linalg.matrix_rank(F[0]) != 2:
-        U, S, V = torch.svd(F[0])
-        print_and_write(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(F)}
-singular values: {S.cpu().tolist()}\n""", plots_path)
-
-    return F
-
-if __name__ == "__main__":
-    plots_path = 'plots/RealEstate/SED_0.1__lr_2e-05__avg_embeddings_True__model_CLIP__use_reconstruction_True'
-    model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
-    
-    train_loader, val_loader = data_with_one_sequence(sequence_name="30b1d229ad4c6353")
-    for img1, img2, label, idx in val_loader:
-        if idx[0].item() == 157:
+    def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
+        prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
+        for img1, img2, label, _ in dataloader:
             img1, img2, label = img1.to(device), img2.to(device), label.to(device)
-            output, _, _, _ = model.forward(img1, img2)
 
-            epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0])
-            SED_dist = epipolar_geo.get_mean_SED_distance() 
+            # Forward pass
+            output = self.forward(img1, img2)
 
-    print(SED_dist) 
+            # Update epoch statistics
+            batch_algebraic_sqr_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
+                epoch_stats, img1.detach(), img2.detach(), label.detach(), output, self.plots_path, data_type, epoch)
+            
+            # Compute loss
+            loss = self.L2_loss(output, label) + self.huber_loss(output, label) + \
+                    self.alg_coeff*batch_algebraic_sqr_pred + self.re1_coeff*batch_RE1_pred + self.sed_coeff*batch_SED_pred
+            epoch_stats[f'{prefix}loss'] = epoch_stats[f'{prefix}loss'] + loss.detach()
+
+            if data_type == "train":
+                # Compute Backward pass and gradients
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+            # Extend lists with batch statistics
+            epoch_stats[f'{prefix}labels'] = torch.cat((epoch_stats[f'{prefix}labels'], label.detach()), dim=0)
+            epoch_stats[f'{prefix}outputs'] = torch.cat((epoch_stats[f'{prefix}outputs'], output.detach()), dim=0)
+
+    def append_epoch_stats(self, train_mae, val_mae, epoch_stats):
+        self.all_train_mae.append(train_mae)
+        self.all_train_loss.append(epoch_stats["loss"])
+        self.all_algebraic_pred.append(epoch_stats["algebraic_pred"])  
+        self.all_algebraic_sqr_pred.append(epoch_stats["algebraic_sqr_pred"])
+        self.all_RE1_pred.append(epoch_stats["RE1_pred"])
+        self.all_SED_pred.append(epoch_stats["SED_pred"])
+
+        self.all_val_mae.append(val_mae)
+        self.all_val_loss.append(epoch_stats["val_loss"])
+        self.all_val_algebraic_pred.append(epoch_stats["val_algebraic_pred"])
+        self.all_val_algebraic_sqr_pred.append(epoch_stats["val_algebraic_sqr_pred"])
+        self.all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
+        self.all_val_SED_pred.append(epoch_stats["val_SED_pred"])
+

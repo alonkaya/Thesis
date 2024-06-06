@@ -80,7 +80,7 @@ def valid_indices_of_dataset(train_loader, idx):
         print("Dataset not found for the current batch")
 
 def vis_gt():
-    train_loader, val_loader = get_data_loaders()
+    train_loader, val_loader, test_loader = get_data_loaders()
     total_sed = 0
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
         epipolar_geo = EpipolarGeometry(img1[0], img2[0], F=label[0], pts1=pts1[0], pts2=pts2[0])
@@ -92,7 +92,7 @@ def vis_gt():
 def vis_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
     
-    train_loader, val_loader = get_data_loaders(batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders(batch_size=1)
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
         img1, img2 = img1.to(device), img2.to(device)
         output = model.forward(img1, img2)
@@ -102,14 +102,13 @@ def vis_trained(plots_path):
 
 
 def sed_distance_gt():
-    train_loader, val_loader = get_data_loaders(batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders(batch_size=1)
     total_sed = 0
 
-    for i, (img1, img2, label, pts1, pts2, _) in enumerate(val_loader):
+    for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
         epipolar_geo_gt = EpipolarGeometry(img1[0], img2[0], label[0], pts1=pts1[0], pts2=pts2[0]) 
         total_sed += epipolar_geo_gt.get_mean_SED_distance()
-        if i == 100: break
 
     total_sed /= i
     print(f'SED distance: {total_sed}') 
@@ -156,7 +155,6 @@ def sed_histogram_trained(plots_path):
         print(seq_name[0])
         epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach())
         sed = epipolar_geo.get_mean_SED_distance(show_histogram=True, plots_path=plots_path)
-
 
 def sed_vs_rotation_translation(file_path):
     # Load the data
@@ -307,10 +305,10 @@ def update_epochs(file_path, increment):
 if __name__ == "__main__":
     file_path = "plots\Stereo\SED_0.05__Enlarged__Continued__lr_2e-05__avg_embeddings_False__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True\output.log"
     # update_epochs(file_path, 114)
-    # os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
     # # sed_distance_trained(plots_path)
     # sed_vs_rotation_translation(file_path)
     # vis_gt()
-    # sed_distance_gt()
-    update_epochs(file_path, 114)
+    sed_distance_gt()
+    # update_epochs(file_path, 114)

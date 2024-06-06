@@ -15,11 +15,8 @@ class MLP(nn.Module):
         prev_size = input_dim
         for hidden_size in mlp_hidden_sizes:
             mlp_layers.append(nn.Linear(prev_size, hidden_size))
-            if BN_AND_DO:
-                mlp_layers.append(nn.BatchNorm1d(hidden_size))  # Batch Normalization
+            mlp_layers.append(nn.BatchNorm1d(hidden_size)) if BATCH_SIZE > 1 else mlp_layers.append(nn.LayerNorm(hidden_size))
             mlp_layers.append(nn.ReLU())
-            if BN_AND_DO:
-                mlp_layers.append(nn.Dropout())  # Dropout
             prev_size = hidden_size
         mlp_layers.append(nn.Linear(prev_size, num_output))
 
@@ -42,22 +39,34 @@ class GroupedConvolution(nn.Module):
 class ConvNet(nn.Module):
     def __init__(self, input_dim, hidden_dims=CONV_HIDDEN_DIM):
         super(ConvNet, self).__init__()
-
         layers = []
         prev_dim = input_dim
         self.hidden_dims = hidden_dims
 
         for hidden_dim in hidden_dims:
             layers.append(nn.Conv2d(prev_dim, hidden_dim, kernel_size=3, padding=1))
+            layers.append(nn.BatchNorm2d(hidden_dim)) if BATCH_SIZE > 1 else layers.append(nn.LayerNorm([hidden_dim, 7, 7]))
             layers.append(nn.ReLU())
             prev_dim = hidden_dim
 
         self.conv_layers = nn.Sequential(*layers)
         self.flatten = nn.Flatten()
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2, return_indices=True)
 
     def forward(self, x):
-        x = self.conv_layers(x)
-        x = self.flatten(x)
+        x = self.conv_layers(x) # shape: (batch_size, hidden_dims[-1], 7, 7)
+
+        # Pooling
+        pooled_features, indices = self.pool(x) # Output shape is (batch_size, hidden_dims[-1], 3, 3)
+        
+        # normalize the indices by dividing each index by the total number of elements in the pooled feature map (i.e. 3 * 3 = 9).
+        indices = indices.float() / (pooled_features.shape[2] * pooled_features.shape[3])
+        indices = indices.expand_as(pooled_features)
+        
+        pooled_features_with_position = torch.cat((pooled_features, indices), dim=1) # Output shape: (batch_size, 2 * hidden_dims[-1], 3, 3)
+
+        x = self.flatten(pooled_features_with_position) # shape (batch_size, 2 * hidden_dims[-1] * 3 * 3)
+
         return x
 
 def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
@@ -152,7 +161,7 @@ def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
     mean = mean.view(-1, 1, 1)
     std = std.view(-1, 1, 1)
     img_tensor = img_tensor * std + mean
-    return (img_tensor.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    return (img_tensor.permute(1, 2, 0).numpy() * 255).astype(np.uint8)
 
 def init_main():
     faulthandler.enable()
@@ -188,11 +197,14 @@ def find_coefficients(F):
 
     return alpha, beta
 
-def divide_by_dataloader(epoch_stats, len_train_loader, len_val_loader):
+def divide_by_dataloader(epoch_stats, len_train_loader, len_val_loader, len_test_loader):
     for key, value in epoch_stats.items():
         if key.startswith("val_"):
-            # For keys that start with "val_", divide by the length of val_loader
             epoch_stats[key] = value.cpu().item() / len_val_loader
+
+        elif key.startswith("test_"):
+            epoch_stats[key] = value.cpu().item() / len_test_loader
+
         else:
             # For all other keys, divide by the length of train_loader
             # Assuming that 'file_num' should not be processed, we'll skip it
@@ -239,3 +251,8 @@ def trim(data, precent):
 
     # Filter the data to keep only values below the threshold
     return data[data < threshold]
+
+def send_to_device(epoch_stats):
+    for key, value in epoch_stats.items():
+        if isinstance(value, torch.Tensor):
+            epoch_stats[key] = value.to(device)    

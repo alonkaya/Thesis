@@ -89,9 +89,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-        epi = EpipolarGeometry(img1, img2, F=F)
-
-        return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
+        return img1, img2, F, self.seq_name
     
 def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
     valid_indices = []
@@ -210,16 +208,16 @@ def get_dataloaders_KITTI(batch_size=BATCH_SIZE):
     return train_loader, val_loader
 
 def get_dataloader_stereo(batch_size=BATCH_SIZE):
-    sequence_paths = [f'sequences/0{i}' for i in range(11)]
-    poses_paths = [f'poses/0{i}.txt' for i in range(11)]
-    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(11)]  
+    sequence_paths = [f'sequences/{i:02}' for i in range(11)]
+    poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
+    calib_paths = [f'sequences/{i:02}/calib.txt' for i in range(11)]  
       
     R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32)
     t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32)    
 
-    train_datasets, val_datasets = [], []    
+    train_datasets, val_datasets, test_datasets = [], [], []
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
-        if i not in train_seqeunces_stereo and i not in val_sequences_stereo: continue
+        if i not in train_seqeunces_stereo and i not in val_sequences_stereo and i not in test_sequences_stereo: continue
 
         image_0_path = os.path.join(sequence_path, 'image_0')
 
@@ -233,22 +231,26 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
+        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', val=True if i in val_sequences_stereo else False)
+
         if i in train_seqeunces_stereo:
-            dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', val=False)
             train_datasets.append(dataset_stereo)        
         if i in val_sequences_stereo:
-            dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', val=True)
             val_datasets.append(dataset_stereo)
+        if i in test_sequences_stereo:
+            test_datasets.append(dataset_stereo)
 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
     concat_val_dataset = ConcatDataset(val_datasets)
+    concat_test_dataset = ConcatDataset(test_datasets)
 
     # Create a DataLoader
     train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
     val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
 
-    return train_loader, val_loader
+    return train_loader, val_loader, test_loader
 
 def get_data_loaders(batch_size=BATCH_SIZE):
     if STEREO:

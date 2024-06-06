@@ -149,8 +149,8 @@ def last_sing_value(output):
     return last_sv_sq
 
 
-def update_distances(img_1, img_2, F, algebraic_dist, algebraic_dist_sqr, RE1_dist, SED_dist, pts1, pts2):
-    epipolar_geo = EpipolarGeometry(img_1, img_2, F, pts1, pts2)
+def update_distances(img1, img2, F, algebraic_dist, algebraic_dist_sqr, RE1_dist, SED_dist, pts1, pts2):
+    epipolar_geo = EpipolarGeometry(img1, img2, F, pts1, pts2)
 
     algebraic_dist = algebraic_dist + epipolar_geo.get_mean_algebraic_distance()
     algebraic_dist_sqr = algebraic_dist_sqr + epipolar_geo.get_sqr_algebraic_distance()
@@ -159,36 +159,43 @@ def update_distances(img_1, img_2, F, algebraic_dist, algebraic_dist_sqr, RE1_di
     
     return algebraic_dist, algebraic_dist_sqr, RE1_dist, SED_dist
 
-def update_epoch_stats(stats, first_image, second_image, label, output, pts1_batch, pts2_batch, plots_path, epoch=0, val=False):
-    # TODO: change from squared to abs in evalutation
+def update_epoch_stats(stats, first_image, second_image, label, output, plots_path, data_type, epoch=0):
     algebraic_dist_truth, algebraic_dist_pred, \
     algebraic_dist_sqr_truth, algebraic_dist_sqr_pred, \
     RE1_dist_truth, RE1_dist_pred, \
     SED_dist_truth, SED_dist_pred = torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0), \
                                     torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0)
-    for img_1, img_2, F_truth, F_pred, pts1, pts2 in zip(first_image, second_image, label, output, pts1_batch, pts2_batch):
-        algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred = update_distances(img_1, img_2, F_pred, algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred, pts1, pts2)
+    for img1, img2, F_truth, F_pred in zip(first_image, second_image, label, output):
+        epi = EpipolarGeometry(img1, img2, F=F_truth)
+        epi.pts1.requires_grad = True
+        epi.pts2.requires_grad = True
 
-        if epoch == 0:
-            algebraic_dist_truth, algebraic_dist_sqr_truth, RE1_dist_truth, SED_dist_truth = update_distances(img_1, img_2, F_truth, algebraic_dist_truth, algebraic_dist_sqr_truth, RE1_dist_truth, SED_dist_truth, pts1.detach(), pts2.detach())
+        algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred = update_distances(
+            img1, img2, F_pred, algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred, epi.pts1, epi.pts2)
 
-        if epoch == VISIUALIZE["epoch"] and val:
-            epipolar_geo_pred = EpipolarGeometry(img_1, img_2, F_pred.detach(), pts1.detach(), pts2.detach())
+        if epoch == 0 or data_type == "test":
+            algebraic_dist_truth, algebraic_dist_sqr_truth, RE1_dist_truth, SED_dist_truth = update_distances(
+                img1, img2, F_truth, algebraic_dist_truth, algebraic_dist_sqr_truth, RE1_dist_truth, SED_dist_truth, epi.pts1.detach(), epi.pts2.detach())
+
+        if epoch == VISIUALIZE["epoch"] and data_type == "val":
+            epipolar_geo_pred = EpipolarGeometry(img1, img2, F_pred.detach(), epi.pts1.detach(), epi.pts2.detach())
             epipolar_geo_pred.visualize(idx=stats["file_num"], epipolar_lines_path=os.path.join(plots_path, VISIUALIZE["dir"]))
             stats["file_num"] = stats["file_num"] + 1
  
     algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred, algebraic_dist_truth, algebraic_dist_sqr_truth, RE1_dist_truth, SED_dist_truth =\
         (v/len(first_image) for v in [algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred, algebraic_dist_truth, algebraic_dist_sqr_truth, RE1_dist_truth, SED_dist_truth])
     
-    prefix = "val_" if val else ""
+    prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
     stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred)
     stats[f"{prefix}algebraic_sqr_pred"] = stats[f"{prefix}algebraic_sqr_pred"] + (algebraic_dist_sqr_pred)
     stats[f"{prefix}RE1_pred"] = stats[f"{prefix}RE1_pred"] + (RE1_dist_pred) if RE1_DIST else stats[f"{prefix}RE1_pred"]
     stats[f"{prefix}SED_pred"] = stats[f"{prefix}SED_pred"] + (SED_dist_pred) if SED_DIST else stats[f"{prefix}SED_pred"]
-    stats[f"{prefix}algebraic_truth"] = stats[f"{prefix}algebraic_truth"] + (algebraic_dist_truth)
-    stats[f"{prefix}algebraic_sqr_truth"] = stats[f"{prefix}algebraic_sqr_truth"] + (algebraic_dist_sqr_truth)
-    stats[f"{prefix}RE1_truth"] = stats[f"{prefix}RE1_truth"] + (RE1_dist_truth) if RE1_DIST else stats[f"{prefix}RE1_truth"]
-    stats[f"{prefix}SED_truth"] = stats[f"{prefix}SED_truth"] + (SED_dist_truth) if SED_DIST else stats[f"{prefix}SED_truth"]
+
+    if epoch == 0 or data_type == "test":
+        stats[f"{prefix}algebraic_truth"] = stats[f"{prefix}algebraic_truth"] + (algebraic_dist_truth)
+        stats[f"{prefix}algebraic_sqr_truth"] = stats[f"{prefix}algebraic_sqr_truth"] + (algebraic_dist_sqr_truth)
+        stats[f"{prefix}RE1_truth"] = stats[f"{prefix}RE1_truth"] + (RE1_dist_truth) if RE1_DIST else stats[f"{prefix}RE1_truth"]
+        stats[f"{prefix}SED_truth"] = stats[f"{prefix}SED_truth"] + (SED_dist_truth) if SED_DIST else stats[f"{prefix}SED_truth"]
 
     return algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred
 
@@ -439,3 +446,38 @@ def move_images(sequence_path, file_name):
     if os.path.exists(src_path):
         print(f'moved {src_path} to {dst_path}')
         os.rename(src_path, dst_path)
+
+
+def paramterization_layer(x, plots_path):
+    """
+    Constructs a batch of 3x3 fundamental matrices from a batch of 8-element vectors based on the described parametrization.
+
+    Parameters:
+    outputs (torch.Tensor): A tensor of shape (batch_size, 8) where each row is an 8-element vector.
+                            The first 6 elements of each vector represent the first two columns
+                            of a fundamental matrix, and the last 2 elements are the coefficients for
+                            combining these columns to get the third column.
+
+    Returns:
+    torch.Tensor: A tensor of shape (batch_size, 3, 3) representing a batch of 3x3 fundamental matrices.
+    """
+
+    # Split the tensor into the first two columns (f1, f2) and the coefficients (alpha, beta)
+    f1 = x[:, :3]  # First three elements of each vector for the first column
+    f2 = x[:, 3:6]  # Next three elements of each vector for the second column
+    alpha, beta = x[:, 6].unsqueeze(1), x[:, 7].unsqueeze(1)  # Last two elements of each vector for the coefficients
+
+    # Compute the third column as a linear combination: f3 = alpha * f1 + beta * f2
+    # We need to use broadcasting to correctly multiply the coefficients with the columns
+    f3 = alpha * f1 + beta * f2
+
+    # Construct the batch of 3x3 fundamental matrices
+    # We need to reshape the columns to concatenate them correctly
+    F = torch.cat((f1.view(-1, 3, 1), f2.view(-1, 3, 1), f3.view(-1, 3, 1)), dim=-1)
+
+    if torch.linalg.matrix_rank(F[0]) != 2:
+        U, S, V = torch.svd(F[0])
+        print_and_write(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(F)}
+singular values: {S.cpu().tolist()}\n""", plots_path)
+
+    return F
