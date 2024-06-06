@@ -167,6 +167,7 @@ def update_epoch_stats(stats, first_image, second_image, label, output, plots_pa
                                     torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0)
     for img1, img2, F_truth, F_pred in zip(first_image, second_image, label, output):
         epi = EpipolarGeometry(img1, img2, F=F_truth)
+        epi.pts1, epi.pts2 = epi.pts1.to(device), epi.pts2.to(device)
         epi.pts1.requires_grad = True
         epi.pts2.requires_grad = True
 
