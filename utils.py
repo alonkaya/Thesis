@@ -15,7 +15,8 @@ class MLP(nn.Module):
         prev_size = input_dim
         for hidden_size in mlp_hidden_sizes:
             mlp_layers.append(nn.Linear(prev_size, hidden_size))
-            # mlp_layers.append(nn.BatchNorm1d(hidden_size)) if BATCH_SIZE > 1 else mlp_layers.append(nn.LayerNorm(hidden_size))
+            if NORM:
+                mlp_layers.append(nn.BatchNorm1d(hidden_size)) if BATCH_SIZE > 1 else mlp_layers.append(nn.LayerNorm(hidden_size))
             mlp_layers.append(nn.ReLU())
             prev_size = hidden_size
         mlp_layers.append(nn.Linear(prev_size, num_output))
@@ -45,7 +46,8 @@ class ConvNet(nn.Module):
 
         for hidden_dim in hidden_dims:
             layers.append(nn.Conv2d(prev_dim, hidden_dim, kernel_size=3, padding=1))
-            # layers.append(nn.BatchNorm2d(hidden_dim)) if BATCH_SIZE > 1 else layers.append(nn.LayerNorm([hidden_dim, 7, 7]))
+            if NORM:
+                layers.append(nn.BatchNorm2d(hidden_dim)) if BATCH_SIZE > 1 else layers.append(nn.LayerNorm([hidden_dim, 7, 7]))
             layers.append(nn.ReLU())
             prev_dim = hidden_dim
 
