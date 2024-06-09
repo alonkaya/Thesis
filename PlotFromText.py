@@ -74,6 +74,7 @@ def process_epoch_stats(file_path):
             if val_sed_dist_match:
                 val_sed_dists.append(float(val_sed_dist_match.group(1)))
 
+    return epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists
 
 # Plotting function for each parameter
 def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=False):

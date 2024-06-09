@@ -1,7 +1,7 @@
 import cv2
 from Dataset import get_data_loaders
 from FMatrixRegressor import FMatrixRegressor
-from FunMatrix import EpipolarGeometry
+from FunMatrix import EpipolarGeometry, update_epoch_stats
 import numpy as np
 import matplotlib.pyplot as plt
 from params import *
@@ -9,7 +9,7 @@ import os
 import torch
 import re
 
-from utils import points_histogram
+from utils import divide_by_dataloader, points_histogram
 
 # Function to denormalize image
 def denormalize(image, mean, std):
@@ -115,34 +115,33 @@ def sed_distance_gt():
 
 def sed_distance_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
-    # source_dir = 'epipole_lines\predicted_RealEstate'
-    # os.makedirs(source_dir, exist_ok=True)
-    train_loader, val_loader = get_data_loaders(batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders(batch_size=1)
 
-    sed_list = []
-    for i, (img1, img2, label, pts1, pts2, seq_name, R, t) in enumerate(val_loader):
-        img1, img2 = img1.to(device), img2.to(device)
+    epoch_stats = {"algebraic_pred": torch.tensor(0), "algebraic_sqr_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
+                "val_algebraic_pred": torch.tensor(0), "val_algebraic_sqr_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
+                "test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
+                "algebraic_truth": torch.tensor(0), "algebraic_sqr_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
+                "val_algebraic_truth": torch.tensor(0), "val_algebraic_sqr_truth": torch.tensor(0), "val_RE1_truth": torch.tensor(0), "val_SED_truth": torch.tensor(0), 
+                "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
+                "loss": torch.tensor(0), "val_loss": torch.tensor(0), "test_loss": torch.tensor(0), 
+                "labels": torch.tensor([]), "outputs": torch.tensor([]), "val_labels": torch.tensor([]), "val_outputs": torch.tensor([]), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([]),
+                "file_num": 0}
+    
+    for i, (img1, img2, F, _) in enumerate(test_loader):
+        img1, img2, label = img1.to(device), img2.to(device), label.to(device)
+
         output = model.forward(img1, img2)
-        epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach(), pts1=pts1[0], pts2=pts2[0])
-        sed = epipolar_geo.get_mean_SED_distance()
 
-        sed_list.append(sed)
-        break
-        # with open(os.path.join(source_dir, 'stats_RealEstate2.txt'), 'a') as f:
-        #     f.write(f'idx: {i+745:06}\n')
-        #     f.write(f'SED: {sed}\n')
-        #     f.write(f'R: {R[0].numpy()}\n')
-        #     f.write(f't: {t[0].numpy()}\n\n')
-        # if i == 1500:
-        #     break
-    print(np.mean(sed_list))
-    # points_histogram(sed_list)
-    # sorted_sed = sorted(sed_list)[:950]
-    # print(f'SED distance: {np.mean(sorted_sed)}')
+        update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, plots_path, data_type="test")
+    
+    divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader), len(test_loader))
 
-    # points_histogram(sed_list_T)
-    # sorted_sed_T = sorted(sed_list_T)[:950]
-    # print(f'SED distance T: {np.mean(sorted_sed_T)}')
+    print(f"""SED distance: {epoch_stats["test_SED_pred"]}
+    Algebraic distance: {epoch_stats["test_algebraic_pred"]}
+    RE1 distance: {epoch_stats["test_RE1_pred"]}
+    SED distance truth: {epoch_stats["test_SED_truth"]}
+    Algebraic distance truth: {epoch_stats["test_algebraic_truth"]}
+    RE1 distance truth: {epoch_stats["test_RE1_truth"]}""")
 
 
 def sed_histogram_trained(plots_path):
@@ -303,12 +302,7 @@ def update_epochs(file_path, increment):
 
 
 if __name__ == "__main__":
-    file_path = "plots\Stereo\SED_0.05__Enlarged__Continued__lr_2e-05__avg_embeddings_False__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True\output.log"
+    file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
     # update_epochs(file_path, 114)
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
-
-    # # sed_distance_trained(plots_path)
-    # sed_vs_rotation_translation(file_path)
-    # vis_gt()
-    sed_distance_gt()
-    # update_epochs(file_path, 114)
+    sed_distance_trained()
