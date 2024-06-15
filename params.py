@@ -36,7 +36,7 @@ DEEPF_NOCORRS = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 # Change Main.py if > 0
 SAVE_MODEL = True
-NUM_EPOCHS = 600
+NUM_EPOCHS = 1500
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
 ADDITIONS = ""
 
@@ -57,7 +57,7 @@ CONV_HIDDEN_DIM = [1024, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-PRETRAINED_PATH = None
+PRETRAINED_PATH = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__Augment_True__rc_True__BS_16__small__first_2_thirds_train"
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
