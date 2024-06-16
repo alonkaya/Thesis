@@ -26,13 +26,13 @@ AUGMENTATION = True
 RANDOM_CROP = True
 
 ### Training ###
-learning_rates_vit = [2e-5]
-learning_rates_mlp = [2e-5]
+learning_rates_vit = [8e-5]
+learning_rates_mlp = [8e-5]
 USE_RECONSTRUCTION_LAYER = True
 BATCH_SIZE = 16
 NORM = False
 TRAIN_FROM_SCRATCH = False
-DEEPF_NOCORRS = True
+DEEPF_NOCORRS = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 # Change Main.py if > 0
 SAVE_MODEL = True
@@ -61,7 +61,7 @@ PRETRAINED_PATH = None
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
-USE_CONV = False
+USE_CONV = True
 USE_CONV = False if DEEPF_NOCORRS else USE_CONV
 GROUP_CONV = {"use" : False, "out_channels": 256}
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
