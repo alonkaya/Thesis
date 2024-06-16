@@ -26,11 +26,12 @@ AUGMENTATION = True
 RANDOM_CROP = True
 
 ### Training ###
-learning_rates_vit = [8e-5]
-learning_rates_mlp = [8e-5]
+learning_rates_vit = [1e-4]
+learning_rates_mlp = [1e-4]
+SCHED = True
 USE_RECONSTRUCTION_LAYER = True
 BATCH_SIZE = 16
-NORM = False
+NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"

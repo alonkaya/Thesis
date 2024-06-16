@@ -92,12 +92,15 @@ class FMatrixRegressor(nn.Module):
         self.L2_loss = nn.MSELoss().to(device)
         self.huber_loss = nn.HuberLoss().to(device)
         self.optimizer = optim.Adam([
-            {'params': self.model.parameters(), 'lr': lr_vit} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
-            {'params': self.feat_ext_deepF.parameters(), 'lr': lr_vit} if self.deepF_noCorrs else {'params': []},
-            {'params': self.mlp.parameters(), 'lr': lr_mlp},   # Potentially higher learning rate for the MLP
-            {'params': self.conv.parameters(), 'lr': lr_mlp} if self.use_conv else {'params': []}
+            {'params': self.model.parameters(), 'lr': lr_vit, 'weight_decay': 5e-5} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.feat_ext_deepF.parameters(), 'lr': lr_vit, 'weight_decay': 5e-5} if self.deepF_noCorrs else {'params': []},
+            {'params': self.mlp.parameters(), 'lr': lr_mlp, 'weight_decay': 5e-5},   # Potentially higher learning rate for the MLP
+            {'params': self.conv.parameters(), 'lr': lr_mlp, 'weight_decay': 5e-5} if self.use_conv else {'params': []}
         ])
         
+        if SCHED:
+            self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=0.8)
+
         if pretrained_path:
             self.load_model(path=pretrained_path)
         self.to(device)
@@ -186,6 +189,9 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
              RE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}
              SED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n""", self.plots_path)
 
+            if SCHED:
+                self.scheduler.step()
+                
             if epoch == self.num_epochs - 1:
                 print_and_write(f"""## TEST RESULTS: ##
 Test Loss: {epoch_stats["test_loss"]}\t\t Test MAE: {test_MAE}
