@@ -92,10 +92,10 @@ class FMatrixRegressor(nn.Module):
         self.L2_loss = nn.MSELoss().to(device)
         self.huber_loss = nn.HuberLoss().to(device)
         self.optimizer = optim.Adam([
-            {'params': self.model.parameters(), 'lr': lr_vit, 'weight_decay': 1e-5} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
-            {'params': self.feat_ext_deepF.parameters(), 'lr': lr_vit, 'weight_decay': 1e-5} if self.deepF_noCorrs else {'params': []},
-            {'params': self.mlp.parameters(), 'lr': lr_mlp, 'weight_decay': 1e-5},   # Potentially higher learning rate for the MLP
-            {'params': self.conv.parameters(), 'lr': lr_mlp, 'weight_decay': 1e-5} if self.use_conv else {'params': []}
+            {'params': self.model.parameters(), 'lr': lr_vit} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.feat_ext_deepF.parameters(), 'lr': lr_vit} if self.deepF_noCorrs else {'params': []},
+            {'params': self.mlp.parameters(), 'lr': lr_mlp},   # Potentially higher learning rate for the MLP
+            {'params': self.conv.parameters(), 'lr': lr_mlp} if self.use_conv else {'params': []}
         ])
         
         if pretrained_path:
