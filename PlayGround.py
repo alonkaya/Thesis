@@ -102,12 +102,12 @@ def vis_trained(plots_path):
 
 
 def sed_distance_gt():
-    train_loader, val_loader, test_loader = get_data_loaders(batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders()
     total_sed = 0
 
-    for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
-        img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
-        epipolar_geo_gt = EpipolarGeometry(img1[0], img2[0], label[0], pts1=pts1[0], pts2=pts2[0]) 
+    for i, (img1, img2, label, _) in enumerate(test_loader):
+        img1, img2, label = img1.to(device), img2.to(device), label.to(device)
+        epipolar_geo_gt = EpipolarGeometry(img1[0], img2[0], label[0]) 
         total_sed += epipolar_geo_gt.get_mean_SED_distance()
 
     total_sed /= i
@@ -302,7 +302,7 @@ def update_epochs(file_path, increment):
 
 
 if __name__ == "__main__":
-    file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
+    # file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
     # update_epochs(file_path, 114)
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
-    sed_distance_trained()
+    sed_distance_gt()
