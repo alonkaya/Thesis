@@ -7,7 +7,7 @@ import torch.optim as optim
 from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, lr_vit, lr_mlp, average_embeddings=AVG_EMBEDDINGS, 
+    def __init__(self, lr_vit, average_embeddings=AVG_EMBEDDINGS, 
                  batch_size=BATCH_SIZE, deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, 
                  unfrozen_layers=UNFROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
                  alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
@@ -36,7 +36,6 @@ class FMatrixRegressor(nn.Module):
         self.to(device)
         self.batch_size = batch_size
         self.lr_vit = lr_vit
-        self.lr_mlp = lr_mlp
         self.deepF_noCorrs = deepF_noCorrs
         self.average_embeddings = average_embeddings
         self.model_name = model_name
@@ -92,14 +91,14 @@ class FMatrixRegressor(nn.Module):
         self.L2_loss = nn.MSELoss().to(device)
         self.huber_loss = nn.HuberLoss().to(device)
         self.optimizer = optim.Adam([
-            {'params': self.model.parameters(), 'lr': lr_vit, 'weight_decay': 5e-5} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
-            {'params': self.feat_ext_deepF.parameters(), 'lr': lr_vit, 'weight_decay': 5e-5} if self.deepF_noCorrs else {'params': []},
-            {'params': self.mlp.parameters(), 'lr': lr_mlp, 'weight_decay': 5e-5},   # Potentially higher learning rate for the MLP
-            {'params': self.conv.parameters(), 'lr': lr_mlp, 'weight_decay': 5e-5} if self.use_conv else {'params': []}
+            {'params': self.model.parameters(), 'lr': lr_vit, 'weight_decay': wieght_decay} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.feat_ext_deepF.parameters(), 'lr': lr_vit, 'weight_decay': wieght_decay} if self.deepF_noCorrs else {'params': []},
+            {'params': self.mlp.parameters(), 'lr': lr_vit, 'weight_decay': wieght_decay},   # Potentially higher learning rate for the MLP
+            {'params': self.conv.parameters(), 'lr': lr_vit, 'weight_decay': wieght_decay} if self.use_conv else {'params': []}
         ])
         
         if SCHED:
-            self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=0.8)
+            self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=lr_decay)
 
         if pretrained_path:
             self.load_model(path=pretrained_path)
@@ -147,12 +146,10 @@ class FMatrixRegressor(nn.Module):
         for epoch in range(self.start_epoch, self.num_epochs):
             epoch_stats = {"algebraic_pred": torch.tensor(0), "algebraic_sqr_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
                             "val_algebraic_pred": torch.tensor(0), "val_algebraic_sqr_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
-                            "test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
                             "algebraic_truth": torch.tensor(0), "algebraic_sqr_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
                             "val_algebraic_truth": torch.tensor(0), "val_algebraic_sqr_truth": torch.tensor(0), "val_RE1_truth": torch.tensor(0), "val_SED_truth": torch.tensor(0), 
-                            "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
-                            "loss": torch.tensor(0), "val_loss": torch.tensor(0), "test_loss": torch.tensor(0), 
-                            "labels": torch.tensor([]), "outputs": torch.tensor([]), "val_labels": torch.tensor([]), "val_outputs": torch.tensor([]), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([]),
+                            "loss": torch.tensor(0), "val_loss": torch.tensor(0),
+                            "labels": torch.tensor([]), "outputs": torch.tensor([]), "val_labels": torch.tensor([]), "val_outputs": torch.tensor([]),
                             "file_num": 0}
             send_to_device(epoch_stats)
 
@@ -160,21 +157,20 @@ class FMatrixRegressor(nn.Module):
             self.train()
             self.dataloader_step(train_loader, epoch, epoch_stats, data_type="train")
 
-            # Validation and Test
+            # Validation
             self.eval()
             with torch.no_grad():
                 self.dataloader_step(val_loader, epoch, epoch_stats, data_type="val")
-
-                if epoch == self.num_epochs - 1:
-                    self.dataloader_step(test_loader, epoch, epoch_stats, data_type="test")
-                    test_MAE = torch.mean(torch.abs(epoch_stats["test_labels"] - epoch_stats["test_outputs"]))
                     
             train_mae = torch.mean(torch.abs(epoch_stats["labels"] - epoch_stats["outputs"]))
             val_mae = torch.mean(torch.abs(epoch_stats["val_labels"] - epoch_stats["val_outputs"]))
 
-            divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader), len(test_loader))
+            divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
 
             self.append_epoch_stats(train_mae.cpu().item(), val_mae.cpu().item(), epoch_stats)
+
+            if SCHED and epoch <= 600:
+                self.scheduler.step()
 
             if epoch == 0: 
                 print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}\t\t val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}
@@ -189,16 +185,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
              RE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}
              SED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n""", self.plots_path)
 
-            if SCHED:
-                self.scheduler.step()
-                
-            if epoch == self.num_epochs - 1:
-                print_and_write(f"""## TEST RESULTS: ##
-Test Loss: {epoch_stats["test_loss"]}\t\t Test MAE: {test_MAE}
-Test Algebraic dist: {epoch_stats["test_algebraic_pred"]}\t\t Test Algebraic Truth: {epoch_stats["test_algebraic_truth"]}
-Test Algebraic sqr dist: {epoch_stats["test_algebraic_sqr_pred"]}\t  Test Algebraic sqr Truth: {epoch_stats["test_algebraic_sqr_truth"]}
-Test RE1 dist: {epoch_stats["test_RE1_pred"]}\t\t Test RE1 Truth: {epoch_stats["test_RE1_truth"]}
-Test SED dist: {epoch_stats["test_SED_pred"]}\t\t Test SED Truth: {epoch_stats["test_SED_truth"]}\n\n""", self.plots_path)
                 
             # If the model is not learning or outputs nan, stop training
             if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.all_train_mae[-1], self.all_val_mae[-1], self.plots_path):
@@ -208,12 +194,15 @@ Test SED dist: {epoch_stats["test_SED_pred"]}\t\t Test SED Truth: {epoch_stats["
             if SAVE_MODEL:
                 self.save_model(epoch+1)
         
+        self.test(test_loader)
+
         plot(x=range(1, self.num_epochs + 1), y1=self.all_train_loss, y2=self.all_val_loss, title="Loss", plots_path=self.plots_path)
         plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae, y2=self.all_val_mae, title="MAE", plots_path=self.plots_path)
         plot(x=range(1, self.num_epochs + 1), y1=self.all_algebraic_pred, y2=self.all_val_algebraic_pred, title="Algebraic distance", plots_path=self.plots_path)
         plot(x=range(1, self.num_epochs + 1), y1=self.all_algebraic_sqr_pred, y2=self.all_val_algebraic_sqr_pred, title="Algebraic sqr distance", plots_path=self.plots_path)
         plot(x=range(1, self.num_epochs + 1), y1=self.all_RE1_pred, y2=self.all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
         plot(x=range(1, self.num_epochs + 1), y1=self.all_SED_pred, y2=self.all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
+
 
     def save_model(self, epoch):
         checkpoint_path = os.path.join(self.plots_path, "model.pth")
@@ -339,3 +328,33 @@ Test SED dist: {epoch_stats["test_SED_pred"]}\t\t Test SED Truth: {epoch_stats["
         self.all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
         self.all_val_SED_pred.append(epoch_stats["val_SED_pred"])
 
+    def test(self, test_loader):
+        with torch.no_grad():
+            loss, MAE, alg, alg_sqr, RE1, SED = 0, 0, 0, 0, 0, 0
+            for epoch in range(10):
+                epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0), 
+                                "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0), 
+                                "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
+                send_to_device(epoch_stats)
+    
+                self.dataloader_step(test_loader, 0, epoch_stats, data_type="test")
+
+                divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
+
+                test_MAE = torch.mean(torch.abs(epoch_stats["test_labels"] - epoch_stats["test_outputs"]))
+
+                loss += epoch_stats["test_loss"].cpu().item()
+                MAE += test_MAE.cpu().item()
+                alg += epoch_stats["test_algebraic_pred"].cpu().item()
+                alg_sqr += epoch_stats["test_algebraic_sqr_pred"].cpu().item()
+                RE1 += epoch_stats["test_RE1_pred"].cpu().item()
+                SED += epoch_stats["test_SED_pred"].cpu().item()
+                
+
+        print_and_write(f"""## TEST RESULTS: ##
+Test Loss: {loss/10}\t\t Test MAE: {MAE/10}
+Test Algebraic dist: {alg/10}\t\t Test Algebraic sqr dist: {alg_sqr/10}
+Test RE1 dist: {RE1/10}\t\t Test SED dist: {SED/10}
+
+Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}\t\t Test Algebraic sqr dist truth: {epoch_stats["test_algebraic_sqr_truth"]}
+Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\t\t Test SED dist truth: {epoch_stats["test_SED_truth"]}\n\n""", self.plots_path)

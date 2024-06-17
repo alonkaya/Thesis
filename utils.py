@@ -16,8 +16,6 @@ class MLP(nn.Module):
         prev_size = input_dim
         for hidden_size in mlp_hidden_sizes:
             mlp_layers.append(nn.Linear(prev_size, hidden_size))
-            # if NORM:
-            #     mlp_layers.append(nn.BatchNorm1d(hidden_size)) if BATCH_SIZE > 1 else mlp_layers.append(nn.LayerNorm(hidden_size))
             mlp_layers.append(nn.ReLU())
             prev_size = hidden_size
         mlp_layers.append(nn.Linear(prev_size, num_output))
@@ -200,7 +198,7 @@ def find_coefficients(F):
 
     return alpha, beta
 
-def divide_by_dataloader(epoch_stats, len_train_loader, len_val_loader, len_test_loader):
+def divide_by_dataloader(epoch_stats, len_train_loader=0, len_val_loader=0, len_test_loader=0):
     for key, value in epoch_stats.items():
         if key == "file_num" or value.shape != torch.Size([]): continue
 

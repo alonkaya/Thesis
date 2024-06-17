@@ -23,7 +23,7 @@ class Dataset(torch.utils.data.Dataset):
         self.jump_frames = jump_frames
 
     def __len__(self):
-        return len(self.valid_indices) if not self.val else VAL_LENGTH
+        return len(self.valid_indices) 
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
@@ -52,7 +52,7 @@ class Dataset(torch.utils.data.Dataset):
         return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, transform, k0, k1, R, t, valid_indices, seq_name, val):
+    def __init__(self, sequence_path, transform, k0, k1, R, t, valid_indices, seq_name, test):
         self.sequence_path = sequence_path
         self.transform = transform
         self.k0 = k0
@@ -61,16 +61,13 @@ class Dataset_stereo(torch.utils.data.Dataset):
         self.t=t        
         self.valid_indices = valid_indices
         self.seq_name = seq_name
-        self.val = val
+        self.test = test
 
     def __len__(self):
-        if FIRST_2_THRIDS_TRAIN:
-            return len(self.valid_indices) * 1//3 if self.val else len(self.valid_indices) * 2//3
-        else:
-            return min(len(self.valid_indices), VAL_LENGTH) if self.val else len(self.valid_indices)
+        return int(len(self.valid_indices) * seq_ratio) if not self.test else len(self.valid_indices)
 
     def __getitem__(self, idx):
-        idx = self.valid_indices[idx + len(self.valid_indices) * 2//3] if self.val and FIRST_2_THRIDS_TRAIN else self.valid_indices[idx]
+        idx = self.valid_indices[idx]
 
         img1 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}'))
         img2 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}'))
@@ -234,20 +231,14 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
-        if FIRST_2_THRIDS_TRAIN:
-            train_datasets.append(Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', val=False))
-            val_datasets.append(Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', val=True))
-            test_datasets.append(Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', val=True))
+        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
 
-        else:
-            dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', val=True if i in val_sequences_stereo else False)
-
-            if i in train_seqeunces_stereo:
-                train_datasets.append(dataset_stereo)        
-            if i in val_sequences_stereo:
-                val_datasets.append(dataset_stereo)
-            if i in test_sequences_stereo:
-                test_datasets.append(dataset_stereo)
+        if i in train_seqeunces_stereo:
+            train_datasets.append(dataset_stereo)        
+        if i in val_sequences_stereo:
+            val_datasets.append(dataset_stereo)
+        if i in test_sequences_stereo:
+            test_datasets.append(dataset_stereo)
 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)

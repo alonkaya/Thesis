@@ -237,7 +237,6 @@ class EpipolarGeometry:
         for i, (m, n) in enumerate(matches):
             distances.append(m.distance / n.distance)
             if distances[-1] < threshold:
-            # if distances[-1] < threshold / ((len(self.good) // 15)+1):
                 self.good.append(m)
             min_distance_index = i if distances[i] < distances[min_distance_index] else min_distance_index
         # If no point passed the threshold, add the smallest distance ratio point

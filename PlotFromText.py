@@ -80,9 +80,9 @@ def process_epoch_stats(file_path):
 def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=False):
     sliced = ""
     # if len(y1) > 3 and (y1[0] > y1[3] + 2000 or y2[0] > y2[3] + 2000):
-    y1 = y1[3:]
-    y2 = y2[3:]
-    x = x[3:]
+    y1 = y1[5:]
+    y2 = y2[5:]
+    x = x[5:]
     sliced = " sliced"
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
