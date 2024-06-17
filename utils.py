@@ -16,8 +16,8 @@ class MLP(nn.Module):
         prev_size = input_dim
         for hidden_size in mlp_hidden_sizes:
             mlp_layers.append(nn.Linear(prev_size, hidden_size))
-            if NORM:
-                mlp_layers.append(nn.BatchNorm1d(hidden_size)) if BATCH_SIZE > 1 else mlp_layers.append(nn.LayerNorm(hidden_size))
+            # if NORM:
+            #     mlp_layers.append(nn.BatchNorm1d(hidden_size)) if BATCH_SIZE > 1 else mlp_layers.append(nn.LayerNorm(hidden_size))
             mlp_layers.append(nn.ReLU())
             prev_size = hidden_size
         mlp_layers.append(nn.Linear(prev_size, num_output))
