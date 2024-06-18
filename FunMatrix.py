@@ -233,8 +233,8 @@ class EpipolarGeometry:
         pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32)
         pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32)
 
-        self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
-        self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
+        self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1) # shape (n, 3)
+        self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1) # shape (n, 3)
 
         self.pts1, self.pts2 = self.trim_by_sed()
       
@@ -270,7 +270,7 @@ class EpipolarGeometry:
 
         mask = (self.pts1[:, :, 0] != 0) & (self.pts2[:, :, 0] != 0)  # Mask to remove padded keypoints
         valid_algebraic_distances = algebraic_distances[mask.view(algebraic_distances.shape)]
-        
+
         return torch.mean(valid_algebraic_distances)
 
     def get_sqr_algebraic_distance(self):
