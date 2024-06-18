@@ -215,7 +215,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
             "batch_size" : self.batch_size,
             "lr_vit" : self.lr_vit,
-            "lr_mlp" : self.lr_mlp,
             "average_embeddings" : self.average_embeddings,
             "model_name" : self.model_name,
             "augmentation" : self.augmentation,
@@ -247,7 +246,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
         self.batch_size = checkpoint.get("batch_size", self.batch_size)
         self.lr_vit = checkpoint.get("lr_vit", self.lr_vit)
-        self.lr_mlp = checkpoint.get("lr_mlp", self.lr_mlp)
         self.average_embeddings = checkpoint.get("average_embeddings", self.average_embeddings)
         self.model_name = checkpoint.get("model_name", self.model_name)
         self.augmentation = checkpoint.get("augmentation", self.augmentation)
