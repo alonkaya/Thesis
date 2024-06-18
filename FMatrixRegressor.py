@@ -286,15 +286,18 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
-        for img1, img2, label, _ in dataloader:
-            img1, img2, label = img1.to(device), img2.to(device), label.to(device)
+        for img1, img2, label, pts1, pts2, _ in dataloader:
+            img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
             # Forward pass
             output = self.forward(img1, img2)
 
+            if data_type == "train":
+                pts1.requires_grad = True
+                pts2.requires_grad = True
             # Update epoch statistics
             batch_algebraic_sqr_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
-                epoch_stats, img1.detach(), img2.detach(), label.detach(), output, self.plots_path, data_type, epoch)
+                epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, data_type, epoch)
             
             # Compute loss
             loss = self.L2_loss(output, label) + self.huber_loss(output, label) + \
@@ -341,12 +344,12 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
                 test_MAE = torch.mean(torch.abs(epoch_stats["test_labels"] - epoch_stats["test_outputs"]))
 
-                loss += epoch_stats["test_loss"].cpu().item()
+                loss += epoch_stats["test_loss"]
                 MAE += test_MAE.cpu().item()
-                alg += epoch_stats["test_algebraic_pred"].cpu().item()
-                alg_sqr += epoch_stats["test_algebraic_sqr_pred"].cpu().item()
-                RE1 += epoch_stats["test_RE1_pred"].cpu().item()
-                SED += epoch_stats["test_SED_pred"].cpu().item()
+                alg += epoch_stats["test_algebraic_pred"]
+                alg_sqr += epoch_stats["test_algebraic_sqr_pred"]
+                RE1 += epoch_stats["test_RE1_pred"]
+                SED += epoch_stats["test_SED_pred"]
                 
 
         print_and_write(f"""## TEST RESULTS: ##

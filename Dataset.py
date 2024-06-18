@@ -9,6 +9,7 @@ import os
 from PIL import Image
 import torchvision
 import torchvision.transforms.functional as TF
+import torch.nn.functional as F
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -89,7 +90,10 @@ class Dataset_stereo(torch.utils.data.Dataset):
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-        return img1, img2, F, self.seq_name
+        # Compute keypoints
+        epi = EpipolarGeometry(img1, img2, F.unsqueeze(0))
+
+        return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
     
 def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
     valid_indices = []
@@ -119,6 +123,20 @@ def get_transform():
     
     return v2.Compose(transforms)
 transform = get_transform()    
+
+def custom_collate_fn(batch):
+    imgs1, imgs2, Fs, all_pts1, all_pts2, seq_names = zip(*batch)
+
+    max_len = max(pts1.shape[0] for pts1 in all_pts1)
+
+    padded_pts1 = []
+    padded_pts2 = []
+    for pts1, pts2 in zip(all_pts1, all_pts2):
+        pad_len = max_len - pts1.shape[0]
+        padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
+        padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
+
+    return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
 
 
 def get_dataloaders_RealEstate(batch_size=BATCH_SIZE):
@@ -246,9 +264,9 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
     concat_test_dataset = ConcatDataset(test_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
-    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True, collate_fn=custom_collate_fn)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True, collate_fn=custom_collate_fn)
+    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True, collate_fn=custom_collate_fn)
 
     return train_loader, val_loader, test_loader
 

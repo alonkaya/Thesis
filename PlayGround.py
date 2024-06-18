@@ -103,19 +103,31 @@ def vis_trained(plots_path):
 
 def sed_distance_gt():
     train_loader, val_loader, test_loader = get_data_loaders()
-    total_sed = 0
 
-    for i, (img1, img2, label, _) in enumerate(test_loader):
-        img1, img2, label = img1.to(device), img2.to(device), label.to(device)
-        epipolar_geo_gt = EpipolarGeometry(img1[0], img2[0], label[0]) 
-        total_sed += epipolar_geo_gt.get_mean_SED_distance()
+    epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
+                   "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
+                   "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
+    
+    for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
+        img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
-    total_sed /= i
-    print(f'SED distance: {total_sed}') 
+        update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
+    
+    divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
+    
+    print(epoch_stats["test_algebraic_pred"])
+    print(epoch_stats["test_algebraic_sqr_pred"])
+    print(epoch_stats["test_RE1_pred"])
+    print(epoch_stats["test_SED_pred"])
+    print()
+    print(epoch_stats["test_algebraic_truth"])
+    print(epoch_stats["test_algebraic_sqr_truth"])
+    print(epoch_stats["test_RE1_truth"])
+    print(epoch_stats["test_SED_truth"])
 
 def sed_distance_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
-    train_loader, val_loader, test_loader = get_data_loaders(batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders()
 
     epoch_stats = {"algebraic_pred": torch.tensor(0), "algebraic_sqr_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
                 "val_algebraic_pred": torch.tensor(0), "val_algebraic_sqr_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
