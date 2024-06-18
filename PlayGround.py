@@ -112,18 +112,19 @@ def sed_distance_gt():
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
+        
+        if i == 10: break
+    # divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
     
-    divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
-    
-    print(epoch_stats["test_algebraic_pred"])
-    print(epoch_stats["test_algebraic_sqr_pred"])
-    print(epoch_stats["test_RE1_pred"])
-    print(epoch_stats["test_SED_pred"])
-    print()
-    print(epoch_stats["test_algebraic_truth"])
-    print(epoch_stats["test_algebraic_sqr_truth"])
-    print(epoch_stats["test_RE1_truth"])
-    print(epoch_stats["test_SED_truth"])
+        print(epoch_stats["test_algebraic_pred"]/i)
+        print(epoch_stats["test_algebraic_sqr_pred"]/i)
+        print(epoch_stats["test_RE1_pred"]/i)
+        print(epoch_stats["test_SED_pred"]/i)
+        print()
+        print(epoch_stats["test_algebraic_truth"]/i)
+        print(epoch_stats["test_algebraic_sqr_truth"]/i)
+        print(epoch_stats["test_RE1_truth"]/i)
+        print(epoch_stats["test_SED_truth"]/i)
 
 def sed_distance_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
@@ -145,15 +146,16 @@ def sed_distance_trained(plots_path):
         output = model.forward(img1, img2)
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, plots_path, data_type="test")
-    
-    divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader), len(test_loader))
 
-    print(f"""SED distance: {epoch_stats["test_SED_pred"]}
-    Algebraic distance: {epoch_stats["test_algebraic_pred"]}
-    RE1 distance: {epoch_stats["test_RE1_pred"]}
-    SED distance truth: {epoch_stats["test_SED_truth"]}
-    Algebraic distance truth: {epoch_stats["test_algebraic_truth"]}
-    RE1 distance truth: {epoch_stats["test_RE1_truth"]}""")
+        if i == 10: break
+    
+
+    print(f"""SED distance: {epoch_stats["test_SED_pred"]/i}
+    Algebraic distance: {epoch_stats["test_algebraic_pred"]/i}
+    RE1 distance: {epoch_stats["test_RE1_pred"]/i}
+    SED distance truth: {epoch_stats["test_SED_truth"]/i}
+    Algebraic distance truth: {epoch_stats["test_algebraic_truth"]/i}
+    RE1 distance truth: {epoch_stats["test_RE1_truth"]}"""/i)
 
 
 def sed_histogram_trained(plots_path):

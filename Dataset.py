@@ -277,7 +277,3 @@ def get_data_loaders(batch_size=BATCH_SIZE):
         return get_dataloaders_RealEstate(batch_size)
     else: # KITTI
         return get_dataloaders_KITTI(batch_size)
-
-if __name__ == "__main__":
-    dataset = odometry(base_path='.', sequence="02")
-    print(len(dataset))
