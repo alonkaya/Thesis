@@ -149,35 +149,29 @@ def last_sing_value(output):
     return last_sv_sq
 
 
-def update_distances(img1, img2, F, pts1, pts2, algebraic_dist, algebraic_dist_sqr, RE1_dist, SED_dist):
+def update_distances(img1, img2, F, pts1, pts2):
     epipolar_geo = EpipolarGeometry(img1, img2, F, pts1, pts2)
 
-    algebraic_dist = algebraic_dist + epipolar_geo.get_mean_algebraic_distance()
-    algebraic_dist_sqr = algebraic_dist_sqr + epipolar_geo.get_sqr_algebraic_distance()
-    RE1_dist = RE1_dist + epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
-    SED_dist = SED_dist + epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
+    algebraic_dist = epipolar_geo.get_mean_algebraic_distance()
+    algebraic_dist_sqr = epipolar_geo.get_sqr_algebraic_distance()
+    RE1_dist = epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
+    SED_dist = epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
     
     return algebraic_dist, algebraic_dist_sqr, RE1_dist, SED_dist
 
 def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, plots_path, data_type, epoch=0):
-    algebraic_dist_truth, algebraic_dist_pred, \
-    algebraic_dist_sqr_truth, algebraic_dist_sqr_pred, \
-    RE1_dist_truth, RE1_dist_pred, \
-    SED_dist_truth, SED_dist_pred = torch.tensor(0).to(device), torch.tensor(0).to(device), torch.tensor(0).to(device), torch.tensor(0).to(device), \
-                                    torch.tensor(0).to(device), torch.tensor(0).to(device), torch.tensor(0).to(device), torch.tensor(0).to(device)
-    
-    algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred = update_distances(
-        img1, img2, output, pts1, pts2, algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred)
- 
     prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
+    
+    algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2)
+ 
     stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred.detach())
     stats[f"{prefix}algebraic_sqr_pred"] = stats[f"{prefix}algebraic_sqr_pred"] + (algebraic_dist_sqr_pred.detach())
     stats[f"{prefix}RE1_pred"] = stats[f"{prefix}RE1_pred"] + (RE1_dist_pred.detach()) if RE1_DIST else stats[f"{prefix}RE1_pred"]
     stats[f"{prefix}SED_pred"] = stats[f"{prefix}SED_pred"] + (SED_dist_pred.detach()) if SED_DIST else stats[f"{prefix}SED_pred"]
 
     if epoch == 0 or data_type == "test":
-        algebraic_dist_truth, algebraic_dist_sqr_truth, RE1_dist_truth, SED_dist_truth = update_distances(
-            img1, img2, label, pts1.detach(), pts2.detach(), algebraic_dist_truth, algebraic_dist_sqr_truth, RE1_dist_truth, SED_dist_truth)
+        algebraic_dist_truth, algebraic_dist_sqr_truth, RE1_dist_truth, SED_dist_truth = update_distances(img1, img2, label, pts1.detach(), pts2.detach())
+
         stats[f"{prefix}algebraic_truth"] = stats[f"{prefix}algebraic_truth"] + (algebraic_dist_truth)
         stats[f"{prefix}algebraic_sqr_truth"] = stats[f"{prefix}algebraic_sqr_truth"] + (algebraic_dist_sqr_truth)
         stats[f"{prefix}RE1_truth"] = stats[f"{prefix}RE1_truth"] + (RE1_dist_truth) if RE1_DIST else stats[f"{prefix}RE1_truth"]
@@ -264,20 +258,32 @@ class EpipolarGeometry:
             torch.matmul(self.pts2.view(batch_size, n, 1, 3), self.F.view(batch_size, 1, 3, 3)),
             self.pts1.view(batch_size, n, 3, 1)))  # Returns shape (batch_size, n, 1, 1)
         return algebraic_distances
+    
+    def average_batch(self, errors):
+        """
+        Input: errors of shape (batch_size * n)
+        Output: average error of shape (1)
+        """
+        # Replace inf/nans values with zero (these won't affect the sum of valid values)
+        cleaned_errors = torch.where(torch.isinf(errors) | torch.isnan(errors), torch.tensor(0.0, dtype=errors.dtype, device=errors.device), errors)
+        
+        # Sum all valid errors
+        sum_errors = torch.sum(cleaned_errors)
+        
+        # Count non-zero elements
+        valid_count = torch.sum(cleaned_errors != 0).float()
+        
+        return sum_errors / (valid_count)
 
     def get_mean_algebraic_distance(self):
-        algebraic_distances = self.get_algebraic_distance()
+        algebraic_distances = self.get_algebraic_distance() # shape (batch_size, n, 1, 1)
 
-        mask = (self.pts1[:, :, 0] != 0) & (self.pts2[:, :, 0] != 0)  # Mask to remove padded keypoints
-        valid_algebraic_distances = algebraic_distances[mask.view(algebraic_distances.shape)]
-
-        return torch.mean(valid_algebraic_distances)
-
+        return self.average_batch(algebraic_distances.view(-1))
+    
     def get_sqr_algebraic_distance(self):
-        algebraic_distances = self.get_algebraic_distance()
-        mask = (self.pts1[:, :, 0] != 0) & (self.pts2[:, :, 0] != 0)
-        valid_algebraic_distances = algebraic_distances[mask.view(algebraic_distances.shape)]
-        return torch.mean(valid_algebraic_distances ** 2)
+        algebraic_distances = self.get_algebraic_distance() # shape (batch_size, n, 1, 1)
+        
+        return self.average_batch(algebraic_distances.view(-1) ** 2)
 
     def get_RE1_distance(self):
         batch_size, num_points, _ = self.pts1.shape
@@ -288,26 +294,22 @@ class EpipolarGeometry:
         denominator = (torch.sum(inhomogeneous_l1 ** 2, dim=2) + torch.sum(inhomogeneous_l2 ** 2, dim=2)).view(batch_size, num_points)
 
         Ri = self.get_algebraic_distance().view(batch_size, num_points)
-        RE1 = (Ri ** 2) / denominator
+        RE1 = (Ri ** 2) / denominator # shape (batch_size, n)
 
-        mask = (self.pts1[:, :, 0] != 0) & (self.pts2[:, :, 0] != 0)
-        valid_RE1 = RE1[mask]
-        
-        return torch.mean(valid_RE1)
+        return self.average_batch(RE1.view(-1))
 
     def get_mean_SED_distance(self):
         sed = self.get_SED_distance()
-        mask = (self.pts1[:, :, 0] != 0) & (self.pts2[:, :, 0] != 0)
-        valid_sed = sed[mask.view(sed.shape)]
-        return torch.mean(valid_sed)
+
+        return self.average_batch(sed.view(-1))
 
     def get_SED_distance(self, show_histogram=False, plots_path=None):
         lines1 = self.compute_epipolar_lines(self.F.transpose(1, 2), self.pts2)  # shape (batch_size, n, 3)
-        lines2 = self.compute_epipolar_lines(self.F, self.pts1)  # shape (batch_size, n, 3)
+        lines2 = self.compute_epipolar_lines(self.F, self.pts1)                  # shape (batch_size, n, 3)
 
         # Compute the distances from each point to its corresponding epipolar line
-        distances1 = self.point_2_line_distance_all_points(self.pts1, lines1)
-        distances2 = self.point_2_line_distance_all_points(self.pts2, lines2)
+        distances1 = self.point_2_line_distance_all_points(self.pts1, lines1) # shape (batch_size, n)
+        distances2 = self.point_2_line_distance_all_points(self.pts2, lines2) # shape (batch_size, n)
 
         sed = distances1 ** 2 + distances2 ** 2  # shape (batch_size, n)
         if show_histogram:
@@ -315,22 +317,20 @@ class EpipolarGeometry:
 
         return sed  # shape (batch_size, n)
 
-    def get_SED_distance2(self):
-        lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
-        lines2 = self.compute_epipolar_lines(self.F, self.pts1)   # shape (n,3)
+    # def get_SED_distance2(self):
+    #     lines1 = self.compute_epipolar_lines(self.F.T, self.pts2) # shape (n,3)
+    #     lines2 = self.compute_epipolar_lines(self.F, self.pts1)   # shape (n,3)
 
-        denominator = 1/(lines1[:,0]**2 + lines1[:,1]**2) + 1/(lines2[:,0]**2 + lines2[:,1]**2)
+    #     denominator = 1/(lines1[:,0]**2 + lines1[:,1]**2) + 1/(lines2[:,0]**2 + lines2[:,1]**2)
 
-        Ri = self.get_algebraic_distance()
-        sed = (Ri**2) * denominator.view(-1,1,1) # shape (n)
+    #     Ri = self.get_algebraic_distance()
+    #     sed = (Ri**2) * denominator.view(-1,1,1) # shape (n)
 
-        return sed.view(-1)
+    #     return sed.view(-1)
     
     def compute_epipolar_lines(self, F, points):
         # F shape: (batch_size, 3, 3), points shape: (batch_size, n, 3)
-        lines = torch.bmm(F, points.transpose(1, 2)).transpose(1, 2)  # shape: (batch_size, n, 3)
-        norm_factor = torch.sqrt(lines[:, :, 0] ** 2 + lines[:, :, 1] ** 2).view(lines.size(0), lines.size(1), 1)
-        return lines / norm_factor
+        return torch.bmm(F, points.transpose(1, 2)).transpose(1, 2)  # shape: (batch_size, n, 3)
 
     def point_2_line_distance_all_points(self, points, lines):
         # Both points and lines are of shape (batch_size, n, 3)

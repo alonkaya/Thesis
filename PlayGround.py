@@ -113,18 +113,14 @@ def sed_distance_gt():
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
         
-        if i == 10: break
+        if i == 3: break
     # divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
     
-        print(epoch_stats["test_algebraic_pred"]/i)
-        print(epoch_stats["test_algebraic_sqr_pred"]/i)
-        print(epoch_stats["test_RE1_pred"]/i)
-        print(epoch_stats["test_SED_pred"]/i)
+        print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(i+1)}')
+        print(f'test_algebraic_sqr_pred: {epoch_stats["test_algebraic_sqr_pred"]/(i+1)}')
+        print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(i+1)}')
+        print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(i+1)}')
         print()
-        print(epoch_stats["test_algebraic_truth"]/i)
-        print(epoch_stats["test_algebraic_sqr_truth"]/i)
-        print(epoch_stats["test_RE1_truth"]/i)
-        print(epoch_stats["test_SED_truth"]/i)
 
 def sed_distance_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
