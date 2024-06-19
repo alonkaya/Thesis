@@ -8,7 +8,7 @@ import os
 import torch
 import re
 
-from utils import divide_by_dataloader, points_histogram
+from utils import divide_by_dataloader, points_histogram, reverse_transforms
 
 # Function to denormalize image
 def denormalize(image, mean, std):
@@ -111,8 +111,8 @@ def sed_distance_gt():
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
-        
-        if i == 0: break
+        print(i)
+        if i == 50: break
     # divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
     
     print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(i+1)}')
@@ -309,9 +309,11 @@ def update_epochs(file_path, increment):
     with open(file_path, 'w') as file:
         file.writelines(updated_lines)
 
+from torchvision import transforms
 
 if __name__ == "__main__":
     # file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
     # update_epochs(file_path, 114)
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
     sed_distance_gt()
+

@@ -31,7 +31,7 @@ if __name__ == "__main__":
         plots_path = os.path.join('plots', dataset, 
                           f"""{coeff}{ADDITIONS}{scratch}{enlarged_clip}lr_{learning_rates_vit[0]}__\
 avg_embeddings_{AVG_EMBEDDINGS}__conv_{USE_CONV}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
-use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{BATCH_SIZE}{dataset_class}""")\
+use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{BATCH_SIZE}__WD_{wieght_decay}{dataset_class}""")\
         
         model = FMatrixRegressor(lr_vit=lr_vit, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
 

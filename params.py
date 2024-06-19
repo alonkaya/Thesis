@@ -24,10 +24,10 @@ RANDOM_CROP = True
 ### Training ###
 learning_rates_vit = [5e-5] # TODO 2e-5
 lr_decay = 0.85 
-wieght_decay = 5e-5
+wieght_decay = 5e-5 #TODO 5e-4
 SCHED = True
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = 16 # TODO 16, 32
+BATCH_SIZE = 16 # TODO 1, 32
 NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
