@@ -1,7 +1,7 @@
 import torch
 
-DEVICE_ID = 2
-device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
+DEVICE_ID = 0
+device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
 
 ### Dataset ###
 train_seqeunces = [0, 2, 3, 5, 6, 7, 8]
@@ -47,7 +47,7 @@ SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0.05] # TODO 0.05, 0.1
+SED_COEFF = [0.1] # TODO 0.05, 0.1
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
