@@ -252,6 +252,19 @@ class EpipolarGeometry:
         
         return trimmed_pts1, trimmed_pts2
     
+    def average_batch(self, errors):
+        """
+        Input: errors of shape (batch_size * n)
+        Output: average error of shape (1)
+        """
+        # Sum all valid errors
+        sum_errors = torch.sum(errors)
+        
+        # Count non-zero elements
+        valid_count = torch.sum(errors != 0).float()
+
+        return sum_errors / (valid_count)
+
     def get_algebraic_distance(self):
         batch_size, n, _ = self.pts1.shape
         algebraic_distances = torch.abs(torch.matmul(
@@ -259,22 +272,6 @@ class EpipolarGeometry:
             self.pts1.view(batch_size, n, 3, 1)))  # Returns shape (batch_size, n, 1, 1)
         return algebraic_distances
     
-    def average_batch(self, errors):
-        """
-        Input: errors of shape (batch_size * n)
-        Output: average error of shape (1)
-        """
-        # Replace inf/nans values with zero (these won't affect the sum of valid values)
-        cleaned_errors = torch.where(torch.isinf(errors) | torch.isnan(errors), torch.tensor(0.0, dtype=errors.dtype, device=errors.device), errors)
-        
-        # Sum all valid errors
-        sum_errors = torch.sum(cleaned_errors)
-        
-        # Count non-zero elements
-        valid_count = torch.sum(cleaned_errors != 0).float()
-        
-        return sum_errors / (valid_count)
-
     def get_mean_algebraic_distance(self):
         algebraic_distances = self.get_algebraic_distance() # shape (batch_size, n, 1, 1)
 
@@ -293,8 +290,8 @@ class EpipolarGeometry:
 
         denominator = (torch.sum(inhomogeneous_l1 ** 2, dim=2) + torch.sum(inhomogeneous_l2 ** 2, dim=2)).view(batch_size, num_points)
 
-        Ri = self.get_algebraic_distance().view(batch_size, num_points)
-        RE1 = (Ri ** 2) / denominator # shape (batch_size, n)
+        Ri_sqr = self.get_algebraic_distance().view(batch_size, num_points) ** 2
+        RE1 = Ri_sqr / (denominator+1e-8) # shape (batch_size, n)
 
         return self.average_batch(RE1.view(-1))
 
@@ -330,16 +327,18 @@ class EpipolarGeometry:
     
     def compute_epipolar_lines(self, F, points):
         # F shape: (batch_size, 3, 3), points shape: (batch_size, n, 3)
-        return torch.bmm(F, points.transpose(1, 2)).transpose(1, 2)  # shape: (batch_size, n, 3)
+        lines = torch.bmm(F, points.transpose(1, 2)).transpose(1, 2)  # shape: (batch_size, n, 3)
+        norm = torch.sqrt(lines[:, :, 0] ** 2 + lines[:, :, 1] ** 2 + 1e-8).unsqueeze(-1) # shape: (batch_size, n, 1)
+
+        return lines / norm
 
     def point_2_line_distance_all_points(self, points, lines):
         # Both points and lines are of shape (batch_size, n, 3)
-        numerators = torch.abs(torch.sum(lines * points, axis=2))  # Element-wise multiplication and sum over last dimension
-        denominators = torch.sqrt(lines[:, :, 0] ** 2 + lines[:, :, 1] ** 2)
-        return numerators / denominators
-
+        dist = torch.abs(torch.sum(lines * points, axis=-1))  # Element-wise multiplication and sum over last dimension
+        return dist # shape (batch_size, n)
+     
     def point_2_line_distance(self, point, l):
-        # Both point and line are of shape (3,) 
+        # Both point and line are of shape (3,) #TODO remove norm from here
         return abs(np.sum(l * point) / np.sqrt(l[0]**2 + l[1]**2))
     
     def algebraic_distance_single_point(self, F, pt1, pt2):
@@ -477,6 +476,7 @@ def paramterization_layer(x, plots_path):
     # We need to reshape the columns to concatenate them correctly
     F = torch.cat((f1.view(-1, 3, 1), f2.view(-1, 3, 1), f3.view(-1, 3, 1)), dim=-1)
     for f in F:
+        # print(f)
         if torch.linalg.matrix_rank(f) != 2:
             U, S, V = torch.svd(F[0])
             print_and_write(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(F)}

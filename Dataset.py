@@ -1,7 +1,6 @@
 import random
 from FunMatrix import *
 from utils import *
-from pykitti.odometry import odometry
 from DatasetOneSequence import CustomDataset_first_two_thirds_train, CustomDataset_first_two_out_of_three_train
 from torch.utils.data import DataLoader, ConcatDataset
 from torchvision.transforms import v2

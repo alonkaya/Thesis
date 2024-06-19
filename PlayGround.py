@@ -1,10 +1,9 @@
-import cv2
 from Dataset import get_data_loaders
 from FMatrixRegressor import FMatrixRegressor
 from FunMatrix import EpipolarGeometry, update_epoch_stats
+from params import device, norm_mean, norm_std
 import numpy as np
 import matplotlib.pyplot as plt
-from params import *
 import os
 import torch
 import re
@@ -113,14 +112,14 @@ def sed_distance_gt():
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
         
-        if i == 3: break
+        if i == 0: break
     # divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
     
-        print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(i+1)}')
-        print(f'test_algebraic_sqr_pred: {epoch_stats["test_algebraic_sqr_pred"]/(i+1)}')
-        print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(i+1)}')
-        print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(i+1)}')
-        print()
+    print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(i+1)}')
+    print(f'test_algebraic_sqr_pred: {epoch_stats["test_algebraic_sqr_pred"]/(i+1)}')
+    print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(i+1)}')
+    print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(i+1)}')
+    print()
 
 def sed_distance_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
