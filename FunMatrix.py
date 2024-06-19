@@ -476,10 +476,10 @@ def paramterization_layer(x, plots_path):
     # We need to reshape the columns to concatenate them correctly
     F = torch.cat((f1.view(-1, 3, 1), f2.view(-1, 3, 1), f3.view(-1, 3, 1)), dim=-1)
     for f in F:
-        # print(f)
         if torch.linalg.matrix_rank(f) != 2:
-            U, S, V = torch.svd(F[0])
-            print_and_write(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(F)}
-    singular values: {S.cpu().tolist()}\n""", plots_path)
+            U, S, V = torch.svd(f)
+            print_and_write(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(f)}                            
+singular values: {S.cpu().tolist()}
+{f}\n\n""", plots_path)
 
     return F
