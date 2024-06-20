@@ -22,8 +22,8 @@ AUGMENTATION = True
 RANDOM_CROP = True
 
 ### Training ###
-learning_rates_vit = [5e-5] # TODO 2e-5
-lr_decay = 0.85 
+learning_rates_vit = [1e-4] # TODO 2e-5, 1e-4
+lr_decay = 0.8
 wieght_decay = 5e-5 #TODO 5e-4
 SCHED = True
 USE_RECONSTRUCTION_LAYER = True
@@ -36,7 +36,7 @@ NUM_WORKERS = 1 # Change Main.py if > 0
 SAVE_MODEL = True
 NUM_EPOCHS = 900
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
-ADDITIONS = ""
+ADDITIONS = "auged__"
 
 ### Epipolar geometry ###
 RE1_DIST = True

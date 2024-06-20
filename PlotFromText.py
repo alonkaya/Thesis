@@ -110,7 +110,7 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-    plots_path = "plots\Stereo\SED_0.05__lr_0.0001__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__Augment_True__rc_True__BS_16__small__first_2_thirds_train"
+    plots_path = "plots\Stereo\SED_0.05__auged__lr_2e-05__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__BS_16__WD_5e-05"
     file_path = os.path.join(plots_path, "output.log")
     save = True
 

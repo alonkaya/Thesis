@@ -105,6 +105,7 @@ class FMatrixRegressor(nn.Module):
         self.to(device)
 
     def FeatureExtractor(self, x1, x2):
+        # TODO Train with convs before VIT
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :]
         x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :]
