@@ -22,8 +22,8 @@ AUGMENTATION = True
 RANDOM_CROP = True
 
 ### Training ###
-learning_rates_vit = [1e-4] # TODO 2e-5, 1e-4
-lr_decay = 0.8
+learning_rates_vit = [5e-5] # TODO 2e-5, 1e-4
+lr_decay = 0.85
 wieght_decay = 5e-5 #TODO 5e-4
 SCHED = True
 USE_RECONSTRUCTION_LAYER = True
