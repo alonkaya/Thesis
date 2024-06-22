@@ -7216,3 +7216,44 @@ Epoch 900/900: Training Loss: 0.11292703209853754		 Val Loss: 0.2936221258980887
              SED dist: 2.1452346429592226		 Val SED dist: 5.804657854352679
 
 
+Fatal Python error: Illegal instruction
+
+Thread 0x00007f6b16468700 (most recent call first):
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/threading.py", line 312 in wait
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/multiprocessing/queues.py", line 231 in _feed
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/threading.py", line 917 in run
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/threading.py", line 980 in _bootstrap_inner
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/threading.py", line 937 in _bootstrap
+
+Thread 0x00007f6a47ff7700 (most recent call first):
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/selectors.py", line 416 in select
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/multiprocessing/connection.py", line 931 in wait
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/multiprocessing/connection.py", line 424 in _poll
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/multiprocessing/connection.py", line 257 in poll
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/multiprocessing/queues.py", line 113 in get
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/_utils/pin_memory.py", line 30 in do_one_step
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/_utils/pin_memory.py", line 53 in _pin_memory_loop
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/threading.py", line 917 in run
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/threading.py", line 980 in _bootstrap_inner
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/threading.py", line 937 in _bootstrap
+
+Thread 0x00007f6a497fa700 (most recent call first):
+<no Python frame>
+
+Thread 0x00007f6a487f8700 (most recent call first):
+<no Python frame>
+
+Thread 0x00007f6a48ff9700 (most recent call first):
+<no Python frame>
+
+Current thread 0x00007f6c149e5200 (most recent call first):
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/threading.py", line 316 in wait
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/queue.py", line 180 in get
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1133 in _try_get_data
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1285 in _get_data
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1329 in _next_data
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 631 in __next__
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 289 in dataloader_step
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 341 in test
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 197 in train_model
+  File "/home/alonkay/Thesis/Main.py", line 49 in <module>
