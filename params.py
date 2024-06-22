@@ -27,14 +27,14 @@ lr_decay = 0.8
 wieght_decay = 5e-5 #TODO 5e-4
 SCHED = True
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = 16 # TODO 32, 64
+BATCH_SIZE = 32 # TODO 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 1 # Change Main.py if > 0
 SAVE_MODEL = True
-NUM_EPOCHS = 900
+NUM_EPOCHS = 1300
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
 ADDITIONS = "auged__"
 
