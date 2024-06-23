@@ -1,6 +1,6 @@
 import torch
 
-DEVICE_ID = 0
+DEVICE_ID = 1
 device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
 
 ### Dataset ###
@@ -32,7 +32,7 @@ NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
-NUM_WORKERS = 1 # Change Main.py if > 0
+NUM_WORKERS = 2 # Change Main.py if > 0
 SAVE_MODEL = True
 NUM_EPOCHS = 1300
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
@@ -55,7 +55,7 @@ CONV_HIDDEN_DIM = [256, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-PRETRAINED_PATH = None
+PRETRAINED_PATH = "plots/Stereo/SED_0.1__auged__lr_5e-05__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__BS_32__WD_5e-05/"
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
