@@ -1,7 +1,7 @@
 import torch
 
 DEVICE_ID = 1
-device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
 
 ### Dataset ###
 train_seqeunces = [0, 2, 3, 5, 6, 7, 8]
@@ -55,7 +55,7 @@ CONV_HIDDEN_DIM = [256, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-PRETRAINED_PATH = "plots/Stereo/SED_0.01__auged__lr_5e-05__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__BS_32__WD_5e-05/"
+PRETRAINED_PATH = None
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
