@@ -52,20 +52,22 @@ class Dataset(torch.utils.data.Dataset):
         return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, transform, k0, k1, R, t, valid_indices, seq_name, test):
+    def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, valid_indices, seq_name, test):
         self.sequence_path = sequence_path
         self.transform = transform
         self.k0 = k0
         self.k1 = k1
         self.R=R
         self.t=t        
+        self.images_0 = images_0
+        self.images_1 = images_1
         self.valid_indices = valid_indices
         self.seq_name = seq_name
         self.test = test
 
         # Load all images into RAM
-        self.images_0 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')) for idx in self.valid_indices}
-        self.images_1 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')) for idx in self.valid_indices}
+        # self.images_0 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')) for idx in self.valid_indices}
+        # self.images_1 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')) for idx in self.valid_indices}
 
     def __len__(self):
         return int(len(self.valid_indices) * seq_ratio) if not self.test else len(self.valid_indices)
@@ -73,8 +75,6 @@ class Dataset_stereo(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
 
-        # img0 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}'))
-        # img1 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}'))
         img0 = self.images_0[idx]
         img1 = self.images_1[idx]
 
@@ -82,7 +82,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
         k1=self.k1.clone()
         if RANDOM_CROP:
             top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
-            img0, img1 = TF.resize(img0, (RESIZE, RESIZE), antialias=True), TF.resize(img0, (RESIZE, RESIZE), antialias=True)
+            img0, img1 = TF.resize(img0, (RESIZE, RESIZE), antialias=True), TF.resize(img1, (RESIZE, RESIZE), antialias=True)
             img0, img1 = TF.crop(img0, top_crop, left_crop, CROP, CROP), TF.crop(img1, top_crop, left_crop, CROP, CROP)
             k0 = adjust_k_crop(k0, top_crop, left_crop)
             k1 = adjust_k_crop(k1, top_crop, left_crop)
@@ -255,7 +255,10 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
-        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
+        images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')) for idx in valid_indices}
+        images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')) for idx in valid_indices}
+
+        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, images_0, images_1, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
 
         if i in train_seqeunces_stereo:
             train_datasets.append(dataset_stereo)        
