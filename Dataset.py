@@ -79,7 +79,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
         img1 = self.images_1[idx]
         print(self.k0.device)
         print("\n\n")
-        k0=self.k0.clone()
+        k0=self.k0.cpu().clone()
         k1=self.k1.clone()
         if RANDOM_CROP:
             top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
