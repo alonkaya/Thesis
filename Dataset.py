@@ -231,8 +231,8 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
     poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
     calib_paths = [f'sequences/{i:02}/calib.txt' for i in range(11)]  
       
-    R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32)
-    t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32)
+    R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32).to(device)
+    t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32).to(device)
 
     train_datasets, val_datasets, test_datasets = [], [], []
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
@@ -253,7 +253,7 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
         images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices}
         images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices}
 
-        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, images_0, images_1, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
+        dataset_stereo = Dataset_stereo(sequence_path, transform, k0.to(device), k1.to(device), R_relative, t_relative, images_0, images_1, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
 
         if i in train_seqeunces_stereo:
             train_datasets.append(dataset_stereo)        

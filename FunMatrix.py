@@ -228,8 +228,8 @@ class EpipolarGeometry:
         pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32)
         pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32)
 
-        self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1) # shape (n, 3)
-        self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1) # shape (n, 3)
+        self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
+        self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
 
         self.pts1, self.pts2 = self.trim_by_sed()
       
