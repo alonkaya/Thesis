@@ -68,7 +68,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
         self.images_1 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in self.valid_indices[:32]}
 
     def __len__(self):
-        return int(len(self.valid_indices) * seq_ratio) if not self.test else len(self.valid_indices)
+        return 32
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
@@ -254,7 +254,7 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
         # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size, on_device=True)
-        print(k0.device, k1.device, R_relative.device, t_relative.device)
+
         dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
 
         if i in train_seqeunces_stereo:
