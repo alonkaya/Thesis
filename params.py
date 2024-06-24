@@ -1,7 +1,7 @@
 import torch
 
 DEVICE_ID = 1
-device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
+device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 ### Dataset ###
 train_seqeunces = [0, 2, 3, 5, 6, 7, 8]
@@ -22,8 +22,8 @@ AUGMENTATION = True
 RANDOM_CROP = True
 
 ### Training ###
-learning_rates_vit = [1e-4] # TODO 2e-5, 1e-4
-lr_decay = 0.8
+learning_rates_vit = [5e-05] # TODO 2e-5, 1e-4
+lr_decay = 0.85
 wieght_decay = 5e-5 #TODO 5e-4
 SCHED = True
 USE_RECONSTRUCTION_LAYER = True
@@ -32,7 +32,7 @@ NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
-NUM_WORKERS = 2 # Change Main.py if > 0
+NUM_WORKERS = 4 # Change Main.py if > 0
 SAVE_MODEL = True
 NUM_EPOCHS = 1300
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
@@ -47,7 +47,7 @@ SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0.05] # TODO 0.05, 0.1
+SED_COEFF = [0.1] # TODO 0.05, 0.1
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
@@ -55,7 +55,7 @@ CONV_HIDDEN_DIM = [256, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-PRETRAINED_PATH = "plots/Stereo/SED_0.05__auged__lr_0.0001__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__BS_32__WD_5e-05/"
+PRETRAINED_PATH = "plots/Stereo/SED_0.1__auged__lr_5e-05__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__BS_32__WD_5e-05"
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
