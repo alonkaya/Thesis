@@ -254,7 +254,7 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
         # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size, on_device=True)
-
+        print(k0.device, k1.device, R_relative.device, t_relative.device)
         dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
 
         if i in train_seqeunces_stereo:
