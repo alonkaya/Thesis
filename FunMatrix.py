@@ -122,7 +122,7 @@ singular values: {S.cpu().tolist()}\n""")
 def get_F(k0, k1, poses=None, idx=None, jump_frames=JUMP_FRAMES, R_relative=None, t_relative=None):
     if R_relative == None:
         R_relative, t_relative = compute_relative_transformations(poses[idx], poses[idx+jump_frames])
-    E = compute_essential(R_relative, t_relative, to_device=True)
+    E = compute_essential(R_relative, t_relative)
     F = compute_fundamental(E, k0, k1)
 
     return F
@@ -228,8 +228,8 @@ class EpipolarGeometry:
         pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32)
         pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32)
 
-        self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
-        self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
+        self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1) # shape (n, 3)
+        self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1) # shape (n, 3)
 
         self.pts1, self.pts2 = self.trim_by_sed()
       
