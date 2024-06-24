@@ -64,8 +64,8 @@ class Dataset_stereo(torch.utils.data.Dataset):
         self.test = test
 
         # Load all images into RAM
-        self.images_0 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in self.valid_indices}
-        self.images_1 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in self.valid_indices}
+        self.images_0 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in self.valid_indices[:32]}
+        self.images_1 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in self.valid_indices[:32]}
 
     def __len__(self):
         return int(len(self.valid_indices) * seq_ratio) if not self.test else len(self.valid_indices)
