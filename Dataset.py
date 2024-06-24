@@ -78,8 +78,8 @@ class Dataset_stereo(torch.utils.data.Dataset):
         img0 = self.images_0[idx]
         img1 = self.images_1[idx]
 
-        k0=self.k0.clone()
-        k1=self.k1.clone()
+        k0=self.k0.clone().to(device)
+        k1=self.k1.clone().to(device)
         if RANDOM_CROP:
             top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
             img0, img1 = TF.resize(img0, (RESIZE, RESIZE), antialias=True), TF.resize(img0, (RESIZE, RESIZE), antialias=True)
@@ -142,7 +142,7 @@ def custom_collate_fn(batch):
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
 
-    return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
+    return (torch.stack(imgs1).to(device), torch.stack(imgs2).to(device), torch.stack(Fs).to(device), torch.stack(padded_pts1).to(device), torch.stack(padded_pts2).to(device), seq_names)
 
 
 def get_dataloaders_RealEstate(batch_size=BATCH_SIZE):
@@ -253,7 +253,7 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
 
         # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
-        k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size, on_device=True)
+        k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
         dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
 

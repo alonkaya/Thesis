@@ -24,14 +24,13 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size):
 
     return k
 
-def get_intrinsic_KITTI(calib_path, original_image_size, on_device=False):
+def get_intrinsic_KITTI(calib_path, original_image_size):
     projection_matrix_cam0, projection_matrix_cam1 = read_camera_intrinsic(calib_path)
 
     k0, k1 = decompose_k(projection_matrix_cam0.reshape(3, 4)), decompose_k(projection_matrix_cam1.reshape(3, 4))
-    if on_device: k0, k1 = k0.to(device), k1.to(device)
 
     # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-    resized = torch.tensor([RESIZE, RESIZE]).to(device) if on_device else torch.tensor([RESIZE, RESIZE])
+    resized = torch.tensor([RESIZE, RESIZE])
     k0, k1 = adjust_k_resize(k0, original_image_size, resized), adjust_k_resize(k1, original_image_size, resized)
 
     center_crop_size = (RESIZE - CROP) // 2
