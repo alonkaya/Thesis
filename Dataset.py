@@ -64,11 +64,11 @@ class Dataset_stereo(torch.utils.data.Dataset):
         self.test = test
 
         # Load all images into RAM
-        self.images_0 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in self.valid_indices[:32]}
-        self.images_1 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in self.valid_indices[:32]}
+        self.images_0 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')) for idx in self.valid_indices}
+        self.images_1 = {idx: torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')) for idx in self.valid_indices}
 
     def __len__(self):
-        return 32
+        return int(len(self.valid_indices) * seq_ratio) if not self.test else len(self.valid_indices)
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
@@ -142,7 +142,7 @@ def custom_collate_fn(batch):
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
 
-    return (torch.stack(imgs1).to(device), torch.stack(imgs2).to(device), torch.stack(Fs).to(device), torch.stack(padded_pts1).to(device), torch.stack(padded_pts2).to(device), seq_names)
+    return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
 
 
 def get_dataloaders_RealEstate(batch_size=BATCH_SIZE):
