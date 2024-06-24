@@ -107,7 +107,7 @@ def sed_distance_gt():
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
                    "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
     
-    for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
+    for i, (img1, img2, label, pts1, pts2, _) in enumerate(val_loader):
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")

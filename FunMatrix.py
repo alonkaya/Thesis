@@ -24,13 +24,15 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size):
 
     return k
 
-def get_intrinsic_KITTI(calib_path, original_image_size):
+def get_intrinsic_KITTI(calib_path, original_image_size, on_device=False):
     projection_matrix_cam0, projection_matrix_cam1 = read_camera_intrinsic(calib_path)
 
     k0, k1 = decompose_k(projection_matrix_cam0.reshape(3, 4)), decompose_k(projection_matrix_cam1.reshape(3, 4))
+    if on_device: k0, k1 = k0.to(device), k1.to(device)
 
     # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-    k0, k1 = adjust_k_resize(k0, original_image_size, torch.tensor([RESIZE, RESIZE])), adjust_k_resize(k1, original_image_size, torch.tensor([RESIZE, RESIZE]))
+    resized = torch.tensor([RESIZE, RESIZE]).to(device) if on_device else torch.tensor([RESIZE, RESIZE])
+    k0, k1 = adjust_k_resize(k0, original_image_size, resized), adjust_k_resize(k1, original_image_size, resized)
 
     center_crop_size = (RESIZE - CROP) // 2
     k0, k1 = adjust_k_crop(k0, center_crop_size, center_crop_size) if not RANDOM_CROP else k0, adjust_k_crop(k1, center_crop_size, center_crop_size) if not RANDOM_CROP else k1
@@ -227,8 +229,8 @@ class EpipolarGeometry:
         pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32)
         pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32)
 
-        self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1) # shape (n, 3)
-        self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1) # shape (n, 3)
+        self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
+        self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
 
         self.pts1, self.pts2 = self.trim_by_sed()
       
