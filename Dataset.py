@@ -71,7 +71,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
         return int(len(self.valid_indices) * seq_ratio) if not self.test else len(self.valid_indices)
 
     def __getitem__(self, idx):
-        # idx = self.valid_indices[idx]
+        idx = self.valid_indices[idx]
 
         # img0 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}'))
         # img1 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}'))
