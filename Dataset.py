@@ -77,9 +77,8 @@ class Dataset_stereo(torch.utils.data.Dataset):
         # img1 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}'))
         img0 = self.images_0[idx]
         img1 = self.images_1[idx]
-        print(self.k0.device)
-        print("\n\n")
-        k0=self.k0.cpu().clone()
+
+        k0=self.k0.clone()
         k1=self.k1.clone()
         if RANDOM_CROP:
             top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
