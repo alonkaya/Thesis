@@ -78,8 +78,8 @@ class Dataset_stereo(torch.utils.data.Dataset):
         img0 = self.images_0[idx]
         img1 = self.images_1[idx]
 
-        k0=self.k0.clone().to(device)
-        k1=self.k1.clone().to(device)
+        k0=self.k0.clone()
+        k1=self.k1.clone()
         if RANDOM_CROP:
             top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
             img0, img1 = TF.resize(img0, (RESIZE, RESIZE), antialias=True), TF.resize(img0, (RESIZE, RESIZE), antialias=True)
@@ -93,7 +93,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
         unnormalized_F = get_F(k0, k1, R_relative=self.R, t_relative=self.t)
         
         # Normalize F-Matrix
-        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3).to(device)
+        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
         # Compute keypoints
         epi = EpipolarGeometry(img0, img1, F.unsqueeze(0))
@@ -236,8 +236,8 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
     poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
     calib_paths = [f'sequences/{i:02}/calib.txt' for i in range(11)]  
       
-    R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32).to(device)
-    t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32).to(device)
+    R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32)
+    t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32)
 
     train_datasets, val_datasets, test_datasets = [], [], []
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
