@@ -23,11 +23,11 @@ RANDOM_CROP = True
 
 ### Training ###
 learning_rates_vit = [1e-4] # TODO 2e-5, 1e-4
-lr_decay = 0.85
+lr_decay = 0.8
 wieght_decay = 5e-5 #TODO 5e-4
 SCHED = True
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = 32 # TODO 32, 64
+BATCH_SIZE = 64 # TODO 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
@@ -55,7 +55,7 @@ CONV_HIDDEN_DIM = [256, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-PRETRAINED_PATH = "plots/Stereo/SED_0.1__auged__lr_0.0001__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__BS_32__WD_5e-05"
+PRETRAINED_PATH = None
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
