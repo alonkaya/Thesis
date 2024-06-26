@@ -22,7 +22,7 @@ AUGMENTATION = True
 RANDOM_CROP = True
 
 ### Training ###
-learning_rates_vit = [5e-05] # TODO 2e-5, 1e-4
+learning_rates_vit = [1e-4] # TODO 2e-5, 1e-4
 lr_decay = 0.85
 wieght_decay = 5e-5 #TODO 5e-4
 SCHED = True
@@ -34,7 +34,7 @@ DEEPF_NOCORRS = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 2 # Change Main.py if > 0
 SAVE_MODEL = True
-NUM_EPOCHS = 1300
+NUM_EPOCHS = 1100
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
 ADDITIONS = "auged__"
 
@@ -55,7 +55,7 @@ CONV_HIDDEN_DIM = [256, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-PRETRAINED_PATH = "plots/Stereo/SED_0.01__auged__lr_5e-05__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__BS_32__WD_5e-05"
+PRETRAINED_PATH = "plots/Stereo/SED_0.01__auged__lr_0.0001__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__BS_32__WD_5e-05"
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
