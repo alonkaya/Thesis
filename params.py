@@ -47,7 +47,7 @@ SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0.01] # TODO 0.05, 0.1
+SED_COEFF = [0.1] # TODO 0.05, 0.1
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
@@ -55,7 +55,7 @@ CONV_HIDDEN_DIM = [256, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-PRETRAINED_PATH = "plots/Stereo/SED_0.01__auged__lr_0.0001__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__BS_32__WD_5e-05"
+PRETRAINED_PATH = "plots/Stereo/SED_0.1__auged__lr_0.0001__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__BS_32__WD_5e-05"
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
