@@ -36,7 +36,7 @@ NUM_WORKERS = 2 # Change Main.py if > 0
 SAVE_MODEL = True
 NUM_EPOCHS = 1100
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
-ADDITIONS = "auged__"
+ADDITIONS = "auged__L12_coeffs__"
 
 ### Epipolar geometry ###
 RE1_DIST = True
@@ -55,7 +55,7 @@ CONV_HIDDEN_DIM = [256, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-PRETRAINED_PATH = "plots/Stereo/SED_0.1__auged__lr_0.0001__avg_embeddings_False__conv_True__model_CLIP__use_reconstruction_True__BS_16__WD_5e-05"
+PRETRAINED_PATH = None
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
