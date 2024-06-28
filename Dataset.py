@@ -52,15 +52,13 @@ class Dataset(torch.utils.data.Dataset):
         return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, valid_indices, seq_name, test):
+    def __init__(self, sequence_path, transform, k0, k1, R, t, valid_indices, seq_name, test):
         self.sequence_path = sequence_path
         self.transform = transform
         self.k0 = k0
         self.k1 = k1
         self.R=R
         self.t=t        
-        self.images_0 = images_0
-        self.images_1 = images_1
         self.valid_indices = valid_indices
         self.seq_name = seq_name
         self.test = test
@@ -70,8 +68,12 @@ class Dataset_stereo(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
-        img0 = self.images_0[idx]
-        img1 = self.images_1[idx]
+
+        img0 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}'))
+        img1 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}'))
+
+        # img0 = self.images_0[idx]
+        # img1 = self.images_1[idx]
 
         k0=self.k0.clone()
         k1=self.k1.clone()
@@ -93,7 +95,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
         # Compute keypoints
         epi = EpipolarGeometry(img0, img1, F.unsqueeze(0))
 
-        return img0, img1, F, epi.pts1, epi.pts2, self.seq_name
+        return img0, img1, F, epi.pts1, epi.pts2, self.seq_name, idx
     
 def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
     valid_indices = []
@@ -250,10 +252,10 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
-        images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')) for idx in valid_indices}
-        images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')) for idx in valid_indices}
+        # images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')) for idx in valid_indices}
+        # images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')) for idx in valid_indices}
 
-        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, images_0, images_1, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
+        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
 
         if i in train_seqeunces_stereo:
             train_datasets.append(dataset_stereo)        
@@ -268,9 +270,9 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
     concat_test_dataset = ConcatDataset(test_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True, collate_fn=custom_collate_fn)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True, collate_fn=custom_collate_fn)
-    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True, collate_fn=custom_collate_fn)
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
 
     return train_loader, val_loader, test_loader
 
@@ -281,3 +283,25 @@ def get_data_loaders(batch_size=BATCH_SIZE):
         return get_dataloaders_RealEstate(batch_size)
     else: # KITTI
         return get_dataloaders_KITTI(batch_size)
+
+
+
+def save_keypoints():
+    train_dataloader, val_dataloader, test_dataloader = get_data_loaders()   
+    
+    def save_to_file(dataloader):
+        for i, (imgs1, imgs2, Fs, pts1, pts2, seq_names, idxs) in enumerate(dataloader):
+            for img1, img2, F, pt1, pt2, seq_name, idx in zip(imgs1, imgs2, Fs, pts1, pts2, seq_names, idxs):
+                filepath = os.path.join('sequences', seq_name, f'keypoints.txt')
+                with open(filepath, 'a') as f:
+                    line = f"{idx.item()}; {pt1.tolist()}; {pt2.tolist()}\n"
+                    f.write(line)
+
+    save_to_file(train_dataloader)
+    save_to_file(val_dataloader)
+    save_to_file(test_dataloader)
+
+if __name__ == "__main__":
+    os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+    save_keypoints()    
