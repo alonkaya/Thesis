@@ -187,8 +187,10 @@ class EpipolarGeometry:
 
         if pts1 is None:
             # Convert images back to original
-            self.image1_numpy = reverse_transforms(image1_tensors.cpu(), mean=norm_mean, std=norm_std) # shape (H, W, 3)
-            self.image2_numpy = reverse_transforms(image2_tensors.cpu(), mean=norm_mean, std=norm_std) # shape (H, W, 3)
+            # self.image1_numpy = reverse_transforms(image1_tensors.cpu(), mean=norm_mean, std=norm_std) # shape (H, W, 3)
+            # self.image2_numpy = reverse_transforms(image2_tensors.cpu(), mean=norm_mean, std=norm_std) # shape (H, W, 3)
+            self.image1_numpy = image1_tensors.cpu().numpy().transpose(1, 2, 0)
+            self.image2_numpy = image2_tensors.cpu().numpy().transpose(1, 2, 0) 
             self.get_keypoints()
 
         else:

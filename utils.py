@@ -284,7 +284,6 @@ def adjust_points(keypoints_dict, idx, top_crop, left_crop, width, height):
     pts1 *= scale
     pts2 *= scale
 
-
     # Filter and adjust keypoints for the cropped image
     mask1 = (pts1[:, 0] >= left_crop) & (pts1[:, 0] < left_crop + CROP) & (pts1[:, 1] >= top_crop) & (pts1[:, 1] < top_crop + CROP) # shape [num_keypoints]
     mask2 = (pts2[:, 0] >= left_crop) & (pts2[:, 0] < left_crop + CROP) & (pts2[:, 1] >= top_crop) & (pts2[:, 1] < top_crop + CROP) # shape [num_keypoints]
