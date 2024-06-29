@@ -270,3 +270,44 @@ def avg_results(output_path):
     print("Validation SED dist: ", sum(val_sed_dists)/len(val_sed_dists))
     print("Training Alg sqr dist: ", sum(alg_sqr_dists)/len(alg_sqr_dists))
     print("Validation Alg sqr dist: ", sum(val_alg_sqr_dists)/len(val_alg_sqr_dists))
+
+
+
+def adjust_points(keypoints_dict, idx, top_crop, left_crop, width, height):
+    " Keypoints_dict: A dictionary containing the keypoints for each image e.g {0: (pts1, pts2), 1: (pts1, pts2), ...} "
+    # Convert keypoints to torch tensors
+    pts1 = torch.tensor(keypoints_dict[idx][0], dtype=torch.float32).to(device)
+    pts2 = torch.tensor(keypoints_dict[idx][1], dtype=torch.float32).to(device)
+
+    # Adjust keypoints for the resized image
+    scale = torch.tensor([RESIZE / width, RESIZE / height], dtype=torch.float32).to(device)
+    pts1 *= scale
+    pts2 *= scale
+
+
+    # Filter and adjust keypoints for the cropped image
+    mask1 = (pts1[:, 0] >= left_crop) & (pts1[:, 0] < left_crop + CROP) & (pts1[:, 1] >= top_crop) & (pts1[:, 1] < top_crop + CROP)
+    mask2 = (pts2[:, 0] >= left_crop) & (pts2[:, 0] < left_crop + CROP) & (pts2[:, 1] >= top_crop) & (pts2[:, 1] < top_crop + CROP)
+    pts1 = pts1[mask1]
+    pts2 = pts2[mask2]
+    
+    crop_offset = torch.tensor([left_crop, top_crop], dtype=torch.float32).to(device)
+    pts1 -= crop_offset
+    pts2 -= crop_offset
+
+    return pts1, pts2
+
+ 
+def load_keypoints(keypoints_path):
+    "load keypoints in the format {idx: (pts1, pts2), ...}"
+    keypoints_dict = {}
+    with open(keypoints_path, 'r') as f:
+        for line in f:
+            parts = line.strip().split(';')
+            idx = int(parts[0])
+            pts1 = eval(parts[1])
+            pts2 = eval(parts[2])
+            keypoints_dict[idx] = (pts1, pts2)
+    return keypoints_dict
+
+

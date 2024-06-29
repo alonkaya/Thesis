@@ -27,11 +27,11 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size):
 def get_intrinsic_KITTI(calib_path, original_image_size, adjust_resize=True):
     projection_matrix_cam0, projection_matrix_cam1 = read_camera_intrinsic(calib_path)
 
-    k0, k1 = decompose_k(projection_matrix_cam0.reshape(3, 4)), decompose_k(projection_matrix_cam1.reshape(3, 4))
+    k0, k1 = decompose_k(projection_matrix_cam0.reshape(3, 4)).to(device), decompose_k(projection_matrix_cam1.reshape(3, 4)).to(device)
 
     if adjust_resize:
         # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-        resized = torch.tensor([RESIZE, RESIZE])
+        resized = torch.tensor([RESIZE, RESIZE]).to(device)
         k0, k1 = adjust_k_resize(k0, original_image_size, resized), adjust_k_resize(k1, original_image_size, resized)
 
     center_crop_size = (RESIZE - CROP) // 2
@@ -188,10 +188,8 @@ class EpipolarGeometry:
 
         if pts1 is None:
             # Convert images back to original
-            # self.image1_numpy = reverse_transforms(image1_tensors.cpu(), mean=norm_mean, std=norm_std) # shape (H, W, 3)
-            # self.image2_numpy = reverse_transforms(image2_tensors.cpu(), mean=norm_mean, std=norm_std) # shape (H, W, 3)
-            self.image1_numpy = image1_tensors.cpu().numpy().transpose(1, 2, 0)
-            self.image2_numpy = image2_tensors.cpu().numpy().transpose(1, 2, 0) 
+            self.image1_numpy = reverse_transforms(image1_tensors.cpu(), mean=norm_mean, std=norm_std) # shape (H, W, 3)
+            self.image2_numpy = reverse_transforms(image2_tensors.cpu(), mean=norm_mean, std=norm_std) # shape (H, W, 3)
             self.get_keypoints()
 
         else:
