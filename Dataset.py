@@ -52,13 +52,16 @@ class Dataset(torch.utils.data.Dataset):
         return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, transform, k0, k1, R, t, valid_indices, seq_name, test):
+    def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, keypoints, valid_indices, seq_name, test):
         self.sequence_path = sequence_path
         self.transform = transform
         self.k0 = k0
         self.k1 = k1
         self.R=R
         self.t=t        
+        self.images_0 = images_0
+        self.images_1 = images_1
+        self.keypoints = keypoints
         self.valid_indices = valid_indices
         self.seq_name = seq_name
         self.test = test
@@ -69,11 +72,11 @@ class Dataset_stereo(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
 
-        img0 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}'))
-        img1 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}'))
+        # img0 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}'))
+        # img1 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}'))
 
-        # img0 = self.images_0[idx]
-        # img1 = self.images_1[idx]
+        img0 = self.images_0[idx]
+        img1 = self.images_1[idx]
 
         k0=self.k0.clone()
         k1=self.k1.clone()
@@ -84,6 +87,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
             k0 = adjust_k_crop(k0, top_crop, left_crop)
             k1 = adjust_k_crop(k1, top_crop, left_crop)
 
+
         img0 = self.transform(img0) # shape (channels, height, width)
         img1 = self.transform(img1) # shape (channels, height, width)
 
@@ -92,10 +96,9 @@ class Dataset_stereo(torch.utils.data.Dataset):
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-        # Compute keypoints
-        epi = EpipolarGeometry(img0, img1, F.unsqueeze(0))
-
-        return img0, img1, F, epi.pts1, epi.pts2, self.seq_name, idx
+        pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, width=img0.shape[1], height=img0.shape[0])
+        
+        return img0, img1, F, pts1, pts2, self.seq_name
     
 def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
     valid_indices = []
@@ -228,7 +231,7 @@ def get_dataloaders_KITTI(batch_size=BATCH_SIZE):
 
     return train_loader, val_loader
 
-def get_dataloader_stereo(batch_size=BATCH_SIZE):
+def get_dataloader_stereo(batch_size=BATCH_SIZE, num_workers=NUM_WORKERS):
     sequence_paths = [f'sequences/{i:02}' for i in range(11)]
     poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
     calib_paths = [f'sequences/{i:02}/calib.txt' for i in range(11)]  
@@ -252,10 +255,10 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
-        # images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')) for idx in valid_indices}
-        # images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')) for idx in valid_indices}
+        images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')) for idx in valid_indices}
+        images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')) for idx in valid_indices}
 
-        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
+        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, images_0, images_1, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
 
         if i in train_seqeunces_stereo:
             train_datasets.append(dataset_stereo)        
@@ -270,9 +273,9 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE):
     concat_test_dataset = ConcatDataset(test_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
-    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True, collate_fn=custom_collate_fn)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True, collate_fn=custom_collate_fn)
+    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True, collate_fn=custom_collate_fn)
 
     return train_loader, val_loader, test_loader
 
@@ -287,19 +290,74 @@ def get_data_loaders(batch_size=BATCH_SIZE):
 
 
 def save_keypoints():
-    train_dataloader, val_dataloader, test_dataloader = get_data_loaders()   
-    
-    def save_to_file(dataloader):
-        for i, (imgs1, imgs2, Fs, pts1, pts2, seq_names, idxs) in enumerate(dataloader):
-            for img1, img2, F, pt1, pt2, seq_name, idx in zip(imgs1, imgs2, Fs, pts1, pts2, seq_names, idxs):
-                filepath = os.path.join('sequences', seq_name, f'keypoints.txt')
-                with open(filepath, 'a') as f:
-                    line = f"{idx.item()}; {pt1.tolist()}; {pt2.tolist()}\n"
-                    f.write(line)
+    """
+    To work put these lines in the init of EpipolarGeometry:
+        self.image1_numpy = image1_tensors.cpu().numpy().transpose(1, 2, 0)
+        self.image2_numpy = image2_tensors.cpu().numpy().transpose(1, 2, 0) 
+    """
+    sequence_paths = [f'sequences/{i:02}' for i in range(11)]
+    poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
+    calib_paths = [f'sequences/{i:02}/calib.txt' for i in range(11)]  
+      
+    R = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32)
+    t = torch.tensor([0.54, 0, 0], dtype=torch.float32)
 
-    save_to_file(train_dataloader)
-    save_to_file(val_dataloader)
-    save_to_file(test_dataloader)
+    for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
+        if i not in train_seqeunces_stereo and i not in val_sequences_stereo and i not in test_sequences_stereo: continue
+
+        image_0_path = os.path.join(sequence_path, 'image_0')
+
+        # Get a list of all poses [R,t] in this sequence
+        poses = read_poses(poses_path)
+        
+        # Indices of 'good' image frames
+        valid_indices = get_valid_indices(len(poses), image_0_path, jump_frames=0)
+
+        # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
+        original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
+        k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size, adjust_resize=False)
+
+        for idx in valid_indices:
+            img0 = torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')) # shape (channels, height, width)
+            img1 = torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')) # shape (channels, height, width)
+            
+            img0 = TF.rgb_to_grayscale(img0, num_output_channels=1)
+            img1 = TF.rgb_to_grayscale(img1, num_output_channels=1)
+
+            unnormalized_F = get_F(k0, k1, R_relative=R, t_relative=t)
+            
+            # Normalize F-Matrix
+            F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
+
+            epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0))
+
+            filepath = os.path.join(sequence_path, f'keypoints.txt')
+            with open(filepath, 'a') as f:
+                line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
+                f.write(line)
+
+
+            # Convert grayscale tensors to numpy arrays for matplotlib
+            # img0_np = img0.squeeze().numpy()
+            # img1_np = img1.squeeze().numpy()
+
+            # # Create a subplot with two images
+            # fig, axs = plt.subplots(1, 2, figsize=(15, 7))
+
+            # # Display the first image with keypoints
+            # axs[0].imshow(img0_np, cmap='gray')
+            # axs[0].scatter(epi.pts1[:, 0].numpy(), epi.pts1[:, 1].numpy(), c='r', s=10)
+            # axs[0].set_title(f'Image 0 - {idx}')
+            # axs[0].axis('off')
+
+            # # Display the second image with keypoints
+            # axs[1].imshow(img1_np, cmap='gray')
+            # axs[1].scatter(epi.pts2[:, 0].numpy(), epi.pts2[:, 1].numpy(), c='r', s=10)
+            # axs[1].set_title(f'Image 1 - {idx}')
+            # axs[1].axis('off')
+
+            # # Show the plot
+            # plt.show()
 
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"

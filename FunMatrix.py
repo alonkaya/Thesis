@@ -24,14 +24,15 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size):
 
     return k
 
-def get_intrinsic_KITTI(calib_path, original_image_size):
+def get_intrinsic_KITTI(calib_path, original_image_size, adjust_resize=True):
     projection_matrix_cam0, projection_matrix_cam1 = read_camera_intrinsic(calib_path)
 
     k0, k1 = decompose_k(projection_matrix_cam0.reshape(3, 4)), decompose_k(projection_matrix_cam1.reshape(3, 4))
 
-    # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-    resized = torch.tensor([RESIZE, RESIZE])
-    k0, k1 = adjust_k_resize(k0, original_image_size, resized), adjust_k_resize(k1, original_image_size, resized)
+    if adjust_resize:
+        # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
+        resized = torch.tensor([RESIZE, RESIZE])
+        k0, k1 = adjust_k_resize(k0, original_image_size, resized), adjust_k_resize(k1, original_image_size, resized)
 
     center_crop_size = (RESIZE - CROP) // 2
     k0, k1 = adjust_k_crop(k0, center_crop_size, center_crop_size) if not RANDOM_CROP else k0, adjust_k_crop(k1, center_crop_size, center_crop_size) if not RANDOM_CROP else k1
@@ -187,8 +188,10 @@ class EpipolarGeometry:
 
         if pts1 is None:
             # Convert images back to original
-            self.image1_numpy = reverse_transforms(image1_tensors.cpu(), mean=norm_mean, std=norm_std)
-            self.image2_numpy = reverse_transforms(image2_tensors.cpu(), mean=norm_mean, std=norm_std)            
+            # self.image1_numpy = reverse_transforms(image1_tensors.cpu(), mean=norm_mean, std=norm_std) # shape (H, W, 3)
+            # self.image2_numpy = reverse_transforms(image2_tensors.cpu(), mean=norm_mean, std=norm_std) # shape (H, W, 3)
+            self.image1_numpy = image1_tensors.cpu().numpy().transpose(1, 2, 0)
+            self.image2_numpy = image2_tensors.cpu().numpy().transpose(1, 2, 0) 
             self.get_keypoints()
 
         else:
@@ -209,8 +212,8 @@ class EpipolarGeometry:
         bf = cv2.BFMatcher()
 
         # Detect keypoints and compute descriptors for both images
-        (kp1, des1) = sift.detectAndCompute(self.image1_numpy, None)
-        (kp2, des2) = sift.detectAndCompute(self.image2_numpy, None)
+        (kp1, des1) = sift.detectAndCompute(self.image1_numpy, None) # input shape (H, W, 3)
+        (kp2, des2) = sift.detectAndCompute(self.image2_numpy, None) # input shape (H, W, 3)
 
         matches = bf.knnMatch(des1, des2, k=2)
         self.good = []
@@ -230,9 +233,9 @@ class EpipolarGeometry:
 
         self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1) # shape (n, 3)
         self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1) # shape (n, 3)
-
+        
         self.pts1, self.pts2 = self.trim_by_sed()
-      
+
     def trim_by_sed(self, threshold=SED_TRIM_THRESHOLD, min_keypoints=5):
         self.pts1, self.pts2 = self.pts1.unsqueeze(0), self.pts2.unsqueeze(0)  # shape (1, n, 3)
         sed = self.get_SED_distance().squeeze(0)                               # shape (n,)
