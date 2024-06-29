@@ -92,12 +92,11 @@ def compute_relative_transformations(pose1, pose2):
     return R_relative, t_relative
 
 
-def compute_essential(R, t, to_device=False):
+def compute_essential(R, t):
     # Compute the skew-symmetric matrix of t
     t_x = torch.tensor([[0, -t[2], t[1]],
                         [t[2], 0, -t[0]],
-                        [-t[1], t[0], 0]])
-    if to_device: t_x = t_x.to(device)
+                        [-t[1], t[0], 0]]).to(device)
 
     # Compute the essential matrix E
     E = torch.matmul(t_x, R)
@@ -136,7 +135,7 @@ def pose_to_F(pose, k):
 
     R = pose[:, :3]
     t = pose[:, 3]
-    E = compute_essential(R, t, to_device=True)
+    E = compute_essential(R, t)
     F = compute_fundamental(E, k, k)
 
     return F.view(-1,3,3)
