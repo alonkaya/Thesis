@@ -301,8 +301,8 @@ def save_keypoints():
     poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
     calib_paths = [f'sequences/{i:02}/calib.txt' for i in range(11)]  
       
-    R = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32)
-    t = torch.tensor([0.54, 0, 0], dtype=torch.float32)
+    R = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32).to(device)
+    t = torch.tensor([0.54, 0, 0], dtype=torch.float32).to(device)
 
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
         if i not in train_seqeunces_stereo and i not in val_sequences_stereo and i not in test_sequences_stereo: continue
@@ -316,7 +316,7 @@ def save_keypoints():
         valid_indices = get_valid_indices(len(poses), image_0_path, jump_frames=0)
 
         # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-        original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
+        original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size, adjust_resize=False)
 
         for idx in valid_indices:
