@@ -276,22 +276,22 @@ def avg_results(output_path):
 def adjust_points(keypoints_dict, idx, top_crop, left_crop, width, height):
     " Keypoints_dict: A dictionary containing the keypoints for each image e.g {0: (pts1, pts2), 1: (pts1, pts2), ...} "
     # Convert keypoints to torch tensors
-    pts1 = torch.tensor(keypoints_dict[idx][0], dtype=torch.float32).to(device)
-    pts2 = torch.tensor(keypoints_dict[idx][1], dtype=torch.float32).to(device)
+    pts1 = torch.tensor(keypoints_dict[idx][0], dtype=torch.float32).to(device) # shape [num_keypoints, 2]
+    pts2 = torch.tensor(keypoints_dict[idx][1], dtype=torch.float32).to(device) # shape [num_keypoints, 2]
 
     # Adjust keypoints for the resized image
-    scale = torch.tensor([RESIZE / width, RESIZE / height], dtype=torch.float32).to(device)
+    scale = torch.tensor([RESIZE / width, RESIZE / height], dtype=torch.float32).unsqueeze(0).to(device) # shape [1, 2]
     pts1 *= scale
     pts2 *= scale
 
 
     # Filter and adjust keypoints for the cropped image
-    mask1 = (pts1[:, 0] >= left_crop) & (pts1[:, 0] < left_crop + CROP) & (pts1[:, 1] >= top_crop) & (pts1[:, 1] < top_crop + CROP)
-    mask2 = (pts2[:, 0] >= left_crop) & (pts2[:, 0] < left_crop + CROP) & (pts2[:, 1] >= top_crop) & (pts2[:, 1] < top_crop + CROP)
-    pts1 = pts1[mask1]
+    mask1 = (pts1[:, 0] >= left_crop) & (pts1[:, 0] < left_crop + CROP) & (pts1[:, 1] >= top_crop) & (pts1[:, 1] < top_crop + CROP) # shape [num_keypoints]
+    mask2 = (pts2[:, 0] >= left_crop) & (pts2[:, 0] < left_crop + CROP) & (pts2[:, 1] >= top_crop) & (pts2[:, 1] < top_crop + CROP) # shape [num_keypoints]
+    pts1 = pts1[mask1] 
     pts2 = pts2[mask2]
     
-    crop_offset = torch.tensor([left_crop, top_crop], dtype=torch.float32).to(device)
+    crop_offset = torch.tensor([left_crop, top_crop], dtype=torch.float32).unsqueeze(0).to(device) # shape [1, 2]
     pts1 -= crop_offset
     pts2 -= crop_offset
 
