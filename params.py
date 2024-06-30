@@ -23,7 +23,7 @@ RANDOM_CROP = True
 INIT_DATA = True
 
 ### Training ###
-learning_rates_vit = [5e-5] # TODO 2e-5, 1e-4
+learning_rates_vit = [2e-5] # TODO 2e-5, 1e-4
 lr_decay = 0.8
 wieght_decay = 5e-5 #TODO 5e-4
 SCHED = True
