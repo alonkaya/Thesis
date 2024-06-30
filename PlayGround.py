@@ -109,39 +109,13 @@ def vis_gt():
 
         # Function to draw points on the image
         def draw_points(image, points, color=(0, 255, 0)):
-            # Ensure image is a numpy array
-            if not isinstance(image, np.ndarray):
-                raise TypeError(f"Image must be a numpy array, but got {type(image)}")
-
-            # Ensure image is of type uint8
-            if image.dtype != np.uint8:
-                print(f"Converting image to uint8 from {image.dtype}")
-                image = image.astype(np.uint8)
-            
-            # Ensure image has three channels
-            if image.ndim != 3 or image.shape[2] != 3:
-                raise ValueError(f"Image must have 3 channels (shape: [H, W, 3]), but got shape {image.shape}")
-
-            print(f"Points shape: {points.shape}")
-            print(f"Image shape: {image.shape}")
-            print(f"Image dtype: {image.dtype}")
-
             for point in points:
-                if point[0] == 0 and point[1] == 0:
-                    continue
-                
-                # Debug: Check point values
-                print(f"Drawing point: ({point[0]}, {point[1]})")
-
-                # Ensure points are within image boundaries
-                if 0 <= point[0] < image.shape[1] and 0 <= point[1] < image.shape[0]:
-                    cv2.circle(image.copy(), (int(point[0]), int(point[1])), 5, color, -1)
-                else:
-                    print(f"Point ({point[0]}, {point[1]}) is out of image boundaries.")
-
+                if point[0] == 0 and point[1] == 0: continue
+                cv2.circle(image.copy(), (int(point[0]), int(point[1])), 5, color, -1)
+        
         # Draw points on the images
-        draw_points(img0_np.copy(), pts1.cpu().numpy())   
-        # draw_points(img1_np, pts2.cpu().numpy())
+        draw_points(img0_np, pts1.cpu().numpy())
+        draw_points(img1_np, pts2.cpu().numpy())
 
         # Concatenate images horizontally
         combined_image = np.hstack((img0_np, img1_np))
