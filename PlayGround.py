@@ -81,7 +81,7 @@ def valid_indices_of_dataset(train_loader, idx):
 def vis_gt():
     train_loader, val_loader, test_loader = get_data_loaders()
     total_sed = 0
-    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
         pts1 = pts1[0].cpu().numpy()
         pts2 = pts2[0].cpu().numpy()
         # Convert grayscale tensors to numpy arrays for matplotlib
