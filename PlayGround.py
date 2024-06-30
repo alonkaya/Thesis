@@ -149,7 +149,7 @@ def vis_gt():
 
 
         # Draw points on the images
-        draw_points(img0_np, pts1.cpu().numpy())
+        draw_points(img0_np, pts1)
         # draw_points(img1_np, pts2.cpu().numpy())
 
         # Concatenate images horizontally
