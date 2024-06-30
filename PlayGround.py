@@ -82,7 +82,8 @@ def vis_gt():
     train_loader, val_loader, test_loader = get_data_loaders()
     total_sed = 0
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
-        
+        pts1 = pts1[0]
+        pts2 = pts2[0]
         # Convert grayscale tensors to numpy arrays for matplotlib
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
         img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
@@ -108,8 +109,8 @@ def vis_gt():
 
         # Function to draw points on the image
         def draw_points(image, points, color=(0, 255, 0)):
-            print(image.shape)
             for point in points:
+                if point[0] == 0 and point[1] == 0: continue
                 cv2.circle(image, (int(point[0]), int(point[1])), 5, color, -1)
 
         # Draw points on the images
