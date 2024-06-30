@@ -293,7 +293,7 @@ def adjust_points(keypoints_dict, idx, top_crop, left_crop, width, height):
     crop_offset = torch.tensor([left_crop, top_crop, 0], dtype=torch.float32).unsqueeze(0).to(device) # shape [1, 2]
     pts1 -= crop_offset
     pts2 -= crop_offset
-
+    print(pts1, pts2, top_crop, left_crop, width, height)
     return pts1, pts2
 
  
