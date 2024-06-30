@@ -82,44 +82,24 @@ def vis_gt():
     train_loader, val_loader, test_loader = get_data_loaders()
     total_sed = 0
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
-        pts1 = pts1[0]
-        pts2 = pts2[0]
+        pts1 = pts1[0].cpu().numpy()
+        pts2 = pts2[0].cpu().numpy()
         # Convert grayscale tensors to numpy arrays for matplotlib
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
         img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
-
-        # # Create a subplot with two images
-        # fig, axs = plt.subplots(1, 2, figsize=(15, 7))
-
-        # # Display the first image with keypoints
-        # axs[0].imshow(img0_np, cmap='gray')
-        # axs[0].scatter(pts1[:, 0].numpy(), pts1[:, 1].numpy(), c='r', s=10)
-        # # axs[0].set_title(f'Image 0 - {idx}')
-        # axs[0].axis('off')
-
-        # # Display the second image with keypoints
-        # axs[1].imshow(img1_np, cmap='gray')
-        # axs[1].scatter(pts2[:, 0].numpy(), pts2[:, 1].numpy(), c='r', s=10)
-        # # axs[1].set_title(f'Image 1 - {idx}')
-        # axs[1].axis('off')
-
-        # # Show the plot
-        # # plt.show()
-        # plt.savefig(f'gt_epiliines/{seq_name[0]}/gt_{i}.png')
-
-        # Function to draw points on the image
-        def draw_points(image, points, color=(128, 0, 0)):
-            print(points)
-            for point in points:
-                if point[0] == 0 and point[1] == 0: continue
-                cv2.circle(image.copy(), (int(point[0]), int(point[1])), 5, color)
         
-        # Draw points on the images
-        draw_points(img0_np, pts1.cpu().numpy())
-        draw_points(img1_np, pts2.cpu().numpy())
+        img0_pts = img0_np.copy()
+        img1_pts = img1_np.copy()
+        for point in pts1:
+            if point[0] == 0 and point[1] == 0: continue
+            img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 5, (0, 255, 0))
+            
+        for point in pts2:
+            if point[0] == 0 and point[1] == 0: continue
+            img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 5, (0, 255, 0))
 
         # Concatenate images horizontally
-        combined_image = np.hstack((img0_np, img1_np))
+        combined_image = np.hstack((img0_pts, img1_pts))
 
         os.makedirs(f'gt_epilines/{seq_name[0]}', exist_ok=True)
         # Save the combined image
