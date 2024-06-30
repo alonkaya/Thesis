@@ -15,4 +15,6 @@ file_path = "sequences/00/image_0/004134.png"
 image_np = cv2.imread(file_path, cv2.IMREAD_COLOR)
 # Draw points on the images
 points = np.array([47,46])
+print(image_np.shape)
+print(points.shape)
 draw_points(image_np, points)
