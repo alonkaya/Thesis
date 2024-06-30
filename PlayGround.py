@@ -109,11 +109,19 @@ def vis_gt():
 
         # Function to draw points on the image
         def draw_points(image, points, color=(0, 255, 0)):
+            # Ensure image is a numpy array
+            image = np.array(image)
+
+            # Ensure image is of type uint8
+            if image.dtype != np.uint8:
+                image = image.astype(np.uint8)
+
             print(points.shape)
             print(image.shape)
+
             for point in points:
-                if point[0] == 0 and point[1] == 0: continue
-                print(image.shape)
+                if point[0] == 0 and point[1] == 0:
+                    continue
                 cv2.circle(image, (int(point[0]), int(point[1])), 5, color, -1)
         
         # Draw points on the images
