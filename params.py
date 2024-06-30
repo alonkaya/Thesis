@@ -20,7 +20,7 @@ RIGHTCAMVAL = False
 JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
-INIT_DATA = False
+INIT_DATA = True
 
 ### Training ###
 learning_rates_vit = [1e-4] # TODO 2e-5, 1e-4
