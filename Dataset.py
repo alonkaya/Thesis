@@ -72,11 +72,8 @@ class Dataset_stereo(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
 
-        # img0 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}'))
-        # img1 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}'))
-
-        img0 = self.images_0[idx] # shape (channels, height, width)
-        img1 = self.images_1[idx] # shape (channels, height, width)
+        img0 = self.images_0[idx] if INIT_DATA else  torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')) # shape (channels, height, width)
+        img1 = self.images_1[idx] if INIT_DATA else  torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')) # shape (channels, height, width)
         H, W = img0.shape[1], img0.shape[2]
 
         k0=self.k0.clone()
@@ -256,8 +253,8 @@ def get_dataloader_stereo(batch_size=BATCH_SIZE, num_workers=NUM_WORKERS):
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
-        images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices}
-        images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices}
+        images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices} if INIT_DATA else None    
+        images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices} if INIT_DATA else None
 
         keypoints_dict = load_keypoints(os.path.join(sequence_path, 'keypoints.txt'))
 

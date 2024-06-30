@@ -111,18 +111,26 @@ def vis_gt():
         def draw_points(image, points, color=(0, 255, 0)):
             # Ensure image is a numpy array
             image = np.array(image)
-
+            
             # Ensure image is of type uint8
             if image.dtype != np.uint8:
                 image = image.astype(np.uint8)
-
-            print(points.shape)
-            print(image.shape)
+            
+            print(f"Points shape: {points.shape}")
+            print(f"Image shape: {image.shape}")
+            print(f"Image dtype: {image.dtype}")
 
             for point in points:
                 if point[0] == 0 and point[1] == 0:
                     continue
-                cv2.circle(image, (int(point[0]), int(point[1])), 5, color, -1)
+                # Debug: Check point values
+                print(f"Drawing point: ({point[0]}, {point[1]})")
+
+                # Ensure points are within image boundaries
+                if 0 <= point[0] < image.shape[1] and 0 <= point[1] < image.shape[0]:
+                    cv2.circle(image, (int(point[0]), int(point[1])), 5, color, -1)
+                else:
+                    print(f"Point ({point[0]}, {point[1]}) is out of image boundaries.")
         
         # Draw points on the images
         draw_points(img0_np, pts1.cpu().numpy())
