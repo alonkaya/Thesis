@@ -121,6 +121,7 @@ def vis_gt():
         # Concatenate images horizontally
         combined_image = np.hstack((img0_np, img1_np))
 
+        os.makedirs(f'gt_epilines/{seq_name[0]}', exist_ok=True)
         # Save the combined image
         cv2.imwrite(f'gt_epilines/{seq_name[0]}/gt_{i}.png', combined_image)
 
