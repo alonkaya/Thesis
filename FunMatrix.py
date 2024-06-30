@@ -122,7 +122,12 @@ singular values: {S.cpu().tolist()}\n""")
 def get_F(k0, k1, poses=None, idx=None, jump_frames=JUMP_FRAMES, R_relative=None, t_relative=None):
     if R_relative == None:
         R_relative, t_relative = compute_relative_transformations(poses[idx], poses[idx+jump_frames])
-    E = compute_essential(R_relative, t_relative)
+        E = compute_essential(R_relative, t_relative)
+    else:
+        E = torch.tensor([[ 0,     0,        0],
+                          [ 0,     0,       -0.5400],
+                          [ 0,     0.5400,   0]]).to(device)
+
     F = compute_fundamental(E, k0, k1)
 
     return F
