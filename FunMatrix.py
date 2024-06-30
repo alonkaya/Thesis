@@ -1,6 +1,7 @@
 from params import *
 from utils import read_camera_intrinsic, reverse_transforms, print_and_write, norm_layer, points_histogram, trim
 import cv2
+print(cv2.getBuildInformation())
 import os
 from scipy.linalg import rq
 import numpy as np
@@ -123,7 +124,6 @@ def get_F(k0, k1, poses=None, idx=None, jump_frames=JUMP_FRAMES, R_relative=None
     if R_relative == None:
         R_relative, t_relative = compute_relative_transformations(poses[idx], poses[idx+jump_frames])
     E = compute_essential(R_relative, t_relative)
-    print(E)
     F = compute_fundamental(E, k0, k1)
 
     return F
