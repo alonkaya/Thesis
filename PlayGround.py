@@ -111,6 +111,7 @@ def vis_gt():
         def draw_points(image, points, color=(0, 255, 0)):
             for point in points:
                 if point[0] == 0 and point[1] == 0: continue
+                print(int(point[0]), int(point[1]))
                 cv2.circle(image, (int(point[0]), int(point[1])), 5, color, -1)
 
         # Draw points on the images
