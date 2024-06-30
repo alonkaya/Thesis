@@ -75,8 +75,10 @@ class Dataset_stereo(torch.utils.data.Dataset):
         # img0 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}'))
         # img1 = torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}'))
 
-        img0 = self.images_0[idx]
-        img1 = self.images_1[idx]
+        img0 = self.images_0[idx] # shape (channels, height, width)
+        img1 = self.images_1[idx] # shape (channels, height, width)
+        print(img0.shape)
+        H, W = img0.shape[1], img0.shape[2]
 
         k0=self.k0.clone()
         k1=self.k1.clone()
@@ -96,7 +98,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-        pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, width=img0.shape[1], height=img0.shape[0])
+        pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, height=H, width=W)
         
         return img0, img1, F, pts1, pts2, self.seq_name
     
