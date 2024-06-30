@@ -1,3 +1,4 @@
+import cv2
 from Dataset import get_data_loaders
 from FMatrixRegressor import FMatrixRegressor
 from FunMatrix import EpipolarGeometry, update_epoch_stats
@@ -7,7 +8,6 @@ import matplotlib.pyplot as plt
 import os
 import torch
 import re
-
 from utils import divide_by_dataloader, points_histogram, reverse_transforms
 
 # Function to denormalize image
@@ -106,7 +106,22 @@ def vis_gt():
         # # plt.show()
         # plt.savefig(f'gt_epiliines/{seq_name[0]}/gt_{i}.png')
 
-        if i == 400: break
+        # Function to draw points on the image
+        def draw_points(image, points, color=(0, 255, 0)):
+            for point in points:
+                cv2.circle(image, (point[0], point[1]), 5, color, -1)
+
+        # Draw points on the images
+        draw_points(img0_np, pts1.numpy())
+        draw_points(img1_np, pts2.numpy())
+
+        # Concatenate images horizontally
+        combined_image = np.hstack((img0_np, img1_np))
+
+        # Save the combined image
+        cv2.imwrite(f'gt_epilines/{seq_name[0]}/gt_{i}.png', combined_image)
+
+        if i == 20: break
         
     total_sed /= i
     print(f'SED distance: {total_sed}') 

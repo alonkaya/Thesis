@@ -1,7 +1,6 @@
 from params import *
 from utils import read_camera_intrinsic, reverse_transforms, print_and_write, norm_layer, points_histogram, trim
 import cv2
-print(cv2.getBuildInformation())
 import os
 from scipy.linalg import rq
 import numpy as np
