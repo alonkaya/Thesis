@@ -139,9 +139,18 @@ def vis_gt():
                 else:
                     print(f"Point ({point[0]}, {point[1]}) is out of image boundaries.")
         
+
+        # Example usage
+        img0_np = np.zeros((224, 224, 3), dtype=np.uint8)  # Example image
+        pts1 = np.array([[67.0644, 22.5891, 1], [100, 100, 1], [150, 150, 1], [200, 200, 1], [300, 300, 1]])  # Example points, with one point out of bounds
+
+        # Ensure pts1 is a numpy array with float values
+        pts1 = np.array(pts1, dtype=np.float32)
+
+
         # Draw points on the images
         draw_points(img0_np, pts1.cpu().numpy())
-        draw_points(img1_np, pts2.cpu().numpy())
+        # draw_points(img1_np, pts2.cpu().numpy())
 
         # Concatenate images horizontally
         combined_image = np.hstack((img0_np, img1_np))
