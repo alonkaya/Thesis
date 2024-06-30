@@ -135,21 +135,12 @@ def vis_gt():
 
                 # Ensure points are within image boundaries
                 if 0 <= point[0] < image.shape[1] and 0 <= point[1] < image.shape[0]:
-                    cv2.circle(image, (int(point[0]), int(point[1])), 5, color, -1)
+                    cv2.circle(image.copy(), (int(point[0]), int(point[1])), 5, color, -1)
                 else:
                     print(f"Point ({point[0]}, {point[1]}) is out of image boundaries.")
-        
-
-        # Example usage
-        img0_np = np.zeros((224, 224, 3), dtype=np.uint8)  # Example image
-        pts1 = np.array([[67.0644, 22.5891, 1], [100, 100, 1], [150, 150, 1], [200, 200, 1], [300, 300, 1]])  # Example points, with one point out of bounds
-
-        # Ensure pts1 is a numpy array with float values
-        pts1 = np.array(pts1, dtype=np.float32)
-
 
         # Draw points on the images
-        draw_points(img0_np, pts1)
+        draw_points(img0_np.copy(), pts1.cpu().numpy())   
         # draw_points(img1_np, pts2.cpu().numpy())
 
         # Concatenate images horizontally
