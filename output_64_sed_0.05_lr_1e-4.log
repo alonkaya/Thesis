@@ -1,0 +1,33 @@
+/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/utils/generic.py:260: UserWarning: torch.utils._pytree._register_pytree_node is deprecated. Please use torch.utils._pytree.register_pytree_node instead.
+  torch.utils._pytree._register_pytree_node(
+###########################################################################################################################################################
+
+        auged__L12_coeffs__learning rate vit: 0.0001, learning rate mlp: 0.0001, lr_decay: 0.8, mlp_hidden_sizes: [1024, 512], jump_frames: 2, use_reconstruction_layer: True
+        batch_size: 64, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], dataset: Stereo,
+        average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, deepF_nocorrs: False, wieght_decay: 5e-05
+        SVD coeff: 0, RE1 coeff: 0 SED coeff: 0.05, ALG_COEFF: 0, unforzen layers: 0, group conv: False
+        crop: 224 resize: 256, use conv: True pretrained: None, seq_ratio: 0.3, norm_mean: tensor([0.4815, 0.4578, 0.4082]), norm_std: tensor([0.2686, 0.2613, 0.2758])
+
+
+Traceback (most recent call last):
+  File "/home/alonkay/Thesis/Main.py", line 49, in <module>
+    model.train_model(train_loader, val_loader, test_loader)
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 159, in train_model
+    self.dataloader_step(train_loader, epoch, epoch_stats, data_type="train")
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 290, in dataloader_step
+    for img1, img2, label, pts1, pts2, _ in dataloader:
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 631, in __next__
+    data = self._next_data()
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 675, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/dataset.py", line 348, in __getitem__
+    return self.datasets[dataset_idx][sample_idx]
+  File "/home/alonkay/Thesis/Dataset.py", line 99, in __getitem__
+    pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, width=img0.shape[1], height=img0.shape[0])
+  File "/home/alonkay/Thesis/utils.py", line 284, in adjust_points
+    pts1 *= scale
+RuntimeError: The size of tensor a (3) must match the size of tensor b (2) at non-singleton dimension 1
