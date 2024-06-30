@@ -77,7 +77,6 @@ class Dataset_stereo(torch.utils.data.Dataset):
 
         img0 = self.images_0[idx] # shape (channels, height, width)
         img1 = self.images_1[idx] # shape (channels, height, width)
-        print(img0.shape)
         H, W = img0.shape[1], img0.shape[2]
 
         k0=self.k0.clone()
