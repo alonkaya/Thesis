@@ -96,7 +96,7 @@ def vis_gt():
             
         for point in pts2:
             if point[0] == 0 and point[1] == 0: continue
-            img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 2, (120, 120, 0))
+            img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 4, (20, 20, 160))
 
         # Concatenate images horizontally
         combined_image = np.hstack((img0_pts, img1_pts))
