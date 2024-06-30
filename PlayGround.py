@@ -108,10 +108,10 @@ def vis_gt():
         # plt.savefig(f'gt_epiliines/{seq_name[0]}/gt_{i}.png')
 
         # Function to draw points on the image
-        def draw_points(image, points, color=(0, 255, 0)):
+        def draw_points(image, points, color=(128, 0, 0)):
             for point in points:
                 if point[0] == 0 and point[1] == 0: continue
-                cv2.circle(image.copy(), (int(point[0]), int(point[1])), 5, color, -1)
+                cv2.circle(image.copy(), (int(point[0]), int(point[1])), 5, color)
         
         # Draw points on the images
         draw_points(img0_np, pts1.cpu().numpy())
