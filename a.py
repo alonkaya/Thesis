@@ -5,7 +5,7 @@ import numpy as np
 def draw_points(image, point, color=(0, 255, 0)):
     # for point in points:
     print(int(point[0]), int(point[1]))
-    print(image)
+    # print(image)
     cv2.circle(image, (int(point[0]), int(point[1])), 5, color, -1)
 
 # File path to the image
