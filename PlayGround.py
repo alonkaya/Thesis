@@ -115,8 +115,8 @@ def vis_gt():
                 cv2.circle(image, (int(point[0]), int(point[1])), 5, color, -1)
         
         # Draw points on the images
-        draw_points(img0_np, pts1.cpu().numpy())
-        draw_points(img1_np, pts2.cpu().numpy())
+        # draw_points(img0_np, pts1.cpu().numpy())
+        # draw_points(img1_np, pts2.cpu().numpy())
 
         # Concatenate images horizontally
         combined_image = np.hstack((img0_np, img1_np))
