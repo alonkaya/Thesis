@@ -84,8 +84,8 @@ def vis_gt():
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
         
         # Convert grayscale tensors to numpy arrays for matplotlib
-        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())
-        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())
+        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
+        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
 
         # # Create a subplot with two images
         # fig, axs = plt.subplots(1, 2, figsize=(15, 7))
@@ -108,6 +108,7 @@ def vis_gt():
 
         # Function to draw points on the image
         def draw_points(image, points, color=(0, 255, 0)):
+            print(image.shape)
             for point in points:
                 cv2.circle(image, (point[0], point[1]), 5, color, -1)
 
