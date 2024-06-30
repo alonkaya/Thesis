@@ -81,10 +81,33 @@ def valid_indices_of_dataset(train_loader, idx):
 def vis_gt():
     train_loader, val_loader, test_loader = get_data_loaders()
     total_sed = 0
-    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
-        epipolar_geo = EpipolarGeometry(img1[0], img2[0], F=label[0], pts1=pts1[0], pts2=pts2[0])
-        total_sed += epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("gt_KITTI_stereo", seq_name[0]))
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
+        
+        # Convert grayscale tensors to numpy arrays for matplotlib
+        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean, std=norm_std)
+        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean, std=norm_std)
+
+        # Create a subplot with two images
+        fig, axs = plt.subplots(1, 2, figsize=(15, 7))
+
+        # Display the first image with keypoints
+        axs[0].imshow(img0_np, cmap='gray')
+        axs[0].scatter(pts1[:, 0].numpy(), pts1[:, 1].numpy(), c='r', s=10)
+        # axs[0].set_title(f'Image 0 - {idx}')
+        axs[0].axis('off')
+
+        # Display the second image with keypoints
+        axs[1].imshow(img1_np, cmap='gray')
+        axs[1].scatter(pts2[:, 0].numpy(), pts2[:, 1].numpy(), c='r', s=10)
+        # axs[1].set_title(f'Image 1 - {idx}')
+        axs[1].axis('off')
+
+        # Show the plot
+        # plt.show()
+        plt.savefig(f'gt_epiliines/{seq_name[0]}/gt_{i}.png')
+
         if i == 400: break
+        
     total_sed /= i
     print(f'SED distance: {total_sed}') 
 
@@ -315,5 +338,5 @@ if __name__ == "__main__":
     # file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
     # update_epochs(file_path, 114)
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
-    sed_distance_gt()
+    vis_gt()
 
