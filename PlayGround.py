@@ -336,5 +336,5 @@ if __name__ == "__main__":
     # file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
     # update_epochs(file_path, 114)
     # os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
-    vis_gt()
+    sed_distance_gt()
 
