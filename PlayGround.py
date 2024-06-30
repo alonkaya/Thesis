@@ -84,8 +84,8 @@ def vis_gt():
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
         
         # Convert grayscale tensors to numpy arrays for matplotlib
-        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean, std=norm_std)
-        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean, std=norm_std)
+        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())
+        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())
 
         # Create a subplot with two images
         fig, axs = plt.subplots(1, 2, figsize=(15, 7))
