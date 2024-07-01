@@ -10,7 +10,7 @@ class FMatrixRegressor(nn.Module):
     def __init__(self, lr_vit, average_embeddings=AVG_EMBEDDINGS, 
                  batch_size=BATCH_SIZE, deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, 
                  unfrozen_layers=UNFROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
-                 alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
+                 alg_coeff=0, re1_coeff=0, sed_coeff=0, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
         """
         Args:
@@ -44,6 +44,8 @@ class FMatrixRegressor(nn.Module):
         self.re1_coeff = re1_coeff
         self.alg_coeff = alg_coeff
         self.sed_coeff = sed_coeff
+        self.L2_coeff = L2_coeff
+        self.huber_coeff = huber_coeff
         self.plots_path = plots_path
         self.use_conv = use_conv
         self.num_epochs = num_epochs
@@ -301,7 +303,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, data_type, epoch)
             
             # Compute loss
-            loss = 0.5*self.L2_loss(output, label) + 0.5*self.huber_loss(output, label) + \
+            loss = self.L2_coeff*self.L2_loss(output, label) + self.huber_coeff*self.huber_loss(output, label) + \
                     self.alg_coeff*batch_algebraic_sqr_pred + self.re1_coeff*batch_RE1_pred + self.sed_coeff*batch_SED_pred
             epoch_stats[f'{prefix}loss'] = epoch_stats[f'{prefix}loss'] + loss.detach()
 

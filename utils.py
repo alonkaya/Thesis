@@ -310,3 +310,61 @@ def load_keypoints(keypoints_path):
     return keypoints_dict
 
 
+
+
+def rename_files(folder_path):
+    for filename in os.listdir(folder_path):
+        if not filename.startswith("SED_"):
+            continue  # Skip files that do not match the expected format
+        
+        # Extract parts of the filename
+        parts = filename.split("__")
+        
+        # Dictionary to hold the parts
+        parts_dict = {}
+        for part in parts:
+            key_value = part.split("_", 1)
+            if len(key_value) == 2:
+                parts_dict[key_value[0]] = key_value[1]
+        
+        # Create the new filename based on the given conditions
+        if parts_dict.get("conv") == "True":
+            new_parts = [
+                "SED_" + parts_dict["SED"],
+                "auged_" + parts_dict["auged"],
+                "L12_coeffs_" + parts_dict["L12_coeffs"],
+                "lr_" + parts_dict["lr"],
+                "conv_True",
+                "model_" + parts_dict["model"],
+                "use_reconstruction_" + parts_dict["use_reconstruction"],
+                "BS_" + parts_dict["BS"],
+                "WD_" + parts_dict["WD"]
+            ]
+        else:
+            new_parts = [
+                "SED_" + parts_dict["SED"],
+                "auged_" + parts_dict["auged"],
+                "L12_coeffs_" + parts_dict["L12_coeffs"],
+                "lr_" + parts_dict["lr"],
+                "avg_embeddings_" + parts_dict["avg_embeddings"],
+                "model_" + parts_dict["model"],
+                "use_reconstruction_" + parts_dict["use_reconstruction"],
+                "BS_" + parts_dict["BS"],
+                "WD_" + parts_dict["WD"]
+            ]
+        
+        new_filename = "__".join(new_parts)
+        
+        # Construct full file paths
+        old_file_path = os.path.join(folder_path, filename)
+        new_file_path = os.path.join(folder_path, new_filename)
+        
+        # Rename the file
+        os.rename(old_file_path, new_file_path)
+        print(f"Renamed '{filename}' to '{new_filename}'")
+
+# # Folder path
+# folder_path = 'plots/Stereo'
+
+# # Call the rename function
+# rename_files(folder_path)

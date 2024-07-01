@@ -23,8 +23,8 @@ RANDOM_CROP = True
 INIT_DATA = True
 
 ### Training ###
-learning_rates_vit = [2e-5]                                           # TODO lr: 1e-4, 5e-5, 2e-5
-lr_decay = 0.85
+learning_rates_vit = [2e-5]                                           # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
+lr_decay = 0.85 if learning_rates_vit[0] < 1e-4 else 0.8
 wieght_decay = 5e-5                                                   # TODO 5e-4, 5e-5
 SCHED = True
 USE_RECONSTRUCTION_LAYER = True
@@ -33,11 +33,11 @@ NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
-NUM_WORKERS = 0 # Change Main.py if > 0
+NUM_WORKERS = 0 
 SAVE_MODEL = True
 NUM_EPOCHS = 1100
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
-ADDITIONS = "auged__L12_coeffs__"                                     # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
+ADDITIONS = "auged__"                                     
 
 ### Epipolar geometry ###
 RE1_DIST = True
@@ -48,7 +48,9 @@ SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0.01, 0.05, 0.1, 0.5]                                           # TODO 0.01, 0.05, 0.1, 0.5
+SED_COEFF = [0.1, 0.5, 1]                                              # TODO 0.01, 0.05, 0.1, 0.5, 1
+L2_COEFF = 0.01
+HUBER_COEFF = 0.01                                                     # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]

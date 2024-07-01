@@ -12,6 +12,7 @@ from FMatrixRegressor import FMatrixRegressor
 from params import *
 import itertools
 from DatasetOneSequence import * 
+import gc
 
 
 if __name__ == "__main__":
@@ -29,10 +30,11 @@ if __name__ == "__main__":
         dataset = 'DeepF_noCors' if DEEPF_NOCORRS else 'Stereo' if STEREO else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
         scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
         enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
-        
+        compress = f'avg_embeddings' if AVG_EMBEDDINGS else f'conv'
+
         plots_path = os.path.join('plots', dataset, 
-                          f"""{coeff}{ADDITIONS}{scratch}{enlarged_clip}lr_{learning_rates_vit[0]}__\
-avg_embeddings_{AVG_EMBEDDINGS}__conv_{USE_CONV}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
+                          f"""{coeff}l2_{L2_COEFF}__huber_{HUBER_COEFF}__{ADDITIONS}lr_{learning_rates_vit[0]}__\
+{compress}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
 use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{BATCH_SIZE}__WD_{wieght_decay}{dataset_class}""")\
         
         model = FMatrixRegressor(lr_vit=lr_vit, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
@@ -43,11 +45,15 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{BATCH_SIZE}__WD_{wieght_decay
         {ADDITIONS}learning rate vit: {lr_vit}, learning rate mlp: {lr_vit}, lr_decay: {lr_decay}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
         batch_size: {BATCH_SIZE}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo if STEREO else train_seqeunces}, val_sequences: {val_sequences_stereo if STEREO else val_sequences}, dataset: {dataset},
         average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, deepF_nocorrs: {DEEPF_NOCORRS}, wieght_decay: {wieght_decay}
-        SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}
+        SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_COEFF: {L2_COEFF}, HUBER_COEFF: {HUBER_COEFF}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}
         crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, seq_ratio: {seq_ratio}, norm_mean: {norm_mean}, norm_std: {norm_std}\n\n"""
                 print_and_write(parameters, model.plots_path)
 
         model.train_model(train_loader, val_loader, test_loader)
+
+        del model
+        torch.cuda.empty_cache()
+        gc.collect()
 
 
 
