@@ -23,7 +23,7 @@ RANDOM_CROP = True
 INIT_DATA = True
 
 ### Training ###
-learning_rates_vit = [5e-5]                                           # TODO lr: 1e-4, 5e-5, 2e-5
+learning_rates_vit = [2e-5]                                           # TODO lr: 1e-4, 5e-5, 2e-5
 lr_decay = 0.85
 wieght_decay = 5e-5                                                   # TODO 5e-4, 5e-5
 SCHED = True
@@ -48,7 +48,7 @@ SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0.05, 0.1, 0.5]                                           # TODO 0.01, 0.05, 0.1, 0.5
+SED_COEFF = [0.01, 0.05, 0.1, 0.5]                                           # TODO 0.01, 0.05, 0.1, 0.5
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
