@@ -20,6 +20,8 @@ if __name__ == "__main__":
     # Iterate over each combination
     param_combinations = itertools.product(learning_rates_vit, ALG_COEFF, RE1_COEFF, SED_COEFF)
 
+    train_loader, val_loader, test_loader = get_data_loaders(BATCH_SIZE)
+    
     for i, (lr_vit, alg_coeff, re1_coeff, sed_coeff) in enumerate(param_combinations):
 
         coeff = f'ALG_sqr_{alg_coeff}__' if alg_coeff > 0 else f'RE1_{re1_coeff}__' if re1_coeff > 0 else f'SED_{sed_coeff}__' if sed_coeff > 0 else ''
@@ -35,8 +37,7 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{BATCH_SIZE}__WD_{wieght_decay
         
         model = FMatrixRegressor(lr_vit=lr_vit, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
 
-        train_loader, val_loader, test_loader = get_data_loaders(BATCH_SIZE)
-        
+       
         if not PRETRAINED_PATH:
                 parameters = f"""###########################################################################################################################################################\n
         {ADDITIONS}learning rate vit: {lr_vit}, learning rate mlp: {lr_vit}, lr_decay: {lr_decay}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
@@ -47,6 +48,7 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{BATCH_SIZE}__WD_{wieght_decay
                 print_and_write(parameters, model.plots_path)
 
         model.train_model(train_loader, val_loader, test_loader)
+
 
 
 

@@ -81,7 +81,7 @@ def valid_indices_of_dataset(train_loader, idx):
 def vis_gt():
     train_loader, val_loader, test_loader = get_data_loaders()
     total_sed = 0
-    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
         pts1 = pts1[0].cpu().numpy()
         pts2 = pts2[0].cpu().numpy()
         # Convert grayscale tensors to numpy arrays for matplotlib
@@ -104,7 +104,7 @@ def vis_gt():
         os.makedirs(f'gt_epilines/{seq_name[0]}', exist_ok=True)
         cv2.imwrite(f'gt_epilines/{seq_name[0]}/gt_{i}.png', combined_image)
 
-        if i == 20: break
+        if i == 100: break
         
     total_sed /= i
     print(f'SED distance: {total_sed}') 
@@ -335,6 +335,6 @@ from torchvision import transforms
 if __name__ == "__main__":
     # file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
     # update_epochs(file_path, 114)
-    # os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
-    sed_distance_gt()
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+    vis_gt()
 

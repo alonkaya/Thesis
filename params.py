@@ -23,8 +23,8 @@ RANDOM_CROP = True
 INIT_DATA = True
 
 ### Training ###
-learning_rates_vit = [2e-5] # TODO 2e-5, 1e-4
-lr_decay = 0.8
+learning_rates_vit = [5e-5] # TODO 2e-5, 1e-4
+lr_decay = 0.85
 wieght_decay = 5e-5 #TODO 5e-4
 SCHED = True
 USE_RECONSTRUCTION_LAYER = True
@@ -48,7 +48,7 @@ SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0.01, 0.05, 0.1] # TODO 0.05, 0.1
+SED_COEFF = [0.05, 0.1] # TODO 0.05, 0.1
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
@@ -65,5 +65,5 @@ USE_CONV = False if DEEPF_NOCORRS else USE_CONV
 GROUP_CONV = {"use" : False, "out_channels": 256}
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
 UNFROZEN_LAYERS = 0
-norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5])
-norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5])
+norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
+norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
