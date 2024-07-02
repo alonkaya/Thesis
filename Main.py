@@ -51,9 +51,9 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{BATCH_SIZE}__WD_{wieght_decay
 
         model.train_model(train_loader, val_loader, test_loader)
 
-        del model
+        # del model
         torch.cuda.empty_cache()
-        gc.collect()
+        # gc.collect()
 
 
 
