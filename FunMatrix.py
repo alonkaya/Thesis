@@ -125,8 +125,8 @@ def get_F(k0, k1, poses=None, idx=None, jump_frames=JUMP_FRAMES, R_relative=None
         E = compute_essential(R_relative, t_relative)
     else:
         E = torch.tensor([[ 0,     0,        0],
-                          [ 0,     0,       -0.5400],
-                          [ 0,     0.5400,   0]]).to(device)
+                          [ 0,     0,       -0.54],
+                          [ 0,     0.54,     0]]).to(device)
 
     F = compute_fundamental(E, k0, k1)
 
@@ -192,8 +192,8 @@ class EpipolarGeometry:
 
         if pts1 is None:
             # Convert images back to original
-            self.image1_numpy = reverse_transforms(image1_tensors.cpu(), mean=norm_mean, std=norm_std) # shape (H, W, 3)
-            self.image2_numpy = reverse_transforms(image2_tensors.cpu(), mean=norm_mean, std=norm_std) # shape (H, W, 3)
+            self.image1_numpy = reverse_transforms(image1_tensors.cpu(), mean=norm_mean.cpu(), std=norm_std.cpu()) # shape (H, W, 3)
+            self.image2_numpy = reverse_transforms(image2_tensors.cpu(), mean=norm_mean.cpu(), std=norm_std.cpu()) # shape (H, W, 3)
             # self.image1_numpy = image1_tensors.cpu().numpy().transpose(1, 2, 0)
             # self.image2_numpy = image2_tensors.cpu().numpy().transpose(1, 2, 0) 
             self.get_keypoints()
