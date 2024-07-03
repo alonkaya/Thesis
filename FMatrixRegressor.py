@@ -7,14 +7,14 @@ import torch.optim as optim
 from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, lr_vit, average_embeddings=AVG_EMBEDDINGS, 
-                 batch_size=BATCH_SIZE, deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, 
+    def __init__(self, lr, lr_decay, wd, batch_size, L2_coeff, huber_coeff, average_embeddings=AVG_EMBEDDINGS, 
+                 deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, 
                  unfrozen_layers=UNFROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
-                 alg_coeff=0, re1_coeff=0, sed_coeff=0, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
+                 alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
         """
         Args:
-        - lr_vit: learning rate for the vision transformer
+        - lr: learning rate for the vision transformer
         - lr_mlp: learning rate for the MLP
         - average_embeddings: whether to average the embeddings of the patches
         - batch_size: batch size for training
@@ -35,7 +35,9 @@ class FMatrixRegressor(nn.Module):
         super(FMatrixRegressor, self).__init__()
         self.to(device)
         self.batch_size = batch_size
-        self.lr_vit = lr_vit
+        self.lr = lr
+        self.lr_decay = lr_decay
+        self.wd = wd
         self.deepF_noCorrs = deepF_noCorrs
         self.average_embeddings = average_embeddings
         self.model_name = model_name
@@ -82,7 +84,7 @@ class FMatrixRegressor(nn.Module):
         if self.average_embeddings:
             mlp_input_shape //= (self.num_patches**2)     
         if self.use_conv:
-            self.conv = ConvNet(input_dim= 2*self.hidden_size).to(device)
+            self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
             mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
         if self.deepF_noCorrs:
             self.feat_ext_deepF = FeatureExtractorDeepF().to(device)
@@ -93,10 +95,10 @@ class FMatrixRegressor(nn.Module):
         self.L2_loss = nn.MSELoss().to(device)
         self.huber_loss = nn.HuberLoss().to(device)
         self.optimizer = optim.Adam([
-            {'params': self.model.parameters(), 'lr': lr_vit, 'weight_decay': wieght_decay} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
-            {'params': self.feat_ext_deepF.parameters(), 'lr': lr_vit, 'weight_decay': wieght_decay} if self.deepF_noCorrs else {'params': []},
-            {'params': self.mlp.parameters(), 'lr': lr_vit, 'weight_decay': wieght_decay},   # Potentially higher learning rate for the MLP
-            {'params': self.conv.parameters(), 'lr': lr_vit, 'weight_decay': wieght_decay} if self.use_conv else {'params': []}
+            {'params': self.model.parameters(), 'lr': lr, 'weight_decay': wd} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.feat_ext_deepF.parameters(), 'lr': lr, 'weight_decay': wd} if self.deepF_noCorrs else {'params': []},
+            {'params': self.mlp.parameters(), 'lr': lr, 'weight_decay': wd},   # Potentially higher learning rate for the MLP
+            {'params': self.conv.parameters(), 'lr': lr, 'weight_decay': wd} if self.use_conv else {'params': []}
         ])
         
         if SCHED:
@@ -107,7 +109,7 @@ class FMatrixRegressor(nn.Module):
         self.to(device)
 
     def FeatureExtractor(self, x1, x2):
-        # TODO Train with convs before VIT
+        # TODO Train with convs before VIT?
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :]
         x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :]
@@ -216,8 +218,12 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             'feat_ext_deepF': self.feat_ext_deepF.state_dict() if self.deepF_noCorrs else '',
             'conv': self.conv.state_dict() if self.use_conv else '',
 
+            "lr_decay" : self.lr_decay,
+            "wd" : self.wd,
+            "L2_coeff" : self.L2_coeff,
+            "huber_coeff" : self.huber_coeff,
             "batch_size" : self.batch_size,
-            "lr_vit" : self.lr_vit,
+            "lr" : self.lr,
             "average_embeddings" : self.average_embeddings,
             "model_name" : self.model_name,
             "augmentation" : self.augmentation,
@@ -247,8 +253,12 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
     def load_model(self, path=None):
         checkpoint = torch.load(os.path.join(path, "model.pth"), map_location='cpu')
 
+        self.lr_decay = checkpoint.get("lr_decay", self.lr_decay)
+        self.wd = checkpoint.get("wd", self.wd)
+        self.L2_coeff = checkpoint.get("L2_coeff", self.L2_coeff)
+        self.huber_coeff = checkpoint.get("huber_coeff", self.huber_coeff)
         self.batch_size = checkpoint.get("batch_size", self.batch_size)
-        self.lr_vit = checkpoint.get("lr_vit", self.lr_vit)
+        self.lr = checkpoint.get("lr", self.lr)
         self.average_embeddings = checkpoint.get("average_embeddings", self.average_embeddings)
         self.model_name = checkpoint.get("model_name", self.model_name)
         self.augmentation = checkpoint.get("augmentation", self.augmentation)
@@ -334,7 +344,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
     def test(self, test_loader):
         with torch.no_grad():
-            loss, MAE, alg, alg_sqr, RE1, SED = 0, 0, 0, 0, 0, 0
+            loss, mae, alg, alg_sqr, re1, sed = 0, 0, 0, 0, 0, 0
             for epoch in range(10):
                 epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0), 
                                 "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0), 
@@ -345,20 +355,20 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
                 divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
 
-                test_MAE = torch.mean(torch.abs(epoch_stats["test_labels"] - epoch_stats["test_outputs"]))
+                test_mae = torch.mean(torch.abs(epoch_stats["test_labels"] - epoch_stats["test_outputs"]))
 
                 loss += epoch_stats["test_loss"]
-                MAE += test_MAE.cpu().item()
+                mae += test_mae.cpu().item()
                 alg += epoch_stats["test_algebraic_pred"]
                 alg_sqr += epoch_stats["test_algebraic_sqr_pred"]
-                RE1 += epoch_stats["test_RE1_pred"]
-                SED += epoch_stats["test_SED_pred"]
+                re1 += epoch_stats["test_RE1_pred"]
+                sed += epoch_stats["test_SED_pred"]
                 
 
         print_and_write(f"""## TEST RESULTS: ##
-Test Loss: {loss/10}\t\t Test MAE: {MAE/10}
+Test Loss: {loss/10}\t\t Test MAE: {mae/10}
 Test Algebraic dist: {alg/10}\t\t Test Algebraic sqr dist: {alg_sqr/10}
-Test RE1 dist: {RE1/10}\t\t Test SED dist: {SED/10}
+Test RE1 dist: {re1/10}\t\t Test SED dist: {sed/10}
 
 Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}\t\t Test Algebraic sqr dist truth: {epoch_stats["test_algebraic_sqr_truth"]}
 Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\t\t Test SED dist truth: {epoch_stats["test_SED_truth"]}\n\n""", self.plots_path)

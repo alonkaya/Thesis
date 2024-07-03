@@ -13,17 +13,33 @@ from params import *
 import itertools
 from DatasetOneSequence import * 
 import gc
-
+import argparse
 
 if __name__ == "__main__":
     init_main()
 
-    # Iterate over each combination
-    param_combinations = itertools.product(learning_rates_vit, ALG_COEFF, RE1_COEFF, SED_COEFF)
+    parser = argparse.ArgumentParser()
 
-    train_loader, val_loader, test_loader = get_data_loaders(BATCH_SIZE)
+    parser.add_argument("--bs", type=int, default=BATCH_SIZE)
+    parser.add_argument("-- lr", type=float, default=LR)
+    parser.add_argument("--wd", type=float, default=WEIGHT_DECAY)
+    parser.add_argument("--L2", type=float, default=L2_COEFF)    
+    parser.add_argument("--huber", type=float, default=HUBER_COEFF)
+    args = parser.parse_args()
+
+    batch_size = args.bs
+    lr = args.lr
+    lr_decay = 0.85 if lr < 1e-4 else 0.8
+    weight_decay = args.wd
+    L2_coeff = args.L2
+    huber_coeff = args.huber
+
+    # Iterate over each combination
+    param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF)
+
+    train_loader, val_loader, test_loader = get_data_loaders(batch_size)
     
-    for i, (lr_vit, alg_coeff, re1_coeff, sed_coeff) in enumerate(param_combinations):
+    for i, (alg_coeff, re1_coeff, sed_coeff) in enumerate(param_combinations):
 
         coeff = f'ALG_sqr_{alg_coeff}__' if alg_coeff > 0 else f'RE1_{re1_coeff}__' if re1_coeff > 0 else f'SED_{sed_coeff}__' if sed_coeff > 0 else ''
         dataset_class = "__first_2_thirds_train" if FIRST_2_THRIDS_TRAIN else "__first_2_of_three_train" if FIRST_2_OF_3_TRAIN else ""
@@ -33,19 +49,19 @@ if __name__ == "__main__":
         compress = f'avg_embeddings' if AVG_EMBEDDINGS else f'conv'
 
         plots_path = os.path.join('plots', dataset, 
-                          f"""{coeff}l2_{L2_COEFF}__huber_{HUBER_COEFF}__{ADDITIONS}lr_{learning_rates_vit[0]}__\
+                          f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__{ADDITIONS}lr_{lr}__\
 {compress}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
-use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{BATCH_SIZE}__WD_{wieght_decay}{dataset_class}""")\
+use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{batch_size}__WD_{weight_decay}{dataset_class}""")\
         
-        model = FMatrixRegressor(lr_vit=lr_vit, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
+        model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, wd=weight_decay, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
 
        
         if not PRETRAINED_PATH:
                 parameters = f"""###########################################################################################################################################################\n
-        {ADDITIONS}learning rate vit: {lr_vit}, learning rate mlp: {lr_vit}, lr_decay: {lr_decay}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
-        batch_size: {BATCH_SIZE}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo if STEREO else train_seqeunces}, val_sequences: {val_sequences_stereo if STEREO else val_sequences}, dataset: {dataset},
-        average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, deepF_nocorrs: {DEEPF_NOCORRS}, wieght_decay: {wieght_decay}
-        SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_COEFF: {L2_COEFF}, HUBER_COEFF: {HUBER_COEFF}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}
+        {ADDITIONS}learning rate: {lr}, lr_decay: {lr_decay}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
+        batch_size: {batch_size}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo if STEREO else train_seqeunces}, val_sequences: {val_sequences_stereo if STEREO else val_sequences}, dataset: {dataset},
+        average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, deepF_nocorrs: {DEEPF_NOCORRS}, weight_decay: {weight_decay}
+        SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}
         crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, seq_ratio: {seq_ratio}, norm_mean: {norm_mean}, norm_std: {norm_std}\n\n"""
                 print_and_write(parameters, model.plots_path)
 

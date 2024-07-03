@@ -37,7 +37,7 @@ class GroupedConvolution(nn.Module):
         return self.grouped_conv(x)
 
 class ConvNet(nn.Module):
-    def __init__(self, input_dim, hidden_dims=CONV_HIDDEN_DIM):
+    def __init__(self, input_dim, batch_size, hidden_dims=CONV_HIDDEN_DIM):
         super(ConvNet, self).__init__()
         layers = []
         prev_dim = input_dim
@@ -46,7 +46,7 @@ class ConvNet(nn.Module):
         for hidden_dim in hidden_dims:
             layers.append(nn.Conv2d(prev_dim, hidden_dim, kernel_size=3, padding=1))
             if NORM:
-                layers.append(nn.BatchNorm2d(hidden_dim)) if BATCH_SIZE > 1 else layers.append(nn.LayerNorm([hidden_dim, 7, 7]))
+                layers.append(nn.BatchNorm2d(hidden_dim)) if batch_size > 1 else layers.append(nn.LayerNorm([hidden_dim, 7, 7]))
             layers.append(nn.ReLU())
             prev_dim = hidden_dim
 
