@@ -21,7 +21,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--bs", type=int, default=BATCH_SIZE)
-    parser.add_argument("-- lr", type=float, default=LR)
+    parser.add_argument("--lr", type=float, default=LR)
     parser.add_argument("--wd", type=float, default=WEIGHT_DECAY)
     parser.add_argument("--L2", type=float, default=L2_COEFF)    
     parser.add_argument("--huber", type=float, default=HUBER_COEFF)
