@@ -143,7 +143,7 @@ def custom_collate_fn(batch):
     return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
 
 
-def get_dataloaders_RealEstate(batch_size=BATCH_SIZE):
+def get_dataloaders_RealEstate(batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
     train_datasets, val_datasets = [], []
     for jump_frames in [JUMP_FRAMES]:
@@ -189,7 +189,7 @@ def get_dataloaders_RealEstate(batch_size=BATCH_SIZE):
 
     return train_loader, val_loader
 
-def get_dataloaders_KITTI(batch_size=BATCH_SIZE):
+def get_dataloaders_KITTI(batch_size):
     sequence_paths = [f'sequences/0{i}' for i in range(11)]
     poses_paths = [f'poses/0{i}.txt' for i in range(11)]
     calib_paths = [f'sequences/0{i}/calib.txt' for i in range(11)]
@@ -229,7 +229,7 @@ def get_dataloaders_KITTI(batch_size=BATCH_SIZE):
 
     return train_loader, val_loader
 
-def get_dataloader_stereo(batch_size=BATCH_SIZE, num_workers=NUM_WORKERS):
+def get_dataloader_stereo(batch_size, num_workers=NUM_WORKERS):
     sequence_paths = [f'sequences/{i:02}' for i in range(11)]
     poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
     calib_paths = [f'sequences/{i:02}/calib.txt' for i in range(11)]  

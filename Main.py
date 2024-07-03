@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
         plots_path = os.path.join('plots', dataset, 
                           f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__{ADDITIONS}lr_{lr}__\
-{compress}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
+{compress}__{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
 use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{batch_size}__WD_{weight_decay}{dataset_class}""")\
         
         model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, wd=weight_decay, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
