@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser.add_argument("--bs", type=int, default=BATCH_SIZE)
     parser.add_argument("--lr", type=float, default=LR)
     parser.add_argument("--wd", type=float, default=WEIGHT_DECAY)
-    parser.add_argument("--L2", type=float, default=L2_COEFF)    
+    parser.add_argument("--l2", type=float, default=L2_COEFF)    
     parser.add_argument("--huber", type=float, default=HUBER_COEFF)
     args = parser.parse_args()
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     lr = args.lr
     lr_decay = 0.85 if lr < 1e-4 else 0.8
     weight_decay = args.wd
-    L2_coeff = args.L2
+    L2_coeff = args.l2
     huber_coeff = args.huber
 
     # Iterate over each combination
@@ -53,12 +53,12 @@ if __name__ == "__main__":
 {compress}__model_{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
 use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{batch_size}__WD_{weight_decay}{dataset_class}""")\
         
-        model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, wd=weight_decay, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
+        model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, wd=weight_decay, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
 
        
         if not PRETRAINED_PATH:
                 parameters = f"""###########################################################################################################################################################\n
-        {ADDITIONS}learning rate: {lr}, lr_decay: {lr_decay}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
+        {ADDITIONS} learning rate: {lr}, lr_decay: {lr_decay}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
         batch_size: {batch_size}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo if STEREO else train_seqeunces}, val_sequences: {val_sequences_stereo if STEREO else val_sequences}, dataset: {dataset},
         average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, deepF_nocorrs: {DEEPF_NOCORRS}, weight_decay: {weight_decay}
         SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}

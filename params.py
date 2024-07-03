@@ -25,9 +25,10 @@ INIT_DATA = True
 ### Training ###
 LR = 5e-4                                                              # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
 WEIGHT_DECAY = 5e-5                                                    # TODO 5e-4, 5e-5
+MIN_LR = 2e-5
 SCHED = True
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = 32                                                        # TODO 16, 32, 64
+BATCH_SIZE = 33                                                        # TODO 16, 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False

@@ -7,7 +7,7 @@ import torch.optim as optim
 from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, lr, lr_decay, wd, batch_size, L2_coeff, huber_coeff, average_embeddings=AVG_EMBEDDINGS, 
+    def __init__(self, lr, lr_decay, min_lr, wd, batch_size, L2_coeff, huber_coeff, average_embeddings=AVG_EMBEDDINGS, 
                  deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, 
                  unfrozen_layers=UNFROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
                  alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
@@ -37,6 +37,7 @@ class FMatrixRegressor(nn.Module):
         self.batch_size = batch_size
         self.lr = lr
         self.lr_decay = lr_decay
+        self.min_lr = min_lr
         self.wd = wd
         self.deepF_noCorrs = deepF_noCorrs
         self.average_embeddings = average_embeddings
@@ -174,7 +175,7 @@ class FMatrixRegressor(nn.Module):
 
             self.append_epoch_stats(train_mae.cpu().item(), val_mae.cpu().item(), epoch_stats)
 
-            if SCHED and epoch <= 600:
+            if self.optimizer.param_groups[0]['lr'] > self.min_lr:
                 self.scheduler.step()
 
             if epoch == 0: 
