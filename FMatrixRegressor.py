@@ -105,8 +105,9 @@ class FMatrixRegressor(nn.Module):
         if SCHED:
             self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=lr_decay)
 
-        if pretrained_path:
+        if pretrained_path or os.path.exists(plots_path):
             self.load_model(path=pretrained_path)
+
         self.to(device)
 
     def FeatureExtractor(self, x1, x2):
@@ -315,7 +316,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             
             # Compute loss
             loss = self.L2_coeff*self.L2_loss(output, label) + self.huber_coeff*self.huber_loss(output, label) + \
-                    self.alg_coeff*batch_algebraic_sqr_pred + self.re1_coeff*batch_RE1_pred + self.sed_coeff*batch_SED_pred
+                    self.sed_coeff*batch_SED_pred
             epoch_stats[f'{prefix}loss'] = epoch_stats[f'{prefix}loss'] + loss.detach()
 
             if data_type == "train":
