@@ -252,9 +252,10 @@ def get_dataloader_stereo(batch_size, num_workers=NUM_WORKERS):
         # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
-
-        images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices} if INIT_DATA else None    
-        images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices} if INIT_DATA else None
+        
+        len = int(len(valid_indices) * seq_ratio) if i not in test_sequences_stereo else len(valid_indices)
+        images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices[len:]} if INIT_DATA else None    
+        images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices[len:]} if INIT_DATA else None
 
         keypoints_dict = load_keypoints(os.path.join(sequence_path, 'keypoints.txt'))
 
