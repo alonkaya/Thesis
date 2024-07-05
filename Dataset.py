@@ -72,8 +72,8 @@ class Dataset_stereo(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
 
-        img0 = self.images_0[idx] if INIT_DATA else  torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')) # shape (channels, height, width)
-        img1 = self.images_1[idx] if INIT_DATA else  torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')) # shape (channels, height, width)
+        img0 = self.images_0[idx] if INIT_DATA else  torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) # shape (channels, height, width)
+        img1 = self.images_1[idx] if INIT_DATA else  torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) # shape (channels, height, width)
         H, W = img0.shape[1], img0.shape[2]
 
         k0=self.k0.clone()
