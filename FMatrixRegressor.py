@@ -105,8 +105,9 @@ class FMatrixRegressor(nn.Module):
         if SCHED:
             self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=lr_decay)
 
-        if pretrained_path or os.path.exists(plots_path):
-            self.load_model(path=pretrained_path)
+        if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')):
+            model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
+            self.load_model(model_path=model_path)
 
         self.to(device)
 
@@ -252,8 +253,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             "all_val_SED_pred" : self.all_val_SED_pred
         }, checkpoint_path) 
 
-    def load_model(self, path=None):
-        checkpoint = torch.load(os.path.join(path, "model.pth"), map_location='cpu')
+    def load_model(self, model_path=None):
+        checkpoint = torch.load(model_path, map_location='cpu')
 
         self.lr_decay = checkpoint.get("lr_decay", self.lr_decay)
         self.wd = checkpoint.get("wd", self.wd)

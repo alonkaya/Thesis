@@ -55,8 +55,7 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{batch_size}__WD_{weight_decay
         
         model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, wd=weight_decay, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
 
-       
-        if not PRETRAINED_PATH:
+        if not PRETRAINED_PATH and not os.path.exists(os.path.join(plots_path, 'model.pth')):
                 parameters = f"""###########################################################################################################################################################\n
         {ADDITIONS} learning rate: {lr}, lr_decay: {lr_decay}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
         batch_size: {batch_size}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo if STEREO else train_seqeunces}, val_sequences: {val_sequences_stereo if STEREO else val_sequences}, dataset: {dataset},
@@ -64,6 +63,8 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{batch_size}__WD_{weight_decay
         SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}
         crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, seq_ratio: {seq_ratio}, norm_mean: {norm_mean}, norm_std: {norm_std}\n\n"""
                 print_and_write(parameters, model.plots_path)
+        else:
+                print_and_write(f"##### CONTINUE TRAINING #####\n", model.plots_path)
 
         model.train_model(train_loader, val_loader, test_loader)
 
