@@ -254,8 +254,8 @@ def get_dataloader_stereo(batch_size, num_workers=NUM_WORKERS):
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
         
         length = int(len(valid_indices) * seq_ratio) if i not in test_sequences_stereo else len(valid_indices)
-        images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices[length:]} if INIT_DATA else None    
-        images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices[length:]} if INIT_DATA else None
+        images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices[:length]} if INIT_DATA else None    
+        images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices[:length]} if INIT_DATA else None
 
         keypoints_dict = load_keypoints(os.path.join(sequence_path, 'keypoints.txt'))
 
