@@ -23,12 +23,12 @@ RANDOM_CROP = True
 INIT_DATA = True
 
 ### Training ###
-LR = 5e-4                                                              # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
-WEIGHT_DECAY = 5e-5                                                    # TODO 5e-4, 5e-5
+LR = 1e-4                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
+WEIGHT_DECAY = 5e-5                                                   # TODO 5e-4, 5e-5
 MIN_LR = 2e-5
 SCHED = True
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = 64                                                        # TODO 16, 32, 64
+BATCH_SIZE = 16                                                       # TODO 16, 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
@@ -48,7 +48,7 @@ SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0.1, 0.5, 1]                                  # TODO 0.01, 0.05, 0.1, 0.5, 1
+SED_COEFF = [0.5, 1]                                                   # TODO 0.01, 0.05, 0.1, 0.5, 1
 L2_COEFF = 0.5
 HUBER_COEFF = 0.5                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
 
