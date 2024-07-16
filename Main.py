@@ -73,16 +73,17 @@ if __name__ == "__main__":
         train_loader, val_loader, test_loader = get_data_loaders(batch_size)
         with open('runs.txt', 'r') as f:
                 for pretrained_path in f:
+                        pretrained_path = pretrained_path.strip()
                         if not os.path.exists(pretrained_path):
                                 print("problema with path: " + pretrained_path)
                                 continue
                         model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, wd=weight_decay, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, pretrained_path=pretrained_path).to(device)
-                        print_and_write(f"##### CONTINUE TRAINING #####\n", model.plots_path)
+                        print_and_write(f"##### CONTINUE TRAINING #####\n\n", model.plots_path)
                         model.train_model(train_loader, val_loader, test_loader)
 
                         torch.cuda.empty_cache()
 
 
 
-
+# plots/Stereo/SED_0.1__L2_0.5__huber_0.5__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_16__WD_5e-05
 
