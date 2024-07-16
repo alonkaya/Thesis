@@ -74,40 +74,41 @@ class FMatrixRegressor(nn.Module):
             # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
 
-
-        # Get input dimension for the MLP based on ViT configuration
-        self.hidden_size = self.model.config.hidden_size
-        self.num_patches = self.model.config.image_size // self.model.config.patch_size
-        mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
-
-        if GROUP_CONV["use"]: 
-            mlp_input_shape = 2 * (self.num_patches**2) * GROUP_CONV["out_channels"] 
-        if self.average_embeddings:
-            mlp_input_shape //= (self.num_patches**2)     
-        if self.use_conv:
-            self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
-            mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
-        if self.deepF_noCorrs:
-            self.feat_ext_deepF = FeatureExtractorDeepF().to(device)
-            mlp_input_shape = 256 * 7 * 7
-
-        self.mlp = MLP(input_dim=mlp_input_shape).to(device)
-
-        self.L2_loss = nn.MSELoss().to(device)
-        self.huber_loss = nn.HuberLoss().to(device)
-        self.optimizer = optim.Adam([
-            {'params': self.model.parameters(), 'lr': lr, 'weight_decay': wd} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
-            {'params': self.feat_ext_deepF.parameters(), 'lr': lr, 'weight_decay': wd} if self.deepF_noCorrs else {'params': []},
-            {'params': self.mlp.parameters(), 'lr': lr, 'weight_decay': wd},   # Potentially higher learning rate for the MLP
-            {'params': self.conv.parameters(), 'lr': lr, 'weight_decay': wd} if self.use_conv else {'params': []}
-        ])
-        
-        if SCHED:
-            self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=lr_decay)
-
         if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')):
             model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
             self.load_model(model_path=model_path)
+
+        else:
+            # Get input dimension for the MLP based on ViT configuration
+            self.hidden_size = self.model.config.hidden_size
+            self.num_patches = self.model.config.image_size // self.model.config.patch_size
+            mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
+
+            if GROUP_CONV["use"]: 
+                mlp_input_shape = 2 * (self.num_patches**2) * GROUP_CONV["out_channels"] 
+            if self.average_embeddings:
+                mlp_input_shape //= (self.num_patches**2)     
+            if self.use_conv:
+                self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
+                mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
+            if self.deepF_noCorrs:
+                self.feat_ext_deepF = FeatureExtractorDeepF().to(device)
+                mlp_input_shape = 256 * 7 * 7
+
+            self.mlp = MLP(input_dim=mlp_input_shape).to(device)
+
+            self.L2_loss = nn.MSELoss().to(device)
+            self.huber_loss = nn.HuberLoss().to(device)
+            self.optimizer = optim.Adam([
+                {'params': self.model.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
+                {'params': self.feat_ext_deepF.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if self.deepF_noCorrs else {'params': []},
+                {'params': self.mlp.parameters(), 'lr': self.lr, 'weight_decay': self.wd},   # Potentially higher learning rate for the MLP
+                {'params': self.conv.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if self.use_conv else {'params': []}
+            ])
+            
+            if SCHED:
+                self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
+
 
         self.to(device)
 
@@ -288,6 +289,36 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.all_val_algebraic_sqr_pred = checkpoint.get("all_val_algebraic_sqr_pred", [])
         self.all_val_RE1_pred = checkpoint.get("all_val_RE1_pred", [])
         self.all_val_SED_pred = checkpoint.get("all_val_SED_pred", [])
+
+        # Get input dimension for the MLP based on ViT configuration
+        self.hidden_size = self.model.config.hidden_size
+        self.num_patches = self.model.config.image_size // self.model.config.patch_size
+        mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
+
+        if GROUP_CONV["use"]: 
+            mlp_input_shape = 2 * (self.num_patches**2) * GROUP_CONV["out_channels"] 
+        if self.average_embeddings:
+            mlp_input_shape //= (self.num_patches**2)     
+        if self.use_conv:
+            self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
+            mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
+        if self.deepF_noCorrs:
+            self.feat_ext_deepF = FeatureExtractorDeepF().to(device)
+            mlp_input_shape = 256 * 7 * 7
+
+        self.mlp = MLP(input_dim=mlp_input_shape).to(device)
+
+        self.L2_loss = nn.MSELoss().to(device)
+        self.huber_loss = nn.HuberLoss().to(device)
+        self.optimizer = optim.Adam([
+            {'params': self.model.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.feat_ext_deepF.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if self.deepF_noCorrs else {'params': []},
+            {'params': self.mlp.parameters(), 'lr': self.lr, 'weight_decay': self.wd},   # Potentially higher learning rate for the MLP
+            {'params': self.conv.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if self.use_conv else {'params': []}
+        ])
+        
+        if SCHED:
+            self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
 
         self.optimizer.load_state_dict(checkpoint['optimizer'])
         self.mlp.load_state_dict(checkpoint['mlp'])
