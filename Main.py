@@ -76,7 +76,7 @@ if __name__ == "__main__":
                         if not os.path.exists(pretrained_path):
                                 print("problema with path: " + pretrained_path)
                                 continue
-                        model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, wd=weight_decay, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, pretrained_path=pretrained_path).to(device)
+                        model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, wd=weight_decay, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, pretrained_path=pretrained_path).to(device)
                         print_and_write(f"##### CONTINUE TRAINING #####\n", model.plots_path)
                         model.train_model(train_loader, val_loader, test_loader)
 

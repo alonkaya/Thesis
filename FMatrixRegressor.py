@@ -7,7 +7,7 @@ import torch.optim as optim
 from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, lr, lr_decay, min_lr, wd, batch_size, L2_coeff, huber_coeff, average_embeddings=AVG_EMBEDDINGS, 
+    def __init__(self, lr, lr_decay, wd, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
                  deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, 
                  unfrozen_layers=UNFROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
                  alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
@@ -227,6 +227,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             "huber_coeff" : self.huber_coeff,
             "batch_size" : self.batch_size,
             "lr" : self.lr,
+            "self.min_lr" : self.min_lr,
             "average_embeddings" : self.average_embeddings,
             "model_name" : self.model_name,
             "augmentation" : self.augmentation,
@@ -262,6 +263,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.huber_coeff = checkpoint.get("huber_coeff", self.huber_coeff)
         self.batch_size = checkpoint.get("batch_size", self.batch_size)
         self.lr = checkpoint.get("lr", self.lr)
+        self.min_lr = checkpoint.get("min_lr", self.min_lr)
         self.average_embeddings = checkpoint.get("average_embeddings", self.average_embeddings)
         self.model_name = checkpoint.get("model_name", self.model_name)
         self.augmentation = checkpoint.get("augmentation", self.augmentation)
