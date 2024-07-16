@@ -35,7 +35,7 @@ DEEPF_NOCORRS = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
-NUM_EPOCHS = 1400
+NUM_EPOCHS = 1500
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
 ADDITIONS = "auged__"                                     
 
