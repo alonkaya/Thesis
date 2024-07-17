@@ -28,7 +28,7 @@ WEIGHT_DECAY = 5e-5                                                   # TODO 5e-
 MIN_LR = 2e-5
 SCHED = True
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = 16                                                       # TODO 16, 32, 64
+BATCH_SIZE = 32                                                       # TODO 16, 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
@@ -49,8 +49,8 @@ LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
 SED_COEFF = [0.5]                                                      # TODO 0.01, 0.05, 0.1, 0.5, 1
-L2_COEFF = 0.5
-HUBER_COEFF = 0.5                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
+L2_COEFF = 1
+HUBER_COEFF = 1                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
