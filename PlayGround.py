@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import os
 import torch
 import re
-from utils import divide_by_dataloader, points_histogram, reverse_transforms
+from utils import divide_by_dataloader, points_histogram, print_and_write, reverse_transforms
 
 # Function to denormalize image
 def denormalize(image, mean, std):
@@ -330,7 +330,22 @@ def update_epochs(file_path, increment):
     with open(file_path, 'w') as file:
         file.writelines(updated_lines)
 
-from torchvision import transforms
+
+def extend_runs(batch_size, lr, lr_decay, weight_decay, L2_coeff, huber_coeff, data_ratio):
+    train_loader, val_loader, test_loader = get_data_loaders(data_ratio, batch_size)
+    with open('runs.txt', 'r') as f:
+        for pretrained_path in f:
+            pretrained_path = pretrained_path.strip()
+            if not os.path.exists(pretrained_path):
+                    print("problema with path: " + pretrained_path)
+                    continue
+            model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, wd=weight_decay, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, pretrained_path=pretrained_path).to(device)
+            print_and_write(f"##### CONTINUE TRAINING #####\n\n", model.plots_path)
+            model.train_model(train_loader, val_loader, test_loader)
+
+            torch.cuda.empty_cache()
+
+
 
 if __name__ == "__main__":
     # file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"

@@ -52,7 +52,7 @@ class Dataset(torch.utils.data.Dataset):
         return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, keypoints, valid_indices, seq_name, test):
+    def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, keypoints, valid_indices, seq_name, test, data_ratio):
         self.sequence_path = sequence_path
         self.transform = transform
         self.k0 = k0
@@ -65,9 +65,10 @@ class Dataset_stereo(torch.utils.data.Dataset):
         self.valid_indices = valid_indices
         self.seq_name = seq_name
         self.test = test
+        self.data_ratio = data_ratio
 
     def __len__(self):
-        return int(len(self.valid_indices) * seq_ratio) if not self.test else len(self.valid_indices)
+        return int(len(self.valid_indices) * self.data_ratio) if not self.test else len(self.valid_indices)
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
@@ -143,7 +144,7 @@ def custom_collate_fn(batch):
     return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
 
 
-def get_dataloaders_RealEstate(batch_size):
+def get_dataloaders_RealEstate(data_ratio, batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
     train_datasets, val_datasets = [], []
     for jump_frames in [JUMP_FRAMES]:
@@ -189,7 +190,7 @@ def get_dataloaders_RealEstate(batch_size):
 
     return train_loader, val_loader
 
-def get_dataloaders_KITTI(batch_size):
+def get_dataloaders_KITTI(data_ratio, batch_size):
     sequence_paths = [f'sequences/0{i}' for i in range(11)]
     poses_paths = [f'poses/0{i}.txt' for i in range(11)]
     calib_paths = [f'sequences/0{i}/calib.txt' for i in range(11)]
@@ -229,7 +230,7 @@ def get_dataloaders_KITTI(batch_size):
 
     return train_loader, val_loader
 
-def get_dataloader_stereo(batch_size, num_workers=NUM_WORKERS):
+def get_dataloader_stereo(data_ratio, batch_size, num_workers=NUM_WORKERS):
     sequence_paths = [f'sequences/{i:02}' for i in range(11)]
     poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
     calib_paths = [f'sequences/{i:02}/calib.txt' for i in range(11)]  
@@ -253,13 +254,13 @@ def get_dataloader_stereo(batch_size, num_workers=NUM_WORKERS):
         original_image_size = torch.tensor(Image.open(os.path.join(image_0_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
         
-        length = int(len(valid_indices) * seq_ratio) if i not in test_sequences_stereo else len(valid_indices)
+        length = int(len(valid_indices) * data_ratio) if i not in test_sequences_stereo else len(valid_indices)
         images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices[:length]} if INIT_DATA else None    
         images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices[:length]} if INIT_DATA else None
 
         keypoints_dict = load_keypoints(os.path.join(sequence_path, 'keypoints.txt'))
 
-        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, images_0, images_1, keypoints_dict, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False)
+        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, images_0, images_1, keypoints_dict, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False, data_ratio=data_ratio)
 
         if i in train_seqeunces_stereo:
             train_datasets.append(dataset_stereo)        
@@ -280,13 +281,13 @@ def get_dataloader_stereo(batch_size, num_workers=NUM_WORKERS):
 
     return train_loader, val_loader, test_loader
 
-def get_data_loaders(batch_size=BATCH_SIZE):
+def get_data_loaders(data_ratio, batch_size=BATCH_SIZE):
     if STEREO:
-        return get_dataloader_stereo(batch_size)
+        return get_dataloader_stereo(data_ratio, batch_size)
     elif USE_REALESTATE:
-        return get_dataloaders_RealEstate(batch_size)
+        return get_dataloaders_RealEstate(data_ratio, batch_size)
     else: # KITTI
-        return get_dataloaders_KITTI(batch_size)
+        return get_dataloaders_KITTI(data_ratio, batch_size)
 
 
 
