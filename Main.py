@@ -44,11 +44,12 @@ if __name__ == "__main__":
                 dataset = 'DeepF_noCors' if DEEPF_NOCORRS else 'Stereo' if STEREO else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
                 scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
+                model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
                 compress = f'avg_embeddings' if AVG_EMBEDDINGS else f'conv'
 
-                plots_path = os.path.join('plots', dataset, 'Winners' 
+                plots_path = os.path.join('plots', dataset, 'Winners',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__{ADDITIONS}lr_{lr}__\
-{compress}__{"CLIP" if MODEL == CLIP_MODEL_NAME else "Google ViT"}__\
+{compress}__{model}__\
 use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{batch_size}__WD_{weight_decay}{dataset_class}__ratio_{data_ratio}""")\
 
                 train_loader, val_loader, test_loader = get_data_loaders(data_ratio, batch_size)
@@ -64,7 +65,7 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{batch_size}__WD_{weight_decay
                 crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, data_ratio: {data_ratio}, norm_mean: {norm_mean}, norm_std: {norm_std}\n\n"""
                         print_and_write(parameters, model.plots_path)
                 else:
-                        print_and_write(f"##### CONTINUE TRAINING #####\n", model.plots_path)
+                        print_and_write(f"##### CONTINUE TRAINING #####\n\n", model.plots_path)
 
                 model.train_model(train_loader, val_loader, test_loader)
 

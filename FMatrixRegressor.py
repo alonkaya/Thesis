@@ -63,6 +63,7 @@ class FMatrixRegressor(nn.Module):
         self.all_RE1_pred, self.all_val_RE1_pred, \
         self.all_SED_pred, self.all_val_SED_pred = [], [], [], [], [], [], [], [], [], [], [], []
         
+        self.resnet = False
         if model_name == CLIP_MODEL_NAME:
             # Initialize CLIP processor and pretrained model
             if TRAIN_FROM_SCRATCH:
@@ -121,7 +122,7 @@ class FMatrixRegressor(nn.Module):
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state
         x2_embeddings = self.model(pixel_values=x2).last_hidden_state
-        print(x1_embeddings.shape)
+
         if not self.resnet:
             x1_embeddings = x1_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
             x2_embeddings = x2_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
@@ -299,8 +300,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.all_val_SED_pred = checkpoint.get("all_val_SED_pred", [])
 
         # Get input dimension for the MLP based on ViT configuration
-        self.hidden_size = self.model.config.hidden_size
-        self.num_patches = self.model.config.image_size // self.model.config.patch_size
+        self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]
+        self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
         mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
 
         if GROUP_CONV["use"]: 
