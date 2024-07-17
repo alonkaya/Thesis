@@ -59,6 +59,7 @@ CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 PRETRAINED_PATH = None # TODO: see about SED coeffs
+RESNET_MODEL_NAME = 'microsoft/resnet-152'
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False

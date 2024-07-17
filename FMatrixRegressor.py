@@ -4,7 +4,8 @@ from utils import *
 from FunMatrix import *
 from deepF_nocors import FeatureExtractorDeepF
 import torch.optim as optim
-from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig
+from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetModel
+
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr, lr_decay, wd, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
@@ -70,6 +71,9 @@ class FMatrixRegressor(nn.Module):
             else:
                 self.model = CLIPVisionModel.from_pretrained(model_name).to(device)
 
+        elif model_name == RESNET_MODEL_NAME:
+            self.resnet = True
+            self.model = ResNetModel.from_pretrained(model_name).to(device)
         else:
             # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
@@ -80,8 +84,8 @@ class FMatrixRegressor(nn.Module):
 
         else:
             # Get input dimension for the MLP based on ViT configuration
-            self.hidden_size = self.model.config.hidden_size
-            self.num_patches = self.model.config.image_size // self.model.config.patch_size
+            self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]
+            self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
             mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
 
             if GROUP_CONV["use"]: 
@@ -115,8 +119,12 @@ class FMatrixRegressor(nn.Module):
     def FeatureExtractor(self, x1, x2):
         # TODO Train with convs before VIT?
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
-        x1_embeddings = self.model(pixel_values=x1).last_hidden_state[:, 1:, :]
-        x2_embeddings = self.model(pixel_values=x2).last_hidden_state[:, 1:, :]
+        x1_embeddings = self.model(pixel_values=x1).last_hidden_state
+        x2_embeddings = self.model(pixel_values=x2).last_hidden_state
+        print(x1_embeddings.shape)
+        if not self.resnet:
+            x1_embeddings = x1_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
+            x2_embeddings = x2_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
 
         x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
         x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
