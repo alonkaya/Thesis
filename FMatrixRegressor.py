@@ -111,9 +111,11 @@ class FMatrixRegressor(nn.Module):
                 {'params': self.conv.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if self.use_conv else {'params': []}
             ])
             
-            if SCHED:
+            self.scheduler = None
+            if SCHED == "cosine":
+                self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.num_epochs, eta_min=self.min_lr)
+            elif SCHED == "step":
                 self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
-
 
         self.to(device)
 
@@ -187,7 +189,7 @@ class FMatrixRegressor(nn.Module):
 
             self.append_epoch_stats(train_mae.cpu().item(), val_mae.cpu().item(), epoch_stats)
 
-            if self.optimizer.param_groups[0]['lr'] > self.min_lr:
+            if (self.optimizer.param_groups[0]['lr'] > self.min_lr or SCHED == "cosine") and self.scheduler != None:
                 self.scheduler.step()
 
             if epoch == 0: 
@@ -230,7 +232,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             'vit': self.model.state_dict() if not self.deepF_noCorrs else '',
             'feat_ext_deepF': self.feat_ext_deepF.state_dict() if self.deepF_noCorrs else '',
             'conv': self.conv.state_dict() if self.use_conv else '',
-
+            "scheduler" : self.scheduler.state_dict(),
             "lr_decay" : self.lr_decay,
             "wd" : self.wd,
             "L2_coeff" : self.L2_coeff,
@@ -326,8 +328,14 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             {'params': self.conv.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if self.use_conv else {'params': []}
         ])
         
-        if SCHED:
+        if SCHED == "cosine":
+            self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.num_epochs, eta_min=self.min_lr)
+            self.scheduler.load_state_dict(checkpoint.get("scheduler"))
+            if self.scheduler.last_epoch >= self.schedular.T_max-1:
+                self.scheduler = None
+        elif SCHED == "step":
             self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
+            self.scheduler.load_state_dict(checkpoint.get("scheduler"))
 
         self.optimizer.load_state_dict(checkpoint['optimizer'])
         self.mlp.load_state_dict(checkpoint['mlp'])
