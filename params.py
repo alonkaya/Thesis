@@ -11,7 +11,7 @@ FIRST_2_OF_3_TRAIN = False
 train_seqeunces_stereo = [0,2,3,5] #  9215 images 
 val_sequences_stereo =  [6,7,8]    #  3697 images
 test_sequences_stereo = [9]        #  1064 images
-seq_ratios = [0.3]      # 2764, 1843, 921, 460
+seq_ratios = [0.2]      # 2764, 1843, 921, 460
 CROP = 224
 RESIZE = 256
 USE_REALESTATE = False
@@ -48,7 +48,7 @@ SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0.5]                                                      # TODO 0.01, 0.05, 0.1, 0.5, 1
+SED_COEFF = [0.5]                                                    # TODO 0.01, 0.05, 0.1, 0.5, 1
 L2_COEFF = 1
 HUBER_COEFF = 1                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
 
