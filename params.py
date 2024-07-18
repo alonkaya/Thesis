@@ -26,7 +26,7 @@ INIT_DATA = True
 LR = 5e-4                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
 WEIGHT_DECAY = 0                                                   # TODO 5e-4, 5e-5
 MIN_LR = 2e-5
-SCHED = True
+SCHED = "cosine"
 USE_RECONSTRUCTION_LAYER = True
 BATCH_SIZE = 32                                                       # TODO 16, 32, 64
 NORM = True
@@ -72,4 +72,3 @@ norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODE
 norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
 
 
-winner = 'plots/Stereo/SED_0.5__L2_0.5__huber_0.5__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_16__WD_5e-05'

@@ -50,7 +50,7 @@ if __name__ == "__main__":
                 plots_path = os.path.join('plots', dataset, 'Winners',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__{ADDITIONS}lr_{lr}__\
 {compress}__{model}__\
-use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{batch_size}__WD_{weight_decay}{dataset_class}__ratio_{data_ratio}""")\
+use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{batch_size}__WD_{weight_decay}{dataset_class}__ratio_{data_ratio}__sched_{SCHED}""")\
 
                 train_loader, val_loader, test_loader = get_data_loaders(data_ratio, batch_size)
                 
@@ -62,7 +62,7 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{batch_size}__WD_{weight_decay
                 batch_size: {batch_size}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo if STEREO else train_seqeunces}, val_sequences: {val_sequences_stereo if STEREO else val_sequences}, dataset: {dataset},
                 average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, deepF_nocorrs: {DEEPF_NOCORRS}, weight_decay: {weight_decay}
                 SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, unforzen layers: {UNFROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}
-                crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, data_ratio: {data_ratio}, norm_mean: {norm_mean}, norm_std: {norm_std}\n\n"""
+                crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, data_ratio: {data_ratio}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED}\n\n"""
                         print_and_write(parameters, model.plots_path)
                 else:
                         print_and_write(f"##### CONTINUE TRAINING #####\n\n", model.plots_path)
