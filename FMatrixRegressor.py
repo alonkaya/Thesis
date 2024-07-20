@@ -232,7 +232,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             'vit': self.model.state_dict() if not self.deepF_noCorrs else '',
             'feat_ext_deepF': self.feat_ext_deepF.state_dict() if self.deepF_noCorrs else '',
             'conv': self.conv.state_dict() if self.use_conv else '',
-            "scheduler" : None if self.scheduler else self.scheduler.state_dict(),
+            "scheduler" : None if self.scheduler==None else self.scheduler.state_dict(),
             "lr_decay" : self.lr_decay,
             "wd" : self.wd,
             "L2_coeff" : self.L2_coeff,
