@@ -11,7 +11,7 @@ FIRST_2_OF_3_TRAIN = False
 train_seqeunces_stereo = [0,2,3,5] #  9215 images 
 val_sequences_stereo =  [6,7,8]    #  3697 images
 test_sequences_stereo = [9]        #  1064 images
-seq_ratios = [0.3, 0.2]      # 2764, 1843, 921, 460
+seq_ratios = [0.3, 0.2, 0.1]      # 2764, 1843, 921, 460
 CROP = 224
 RESIZE = 256
 USE_REALESTATE = False
@@ -23,21 +23,21 @@ RANDOM_CROP = True
 INIT_DATA = True
 
 ### Training ###
-LR = 5e-4                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
-WEIGHT_DECAY = 0                                                   # TODO 5e-4, 5e-5
+LR = [1e-4, 5e-4]                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
+WEIGHT_DECAY = 0                                                              # TODO 5e-4, 5e-5
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = 32                                                       # TODO 16, 32, 64
+BATCH_SIZE = [16, 32, 64]                                                     # TODO 16, 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
-NUM_EPOCHS = 2500
+NUM_EPOCHS = 1500
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
-ADDITIONS = "auged__2"                                     
+ADDITIONS = "auged__"                                     
 
 ### Epipolar geometry ###
 RE1_DIST = True
@@ -48,7 +48,7 @@ SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0.5]                                                    # TODO 0.01, 0.05, 0.1, 0.5, 1
+SED_COEFF = [0.1, 0.5, 1]                                                    # TODO 0.01, 0.05, 0.1, 0.5, 1
 L2_COEFF = 1
 HUBER_COEFF = 1                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
 
@@ -58,7 +58,7 @@ CONV_HIDDEN_DIM = [256, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-PRETRAINED_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__2lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__WD_0__ratio_0.2__sched_None" # TODO: see about SED coeffs
+PRETRAINED_PATH = None
 RESNET_MODEL_NAME = 'microsoft/resnet-152'
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False

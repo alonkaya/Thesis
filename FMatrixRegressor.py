@@ -8,7 +8,7 @@ from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetMode
 
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, lr, lr_decay, wd, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
+    def __init__(self, lr, lr_decay, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
                  deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, 
                  unfrozen_layers=UNFROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
                  alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
@@ -39,7 +39,6 @@ class FMatrixRegressor(nn.Module):
         self.lr = lr
         self.lr_decay = lr_decay
         self.min_lr = min_lr
-        self.wd = wd
         self.deepF_noCorrs = deepF_noCorrs
         self.average_embeddings = average_embeddings
         self.model_name = model_name
@@ -105,10 +104,10 @@ class FMatrixRegressor(nn.Module):
             self.L2_loss = nn.MSELoss().to(device)
             self.huber_loss = nn.HuberLoss().to(device)
             self.optimizer = optim.Adam([
-                {'params': self.model.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
-                {'params': self.feat_ext_deepF.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if self.deepF_noCorrs else {'params': []},
-                {'params': self.mlp.parameters(), 'lr': self.lr, 'weight_decay': self.wd},   # Potentially higher learning rate for the MLP
-                {'params': self.conv.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if self.use_conv else {'params': []}
+                {'params': self.model.parameters(), 'lr': self.lr} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
+                {'params': self.feat_ext_deepF.parameters(), 'lr': self.lr} if self.deepF_noCorrs else {'params': []},
+                {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
+                {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
             ])
             
             self.scheduler = None
@@ -234,7 +233,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             'conv': self.conv.state_dict() if self.use_conv else '',
             "scheduler" : None if self.scheduler==None else self.scheduler.state_dict(),
             "lr_decay" : self.lr_decay,
-            "wd" : self.wd,
             "L2_coeff" : self.L2_coeff,
             "huber_coeff" : self.huber_coeff,
             "batch_size" : self.batch_size,
@@ -270,7 +268,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         checkpoint = torch.load(model_path, map_location='cpu')
 
         self.lr_decay = checkpoint.get("lr_decay", self.lr_decay)
-        self.wd = checkpoint.get("wd", self.wd)
         self.L2_coeff = checkpoint.get("L2_coeff", self.L2_coeff)
         self.huber_coeff = checkpoint.get("huber_coeff", self.huber_coeff)
         self.batch_size = checkpoint.get("batch_size", self.batch_size)
@@ -322,10 +319,10 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.L2_loss = nn.MSELoss().to(device)
         self.huber_loss = nn.HuberLoss().to(device)
         self.optimizer = optim.Adam([
-            {'params': self.model.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
-            {'params': self.feat_ext_deepF.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if self.deepF_noCorrs else {'params': []},
-            {'params': self.mlp.parameters(), 'lr': self.lr, 'weight_decay': self.wd},   # Potentially higher learning rate for the MLP
-            {'params': self.conv.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if self.use_conv else {'params': []}
+            {'params': self.model.parameters(), 'lr': self.lr} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
+            {'params': self.feat_ext_deepF.parameters(), 'lr': self.lr} if self.deepF_noCorrs else {'params': []},
+            {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
+            {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
         ])
         self.scheduler = None
         if SCHED == "cosine":
