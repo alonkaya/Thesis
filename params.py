@@ -23,7 +23,7 @@ RANDOM_CROP = True
 INIT_DATA = True
 
 ### Training ###
-LR = [1e-4, 5e-4]                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
+LR = [5e-4, 1e-4]                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
 WEIGHT_DECAY = 0                                                              # TODO 5e-4, 5e-5
 MIN_LR = 2e-5
 SCHED = None
