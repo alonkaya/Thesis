@@ -327,7 +327,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             {'params': self.mlp.parameters(), 'lr': self.lr, 'weight_decay': self.wd},   # Potentially higher learning rate for the MLP
             {'params': self.conv.parameters(), 'lr': self.lr, 'weight_decay': self.wd} if self.use_conv else {'params': []}
         ])
-        
+        self.scheduler = None
         if SCHED == "cosine":
             self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.num_epochs, eta_min=self.min_lr)
             self.scheduler.load_state_dict(checkpoint.get("scheduler"))
