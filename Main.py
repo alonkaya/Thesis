@@ -49,7 +49,7 @@ if __name__ == "__main__":
 {compress}__{model}__\
 use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{bs}{dataset_class}__ratio_{data_ratio}__sched_{SCHED}""")
                 
-                if plots_path == "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__WD_0__ratio_0.2__sched_None" or plots_path == "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__WD_0__ratio_0.3__sched_None":
+                if os.path.exists(plots_path) or plots_path == "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__WD_0__ratio_0.2__sched_None" or plots_path == "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__WD_0__ratio_0.3__sched_None":
                         continue
         
                 train_loader, val_loader, test_loader = get_data_loaders(data_ratio, bs)
