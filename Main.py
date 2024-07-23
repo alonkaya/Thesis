@@ -35,6 +35,7 @@ if __name__ == "__main__":
 
         for i, (alg_coeff, re1_coeff, sed_coeff, data_ratio, lr, bs) in enumerate(param_combinations):
                 lr_decay = 0.85 if lr < 1e-4 else 0.8
+                num_epochs = 1500 if data_ratio > 0.1 else 2500
 
                 coeff = f'ALG_sqr_{alg_coeff}__' if alg_coeff > 0 else f'RE1_{re1_coeff}__' if re1_coeff > 0 else f'SED_{sed_coeff}__' if sed_coeff > 0 else ''
                 dataset_class = "__first_2_thirds_train" if FIRST_2_THRIDS_TRAIN else "__first_2_of_three_train" if FIRST_2_OF_3_TRAIN else ""
@@ -49,12 +50,10 @@ if __name__ == "__main__":
 {compress}__{model}__\
 use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{bs}{dataset_class}__ratio_{data_ratio}__sched_{SCHED}""")
                 
-                if os.path.exists(plots_path) or plots_path == "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__WD_0__ratio_0.2__sched_None" or plots_path == "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__WD_0__ratio_0.3__sched_None":
-                        continue
         
                 train_loader, val_loader, test_loader = get_data_loaders(data_ratio, bs)
                 
-                model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH).to(device)
+                model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs).to(device)
 
                 if not PRETRAINED_PATH and not os.path.exists(os.path.join(plots_path, 'model.pth')):
                         parameters = f"""###########################################################################################################################################################\n
