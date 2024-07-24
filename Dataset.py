@@ -234,6 +234,9 @@ def get_dataloader_stereo(data_ratio, batch_size, num_workers=NUM_WORKERS):
     sequence_paths = [f'sequences/{i:02}' for i in range(11)]
     poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
     calib_paths = [f'sequences/{i:02}/calib.txt' for i in range(11)]  
+    # sequence_paths = [f'/mnt_ssd4tb/sequences/{i:02}' for i in range(11)]
+    # poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
+    # calib_paths = [f'/mnt_ssd4tb/sequences/{i:02}/calib.txt' for i in range(11)]  
       
     R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32).to(device)
     t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32).to(device)
@@ -255,8 +258,10 @@ def get_dataloader_stereo(data_ratio, batch_size, num_workers=NUM_WORKERS):
         k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
         
         length = int(len(valid_indices) * data_ratio) if i not in test_sequences_stereo else len(valid_indices)
-        images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices[:length]} if INIT_DATA else None    
-        images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices[:length]} if INIT_DATA else None
+        subset = valid_indices[:length] if HEAD else valid_indices[-length:]
+
+        images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
+        images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None
 
         keypoints_dict = load_keypoints(os.path.join(sequence_path, 'keypoints.txt'))
 

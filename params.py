@@ -20,7 +20,8 @@ RIGHTCAMVAL = False
 JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
-INIT_DATA = True
+INIT_DATA = True # change the dataset class if HEAD=False and INIT_DATA=False!
+HEAD = False
 
 ### Training ###
 LR = [5e-4, 1e-4]                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
@@ -28,7 +29,7 @@ WEIGHT_DECAY = 0                                                              # 
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = [16, 32]                                                     # TODO 16, 32, 64
+BATCH_SIZE = [16, 32]                                                         # TODO 16, 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False

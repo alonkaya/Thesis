@@ -58,9 +58,8 @@ class FMatrixRegressor(nn.Module):
         self.all_train_loss, self.all_val_loss, \
         self.all_train_mae, self.all_val_mae, \
         self.all_algebraic_pred, self.all_val_algebraic_pred, \
-        self.all_algebraic_sqr_pred, self.all_val_algebraic_sqr_pred, \
         self.all_RE1_pred, self.all_val_RE1_pred, \
-        self.all_SED_pred, self.all_val_SED_pred = [], [], [], [], [], [], [], [], [], [], [], []
+        self.all_SED_pred, self.all_val_SED_pred = [], [], [], [], [], [], [], [], [], []
         
         self.resnet = False
         if model_name == CLIP_MODEL_NAME:
@@ -193,14 +192,12 @@ class FMatrixRegressor(nn.Module):
 
             if epoch == 0: 
                 print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}\t\t val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}
-algebraic_sqr_truth: {epoch_stats["algebraic_sqr_truth"]}\t val_algebraic_sqr_truth: {epoch_stats["val_algebraic_sqr_truth"]}                                
 RE1_truth: {epoch_stats["RE1_truth"]}\t\t val_RE1_truth: {epoch_stats["val_RE1_truth"]}
 SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
             print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}
              Training MAE: {self.all_train_mae[-1]}\t\t Val MAE: {self.all_val_mae[-1]}
              Algebraic dist: {self.all_algebraic_pred[-1]}\t\t Val Algebraic dist: {self.all_val_algebraic_pred[-1]}
-             Algebraic sqr dist: {self.all_algebraic_sqr_pred[-1]}\t  Val Algebraic sqr dist: {self.all_val_algebraic_sqr_pred[-1]}
              RE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}
              SED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n""", self.plots_path)
 
@@ -218,7 +215,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         plot(x=range(1, self.num_epochs + 1), y1=self.all_train_loss, y2=self.all_val_loss, title="Loss", plots_path=self.plots_path)
         plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae, y2=self.all_val_mae, title="MAE", plots_path=self.plots_path)
         plot(x=range(1, self.num_epochs + 1), y1=self.all_algebraic_pred, y2=self.all_val_algebraic_pred, title="Algebraic distance", plots_path=self.plots_path)
-        plot(x=range(1, self.num_epochs + 1), y1=self.all_algebraic_sqr_pred, y2=self.all_val_algebraic_sqr_pred, title="Algebraic sqr distance", plots_path=self.plots_path)
         plot(x=range(1, self.num_epochs + 1), y1=self.all_RE1_pred, y2=self.all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
         plot(x=range(1, self.num_epochs + 1), y1=self.all_SED_pred, y2=self.all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
 
@@ -255,11 +251,9 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             "all_train_mae" : self.all_train_mae, 
             "all_val_mae" : self.all_val_mae, 
             "all_algebraic_pred" : self.all_algebraic_pred, 
-            "all_algebraic_sqr_pred" : self.all_algebraic_sqr_pred, 
             "all_RE1_pred" : self.all_RE1_pred, 
             "all_SED_pred" : self.all_SED_pred, 
             "all_val_algebraic_pred" : self.all_val_algebraic_pred, 
-            "all_val_algebraic_sqr_pred" : self.all_val_algebraic_sqr_pred, 
             "all_val_RE1_pred" : self.all_val_RE1_pred, 
             "all_val_SED_pred" : self.all_val_SED_pred
         }, checkpoint_path) 
@@ -290,11 +284,9 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.all_train_mae = checkpoint.get("all_train_mae", [])
         self.all_val_mae = checkpoint.get("all_val_mae", [])
         self.all_algebraic_pred = checkpoint.get("all_algebraic_pred", [])
-        self.all_algebraic_sqr_pred = checkpoint.get("all_algebraic_sqr_pred", [])
         self.all_RE1_pred = checkpoint.get("all_RE1_pred", [])
         self.all_SED_pred = checkpoint.get("all_SED_pred", [])
         self.all_val_algebraic_pred = checkpoint.get("all_val_algebraic_pred", [])
-        self.all_val_algebraic_sqr_pred = checkpoint.get("all_val_algebraic_sqr_pred", [])
         self.all_val_RE1_pred = checkpoint.get("all_val_RE1_pred", [])
         self.all_val_SED_pred = checkpoint.get("all_val_SED_pred", [])
 
@@ -359,7 +351,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 pts1.requires_grad = True
                 pts2.requires_grad = True
             # Update epoch statistics
-            batch_algebraic_sqr_pred, batch_RE1_pred, batch_SED_pred = update_epoch_stats(
+            batch_SED_pred = update_epoch_stats(
                 epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, data_type, epoch)
             
             # Compute loss
@@ -381,20 +373,18 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.all_train_mae.append(train_mae)
         self.all_train_loss.append(epoch_stats["loss"])
         self.all_algebraic_pred.append(epoch_stats["algebraic_pred"])  
-        self.all_algebraic_sqr_pred.append(epoch_stats["algebraic_sqr_pred"])
         self.all_RE1_pred.append(epoch_stats["RE1_pred"])
         self.all_SED_pred.append(epoch_stats["SED_pred"])
 
         self.all_val_mae.append(val_mae)
         self.all_val_loss.append(epoch_stats["val_loss"])
         self.all_val_algebraic_pred.append(epoch_stats["val_algebraic_pred"])
-        self.all_val_algebraic_sqr_pred.append(epoch_stats["val_algebraic_sqr_pred"])
         self.all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
         self.all_val_SED_pred.append(epoch_stats["val_SED_pred"])
 
     def test(self, test_loader):
         with torch.no_grad():
-            loss, mae, alg, alg_sqr, re1, sed = 0, 0, 0, 0, 0, 0
+            loss, mae, alg, re1, sed = 0, 0, 0, 0, 0
             for epoch in range(10):
                 epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0), 
                                 "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0), 
@@ -410,15 +400,12 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 loss += epoch_stats["test_loss"]
                 mae += test_mae.cpu().item()
                 alg += epoch_stats["test_algebraic_pred"]
-                alg_sqr += epoch_stats["test_algebraic_sqr_pred"]
                 re1 += epoch_stats["test_RE1_pred"]
                 sed += epoch_stats["test_SED_pred"]
                 
 
         print_and_write(f"""## TEST RESULTS: ##
 Test Loss: {loss/10}\t\t Test MAE: {mae/10}
-Test Algebraic dist: {alg/10}\t\t Test Algebraic sqr dist: {alg_sqr/10}
-Test RE1 dist: {re1/10}\t\t Test SED dist: {sed/10}
+Test Algebraic dist: {alg/10}\t\t Test RE1 dist: {re1/10}\t\t Test SED dist: {sed/10}
 
-Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}\t\t Test Algebraic sqr dist truth: {epoch_stats["test_algebraic_sqr_truth"]}
-Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\t\t Test SED dist truth: {epoch_stats["test_SED_truth"]}\n\n""", self.plots_path)
+Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}\t\t Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\t\t Test SED dist truth: {epoch_stats["test_SED_truth"]}\n\n""", self.plots_path)
