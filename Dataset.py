@@ -52,7 +52,7 @@ class Dataset(torch.utils.data.Dataset):
         return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, keypoints, valid_indices, seq_name, test, data_ratio):
+    def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, keypoints, subset_valid_indices, seq_name, test, data_ratio):
         self.sequence_path = sequence_path
         self.transform = transform
         self.k0 = k0
@@ -62,16 +62,16 @@ class Dataset_stereo(torch.utils.data.Dataset):
         self.images_0 = images_0
         self.images_1 = images_1
         self.keypoints = keypoints
-        self.valid_indices = valid_indices
+        self.subset_valid_indices = subset_valid_indices
         self.seq_name = seq_name
         self.test = test
         self.data_ratio = data_ratio
 
     def __len__(self):
-        return int(len(self.valid_indices) * self.data_ratio) if not self.test else len(self.valid_indices)
+        return int(len(self.subset_valid_indices))
 
     def __getitem__(self, idx):
-        idx = self.valid_indices[idx]
+        idx = self.subset_valid_indices[idx]
 
         img0 = self.images_0[idx] if INIT_DATA else  torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) # shape (channels, height, width)
         img1 = self.images_1[idx] if INIT_DATA else  torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) # shape (channels, height, width)
@@ -265,7 +265,7 @@ def get_dataloader_stereo(data_ratio, batch_size, num_workers=NUM_WORKERS):
 
         keypoints_dict = load_keypoints(os.path.join(sequence_path, 'keypoints.txt'))
 
-        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, images_0, images_1, keypoints_dict, valid_indices, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False, data_ratio=data_ratio)
+        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, images_0, images_1, keypoints_dict, subset, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False, data_ratio=data_ratio)
 
         if i in train_seqeunces_stereo:
             train_datasets.append(dataset_stereo)        
