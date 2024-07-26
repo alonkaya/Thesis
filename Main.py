@@ -32,6 +32,8 @@ if __name__ == "__main__":
         
         # Iterate over each combination
         param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, seq_ratios, lrs, batch_size)
+        with open ('not_good.txt', 'r') as f:
+                not_good = f.read().splitlines()
 
         for i, (alg_coeff, re1_coeff, sed_coeff, data_ratio, lr, bs) in enumerate(param_combinations):
                 lr_decay = 0.85 if lr < 1e-4 else 0.8
@@ -49,7 +51,10 @@ if __name__ == "__main__":
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__{ADDITIONS}lr_{lr}__\
 {compress}__{model}__\
 use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{bs}{dataset_class}__ratio_{data_ratio}__sched_{SCHED}_head_{HEAD}""")
-        
+                
+                if plots_path in not_good:
+                        continue
+
                 train_loader, val_loader, test_loader = get_data_loaders(data_ratio, bs)
                 
                 model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs).to(device)
