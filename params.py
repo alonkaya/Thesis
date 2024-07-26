@@ -20,7 +20,7 @@ RIGHTCAMVAL = False
 JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
-INIT_DATA = True 
+INIT_DATA = False 
 HEAD = False
 
 ### Training ###

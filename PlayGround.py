@@ -79,8 +79,9 @@ def valid_indices_of_dataset(train_loader, idx):
         print("Dataset not found for the current batch")
 
 def vis_gt():
-    train_loader, val_loader, test_loader = get_data_loaders()
+    train_loader, val_loader, test_loader = get_data_loaders(data_ratio= 0.1, batch_size=1)
     total_sed = 0
+
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
         pts1 = pts1[0].cpu().numpy()
         pts2 = pts2[0].cpu().numpy()
@@ -351,8 +352,8 @@ if __name__ == "__main__":
     # file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
     # update_epochs(file_path, 114)
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
-    # vis_gt()
-    t,_,_ = get_data_loaders(1)
-    for i, (img1, img2, label, pts1, pts2, seq_name, idx) in enumerate(t):
-        print(idx[0])
+    vis_gt()
+    # t,_,_ = get_data_loaders(1)
+    # for i, (img1, img2, label, pts1, pts2, seq_name, idx) in enumerate(t):
+    #     print(idx[0])
 
