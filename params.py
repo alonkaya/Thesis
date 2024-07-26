@@ -20,8 +20,8 @@ RIGHTCAMVAL = False
 JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
-INIT_DATA = False 
-HEAD = False
+INIT_DATA = True 
+HEAD = True
 
 ### Training ###
 LR = [5e-4, 1e-4]                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
