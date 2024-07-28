@@ -2243,3 +2243,28 @@ Epoch 1820/2000: Training Loss: 0.12143244259599326		 Val Loss: 0.44809603691101
              SED dist: 1.161017376443614		 Val SED dist: 4.431557655334473
 
 
+Fatal Python error: Illegal instruction
+
+Thread 0x00007ff8a1fff700 (most recent call first):
+<no Python frame>
+
+Current thread 0x00007ffae3477200 (most recent call first):
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torchvision/transforms/v2/functional/_misc.py", line 43 in normalize_image
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torchvision/transforms/v2/_transform.py", line 35 in _call_kernel
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torchvision/transforms/v2/_misc.py", line 165 in _transform
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torchvision/transforms/v2/_transform.py", line 51 in <listcomp>
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torchvision/transforms/v2/_transform.py", line 50 in forward
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1520 in _call_impl
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1511 in _wrapped_call_impl
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torchvision/transforms/v2/_container.py", line 51 in forward
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1520 in _call_impl
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1511 in _wrapped_call_impl
+  File "/home/alonkay/Thesis/Dataset.py", line 90 in __getitem__
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/dataset.py", line 348 in __getitem__
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51 in <listcomp>
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51 in fetch
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 675 in _next_data
+  File "/opt/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 631 in __next__
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 344 in dataloader_step
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 176 in train_model
+  File "/home/alonkay/Thesis/Main.py", line 74 in <module>
