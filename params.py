@@ -39,6 +39,7 @@ SAVE_MODEL = True
 NUM_EPOCHS = 1500
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
 ADDITIONS = "auged__"                                     
+GET_OLD_PATH = False
 
 ### Epipolar geometry ###
 RE1_DIST = True

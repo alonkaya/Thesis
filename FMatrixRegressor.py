@@ -274,7 +274,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.re1_coeff = checkpoint.get("re1_coeff", self.re1_coeff)
         self.alg_coeff = checkpoint.get("alg_coeff", self.alg_coeff)
         self.sed_coeff = checkpoint.get("sed_coeff", self.sed_coeff)
-        self.plots_path = checkpoint.get("plots_path", self.plots_path)
+        self.plots_path = checkpoint.get("plots_path", None) if GET_OLD_PATH else self.plots_path 
         self.use_conv = checkpoint.get("use_conv", self.use_conv)
         self.hidden_size = checkpoint.get("hidden_size", 0)
         self.num_patches = checkpoint.get("num_patches", 0)
