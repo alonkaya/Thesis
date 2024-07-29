@@ -406,6 +406,10 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
         print_and_write(f"""## TEST RESULTS: ##
 Test Loss: {loss/10}\t\t Test MAE: {mae/10}
-Test Algebraic dist: {alg/10}\t\t Test RE1 dist: {re1/10}\t\t Test SED dist: {sed/10}
+Test Algebraic dist: {alg/10}
+Test RE1 dist: {re1/10}
+Test SED dist: {sed/10}
 
-Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}\t\t Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\t\t Test SED dist truth: {epoch_stats["test_SED_truth"]}\n\n""", self.plots_path)
+Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}
+Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}
+Test SED dist truth: {epoch_stats["test_SED_truth"]}\n\n""", self.plots_path)

@@ -36,6 +36,7 @@ if __name__ == "__main__":
                 not_good = f.read().splitlines()
 
         for i, (alg_coeff, re1_coeff, sed_coeff, data_ratio, lr, bs) in enumerate(param_combinations):
+                if i < 5: continue
                 lr_decay = 0.85 if lr < 1e-4 else 0.8
                 num_epochs = 1200 if data_ratio==0.3 else 2000 if data_ratio==0.2 else 3500 if data_ratio==0.1 else 5000 if data_ratio==0.05 else 0
 
@@ -56,9 +57,11 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{bs}{dataset_class}__ratio_{da
                         continue
 
                 train_loader, val_loader, test_loader = get_data_loaders(data_ratio, bs)
-                
-                model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs).to(device)
-
+                try:
+                        model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs).to(device)
+                except Exception as e:
+                        print(f"\n {plots_path}")
+                        continue
                 if model.start_epoch < model.num_epochs:
                         if not PRETRAINED_PATH and not os.path.exists(os.path.join(plots_path, 'model.pth')):
                                 parameters = f"""###########################################################################################################################################################\n
