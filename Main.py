@@ -54,6 +54,7 @@ if __name__ == "__main__":
 use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{bs}{dataset_class}__ratio_{data_ratio}__head_{HEAD}""")
                 
                 if plots_path in not_good:
+                        print(f"Skipping {plots_path}")
                         continue
                 print(plots_path)
                 # train_loader, val_loader, test_loader = get_data_loaders(data_ratio, bs)
