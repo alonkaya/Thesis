@@ -59,7 +59,7 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{bs}{dataset_class}__ratio_{da
                 try:
                         model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs).to(device)
                 except Exception as e:
-                        print_and_write(f"##### ERROR: {e} #####\n{model.plots_path}\n", model.plots_path)
+                        print_and_write(f"\n {plots_path}")
                         continue
                 if model.start_epoch < model.num_epochs:
                         if not PRETRAINED_PATH and not os.path.exists(os.path.join(plots_path, 'model.pth')):
