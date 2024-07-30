@@ -122,6 +122,8 @@ if __name__ == "__main__":
     plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic Distance", plots_path, save=save)
     plot_parameter(epochs, re1_dists, val_re1_dists, "RE1 Distance", plots_path, save=save)
     plot_parameter(epochs, sed_dists, val_sed_dists, "SED Distance", plots_path, save=save)
-    plot_parameter(epochs, alg_sqr_dists, val_alg_sqr_dists, "Algebraic Sqr Distance", plots_path, save=save)
-
     
+    try:
+        plot_parameter(epochs, alg_sqr_dists, val_alg_sqr_dists, "Algebraic Sqr Distance", plots_path, save=save)
+    except:
+        print("No Algebraic Sqr Distance found")
