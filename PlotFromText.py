@@ -110,7 +110,7 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-    plots_path = "plots/Stereo/Winners/SED_0.1__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_16__ratio_0.05__head_True"
+    plots_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0001__conv__CLIP__use_reconstruction_True__BS_16__ratio_0.1__head_False"
     file_path = os.path.join(plots_path, "output.log")
     save = True
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic Distance", plots_path, save=save)
     plot_parameter(epochs, re1_dists, val_re1_dists, "RE1 Distance", plots_path, save=save)
     plot_parameter(epochs, sed_dists, val_sed_dists, "SED Distance", plots_path, save=save)
-    
+
     try:
         plot_parameter(epochs, alg_sqr_dists, val_alg_sqr_dists, "Algebraic Sqr Distance", plots_path, save=save)
     except:
