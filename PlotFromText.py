@@ -110,9 +110,9 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-    plots_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_True_2"
+    plots_path = "plots/Stereo/Winners/SED_0.1__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_16__ratio_0.05__head_True"
     file_path = os.path.join(plots_path, "output.log")
-    save = False
+    save = True
 
     process_epoch_stats(file_path)
     print(len(epochs), len(training_losses), len(val_losses), len(training_maes), len(val_maes), len(alg_dists), len(val_alg_dists), len(re1_dists), len(val_re1_dists), len(sed_dists), len(val_sed_dists), len(alg_sqr_dists), len(val_alg_sqr_dists))
@@ -122,6 +122,8 @@ if __name__ == "__main__":
     plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic Distance", plots_path, save=save)
     plot_parameter(epochs, re1_dists, val_re1_dists, "RE1 Distance", plots_path, save=save)
     plot_parameter(epochs, sed_dists, val_sed_dists, "SED Distance", plots_path, save=save)
-    plot_parameter(epochs, alg_sqr_dists, val_alg_sqr_dists, "Algebraic Sqr Distance", plots_path, save=save)
-
     
+    try:
+        plot_parameter(epochs, alg_sqr_dists, val_alg_sqr_dists, "Algebraic Sqr Distance", plots_path, save=save)
+    except:
+        print("No Algebraic Sqr Distance found")
