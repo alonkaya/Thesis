@@ -110,9 +110,9 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-    plots_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_True_2"
+    plots_path = "plots/Stereo/Winners/SED_0.1__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_16__ratio_0.05__head_True"
     file_path = os.path.join(plots_path, "output.log")
-    save = False
+    save = True
 
     process_epoch_stats(file_path)
     print(len(epochs), len(training_losses), len(val_losses), len(training_maes), len(val_maes), len(alg_dists), len(val_alg_dists), len(re1_dists), len(val_re1_dists), len(sed_dists), len(val_sed_dists), len(alg_sqr_dists), len(val_alg_sqr_dists))
