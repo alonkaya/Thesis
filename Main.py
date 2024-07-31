@@ -17,28 +17,30 @@ import argparse
 if __name__ == "__main__":
         init_main()
 
-        parser = argparse.ArgumentParser()
+        model_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0001__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.__head_False/model.pth"
+        try:
+                checkpoint = torch.load(model_path, map_location='cpu')
+                print("Checkpoint loaded successfully.")
+        except EOFError as e:
+                print(f"Error loading checkpoint: {e}")
+#         parser = argparse.ArgumentParser()
 
-        parser.add_argument("--bs", type=int, default=BATCH_SIZE)
-        parser.add_argument("--lr", type=float, default=LR)
-        parser.add_argument("--l2", type=float, default=L2_COEFF)    
-        parser.add_argument("--huber", type=float, default=HUBER_COEFF)
-        args = parser.parse_args()
+#         parser.add_argument("--bs", type=int, default=BATCH_SIZE)
+#         parser.add_argument("--lr", type=float, default=LR)
+#         parser.add_argument("--l2", type=float, default=L2_COEFF)    
+#         parser.add_argument("--huber", type=float, default=HUBER_COEFF)
+#         args = parser.parse_args()
 
-        batch_size = args.bs
-        lrs = args.lr
-        L2_coeff = args.l2
-        huber_coeff = args.huber
+#         batch_size = args.bs
+#         lrs = args.lr
+#         L2_coeff = args.l2
+#         huber_coeff = args.huber
         
-        # Iterate over each combination
-        param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, seq_ratios, lrs, batch_size)
-        with open ('not_good.txt', 'r') as f:
-                not_good = f.read().splitlines()
-        p = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0001__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_False"
-        num_epochs = 2500
-        train_loader, val_loader, test_loader = get_data_loaders(0.2, 32)
-        model = FMatrixRegressor(lr=0.0001, lr_decay=0.8, min_lr=MIN_LR, batch_size=32, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=0, re1_coeff=0, sed_coeff=0.5, plots_path=p, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs).to(device)
-#                 
+#         # Iterate over each combination
+#         param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, seq_ratios, lrs, batch_size)
+#         with open ('not_good.txt', 'r') as f:
+#                 not_good = f.read().splitlines()
+
 #         for i, (alg_coeff, re1_coeff, sed_coeff, data_ratio, lr, bs) in enumerate(param_combinations):
 #                 lr_decay = 0.85 if lr < 1e-4 else 0.8
 #                 num_epochs = 1200 if data_ratio==0.3 else 2500 if data_ratio==0.2 else 4000 if data_ratio==0.1 else 4000 if data_ratio==0.05 else 0
