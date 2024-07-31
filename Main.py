@@ -18,6 +18,8 @@ if __name__ == "__main__":
         init_main()
 
         model_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0001__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_False/model.pth"
+        if not os.path.isfile(model_path):
+                print(f"Checkpoint file not found: {model_path}")
         try:
                 checkpoint = torch.load(model_path, map_location='cpu')
                 print("Checkpoint loaded successfully.")
