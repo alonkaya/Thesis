@@ -37,7 +37,7 @@ if __name__ == "__main__":
         p = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0001__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_False"
         num_epochs = 2500
         train_loader, val_loader, test_loader = get_data_loaders(0.2, 32)
-        model = FMatrixRegressor(lr=0.0001, lr_decay=0.8, min_lr=MIN_LR, batch_size=32, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=0, re1_coeff=0, sed_coeff=0.5, plots_path=plots_path, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs).to(device)
+        model = FMatrixRegressor(lr=0.0001, lr_decay=0.8, min_lr=MIN_LR, batch_size=32, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=0, re1_coeff=0, sed_coeff=0.5, plots_path=p, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs).to(device)
 #                 
 #         for i, (alg_coeff, re1_coeff, sed_coeff, data_ratio, lr, bs) in enumerate(param_combinations):
 #                 lr_decay = 0.85 if lr < 1e-4 else 0.8
