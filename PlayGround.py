@@ -374,12 +374,15 @@ def move():
                 # print(f"Moved {filename} to {ratio_dir}\n")
                 break
 
-
+import torch
 if __name__ == "__main__":
     # file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
     # update_epochs(file_path, 114)
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
-    move()
+    # move()
     # t,_,_ = get_data_loaders(1)
     # for i, (img1, img2, label, pts1, pts2, seq_name, idx) in enumerate(t):
     #     print(idx[0])
+    plot = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_True_2.model.pth"
+    checkpoint = torch.load(plot, map_location='cpu')
+    
