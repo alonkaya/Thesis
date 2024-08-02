@@ -21,10 +21,10 @@ JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True 
-HEAD = True
+HEAD = False
 
 ### Training ###
-LR = [5e-4, 1e-4]                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
+LR = [1e-4, 5e-4]                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
 WEIGHT_DECAY = 0                                                              # TODO 5e-4, 5e-5
 MIN_LR = 2e-5
 SCHED = None
@@ -50,7 +50,7 @@ SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.1
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0.1, 0.5]                                                    # TODO 0.01, 0.05, 0.1, 0.5, 1
+SED_COEFF = [0.5, 0.1]                                                    # TODO 0.01, 0.05, 0.1, 0.5, 1
 L2_COEFF = 1
 HUBER_COEFF = 1                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
 
