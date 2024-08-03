@@ -11,7 +11,7 @@ FIRST_2_OF_3_TRAIN = False
 train_seqeunces_stereo = [0,2,3,5] #  9215 images 
 val_sequences_stereo =  [6,7,8]    #  3697 images
 test_sequences_stereo = [9]        #  1064 images
-seq_ratios = [0.3]      # 2764, 1843, 921, 460
+seq_ratios = [0.2]      # 2764, 1843, 921, 460
 CROP = 224
 RESIZE = 256
 USE_REALESTATE = False
@@ -21,7 +21,7 @@ JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True 
-HEAD = False
+HEAD = True
 
 ### Training ###
 LR = [1e-4]                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
