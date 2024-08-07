@@ -1,7 +1,7 @@
 import torch
 
 DEVICE_ID = 1
-device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
+device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 # 324525 is the 0.025
 ### Dataset ###
 train_seqeunces = [0, 2, 3, 5, 6, 7, 8]
