@@ -1,8 +1,8 @@
 import torch
 
 DEVICE_ID = 1
-device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
-
+device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
+# 324525 is the 0.025
 ### Dataset ###
 train_seqeunces = [0, 2, 3, 5, 6, 7, 8]
 val_sequences = [0, 2, 3, 5, 6, 7, 8]
@@ -21,7 +21,7 @@ JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True
-HEAD = False
+HEAD = True
 
 ### Training ###
 LR = [1e-4]                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
@@ -29,7 +29,7 @@ WEIGHT_DECAY = 0                                                              # 
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = [8,4,16]                                                         # TODO 16, 32, 64
+BATCH_SIZE = [1]                                                         # TODO 16, 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
