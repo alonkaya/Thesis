@@ -383,7 +383,7 @@ if __name__ == "__main__":
     #     print(idx[0])
     # plot = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_True_2.model.pth"
     # checkpoint = torch.load(plot, map_location='cpu')
-    train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.025)
+    train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.025, batch_size=1)
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
         pass
     
