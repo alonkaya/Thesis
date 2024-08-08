@@ -385,6 +385,6 @@ if __name__ == "__main__":
     # checkpoint = torch.load(plot, map_location='cpu')
     for i in range(300):
         train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.025, batch_size=1)
-        for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
+        for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
             pass
     
