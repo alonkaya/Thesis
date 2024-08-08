@@ -1,4 +1,3 @@
-import math
 from params import *
 from utils import read_camera_intrinsic, reverse_transforms, print_and_write, norm_layer, points_histogram, trim
 import cv2
@@ -156,27 +155,20 @@ def last_sing_value(output):
     return last_sv_sq
 
 
-def update_distances(img1, img2, F, pts1, pts2, plots_path):
+def update_distances(img1, img2, F, pts1, pts2):
     epipolar_geo = EpipolarGeometry(img1, img2, F, pts1, pts2)
 
     algebraic_dist = epipolar_geo.get_mean_algebraic_distance()
     # algebraic_dist_sqr = epipolar_geo.get_sqr_algebraic_distance()
     RE1_dist = epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
     SED_dist = epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
-    if math.isnan(algebraic_dist) or math.isnan(RE1_dist) or math.isnan(SED_dist):
-        print_and_write("NAN", plots_path)
-        print_and_write(str(epipolar_geo.pts1.detach().cpu().numpy()), plots_path)
-        print_and_write(str(epipolar_geo.pts2.detach().cpu().numpy()), plots_path)
-        print_and_write(str(epipolar_geo.pts1.shape.numpy()), plots_path)
-        print_and_write(str(epipolar_geo.pts2.shape.numpy()), plots_path)
-        print("\n")
     
     return algebraic_dist, RE1_dist, SED_dist
 
 def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, plots_path, data_type, epoch=0):
     prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
     
-    algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2, plots_path)
+    algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2)
  
     stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred.detach())
     # stats[f"{prefix}algebraic_sqr_pred"] = stats[f"{prefix}algebraic_sqr_pred"] + (algebraic_dist_sqr_pred.detach())
@@ -184,7 +176,7 @@ def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, plots_path,
     stats[f"{prefix}SED_pred"] = stats[f"{prefix}SED_pred"] + (SED_dist_pred.detach()) if SED_DIST else stats[f"{prefix}SED_pred"]
 
     if epoch == 0 or data_type == "test":
-        algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img1, img2, label, pts1.detach(), pts2.detach(), plots_path)
+        algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img1, img2, label, pts1.detach(), pts2.detach())
 
         stats[f"{prefix}algebraic_truth"] = stats[f"{prefix}algebraic_truth"] + (algebraic_dist_truth)
         # stats[f"{prefix}algebraic_sqr_truth"] = stats[f"{prefix}algebraic_sqr_truth"] + (algebraic_dist_sqr_truth)
@@ -274,13 +266,11 @@ class EpipolarGeometry:
         Output: average error of shape (1)
         """
         # Sum all valid errors
-        sum_errors = torch.sum(errors) 
+        sum_errors = torch.sum(errors)
         
         # Count non-zero elements
         valid_count = torch.sum(errors != 0).float()
-        if valid_count == 0:
-            print_and_write(f"""No valid points
-                            {str(errors.detach().cpu().numpy())}""", "aaa")
+
         return sum_errors / (valid_count)
 
     def get_algebraic_distance(self):
