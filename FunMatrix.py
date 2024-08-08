@@ -1,3 +1,4 @@
+import math
 from params import *
 from utils import read_camera_intrinsic, reverse_transforms, print_and_write, norm_layer, points_histogram, trim
 import cv2
@@ -162,6 +163,14 @@ def update_distances(img1, img2, F, pts1, pts2):
     # algebraic_dist_sqr = epipolar_geo.get_sqr_algebraic_distance()
     RE1_dist = epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
     SED_dist = epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
+    if math.isnan(algebraic_dist) or math.isnan(RE1_dist) or math.isnan(SED_dist):
+        print("NAN")
+        print(epipolar_geo.pts1)
+        print(epipolar_geo.pts2)
+        print(epipolar_geo.pts1.shape)
+        print(epipolar_geo.pts2.shape)
+        print("\n")
+        
     
     return algebraic_dist, RE1_dist, SED_dist
 
