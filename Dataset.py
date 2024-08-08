@@ -96,8 +96,9 @@ class Dataset_stereo(torch.utils.data.Dataset):
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
         pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, height=H, width=W)
-        
-        print(pts1.shape[0])
+        if pts1.shape[0] < 2:
+            print(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}'))
+            print("smaller than 2")
         return img0, img1, F, pts1, pts2, self.seq_name
     
 def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
