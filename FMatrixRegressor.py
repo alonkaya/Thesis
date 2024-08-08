@@ -183,6 +183,8 @@ class FMatrixRegressor(nn.Module):
             train_mae = torch.mean(torch.abs(epoch_stats["labels"] - epoch_stats["outputs"]))
             val_mae = torch.mean(torch.abs(epoch_stats["val_labels"] - epoch_stats["val_outputs"]))
 
+            if len(train_loader) == 0 or len(val_loader) == 0:
+                print("No data in train or val loader\n\n")
             divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
 
             self.append_epoch_stats(train_mae.cpu().item(), val_mae.cpu().item(), epoch_stats)
