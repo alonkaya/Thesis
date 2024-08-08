@@ -278,7 +278,9 @@ class EpipolarGeometry:
         
         # Count non-zero elements
         valid_count = torch.sum(errors != 0).float()
-
+        if valid_count == 0:
+            print_and_write(f"""No valid points
+                            {str(sum_errors.numpy())}""", "soemthing.txt")
         return sum_errors / (valid_count)
 
     def get_algebraic_distance(self):
