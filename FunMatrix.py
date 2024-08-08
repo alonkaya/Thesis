@@ -165,10 +165,10 @@ def update_distances(img1, img2, F, pts1, pts2, plots_path):
     SED_dist = epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
     if math.isnan(algebraic_dist) or math.isnan(RE1_dist) or math.isnan(SED_dist):
         print_and_write("NAN", plots_path)
-        print_and_write(epipolar_geo.pts1, plots_path)
-        print_and_write(epipolar_geo.pts2, plots_path)
-        print_and_write(epipolar_geo.pts1.shape, plots_path)
-        print_and_write(epipolar_geo.pts2.shape, plots_path)
+        print_and_write(str(epipolar_geo.pts1.numpy()), plots_path)
+        print_and_write(str(epipolar_geo.pts2.numpy()), plots_path)
+        print_and_write(str(epipolar_geo.pts1.shape.numpy()), plots_path)
+        print_and_write(str(epipolar_geo.pts2.shape.numpy()), plots_path)
         print("\n")
     
     return algebraic_dist, RE1_dist, SED_dist
