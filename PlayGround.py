@@ -383,8 +383,25 @@ if __name__ == "__main__":
     #     print(idx[0])
     # plot = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_True_2.model.pth"
     # checkpoint = torch.load(plot, map_location='cpu')
-    for i in range(300):
-        train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.025, batch_size=1)
-        for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
-            pass
+    # for i in range(300):
+    #     train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.025, batch_size=1)
+    #     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
+    #         pass
     
+    for i in range(210, 290):
+        p0 = os.path.join("sequences/02/image_0", f'{i:06}')
+        p1 = os.path.join("sequences/02/image_1", f'{i:06}')
+        if os.path.exists(p0):
+            os.rename(p0, f"sequences/02/image_0_moving/{i:06}")
+            os.rename(p1, f"sequences/02/image_1_moving/{i:06}")
+            print(f'moved {i}')
+
+    p0 = ["sequences/02/image_0/004636.png", "sequences/08/image_0/003616.png", "sequences/08/image_0/000256.png"]
+    p1 = ["sequences/02/image_1/004636.png", "sequences/08/image_1/003616.png", "sequences/08/image_1/000256.png"]
+    for p0, p1 in zip(p0, p1):
+        if os.path.exists(p0):
+            print(p0.replace("image_0", "image_0_moving"))
+            # os.rename(p0, p0.replace("image_0", "image_0_moving"))
+            # os.rename(p1, p1.replace("image_1", "image_1_moving"))
+            # print(f'moved {p0}')
+
