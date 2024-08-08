@@ -389,11 +389,11 @@ if __name__ == "__main__":
     #         pass
     
     for i in range(210, 290):
-        p0 = os.path.join("sequences/02/image_0", f'{i:06}')
-        p1 = os.path.join("sequences/02/image_1", f'{i:06}')
+        p0 = os.path.join("sequences/02/image_0", f'{i:06}.png')
+        p1 = os.path.join("sequences/02/image_1", f'{i:06}.png')
         if os.path.exists(p0):
-            os.rename(p0, f"sequences/02/image_0_moving/{i:06}")
-            os.rename(p1, f"sequences/02/image_1_moving/{i:06}")
+            os.rename(p0, f"sequences/02/image_0_moving/{i:06}.png")
+            os.rename(p1, f"sequences/02/image_1_moving/{i:06}.png")
             print(f'moved {i}')
         else: 
             print(p0)
