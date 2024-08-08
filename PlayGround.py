@@ -402,8 +402,8 @@ if __name__ == "__main__":
     p1 = ["sequences/02/image_1/004636.png", "sequences/08/image_1/003616.png", "sequences/08/image_1/000256.png"]
     for p0, p1 in zip(p0, p1):
         if os.path.exists(p0):
-            print(p0.replace("image_0", "image_0_moving"))
-            # os.rename(p0, p0.replace("image_0", "image_0_moving"))
-            # os.rename(p1, p1.replace("image_1", "image_1_moving"))
-            # print(f'moved {p0}')
+            # print(p0.replace("image_0", "image_0_moving"))
+            os.rename(p0, p0.replace("image_0", "image_0_moving"))
+            os.rename(p1, p1.replace("image_1", "image_1_moving"))
+            print(f'moved {p0}')
 
