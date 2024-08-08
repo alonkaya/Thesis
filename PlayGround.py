@@ -395,6 +395,8 @@ if __name__ == "__main__":
             os.rename(p0, f"sequences/02/image_0_moving/{i:06}")
             os.rename(p1, f"sequences/02/image_1_moving/{i:06}")
             print(f'moved {i}')
+        else: 
+            print(p0)
 
     p0 = ["sequences/02/image_0/004636.png", "sequences/08/image_0/003616.png", "sequences/08/image_0/000256.png"]
     p1 = ["sequences/02/image_1/004636.png", "sequences/08/image_1/003616.png", "sequences/08/image_1/000256.png"]
