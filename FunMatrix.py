@@ -165,10 +165,10 @@ def update_distances(img1, img2, F, pts1, pts2, plots_path):
     SED_dist = epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
     if math.isnan(algebraic_dist) or math.isnan(RE1_dist) or math.isnan(SED_dist):
         print_and_write("NAN", plots_path)
-        print_and_write(str(epipolar_geo.pts1.cpu().numpy()), plots_path)
-        print_and_write(str(epipolar_geo.pts2.cpu().numpy()), plots_path)
-        print_and_write(str(epipolar_geo.pts1.shape.cpu().numpy()), plots_path)
-        print_and_write(str(epipolar_geo.pts2.shape.cpu().numpy()), plots_path)
+        print_and_write(str(epipolar_geo.pts1.detach().cpu().numpy()), plots_path)
+        print_and_write(str(epipolar_geo.pts2.detach().cpu().numpy()), plots_path)
+        print_and_write(str(epipolar_geo.pts1.shape.detach().cpu().numpy()), plots_path)
+        print_and_write(str(epipolar_geo.pts2.shape.detach().cpu().numpy()), plots_path)
         print("\n")
     
     return algebraic_dist, RE1_dist, SED_dist
@@ -280,7 +280,7 @@ class EpipolarGeometry:
         valid_count = torch.sum(errors != 0).float()
         if valid_count == 0:
             print_and_write(f"""No valid points
-                            {str(sum_errors.cpu().numpy())}""", "soemthing.txt")
+                            {str(sum_errors.detach().cpu().numpy())}""", "soemthing.txt")
         return sum_errors / (valid_count)
 
     def get_algebraic_distance(self):
