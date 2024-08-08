@@ -167,8 +167,8 @@ def update_distances(img1, img2, F, pts1, pts2, plots_path):
         print_and_write("NAN", plots_path)
         print_and_write(str(epipolar_geo.pts1.detach().cpu().numpy()), plots_path)
         print_and_write(str(epipolar_geo.pts2.detach().cpu().numpy()), plots_path)
-        print_and_write(str(epipolar_geo.pts1.shape.cpu().numpy()), plots_path)
-        print_and_write(str(epipolar_geo.pts2.shape.cpu().numpy()), plots_path)
+        print_and_write(str(epipolar_geo.pts1.shape.numpy()), plots_path)
+        print_and_write(str(epipolar_geo.pts2.shape.numpy()), plots_path)
         print("\n")
     
     return algebraic_dist, RE1_dist, SED_dist
@@ -274,7 +274,7 @@ class EpipolarGeometry:
         Output: average error of shape (1)
         """
         # Sum all valid errors
-        sum_errors = torch.sum(errors)
+        sum_errors = torch.sum(errors) 
         
         # Count non-zero elements
         valid_count = torch.sum(errors != 0).float()
