@@ -156,7 +156,7 @@ def last_sing_value(output):
     return last_sv_sq
 
 
-def update_distances(img1, img2, F, pts1, pts2):
+def update_distances(img1, img2, F, pts1, pts2, plots_path):
     epipolar_geo = EpipolarGeometry(img1, img2, F, pts1, pts2)
 
     algebraic_dist = epipolar_geo.get_mean_algebraic_distance()
@@ -164,20 +164,19 @@ def update_distances(img1, img2, F, pts1, pts2):
     RE1_dist = epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
     SED_dist = epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
     if math.isnan(algebraic_dist) or math.isnan(RE1_dist) or math.isnan(SED_dist):
-        print("NAN")
-        print(epipolar_geo.pts1)
-        print(epipolar_geo.pts2)
-        print(epipolar_geo.pts1.shape)
-        print(epipolar_geo.pts2.shape)
+        print_and_write("NAN", plots_path)
+        print_and_write(epipolar_geo.pts1, plots_path)
+        print_and_write(epipolar_geo.pts2, plots_path)
+        print_and_write(epipolar_geo.pts1.shape, plots_path)
+        print_and_write(epipolar_geo.pts2.shape, plots_path)
         print("\n")
-        
     
     return algebraic_dist, RE1_dist, SED_dist
 
 def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, plots_path, data_type, epoch=0):
     prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
     
-    algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2)
+    algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2, plots_path)
  
     stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred.detach())
     # stats[f"{prefix}algebraic_sqr_pred"] = stats[f"{prefix}algebraic_sqr_pred"] + (algebraic_dist_sqr_pred.detach())
@@ -185,7 +184,7 @@ def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, plots_path,
     stats[f"{prefix}SED_pred"] = stats[f"{prefix}SED_pred"] + (SED_dist_pred.detach()) if SED_DIST else stats[f"{prefix}SED_pred"]
 
     if epoch == 0 or data_type == "test":
-        algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img1, img2, label, pts1.detach(), pts2.detach())
+        algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img1, img2, label, pts1.detach(), pts2.detach(), plots_path)
 
         stats[f"{prefix}algebraic_truth"] = stats[f"{prefix}algebraic_truth"] + (algebraic_dist_truth)
         # stats[f"{prefix}algebraic_sqr_truth"] = stats[f"{prefix}algebraic_sqr_truth"] + (algebraic_dist_sqr_truth)
