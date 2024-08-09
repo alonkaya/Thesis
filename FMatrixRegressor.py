@@ -81,7 +81,7 @@ class FMatrixRegressor(nn.Module):
         num_layers = len(self.model.encoder.layer)  # Get the total number of transformer layers (should be 12)
         if num_layers != 12:
             print_and_write(f"WARNING: The number of transformer layers is {num_layers}, but it should be 12", self.plots_path)
-        for layer_idx, layer in enumerate(self.model.vit.encoder.layer):
+        for layer_idx, layer in enumerate(self.model.encoder.layer):
             if layer_idx < frozen_layers:  # Only train the last layers
                 for param in layer.parameters():
                     param.requires_grad = False
