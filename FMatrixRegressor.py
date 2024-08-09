@@ -79,11 +79,9 @@ class FMatrixRegressor(nn.Module):
         
         # Freeze all layers except the top 8 transformer layers
         for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
-            print(layer)
             if layer_idx < frozen_layers:  # Only train the last layers
                 for param in layer.parameters():
                     param.requires_grad = False
-        self.model.asdf
 
         if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): #TODO: take care of frozenn
             model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
