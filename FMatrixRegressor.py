@@ -77,15 +77,13 @@ class FMatrixRegressor(nn.Module):
             # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
         
-        print(self.model.vision_model.encoder.layers)
         # Freeze all layers except the top 8 transformer layers
-        num_layers = len(self.model.vision_model.encoder.layers)  # Get the total number of transformer layers (should be 12)
-        if num_layers != 12:
-            print_and_write(f"WARNING: The number of transformer layers is {num_layers}, but it should be 12", self.plots_path)
-        for layer_idx, layer in enumerate(self.model.encoder.layer):
+        for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
+            print(layer)
             if layer_idx < frozen_layers:  # Only train the last layers
                 for param in layer.parameters():
                     param.requires_grad = False
+        self.model.asdf
 
         if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): #TODO: take care of frozenn
             model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
