@@ -52,6 +52,7 @@ class FMatrixRegressor(nn.Module):
         self.plots_path = plots_path
         self.use_conv = use_conv
         self.num_epochs = num_epochs
+        self.frozen_layers = frozen_layers
         self.start_epoch = 0
 
         # Lists to store training statistics
@@ -76,16 +77,16 @@ class FMatrixRegressor(nn.Module):
         else:
             # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
-        
-        # Freeze all layers except the top 8 transformer layers
-        for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
-            if layer_idx < frozen_layers:  # Only train the last layers
-                for param in layer.parameters():
-                    param.requires_grad = False
 
-        if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): #TODO: take care of frozenn
+        if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
             model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
             self.load_model(model_path=model_path)
+
+        # Freeze frozen_layers bottom layers
+        for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
+            if layer_idx < self.frozen_layers:  
+                for param in layer.parameters():
+                    param.requires_grad = False
 
         else:
             # Get input dimension for the MLP based on ViT configuration
@@ -93,8 +94,6 @@ class FMatrixRegressor(nn.Module):
             self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
             mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
 
-            if GROUP_CONV["use"]: 
-                mlp_input_shape = 2 * (self.num_patches**2) * GROUP_CONV["out_channels"] 
             if self.average_embeddings:
                 mlp_input_shape //= (self.num_patches**2)     
             if self.use_conv:
@@ -254,6 +253,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             "hidden_size" : self.hidden_size,
             "num_patches" : self.num_patches,
             'epoch' : epoch,
+            "frozen_layers" : self.frozen_layers,
             "all_train_loss" : self.all_train_loss, 
             "all_val_loss" : self.all_val_loss, 
             "all_train_mae" : self.all_train_mae, 
@@ -286,6 +286,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.use_conv = checkpoint.get("use_conv", self.use_conv)
         self.hidden_size = checkpoint.get("hidden_size", 0)
         self.num_patches = checkpoint.get("num_patches", 0)
+        self.frozen_layers = checkpoint.get("frozen_layers", self.frozen_layers)
         self.start_epoch = checkpoint.get("epoch", 0)
         self.all_train_loss = checkpoint.get("all_train_loss", [])
         self.all_val_loss = checkpoint.get("all_val_loss", [])
@@ -303,8 +304,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
         mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
 
-        if GROUP_CONV["use"]: 
-            mlp_input_shape = 2 * (self.num_patches**2) * GROUP_CONV["out_channels"] 
         if self.average_embeddings:
             mlp_input_shape //= (self.num_patches**2)     
         if self.use_conv:

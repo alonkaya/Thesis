@@ -65,7 +65,7 @@ use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{bs}{dataset_class}__ratio_{da
                         {ADDITIONS} learning rate: {lr}, lr_decay: {lr_decay}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
                         batch_size: {bs}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo if STEREO else train_seqeunces}, val_sequences: {val_sequences_stereo if STEREO else val_sequences}, dataset: {dataset},
                         average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, deepF_nocorrs: {DEEPF_NOCORRS}, head: {HEAD},
-                        SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, frozen layers: {FROZEN_LAYERS}, group conv: {GROUP_CONV["use"]}
+                        SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, frozen layers: {FROZEN_LAYERS},
                         crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, data_ratio: {data_ratio}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED}, \n\n"""
                                 print_and_write(parameters, model.plots_path)
                         else:

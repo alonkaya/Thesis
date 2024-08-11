@@ -67,7 +67,6 @@ FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
 USE_CONV = True
 USE_CONV = False if DEEPF_NOCORRS else USE_CONV
-GROUP_CONV = {"use" : False, "out_channels": 256}
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
 FROZEN_LAYERS = 8
 norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
