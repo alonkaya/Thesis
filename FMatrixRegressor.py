@@ -10,7 +10,7 @@ from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetMode
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr, lr_decay, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
                  deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, 
-                 unfrozen_layers=UNFROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
+                 frozen_layers=FROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
                  alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
         """
@@ -76,8 +76,14 @@ class FMatrixRegressor(nn.Module):
         else:
             # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
+        
+        # Freeze all layers except the top 8 transformer layers
+        for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
+            if layer_idx < frozen_layers:  # Only train the last layers
+                for param in layer.parameters():
+                    param.requires_grad = False
 
-        if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')):
+        if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): #TODO: take care of frozenn
             model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
             self.load_model(model_path=model_path)
 
