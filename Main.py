@@ -50,7 +50,7 @@ if __name__ == "__main__":
                 plots_path = os.path.join('plots', dataset, 'Winners',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__{ADDITIONS}lr_{lr}__\
 {compress}__{model}__\
-use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{bs}{dataset_class}__ratio_{data_ratio}__head_{HEAD}""")
+use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{bs}{dataset_class}__ratio_{data_ratio}__head_{HEAD}__frozen_{FROZEN_LAYERS}""")
                 
                 if plots_path in not_good:
                         continue
