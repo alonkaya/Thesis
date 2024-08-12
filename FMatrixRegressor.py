@@ -10,7 +10,7 @@ from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetMode
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr, lr_decay, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
                  deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, 
-                 frozen_layers=FROZEN_LAYERS, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
+                 frozen_layers=0, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
                  alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
         """

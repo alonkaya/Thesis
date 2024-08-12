@@ -11,7 +11,7 @@ FIRST_2_OF_3_TRAIN = False
 train_seqeunces_stereo = [0,2,3,5] #  9215 images 
 val_sequences_stereo =  [6,7,8]    #  3697 images
 test_sequences_stereo = [9]        #  1064 images
-seq_ratios = [0.05]      # 2764, 1843, 921, 460, 230
+seq_ratios = [0.0375]      # 2764, 1843, 921, 460, 345, 230
 CROP = 224
 RESIZE = 256
 USE_REALESTATE = False
@@ -21,7 +21,7 @@ JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True
-HEAD = False
+PART = ["head", "mid", "tail"]                                                  
 
 ### Training ###
 LR = [1e-4]                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
@@ -29,7 +29,7 @@ WEIGHT_DECAY = 0                                                              # 
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = [8, 4]                                                         # TODO 16, 32, 64
+BATCH_SIZE = [8, 4, 16]                                                         # TODO 16, 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
@@ -68,7 +68,7 @@ AVG_EMBEDDINGS = False
 USE_CONV = True
 USE_CONV = False if DEEPF_NOCORRS else USE_CONV
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
-FROZEN_LAYERS = 8
+FROZEN_LAYERS = [0]
 norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
 norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
 
