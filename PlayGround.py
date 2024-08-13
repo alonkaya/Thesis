@@ -390,24 +390,14 @@ if __name__ == "__main__":
     # checkpoint = torch.load(plot, map_location='cpu')
 
     # for i in range(10):
-    train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.05, part='mid', batch_size=1)
-    print(len(train_loader))
-    print(len(val_loader))
+    for i in [0.025, 0.0375, 0.05, 0.1, 0.2, 0.3, 1]:
+        train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.025, part='mid', batch_size=1)
+        print(f'{i}: {len(train_loader)}')
 
     
-    train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.1, part='mid', batch_size=1)
-    print(len(train_loader))
-    print(len(val_loader))
 
-    
-    train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.2, part='mid', batch_size=1)
-    print(len(train_loader))
-    print(len(val_loader))
 
-    
-    train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.3, part='mid', batch_size=1)
-    print(len(train_loader))
-    print(len(val_loader))
+
     # for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
     #     pass
     # for img1, img2, label, pts1, pts2, seq_name in val_loader:
