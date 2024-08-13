@@ -391,10 +391,13 @@ if __name__ == "__main__":
 
     # for i in range(10):
     train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.05, part='mid', batch_size=1)
-    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
-        pass
-    for img1, img2, label, pts1, pts2, seq_name in val_loader:
-        pass
+
+    print(len(train_loader))
+    print(len(val_loader))
+    # for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
+    #     pass
+    # for img1, img2, label, pts1, pts2, seq_name in val_loader:
+    #     pass
     torch.cuda.empty_cache()
 
     
