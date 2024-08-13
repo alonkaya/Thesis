@@ -6,6 +6,8 @@
 # import numpy as np
 # import matplotlib.pyplot as plt
 import os
+
+from Dataset import get_data_loaders
 # import torch
 # import re
 # from utils import divide_by_dataloader, points_histogram, print_and_write, reverse_transforms
@@ -384,10 +386,13 @@ if __name__ == "__main__":
     #     print(idx[0])
     # plot = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_True_2.model.pth"
     # checkpoint = torch.load(plot, map_location='cpu')
-    # for i in range(300):
-    #     train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.025, batch_size=1)
-    #     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
-    #         pass
+    for i in range(300):
+        train_loader, val_loader, test_loader = get_data_loaders(data_ratio=1, part='head', batch_size=1)
+        for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
+            pass
+        for img1, img2, label, pts1, pts2, seq_name in val_loader:
+            pass
+
     
     # for i in range(210, 290):
     #     p0 = os.path.join("sequences/02/image_0", f'{i:06}.png')
@@ -409,15 +414,3 @@ if __name__ == "__main__":
     #         print(f'moved {p0}')
 
 
-
-
-    directory = 'plots/Stereo/Winners'
-
-    for filename in os.listdir(directory):
-        if '0.0005' in filename:
-            file_path = os.path.join(directory, filename, 'model.pth')
-            if os.path.exists(file_path):
-                # os.remove(file_path)
-                print(f"Deleted: {file_path}")
-            else:
-                print(f"File not found: {file_path}")
