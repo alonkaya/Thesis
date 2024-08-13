@@ -390,12 +390,12 @@ if __name__ == "__main__":
     # checkpoint = torch.load(plot, map_location='cpu')
 
     # for i in range(10):
-    #     train_loader, val_loader, test_loader = get_data_loaders(data_ratio=1, part='head', batch_size=1)
-    #     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
-    #         pass
-    #     for img1, img2, label, pts1, pts2, seq_name in val_loader:
-    #         pass
-    #     torch.cuda.empty_cache()
+    train_loader, val_loader, test_loader = get_data_loaders(data_ratio=0.05, part='mid', batch_size=1)
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
+        pass
+    for img1, img2, label, pts1, pts2, seq_name in val_loader:
+        pass
+    torch.cuda.empty_cache()
 
     
     # for i in range(210, 290):
@@ -408,15 +408,15 @@ if __name__ == "__main__":
     #     else: 
     #         print(p0)
 
-    p0 = ["sequences/08/image_0/003143.png", "sequences/08/image_0/002828.png", "sequences/08/image_0/002719.png", "sequences/08/image_0/000368.png", "sequences/02/image_0/003789.png", "sequences/00/image_0/004120.png", "sequences/03/image_0/000557.png", "sequences/00/image_0/004322.png", "sequences/02/image_0/002284.png", "sequences/03/image_0/000408.png", "sequences/08/image_0/003484.png", "sequences/08/image_0/002785.png", "sequences/08/image_0/002434.png", "sequences/08/image_0/002086.png", "sequences/08/image_0/002084.png", "sequences/08/image_0/002073.png", "sequences/08/image_0/002029.png", "sequences/08/image_0/001716.png", "sequences/07/image_0/000254.png", "sequences/00/image_0/004121.png", "sequences/03/image_0/000442.png", "sequences/03/image_0/000529.png", "sequences/03/image_0/000439.png", "sequences/03/image_0/000423.png", "sequences/02/image_0/004636.png", "sequences/08/image_0/003616.png", "sequences/08/image_0/000256.png", "sequences/00/image_0/004122.png", "sequences/00/image_0/001070.png"]
-    p1 = ["sequences/08/image_1/003143.png", "sequences/08/image_1/002828.png", "sequences/08/image_1/002719.png", "sequences/08/image_1/000368.png", "sequences/02/image_1/003789.png", "sequences/00/image_1/004120.png", "sequences/03/image_1/000557.png", "sequences/00/image_1/004322.png", "sequences/02/image_1/002284.png", "sequences/03/image_1/000408.png", "sequences/08/image_1/003484.png", "sequences/08/image_1/002785.png", "sequences/08/image_1/002434.png", "sequences/08/image_1/002086.png", "sequences/08/image_1/002084.png", "sequences/08/image_1/002073.png", "sequences/08/image_1/002029.png", "sequences/08/image_1/001716.png", "sequences/07/image_1/000254.png", "sequences/00/image_1/004121.png", "sequences/03/image_1/000442.png", "sequences/03/image_1/000529.png", "sequences/03/image_1/000439.png", "sequences/03/image_1/000423.png", "sequences/02/image_1/004636.png", "sequences/08/image_1/003616.png", "sequences/08/image_1/000256.png", "sequences/00/image_1/004122.png", "sequences/00/image_1/001070.png"]
-    for p0, p1 in zip(p0, p1):
-        if os.path.exists(p0) and os.path.exists(p1):
-            os.rename(p0, p0.replace("image_0", "image_0_moving"))
-            os.rename(p1, p1.replace("image_1", "image_1_moving"))
-            print(f'moved {p0}')
-        else:
-            print(f'not found {p0}')
+    # p0 = ["sequences/08/image_0/003143.png", "sequences/08/image_0/002828.png", "sequences/08/image_0/002719.png", "sequences/08/image_0/000368.png", "sequences/02/image_0/003789.png", "sequences/00/image_0/004120.png", "sequences/03/image_0/000557.png", "sequences/00/image_0/004322.png", "sequences/02/image_0/002284.png", "sequences/03/image_0/000408.png", "sequences/08/image_0/003484.png", "sequences/08/image_0/002785.png", "sequences/08/image_0/002434.png", "sequences/08/image_0/002086.png", "sequences/08/image_0/002084.png", "sequences/08/image_0/002073.png", "sequences/08/image_0/002029.png", "sequences/08/image_0/001716.png", "sequences/07/image_0/000254.png", "sequences/00/image_0/004121.png", "sequences/03/image_0/000442.png", "sequences/03/image_0/000529.png", "sequences/03/image_0/000439.png", "sequences/03/image_0/000423.png", "sequences/02/image_0/004636.png", "sequences/08/image_0/003616.png", "sequences/08/image_0/000256.png", "sequences/00/image_0/004122.png", "sequences/00/image_0/001070.png"]
+    # p1 = ["sequences/08/image_1/003143.png", "sequences/08/image_1/002828.png", "sequences/08/image_1/002719.png", "sequences/08/image_1/000368.png", "sequences/02/image_1/003789.png", "sequences/00/image_1/004120.png", "sequences/03/image_1/000557.png", "sequences/00/image_1/004322.png", "sequences/02/image_1/002284.png", "sequences/03/image_1/000408.png", "sequences/08/image_1/003484.png", "sequences/08/image_1/002785.png", "sequences/08/image_1/002434.png", "sequences/08/image_1/002086.png", "sequences/08/image_1/002084.png", "sequences/08/image_1/002073.png", "sequences/08/image_1/002029.png", "sequences/08/image_1/001716.png", "sequences/07/image_1/000254.png", "sequences/00/image_1/004121.png", "sequences/03/image_1/000442.png", "sequences/03/image_1/000529.png", "sequences/03/image_1/000439.png", "sequences/03/image_1/000423.png", "sequences/02/image_1/004636.png", "sequences/08/image_1/003616.png", "sequences/08/image_1/000256.png", "sequences/00/image_1/004122.png", "sequences/00/image_1/001070.png"]
+    # for p0, p1 in zip(p0, p1):
+    #     if os.path.exists(p0) and os.path.exists(p1):
+    #         os.rename(p0, p0.replace("image_0", "image_0_moving"))
+    #         os.rename(p1, p1.replace("image_1", "image_1_moving"))
+    #         print(f'moved {p0}')
+    #     else:
+    #         print(f'not found {p0}')
 
 
 

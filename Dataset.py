@@ -263,8 +263,14 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
             subset = valid_indices
         else:
             length = int(len(valid_indices) * data_ratio) 
-            mid_start = len(valid_indices) // 2 - length // 2
-            subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
+            if part == "head":
+                subset = valid_indices[:length]  
+            elif part == "tail":
+                subset = valid_indices[-length:] 
+            elif part == "mid":
+                subset = random.sample(valid_indices[length:len(valid_indices) - length], length)
+        print(len(subset))
+        print(subset)
 
         images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
         images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None
