@@ -232,7 +232,7 @@ def get_dataloaders_KITTI(data_ratio, batch_size):
 
     return train_loader, val_loader
 
-def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS):
+def get_dataloader_stereo(data_ratio, part, batch_size, mid_subset=None, num_workers=NUM_WORKERS):
     sequence_paths = [f'sequences/{i:02}' for i in range(11)]
     poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
     calib_paths = [f'sequences/{i:02}/calib.txt' for i in range(11)]  
@@ -244,9 +244,10 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
     t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32).to(device)
 
     train_datasets, val_datasets, test_datasets = [], [], []
+    mid_subset = mid_subset if mid_subset else {}
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
         if i not in train_seqeunces_stereo and i not in val_sequences_stereo and i not in test_sequences_stereo: continue
-
+        
         image_0_path = os.path.join(sequence_path, 'image_0')
 
         # Get a list of all poses [R,t] in this sequence
@@ -268,9 +269,8 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
             elif part == "tail":
                 subset = valid_indices[-length:] 
             elif part == "mid":
-                subset = random.sample(valid_indices, length)
-        # print(len(subset))
-        # print(subset)
+                subset = random.sample(valid_indices[length : len(valid_indices) - length], length) if i not in mid_subset else mid_subset[i]
+                mid_subset[i] = subset
 
         images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
         images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None
@@ -296,11 +296,11 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
     val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
     test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
 
-    return train_loader, val_loader, test_loader
+    return train_loader, val_loader, test_loader, mid_subset
 
-def get_data_loaders(data_ratio, part, batch_size=BATCH_SIZE):
+def get_data_loaders(data_ratio, part, mid_subset=None, batch_size=BATCH_SIZE):
     if STEREO:
-        return get_dataloader_stereo(data_ratio, part, batch_size)
+        return get_dataloader_stereo(data_ratio, part, batch_size, mid_subset)
     elif USE_REALESTATE:
         return get_dataloaders_RealEstate(data_ratio, batch_size)
     else: # KITTI

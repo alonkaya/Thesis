@@ -2,6 +2,7 @@
 # mp.set_start_method('spawn', force=True)
 
 import os
+import pickle
 # os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 # os.environ['TORCH_USE_CUDA_DSA'] = '1'
 # os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -54,8 +55,13 @@ if __name__ == "__main__":
                 if plots_path in not_good:
                         continue
 
-                train_loader, val_loader, test_loader = get_data_loaders(data_ratio, part, batch_size=bs)
+                train_loader, val_loader, test_loader, mid_subset = get_data_loaders(data_ratio, part, batch_size=bs)
                 
+                if part == "mid":
+                        mid_subset_path = os.path.join(plots_path, 'mid_subset.pkl')
+                        with open(mid_subset_path, 'wb') as f:
+                                pickle.dump(mid_subset, f)
+
                 model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
 
                 if model.start_epoch < model.num_epochs:
