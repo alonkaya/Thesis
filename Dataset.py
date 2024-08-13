@@ -96,9 +96,9 @@ class Dataset_stereo(torch.utils.data.Dataset):
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
         pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, height=H, width=W)
-        if pts1.shape[0] < 3:
-            print(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}'))
-            print(f"smaller than 3: {pts1.shape[0]}\n")
+        # if pts1.shape[0] < 3:
+        #     print(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}'))
+        #     print(f"smaller than 3: {pts1.shape[0]}\n")
         return img0, img1, F, pts1, pts2, self.seq_name
     
 def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
@@ -265,7 +265,7 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
             length = int(len(valid_indices) * data_ratio) 
             mid_start = len(valid_indices) // 2 - length // 2
             subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
-            print(f'length: {length}, subset: {len(subset)}, mid_start: {mid_start}')
+
         images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
         images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None
 
