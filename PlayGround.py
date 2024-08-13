@@ -7,6 +7,8 @@
 # import matplotlib.pyplot as plt
 import os
 
+import torch
+
 from Dataset import get_data_loaders
 # import torch
 # import re
@@ -386,16 +388,6 @@ if __name__ == "__main__":
     #     print(idx[0])
     # plot = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_True_2.model.pth"
     # checkpoint = torch.load(plot, map_location='cpu')
-    directory = 'plots/Stereo/Winners'
-
-    for filename in os.listdir(directory):
-        if '0.0005' in filename:
-            file_path = os.path.join(directory, filename, 'model.pth')
-            if os.path.exists(file_path):
-                # os.remove(file_path)
-                print(f"Deleted: {file_path}")
-            else:
-                print(f"File not found: {file_path}")
 
     for i in range(300):
         train_loader, val_loader, test_loader = get_data_loaders(data_ratio=1, part='head', batch_size=1)
@@ -403,6 +395,7 @@ if __name__ == "__main__":
             pass
         for img1, img2, label, pts1, pts2, seq_name in val_loader:
             pass
+        torch.cuda.empty_cache()
 
     
     # for i in range(210, 290):
