@@ -390,8 +390,8 @@ if __name__ == "__main__":
     # checkpoint = torch.load(plot, map_location='cpu')
 
     # for i in range(10):
-    for i in [0.025, 0.0375, 0.05, 0.1, 0.2, 0.3, 1]:
-        train_loader, val_loader, test_loader = get_data_loaders(data_ratio=i, part='mid', batch_size=1)
+    for i in [1]:
+        train_loader, val_loader, test_loader = get_data_loaders(data_ratio=i, part='head', batch_size=1)
         print(f'{i}: {len(train_loader)}')
 
     

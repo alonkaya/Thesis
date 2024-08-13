@@ -268,7 +268,7 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
             elif part == "tail":
                 subset = valid_indices[-length:] 
             elif part == "mid":
-                subset = random.sample(valid_indices[length:len(valid_indices) - length], length)
+                subset = random.sample(valid_indices, length)
         # print(len(subset))
         # print(subset)
 
