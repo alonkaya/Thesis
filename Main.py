@@ -57,8 +57,8 @@ if __name__ == "__main__":
 
                 train_loader, val_loader, test_loader, mid_subset = get_data_loaders(data_ratio, part, batch_size=bs)
 
-                os.makedirs(plots_path, exist_ok=True)
                 mid_subset_path = os.path.join(plots_path, 'mid_subset.pkl')
+                os.makedirs(mid_subset_path, exist_ok=True)
                 with open(mid_subset_path, 'wb') as f:
                         pickle.dump(mid_subset, f)
 
