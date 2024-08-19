@@ -61,31 +61,27 @@ class FMatrixRegressor(nn.Module):
         self.all_RE1_pred, self.all_val_RE1_pred, \
         self.all_SED_pred, self.all_val_SED_pred = [], [], [], [], [], [], [], [], [], []
         
-        def init_model(self):
-            self.resnet = False
-            if model_name == CLIP_MODEL_NAME:
-                # Initialize CLIP processor and pretrained model
-                if TRAIN_FROM_SCRATCH:
-                    config = CLIPVisionConfig()
-                    self.model = CLIPVisionModel(config).to(device)
-                else:
-                    self.model = CLIPVisionModel.from_pretrained(model_name).to(device)
-
-            elif model_name == RESNET_MODEL_NAME:
-                self.resnet = True
-                self.model = ResNetModel.from_pretrained(model_name).to(device)
+        self.resnet = False
+        if model_name == CLIP_MODEL_NAME:
+            # Initialize CLIP processor and pretrained model
+            if TRAIN_FROM_SCRATCH:
+                config = CLIPVisionConfig()
+                self.model = CLIPVisionModel(config).to(device)
             else:
-                # Initialize ViT pretrained model
-                self.model = ViTModel.from_pretrained(model_name).to(device)
-        self.init_model()
-        
-        def freeze_layers(self):
-            # Freeze frozen_layers bottom layers
-            for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
-                if layer_idx < self.frozen_layers:  
-                    for param in layer.parameters():
-                        param.requires_grad = False
-        self.freeze_layers()
+                self.model = CLIPVisionModel.from_pretrained(model_name).to(device)
+
+        elif model_name == RESNET_MODEL_NAME:
+            self.resnet = True
+            self.model = ResNetModel.from_pretrained(model_name).to(device)
+        else:
+            # Initialize ViT pretrained model
+            self.model = ViTModel.from_pretrained(model_name).to(device)
+    
+        # Freeze frozen_layers bottom layers
+        for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
+            if layer_idx < self.frozen_layers:  
+                for param in layer.parameters():
+                    param.requires_grad = False
 
         if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
             model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
