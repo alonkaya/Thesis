@@ -39,7 +39,6 @@ class FMatrixRegressor(nn.Module):
         self.lr = lr
         self.lr_decay = lr_decay
         self.min_lr = min_lr
-        self.deepF_noCorrs = deepF_noCorrs
         self.average_embeddings = average_embeddings
         self.model_name = model_name
         self.augmentation = augmentation
@@ -77,16 +76,16 @@ class FMatrixRegressor(nn.Module):
         else:
             # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
-
-        if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
-            model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
-            self.load_model(model_path=model_path)
-
+    
         # Freeze frozen_layers bottom layers
         for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
             if layer_idx < self.frozen_layers:  
                 for param in layer.parameters():
                     param.requires_grad = False
+
+        if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
+            model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
+            self.load_model(model_path=model_path)
 
         else:
             # Get input dimension for the MLP based on ViT configuration
@@ -94,26 +93,26 @@ class FMatrixRegressor(nn.Module):
             self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
             mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
 
+            # Initialize loss functions
+            self.L2_loss = nn.MSELoss().to(device)
+            self.huber_loss = nn.HuberLoss().to(device)
+        
+            # Load conv/average embeddings
             if self.average_embeddings:
                 mlp_input_shape //= (self.num_patches**2)     
             if self.use_conv:
                 self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
                 mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
-            if self.deepF_noCorrs:
-                self.feat_ext_deepF = FeatureExtractorDeepF().to(device)
-                mlp_input_shape = 256 * 7 * 7
 
+            # Initialize MLP
             self.mlp = MLP(input_dim=mlp_input_shape).to(device)
 
-            self.L2_loss = nn.MSELoss().to(device)
-            self.huber_loss = nn.HuberLoss().to(device)
+            # Load optimizer and scheduler
             self.optimizer = optim.Adam([
-                {'params': self.model.parameters(), 'lr': self.lr} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
-                {'params': self.feat_ext_deepF.parameters(), 'lr': self.lr} if self.deepF_noCorrs else {'params': []},
-                {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
+                {'params': self.model.parameters(), 'lr': self.lr},
+                {'params': self.mlp.parameters(), 'lr': self.lr},   
                 {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
             ])
-            
             self.scheduler = None
             if SCHED == "cosine":
                 self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.num_epochs, eta_min=self.min_lr)
@@ -154,7 +153,7 @@ class FMatrixRegressor(nn.Module):
 
     def forward(self, x1, x2):
         # x1, x2 shape is (batch_size, channels, height, width)
-        embeddings = self.FeatureExtractor(x1, x2) if not self.deepF_noCorrs else self.feat_ext_deepF(x1, x2) # Output shape is (batch_size, -1)
+        embeddings = self.FeatureExtractor(x1, x2) # Output shape is (batch_size, -1)
 
         output = self.mlp(embeddings)
 
@@ -231,8 +230,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         torch.save({
             'mlp': self.mlp.state_dict(),
             'optimizer': self.optimizer.state_dict(),
-            'vit': self.model.state_dict() if not self.deepF_noCorrs else '',
-            'feat_ext_deepF': self.feat_ext_deepF.state_dict() if self.deepF_noCorrs else '',
+            'vit': self.model.state_dict() ,
             'conv': self.conv.state_dict() if self.use_conv else '',
             "scheduler" : None if self.scheduler==None else self.scheduler.state_dict(),
             "lr_decay" : self.lr_decay,
@@ -304,22 +302,31 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
         mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
 
+        # Initialize loss functions
+        self.L2_loss = nn.MSELoss().to(device)
+        self.huber_loss = nn.HuberLoss().to(device)
+
+        # Load conv/average embeddings
         if self.average_embeddings:
             mlp_input_shape //= (self.num_patches**2)     
         if self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
             mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
-        if self.deepF_noCorrs:
-            self.feat_ext_deepF = FeatureExtractorDeepF().to(device)
-            mlp_input_shape = 256 * 7 * 7
+            self.conv.load_state_dict(checkpoint['conv'])
+            self.conv.to(device)
 
+        # Load MLP
         self.mlp = MLP(input_dim=mlp_input_shape).to(device)
+        self.mlp.load_state_dict(checkpoint['mlp'])
+        self.mlp.to(device)
 
-        self.L2_loss = nn.MSELoss().to(device)
-        self.huber_loss = nn.HuberLoss().to(device)
+        # Load model
+        self.model.load_state_dict(checkpoint['vit']) 
+        self.model.to(device)
+
+        # Load optimizer and scheduler
         self.optimizer = optim.Adam([
-            {'params': self.model.parameters(), 'lr': self.lr} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
-            {'params': self.feat_ext_deepF.parameters(), 'lr': self.lr} if self.deepF_noCorrs else {'params': []},
+            {'params': self.model.parameters(), 'lr': self.lr},
             {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
             {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
         ])
@@ -332,19 +339,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         elif SCHED == "step":
             self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
             self.scheduler.load_state_dict(checkpoint.get("scheduler"))
-
         self.optimizer.load_state_dict(checkpoint['optimizer'])
-        self.mlp.load_state_dict(checkpoint['mlp'])
-        self.mlp.to(device)
-        if self.use_conv:
-            self.conv.load_state_dict(checkpoint['conv'])
-            self.conv.to(device)
-        if self.deepF_noCorrs:
-            self.feat_ext_deepF.load_state_dict(checkpoint['feat_ext_deepF'])
-            self.feat_ext_deepF.to(device)
-        else:
-            self.model.load_state_dict(checkpoint['vit']) 
-            self.model.to(device)
+
 
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
