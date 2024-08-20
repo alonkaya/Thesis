@@ -21,7 +21,7 @@ JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True
-PART = ["mid", "head"]                                                  
+PART = ["tail", "head"]                                                  
 
 ### Training ###
 LR = [1e-4]                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
@@ -38,7 +38,7 @@ NUM_WORKERS = 0
 SAVE_MODEL = True
 NUM_EPOCHS = 1500
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
-ADDITIONS = "auged__"                                     
+ADDITIONS = "auged__2"                                     
 GET_OLD_PATH = False
 
 ### Epipolar geometry ###
