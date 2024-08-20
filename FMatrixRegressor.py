@@ -328,7 +328,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             # Load optimizer and scheduler
             self.optimizer = optim.Adam([
                 {'params': self.model.parameters(), 'lr': self.lr},
-                {'params': []},
                 {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
                 {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
             ])
@@ -345,9 +344,9 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         except Exception as e:
             self.optimizer = optim.Adam([
                 {'params': self.model.parameters(), 'lr': self.lr},
+                {'params': []},
                 {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
-                {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []},
-                {'params': [], 'lr': self.lr} if DEEPF_NOCORRS else {'params': []},
+                {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
             ])
             self.scheduler = None
             if SCHED == "cosine":
