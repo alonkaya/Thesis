@@ -21,11 +21,11 @@ JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True
-PART = ["head", "mid", "tail"]                                                  
+PART = ["tail"]                                                  
 
 ### Training ###
 LR = [1e-4]                                                             # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
-WEIGHT_DECAY = 0                                                              # TODO 5e-4, 5e-5
+WEIGHT_DECAY = 0                                                          # TODO 5e-4, 5e-5
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
