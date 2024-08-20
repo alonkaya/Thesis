@@ -346,7 +346,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 {'params': self.model.parameters(), 'lr': self.lr},
                 {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
                 {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []},
-                {'params': []} 
+                {'params': [], 'lr': self.lr} if DEEPF_NOCORRS else {'params': []},
             ])
             self.scheduler = None
             if SCHED == "cosine":
