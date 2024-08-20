@@ -327,8 +327,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         try:
             # Load optimizer and scheduler
             self.optimizer = optim.Adam([
-                {'params': self.model.parameters(), 'lr': self.lr} if not DEEPF_NOCORRS else {'params': []},  # Lower learning rate for the pre-trained vision transformer
-                {'params': self.feat_ext_deepF.parameters(), 'lr': self.lr} if DEEPF_NOCORRS else {'params': []},
+                {'params': self.model.parameters(), 'lr': self.lr},
+                {'params': []},
                 {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
                 {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
             ])
