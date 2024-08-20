@@ -324,23 +324,40 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.model.load_state_dict(checkpoint['vit']) 
         self.model.to(device)
 
-        # Load optimizer and scheduler
-        self.optimizer = optim.Adam([
-            {'params': self.model.parameters(), 'lr': self.lr},
-            {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
-            {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
-        ])
-        self.scheduler = None
-        if SCHED == "cosine":
-            self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.num_epochs, eta_min=self.min_lr)
-            self.scheduler.load_state_dict(checkpoint.get("scheduler"))
-            if self.scheduler.last_epoch >= self.schedular.T_max-1:
-                self.scheduler = None
-        elif SCHED == "step":
-            self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
-            self.scheduler.load_state_dict(checkpoint.get("scheduler"))
-        self.optimizer.load_state_dict(checkpoint['optimizer'])
-
+        try:
+            # Load optimizer and scheduler
+            self.optimizer = optim.Adam([
+                {'params': self.model.parameters(), 'lr': self.lr},
+                {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
+                {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
+            ])
+            self.scheduler = None
+            if SCHED == "cosine":
+                self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.num_epochs, eta_min=self.min_lr)
+                self.scheduler.load_state_dict(checkpoint.get("scheduler"))
+                if self.scheduler.last_epoch >= self.schedular.T_max-1:
+                    self.scheduler = None
+            elif SCHED == "step":
+                self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
+                self.scheduler.load_state_dict(checkpoint.get("scheduler"))
+            self.optimizer.load_state_dict(checkpoint['optimizer'])
+        except Exception as e:
+            self.optimizer = optim.Adam([
+                {'params': self.model.parameters(), 'lr': self.lr},
+                {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
+                {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []},
+                {'params': []} 
+            ])
+            self.scheduler = None
+            if SCHED == "cosine":
+                self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.num_epochs, eta_min=self.min_lr)
+                self.scheduler.load_state_dict(checkpoint.get("scheduler"))
+                if self.scheduler.last_epoch >= self.schedular.T_max-1:
+                    self.scheduler = None
+            elif SCHED == "step":
+                self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
+                self.scheduler.load_state_dict(checkpoint.get("scheduler"))
+            self.optimizer.load_state_dict(checkpoint['optimizer'])
 
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
