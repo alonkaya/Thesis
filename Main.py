@@ -52,8 +52,8 @@ if __name__ == "__main__":
                 compress = f'avg_embeddings' if AVG_EMBEDDINGS else f'conv'
 
                 plots_path = os.path.join('plots', dataset, 'Winners',
-                                        f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__{ADDITIONS}lr_{lr}__\
-{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}__BS_{bs}{dataset_class}__ratio_{data_ratio}__{part}__frozen_{fl}""")
+                                        f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__{ADDITIONS}lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
+                                        f"""BS_{bs}__ratio_{data_ratio}__{part}__frozen_{fl}""")
                 
                 if plots_path in not_good:
                         continue
