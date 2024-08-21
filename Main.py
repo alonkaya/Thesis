@@ -24,15 +24,22 @@ if __name__ == "__main__":
         parser.add_argument("--lr", type=float, default=LR)
         parser.add_argument("--l2", type=float, default=L2_COEFF)    
         parser.add_argument("--huber", type=float, default=HUBER_COEFF)
+        parser.add_argument("--fl", nargs="+", type=int)
+        parser.add_argument("--parts", nargs="+", type=str)
+        parser.add_argument("--dr", nargs="+", type=float)
+
         args = parser.parse_args()
 
         batch_size = args.bs
         lrs = args.lr
         L2_coeff = args.l2
         huber_coeff = args.huber
+        seq_ratios = args.dr if args.dr else SEQ_RATIOS
+        part = args.parts if args.parts else PART
+        frozen_layers = args.fl if args.fl else FROZEN_LAYERS
         
         # Iterate over each combination
-        param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, seq_ratios, lrs, batch_size, PART, FROZEN_LAYERS)
+        param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, seq_ratios, lrs, batch_size, part, frozen_layers)
         with open ('not_good.txt', 'r') as f:
                 not_good = f.read().splitlines()
 
