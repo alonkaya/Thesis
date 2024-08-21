@@ -142,17 +142,19 @@ def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_la
         print_and_write("found nan\n", plots_path)                
         return True
     return False
-                     
+
+def not_learning(val_sed):
+    if sum(val_sed[-150:]) > sum(val_sed[200:350]) - (100*0.8):
+        print_and_write("not learning\n", plots_path)
+        return True
+    return False
+
 def print_and_write(output, plots_path):
     os.makedirs(plots_path, exist_ok=True)
     output_path = os.path.join(plots_path, "output.log")
     with open(output_path, "a") as f:
         f.write(output)
         print(output)
-
-def not_learning(all_train_loss, all_val_loss):
-    return len(all_train_loss) > 3 and abs(all_train_loss[-1] - all_train_loss[-2]) < 1e-4 and abs(all_train_loss[-1] - all_train_loss[-3]) < 1e-4  and abs(all_train_loss[-1] - all_train_loss[-4]) < 1e-4\
-                                   and abs(all_val_loss[-1] - all_val_loss[-2]) < 1e-4 and abs(all_val_loss[-1] - all_val_loss[-3]) < 1e-4  and abs(all_val_loss[-1] - all_val_loss[-4]) < 1e-4
 
 def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
     """ Reverses the scaling and normalization transformation applied on the image.
