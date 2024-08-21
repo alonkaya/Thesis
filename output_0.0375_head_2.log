@@ -1,0 +1,14 @@
+nohup: ignoring input
+/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/utils/generic.py:260: UserWarning: torch.utils._pytree._register_pytree_node is deprecated. Please use torch.utils._pytree.register_pytree_node instead.
+  torch.utils._pytree._register_pytree_node(
+Model path exists
+Traceback (most recent call last):
+  File "/home/aviran/Alon/Thesis/Main.py", line 63, in <module>
+    model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
+  File "/home/aviran/Alon/Thesis/FMatrixRegressor.py", line 119, in __init__
+    checkpoint = torch.load(f, map_location='cpu')
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/serialization.py", line 1086, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/serialization.py", line 1308, in _legacy_load
+    magic_number = pickle_module.load(f, **pickle_load_args)
+EOFError: Ran out of input
