@@ -109,12 +109,14 @@ class FMatrixRegressor(nn.Module):
 
 
 ########################################################################################################################################################################################
-            model_path = os.path.join("plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0001__conv__CLIP__use_reconstruction_True__BS_8__ratio_0.0375__head__frozen_0", 'model.pth')
+            model_path = os.path.join("plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0001__conv__CLIP__use_reconstruction_True__BS_8__ratio_0.0375__head__frozen_0/model.pth")
+            if not os.path.exists(model_path):
+                print("Model path does not exist")
             checkpoint = torch.load(model_path, map_location='cpu')
     
             self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
-            
+
             self.mlp.load_state_dict(checkpoint['mlp'])
             self.mlp.to(device)
 ########################################################################################################################################################################################   
