@@ -2,7 +2,6 @@
 # mp.set_start_method('spawn', force=True)
 
 import os
-import pickle
 # os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 # os.environ['TORCH_USE_CUDA_DSA'] = '1'
 # os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -37,13 +36,17 @@ if __name__ == "__main__":
         seq_ratios = args.dr if args.dr else SEQ_RATIOS
         part = args.parts if args.parts else PART
         frozen_layers = args.fl if args.fl else FROZEN_LAYERS
-        
+
         # Iterate over each combination
         param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, seq_ratios, lrs, batch_size, part, frozen_layers)
         with open ('not_good.txt', 'r') as f:
                 not_good = f.read().splitlines()
 
         for i, (alg_coeff, re1_coeff, sed_coeff, data_ratio, lr, bs, part, fl) in enumerate(param_combinations):
+                torch.manual_seed(SEED)
+                torch.cuda.manual_seed(SEED)
+                torch.cuda.manual_seed_all(SEED)  # If using multi-GPU.
+
                 lr_decay = 0.85 if lr < 1e-4 else 0.8
                 num_epochs = 2000 if data_ratio==0.3 else 3000 if data_ratio==0.2 else 4000 if data_ratio==0.1 else 5500 if data_ratio==0.05 else 7000 if data_ratio==0.0375 else 8000 if data_ratio==0.025 else 0
                 if num_epochs == 0:

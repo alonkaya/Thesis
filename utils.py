@@ -143,7 +143,7 @@ def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_la
         return True
     return False
 
-def not_learning(val_sed):
+def not_learning(val_sed, plots_path):
     if sum(val_sed[-150:]) > sum(val_sed[200:350]) - (100*0.8):
         print_and_write("not learning\n", plots_path)
         return True
