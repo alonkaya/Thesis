@@ -48,7 +48,7 @@ if __name__ == "__main__":
                 torch.cuda.manual_seed_all(SEED)  # If using multi-GPU.
 
                 lr_decay = 0.85 if lr < 1e-4 else 0.8
-                num_epochs = 2000 if data_ratio==0.3 else 3000 if data_ratio==0.2 else 4000 if data_ratio==0.1 else 5500 if data_ratio==0.05 else 7000 if data_ratio==0.0375 else 8000 if data_ratio==0.025 else 0
+                num_epochs = 2000 if data_ratio==0.3 else 3000 if data_ratio==0.2 else 4000 if data_ratio==0.1 else 5500 if data_ratio==0.05 else 7000 if data_ratio==0.0375 else 8500 if data_ratio==0.025 else 0
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
@@ -79,7 +79,7 @@ if __name__ == "__main__":
                         batch_size: {bs}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo if STEREO else train_seqeunces}, val_sequences: {val_sequences_stereo if STEREO else val_sequences}, dataset: {dataset},
                         average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, deepF_nocorrs: {DEEPF_NOCORRS}, part: {part},
                         SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, frozen layers: {fl},
-                        crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, data_ratio: {data_ratio}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED}, \n\n"""
+                        crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, data_ratio: {data_ratio}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED} seed: {SEED}, \n\n"""
                                 print_and_write(parameters, model.plots_path)
                         else:
                                 print_and_write(f"##### CONTINUE TRAINING #####\n\n", model.plots_path)
