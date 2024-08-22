@@ -46,7 +46,7 @@ if __name__ == "__main__":
                 set_seed(SEED)
 
                 lr_decay = 0.85 if lr < 1e-4 else 0.8
-                num_epochs = 2000 if data_ratio==0.3 else 3000 if data_ratio==0.2 else 4000 if data_ratio==0.1 else 5500 if data_ratio==0.05 else 8000 if data_ratio==0.0375 else 8500 if data_ratio==0.025 else 0
+                num_epochs = 2000 if data_ratio==0.3 else 3000 if data_ratio==0.2 else 4000 if data_ratio==0.1 else 5500 if data_ratio==0.05 else 8000 if data_ratio==0.0375 else 10000 if data_ratio==0.025 else 0
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue

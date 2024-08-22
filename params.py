@@ -74,6 +74,8 @@ norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODE
 norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
 
 
-# "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.0375__head__frozen_0"
 # "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0001__conv__CLIP__use_reconstruction_True__BS_8__ratio_0.0375__mid__frozen_0"
 # "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__2lr_0.0001__conv__CLIP__use_reconstruction_True__BS_8__ratio_0.0375__tail__frozen_0"
+# "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.025__mid__frozen_0"
+# "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.025__tail__frozen_0"
+# "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0001__conv__CLIP__use_reconstruction_True__BS_4__ratio_0.025__head_True"
