@@ -110,7 +110,7 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-    plots_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__2lr_0.0001__conv__CLIP__use_reconstruction_True__BS_8__ratio_0.0375__tail__frozen_0"
+    plots_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__mid__frozen_4"
     file_path = os.path.join(plots_path, "output.log")
     save = True
 
@@ -125,5 +125,5 @@ if __name__ == "__main__":
 
     try:
         plot_parameter(epochs, alg_sqr_dists, val_alg_sqr_dists, "Algebraic Sqr Distance", plots_path, save=save)
-    except:
-        print("No Algebraic Sqr Distance found")
+    except: 
+        pass

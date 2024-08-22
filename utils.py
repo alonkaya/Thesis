@@ -365,8 +365,7 @@ def rename_files(folder_path):
         os.rename(old_file_path, new_file_path)
         print(f"Renamed '{filename}' to '{new_filename}'")
 
-# # Folder path
-# folder_path = 'plots/Stereo'
-
-# # Call the rename function
-# rename_files(folder_path)
+def set_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)  # If using multi-GPU.

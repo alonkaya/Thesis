@@ -43,12 +43,10 @@ if __name__ == "__main__":
                 not_good = f.read().splitlines()
 
         for i, (alg_coeff, re1_coeff, sed_coeff, data_ratio, lr, bs, part, fl) in enumerate(param_combinations):
-                torch.manual_seed(SEED)
-                torch.cuda.manual_seed(SEED)
-                torch.cuda.manual_seed_all(SEED)  # If using multi-GPU.
+                set_seed(SEED)
 
                 lr_decay = 0.85 if lr < 1e-4 else 0.8
-                num_epochs = 2000 if data_ratio==0.3 else 3000 if data_ratio==0.2 else 4000 if data_ratio==0.1 else 5500 if data_ratio==0.05 else 7000 if data_ratio==0.0375 else 8500 if data_ratio==0.025 else 0
+                num_epochs = 2000 if data_ratio==0.3 else 3000 if data_ratio==0.2 else 4000 if data_ratio==0.1 else 5500 if data_ratio==0.05 else 8000 if data_ratio==0.0375 else 8500 if data_ratio==0.025 else 0
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
@@ -62,8 +60,8 @@ if __name__ == "__main__":
                 compress = f'avg_embeddings' if AVG_EMBEDDINGS else f'conv'
 
                 plots_path = os.path.join('plots', dataset, 'Winners',
-                                        f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__{ADDITIONS}lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
-                                        f"""BS_{bs}__ratio_{data_ratio}__{part}__frozen_{fl}""")
+                                        f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
+                                        f"""BS_{bs}__ratio_{data_ratio}__{part}__frozen_{fl}{ADDITIONS}""")
                 
                 if plots_path in not_good:
                         continue
@@ -85,6 +83,8 @@ if __name__ == "__main__":
                                 print_and_write(f"##### CONTINUE TRAINING #####\n\n", model.plots_path)
                 
                         model.train_model(train_loader, val_loader, test_loader)
+                else: 
+                        print(f"Model {plots_path} already trained")
 
                 torch.cuda.empty_cache()
 
