@@ -377,7 +377,8 @@
 # #                 break
 
 
-import os        
+import os
+import shutil        
 if __name__ == "__main__":
 #     # file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
 #     # update_epochs(file_path, 114)
@@ -389,23 +390,29 @@ if __name__ == "__main__":
 #     # plot = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_True_2.model.pth"
 #     # checkpoint = torch.load(plot, map_location='cpu')
 
-    directory = 'plots/Stereo/Winners'
+    base_dir = "plots/Stereo/Winners"
 
-    # Iterate over each file in the directory
-    for filename in os.listdir(directory):
-        if 'BS_' in filename:
-            # Find the index of 'BS_'
-            index = filename.find('BS_')
-            # Extract the new name starting from 'BS_'
-            new_name = filename[index:]
-            # Define full paths
-            old_file = os.path.join(directory, filename)
-            new_file = os.path.join(directory, "SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True", new_name)
-            # Rename the file
-            # os.rename(old_file, new_file)
-            print(f'{old_file}\n{new_file}\n\n')
-        else:
-            print(f'Skipping: {filename} (no BS_ found)')
+    # Names of the target directories
+    frozen_dirs = ["frozen_0", "frozen_4", "frozen_8"]
+
+    # Create target directories if they don't exist
+    for frozen_dir in frozen_dirs:
+        frozen_dir_path = os.path.join(base_dir, frozen_dir)
+        if not os.path.exists(frozen_dir_path):
+            os.makedirs(frozen_dir_path)
+
+    # Iterate over all subdirectories in the base directory
+    for subdir in os.listdir(base_dir):
+        subdir_path = os.path.join(base_dir, subdir)
+
+        # Only process if it's a directory and ends with one of the target suffixes
+        if os.path.isdir(subdir_path):
+            for frozen_dir in frozen_dirs:
+                if subdir.endswith(frozen_dir):
+                    target_dir = os.path.join(base_dir, frozen_dir)
+                    # shutil.move(subdir_path, target_dir)
+                    print(f'{subdir_path}\n{target_dir}\n\n')
+                    break
 
 #     # for i in range(10):
 #     # for i in [0.025, 0.0375]:
