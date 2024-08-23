@@ -39,7 +39,7 @@ SAVE_MODEL = True
 NUM_EPOCHS = 1500
 VISIUALIZE = {"epoch" : -1, "dir": 'predicted_epipole_lines'}
 ADDITIONS = ""                                     
-GET_OLD_PATH = False
+GET_OLD_PATH = True ###############################################################################
 SEED = 42
 
 ### Epipolar geometry ###
@@ -61,7 +61,7 @@ CONV_HIDDEN_DIM = [256, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-PRETRAINED_PATH =  None
+PRETRAINED_PATH =  "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.0375__head__frozen_0"
 RESNET_MODEL_NAME = 'microsoft/resnet-152'
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False

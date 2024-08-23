@@ -33,9 +33,9 @@ if __name__ == "__main__":
         lrs = args.lr
         L2_coeff = args.l2
         huber_coeff = args.huber
-        seq_ratios = args.dr if args.dr else SEQ_RATIOS
-        part = args.parts if args.parts else PART
         frozen_layers = args.fl if args.fl else FROZEN_LAYERS
+        part = args.parts if args.parts else PART
+        seq_ratios = args.dr if args.dr else SEQ_RATIOS
 
         # Iterate over each combination
         param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, seq_ratios, lrs, batch_size, part, frozen_layers)
