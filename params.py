@@ -21,7 +21,7 @@ JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True
-PART = ["mid"]                                                  
+PART = ["head"]                                                  
 
 ### Training ###
 LR = [1e-4]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
@@ -29,7 +29,7 @@ WEIGHT_DECAY = 0                                                          # TODO
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = [8]                                                          # TODO 16, 32, 64
+BATCH_SIZE = [4]                                                          # TODO 16, 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
@@ -61,7 +61,7 @@ CONV_HIDDEN_DIM = [256, 512]
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-PRETRAINED_PATH =  "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.025__mid__frozen_0"
+PRETRAINED_PATH =  "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0001__conv__CLIP__use_reconstruction_True__BS_4__ratio_0.025__head_True"
 RESNET_MODEL_NAME = 'microsoft/resnet-152'
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
@@ -75,6 +75,6 @@ norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODE
 
 
 # currently on 3080 "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__2lr_0.0001__conv__CLIP__use_reconstruction_True__BS_8__ratio_0.0375__tail__frozen_0"
-# "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.025__mid__frozen_0"
+# currently on 3080 "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.025__mid__frozen_0"
 # "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.025__tail__frozen_0"
 # waiting on 4090 "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0001__conv__CLIP__use_reconstruction_True__BS_4__ratio_0.025__head_True"
