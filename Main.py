@@ -44,7 +44,9 @@ if __name__ == "__main__":
 
         for i, (alg_coeff, re1_coeff, sed_coeff, data_ratio, lr, bs, part, fl) in enumerate(param_combinations):
                 set_seed(SEED)
-
+                if part != "head" and part != "mid" and part != "tail":
+                        raise ValueError("Invalid part")
+                
                 lr_decay = 0.85 if lr < 1e-4 else 0.8
                 num_epochs = 2000 if data_ratio==0.3 else 3000 if data_ratio==0.2 else 4000 if data_ratio==0.1 else 5500 if data_ratio==0.05 else 9000 if data_ratio==0.0375 else 12000 if data_ratio==0.025 else 0
                 if num_epochs == 0:
