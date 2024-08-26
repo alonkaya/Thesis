@@ -24020,3 +24020,29 @@ Test Algebraic dist truth: 0.017701973592428335
 Test SED dist truth: 0.0017230902847490813
 Test RE1 dist truth: 0.00021538656569065009
 
+###########################################################################################################################################################
+
+                         learning rate: 0.0001, lr_decay: 0.8, mlp_hidden_sizes: [1024, 512], jump_frames: 2, use_reconstruction_layer: True
+                        batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], dataset: Stereo,
+                        average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, deepF_nocorrs: False, part: head, get_old_path: False,
+                        SVD coeff: 0, RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 4,
+                        crop: 224 resize: 256, use conv: True pretrained: None, data_ratio: 0.1, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+##### CONTINUE TRAINING #####
+
+Epoch 4001/4001: Training Loss: 0.28910137625301585		 Val Loss: 0.6272495518559995
+             Training MAE: 0.06540011614561081		 Val MAE: 0.06632085144519806
+             Algebraic dist: 0.43317315157722025		 Val Algebraic dist: 0.7504107433816661
+             RE1 dist: 0.19887290281407974		 Val RE1 dist: 0.49711749864661176
+             SED dist: 0.5423692254459157		 Val SED dist: 1.218513239984927
+
+## TEST RESULTS: ##
+Test Loss: 0.49496739322977856		 Test MAE: 0.06666923835873603
+Test Algebraic dist: 0.6152098232642152
+Test SED dist: 0.9538636343819753
+Test RE1 dist: 0.381168884621527
+
+Test Algebraic dist truth: 0.017696348348058256
+Test SED dist truth: 0.0017220622166655118
+Test RE1 dist truth: 0.00021526300089251725
+
