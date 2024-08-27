@@ -53,7 +53,7 @@ RE1_COEFF = [0]
 SED_COEFF = [0.5]                                                    # TODO 0.01, 0.05, 0.1, 0.5, 1
 L2_COEFF = 1
 HUBER_COEFF = 1                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
-"plots\Stereo\Winners\SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True\BS_8__ratio_0.1__head__frozen_4"
+
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
 CONV_HIDDEN_DIM = [256, 512]
@@ -68,7 +68,7 @@ AVG_EMBEDDINGS = False
 USE_CONV = True
 USE_CONV = False if DEEPF_NOCORRS else USE_CONV
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
-FROZEN_LAYERS = [8]
+FROZEN_LAYERS = [4]
 norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
 norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
 
