@@ -6,6 +6,8 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 ### Dataset ###
 CROP = 224
 RESIZE = 256
+angle_range = 90
+shift_range = 150
 AUGMENTATION = True
 RANDOM_CROP = True
 
@@ -20,7 +22,6 @@ NUM_EPOCHS = 1500
 ADDITIONS = ""                                     
 GET_OLD_PATH = False
 SEED = 42
-
 L2_COEFF = 1
 HUBER_COEFF = 1                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
 
@@ -36,7 +37,7 @@ MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
 USE_CONV = True
-NUM_OUTPUT = 0
+NUM_OUTPUT = 3
 FROZEN_LAYERS = [0]
 norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
 norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)

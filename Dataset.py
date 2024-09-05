@@ -8,9 +8,6 @@ from params import *
 import torchvision.transforms as v2
 
 
-angle_range = 10
-shift_range = 0.1
-
 class CustomDataset(torch.utils.data.Dataset):
     def __init__(self, dataset, transform=None, angle_range=None, shift_range=None):
         self.dataset = dataset
@@ -63,11 +60,10 @@ def get_dataloaders(batch_size, num_of_training_images, num_of_val_images):
     ])
 
     # Load and display the image
-    dataset = load_dataset("frgfm/imagenette", 'full_size')
+    dataset = load_dataset("frgfm/imagenette", "320px")
     train_dataset = dataset["train"].select(np.arange(num_of_training_images))
     val_dataset = dataset["validation"].select(np.arange(num_of_val_images))
 
-    print(val_dataset)
     # Create an instance dataset
     custom_train_dataset = CustomDataset(train_dataset, transform=transform, angle_range=angle_range, shift_range=shift_range)
     custom_val_dataset = CustomDataset(val_dataset, transform=transform,angle_range=angle_range, shift_range=shift_range)
