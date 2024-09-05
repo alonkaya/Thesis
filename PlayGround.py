@@ -377,9 +377,50 @@
 # #                 break
 
 
-import os
-import shutil        
+from matplotlib import pyplot as plt
+
+
+def pl():
+    # Re-defining the data since the previous session's variables are not retained
+
+    # Data from the table
+    training_images = [2166, 1082, 540, 405]
+
+    mean_alg = [0.255, 0.475, 0.47, 0.7233]
+    mean_sed = [0.265, 0.69, 0.685, 1.3]
+    mean_re1 = [0.075, 0.2635, 0.27, 0.6767]
+
+    std_alg = [0.0071, 0.1768, 0.0424, 0.2084]
+    std_sed = [0.0071, 0.3677, 0.0636, 0.5292]
+    std_re1 = [0.0071, 0.1648, 0.0141, 0.2926]
+
+    # Reverse the training_images, mean, and std data to match the original order
+    training_images_reversed = list(reversed(training_images))
+    mean_alg_reversed = list(reversed(mean_alg))
+    mean_sed_reversed = list(reversed(mean_sed))
+    mean_re1_reversed = list(reversed(mean_re1))
+    std_alg_reversed = list(reversed(std_alg))
+    std_sed_reversed = list(reversed(std_sed))
+    std_re1_reversed = list(reversed(std_re1))
+
+    # Generate categorical x-axis indices for equal spacing
+    x_indices = range(len(training_images))
+
+    # Plotting Mean with Error Bars representing STD
+    plt.figure(figsize=(10, 6))
+    plt.errorbar(x_indices, mean_alg_reversed, yerr=std_alg_reversed, marker='o', color='blue', label='alg Mean ± STD', capsize=5)
+    plt.errorbar(x_indices, mean_sed_reversed, yerr=std_sed_reversed, marker='o', color='green', label='SED Mean ± STD', capsize=5)
+    plt.errorbar(x_indices, mean_re1_reversed, yerr=std_re1_reversed, marker='o', color='orange', label='RE1 Mean ± STD', capsize=5)
+    plt.title('Mean Values with Standard Deviation vs. Training Images')
+    plt.xlabel('Number of Training Images')
+    plt.ylabel('Mean Value ± STD')
+    plt.xticks(x_indices, labels=[str(img) for img in training_images_reversed])
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+      
 if __name__ == "__main__":
+    pl()
 #     # file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
 #     # update_epochs(file_path, 114)
 #     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
@@ -390,29 +431,29 @@ if __name__ == "__main__":
 #     # plot = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_True_2.model.pth"
 #     # checkpoint = torch.load(plot, map_location='cpu')
 
-    base_dir = "plots/Stereo/Winners"
+    # base_dir = "plots/Stereo/Winners"
 
-    # Names of the target directories
-    frozen_dirs = ["frozen_0", "frozen_4", "frozen_8"]
+    # # Names of the target directories
+    # frozen_dirs = ["frozen_0", "frozen_4", "frozen_8"]
 
-    # Create target directories if they don't exist
-    for frozen_dir in frozen_dirs:
-        frozen_dir_path = os.path.join(base_dir, frozen_dir)
-        if not os.path.exists(frozen_dir_path):
-            os.makedirs(frozen_dir_path)
+    # # Create target directories if they don't exist
+    # for frozen_dir in frozen_dirs:
+    #     frozen_dir_path = os.path.join(base_dir, frozen_dir)
+    #     if not os.path.exists(frozen_dir_path):
+    #         os.makedirs(frozen_dir_path)
 
-    # Iterate over all subdirectories in the base directory
-    for subdir in os.listdir(base_dir):
-        subdir_path = os.path.join(base_dir, subdir)
+    # # Iterate over all subdirectories in the base directory
+    # for subdir in os.listdir(base_dir):
+    #     subdir_path = os.path.join(base_dir, subdir)
 
-        # Only process if it's a directory and ends with one of the target suffixes
-        if os.path.isdir(subdir_path):
-            for frozen_dir in frozen_dirs:
-                if subdir.endswith(frozen_dir):
-                    target_dir = os.path.join(base_dir, frozen_dir)
-                    # shutil.move(subdir_path, target_dir)
-                    print(f'{subdir_path}\n{target_dir}\n\n')
-                    break
+    #     # Only process if it's a directory and ends with one of the target suffixes
+    #     if os.path.isdir(subdir_path):
+    #         for frozen_dir in frozen_dirs:
+    #             if subdir.endswith(frozen_dir):
+    #                 target_dir = os.path.join(base_dir, frozen_dir)
+    #                 # shutil.move(subdir_path, target_dir)
+    #                 print(f'{subdir_path}\n{target_dir}\n\n')
+    #                 break
 
 #     # for i in range(10):
 #     # for i in [0.025, 0.0375]:
@@ -449,7 +490,6 @@ if __name__ == "__main__":
 #     #         print(f'moved {p0}')
 #     #     else:
 #     #         print(f'not found {p0}')
-
 
 
 
