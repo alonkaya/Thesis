@@ -80,7 +80,7 @@ def plot_over_epoch(x, y1, y2, title, x_label="Epochs"):
       plt.legend()
 
       plt.show()
-      
+
 def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
     # if len(y1) > 3 and (y1[0] > y1[3] + 2000 or y2[0] > y2[3] + 2000):
     y1 = y1[5:]
@@ -147,15 +147,6 @@ def print_and_write(output, plots_path):
         f.write(output)
         print(output)
 
-def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
-    """ Reverses the scaling and normalization transformation applied on the image.
-        This function is called when computing the epipolar error.
-    """
-    # The mean and std have to be reshaped to [3, 1, 1] to match the tensor dimensions for broadcasting
-    mean = mean.view(-1, 1, 1)
-    std = std.view(-1, 1, 1)
-    img_tensor = img_tensor * std + mean
-    return (img_tensor.permute(1, 2, 0).numpy() * 255).astype(np.uint8)
 
 def init_main():
     faulthandler.enable()
@@ -187,7 +178,6 @@ def send_to_device(epoch_stats):
     for key, value in epoch_stats.items():
         if isinstance(value, torch.Tensor):
             epoch_stats[key] = value.to(device)    
-
 
 
 def set_seed(seed):

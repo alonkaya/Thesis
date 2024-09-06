@@ -5,7 +5,11 @@ from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetMode
 
 
 class AffineRegressor(nn.Module):
-    def __init__(self, lr, batch_size, L2_coeff, huber_coeff, model_name=MODEL, pretrained_path=None, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
+    def __init__(self, lr, lr_decay, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
+                 deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, 
+                 frozen_layers=0, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
+                 alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
+
         """
         Args:
         - lr: learning rate for the vision transformer
@@ -30,17 +34,29 @@ class AffineRegressor(nn.Module):
         self.to(device)
         self.batch_size = batch_size
         self.lr = lr
+        self.lr_decay = lr_decay
+        self.min_lr = min_lr
+        self.average_embeddings = average_embeddings
         self.model_name = model_name
+        self.augmentation = augmentation
+        self.use_reconstruction=use_reconstruction
+        self.re1_coeff = re1_coeff
+        self.alg_coeff = alg_coeff
+        self.sed_coeff = sed_coeff
         self.L2_coeff = L2_coeff
         self.huber_coeff = huber_coeff
         self.plots_path = plots_path
         self.use_conv = use_conv
         self.num_epochs = num_epochs
+        self.frozen_layers = frozen_layers
         self.start_epoch = 0
 
         # Lists to store training statistics
         self.all_train_loss, self.all_val_loss, \
-        self.all_train_mae, self.all_val_mae, 
+        self.all_train_mae, self.all_val_mae, \
+        self.all_algebraic_pred, self.all_val_algebraic_pred, \
+        self.all_RE1_pred, self.all_val_RE1_pred, \
+        self.all_SED_pred, self.all_val_SED_pred = [], [], [], [], [], [], [], [], [], []
         
         self.resnet = False
         if model_name == CLIP_MODEL_NAME:
@@ -57,6 +73,12 @@ class AffineRegressor(nn.Module):
         else:
             # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
+    
+        # Freeze frozen_layers bottom layers
+        for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
+            if layer_idx < self.frozen_layers:  
+                for param in layer.parameters():
+                    param.requires_grad = False
 
         if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
             model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
@@ -88,10 +110,16 @@ class AffineRegressor(nn.Module):
                 {'params': self.mlp.parameters(), 'lr': self.lr},   
                 {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
             ])
+            self.scheduler = None
+            if SCHED == "cosine":
+                self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.num_epochs, eta_min=self.min_lr)
+            elif SCHED == "step":
+                self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
 
         self.to(device)
 
     def FeatureExtractor(self, x1, x2):
+        # TODO Train with convs before VIT?
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state
         x2_embeddings = self.model(pixel_values=x2).last_hidden_state
