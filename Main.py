@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
                 if model.start_epoch < model.num_epochs:
                         parameters = f"""###########################################################################################################################################################\n
-                        {ADDITIONS} learning rate: {lr},  mlp_hidden_sizes: {MLP_HIDDEN_DIM}, batch_size: {bs}, norm: {NORM},
+                        {ADDITIONS} learning rate: {lr},  mlp_hidden_sizes: {MLP_HIDDEN_DIM}, batch_size: {bs}, norm: {NORM}, alpha: {alpha},
                         crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, seed: {SEED}, angle range: {ANGLE_RANGE}, shift range: {SHIFT_RANGE}, 
                         train length: {train_length}, val length: {val_length}, test length: {test_length}, get old path: {GET_OLD_PATH}\n\n\n"""
                         print_and_write(parameters, model.plots_path)
