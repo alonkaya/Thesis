@@ -25,13 +25,15 @@ class CustomDataset(torch.utils.data.Dataset):
 
         # Generate random affine params
         angle, shift_x, shift_y = random.uniform(-self.angle_range, self.angle_range), random.uniform(-self.shift_range, self.shift_range), random.uniform(-self.shift_range, self.shift_range)
-
         translated_image = F.affine(original_image, angle=angle, translate=(shift_x, shift_y), scale=1, shear=0)
+        
+        translated_image, original_image = F.to_tensor(translated_image), F.to_tensor(original_image)
+        translated_image, original_image = F.normalize(translated_image, mean, std), F.normalize(original_image, mean, std)
 
         # Rescale params -> [0,1]
-        angle = torch.tensor(abs(angle) / self.angle_range, dtype=torch.float32)
-        shift_x = torch.tensor(abs(shift_x) / self.shift_range, dtype=torch.float32)
-        shift_y = torch.tensor(abs(shift_y) / self.shift_range, dtype=torch.float32)
+        angle = torch.tensor(angle / self.angle_range, dtype=torch.float32)
+        shift_x = torch.tensor(shift_x / self.shift_range, dtype=torch.float32)
+        shift_y = torch.tensor(shift_y / self.shift_range, dtype=torch.float32)
 
         return original_image, translated_image, angle, shift_x, shift_y
 
@@ -41,8 +43,8 @@ def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length
         v2.Resize(256),
         v2.RandomCrop(224),
         v2.Grayscale(num_output_channels=3),
-        v2.ToTensor(), 
-        v2.Normalize(mean, std)
+        # v2.ToTensor(), 
+        # v2.Normalize(mean, std)
     ])
 
     # Load and display the image
@@ -83,12 +85,12 @@ def show_images(original_image, rotated_image, mean=mean, std=std):
     original_pil_image.save("original_image.png")
     rotated_pil_image.save("rotated_image.png")
 
-# if __name__ == "__main__":
-#     train_loader, val_loader, test_loader = get_dataloaders(batch_size=32, train_length=train_length, val_length=val_length, test_length=test_length)
+if __name__ == "__main__":
+    train_loader, val_loader, test_loader = get_dataloaders(batch_size=32, train_length=train_length, val_length=val_length, test_length=test_length)
     
-#     # Get a batch of images
-#     it = iter(train_loader)
-#     original_image, rotated_image, _, _, _ = next(it)
+    # Get a batch of images
+    it = iter(train_loader)
+    original_image, rotated_image, _, _, _ = next(it)
 
-#     # Visualize the first image in the batch
-#     show_images(original_image[0], rotated_image[0])  # Display the first image from the batch
+    # Visualize the first image in the batch
+    show_images(original_image[0], rotated_image[0])  # Display the first image from the batch
