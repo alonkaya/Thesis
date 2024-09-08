@@ -95,7 +95,7 @@ class AffineRegressor(nn.Module):
     def FeatureExtractor(self, x1, x2):
         if torch.isnan(x1).any():
             print_and_write(f"0. Nan in x1_embeddings\n {x1}")
-            raise ValueError("Nan in output")
+
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state
         x2_embeddings = self.model(pixel_values=x2).last_hidden_state
@@ -108,7 +108,6 @@ class AffineRegressor(nn.Module):
         x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
         if torch.isnan(x1_embeddings).any():
             print_and_write("1. Nan in x1_embeddings")
-            raise ValueError("Nan in output")
         
         if self.avg_embeddings:
             # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
@@ -117,7 +116,6 @@ class AffineRegressor(nn.Module):
             x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
             if torch.isnan(x1_embeddings).any():
                 print_and_write("2. Nan in x1_embeddings")
-                raise ValueError("Nan in output")
 
         if self.use_conv:
             # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
@@ -137,12 +135,10 @@ class AffineRegressor(nn.Module):
         output = self.mlp(embeddings)
         if torch.isnan(output).any():
             print_and_write("3. Nan in output")
-            raise ValueError("Nan in output")
 
         output = norm_layer(output)
         if torch.isnan(output).any():
             print_and_write("4. Nan in output")
-            raise ValueError("Nan in output")
 
         return output
 
@@ -336,7 +332,7 @@ class AffineRegressor(nn.Module):
 
     def test(self, test_loader):
         with torch.no_grad():
-            loss, mae_shift, euclidean_shift, mae_angle, mse_angle = torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0)
+            loss, mae_shift, euclidean_shift, mae_angle, mse_angle = torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32)
             for epoch in range(10):
                 epoch_stats = {"test_loss": torch.tensor(0, dtype=torch.float32), "test_mae_shift": torch.tensor(0, dtype=torch.float32), "test_euclidean_shift": torch.tensor(0, dtype=torch.float32), \
                                "test_mae_angle": torch.tensor(0, dtype=torch.float32), "test_mse_angle": torch.tensor(0, dtype=torch.float32)}
