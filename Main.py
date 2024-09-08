@@ -24,16 +24,16 @@ if __name__ == "__main__":
                 scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
-
-                plots_path = os.path.join('plots', f'BS_{bs}__lr_{lr}__train_size_{train_length}__model_{model}')
+                regrees = 'avg' if AVG_EMBEDDINGS else 'conv'
+                plots_path = os.path.join('plots', f'BS_{bs}__lr_{lr}__train_size_{train_length}__model_{model}__{regrees}')
    
                 train_loader, val_loader, test_loader = get_dataloaders(batch_size=bs, train_length=train_length, val_length=val_length, test_length=test_length)
 
-                model = AffineRegressor(lr, bs, alpha, model_name=MODEL, plots_path=plots_path, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS)
+                model = AffineRegressor(lr, bs, alpha, model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path=plots_path, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS)
 
                 if model.start_epoch < model.num_epochs:
                         parameters = f"""###########################################################################################################################################################\n
-                        {ADDITIONS} learning rate: {lr},  mlp_hidden_sizes: {MLP_HIDDEN_DIM}, batch_size: {bs}, norm: {NORM}, alpha: {alpha},
+                        {ADDITIONS} learning rate: {lr},  mlp_hidden_sizes: {MLP_HIDDEN_DIM}, batch_size: {bs}, norm: {NORM}, alpha: {alpha}, avg embeddings: {AVG_EMBEDDINGS}, 
                         crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, seed: {SEED}, angle range: {ANGLE_RANGE}, shift range: {SHIFT_RANGE}, 
                         train length: {train_length}, val length: {val_length}, test length: {test_length}, get old path: {GET_OLD_PATH}\n\n\n"""
                         print_and_write(parameters, model.plots_path)

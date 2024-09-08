@@ -5,7 +5,7 @@ from transformers import CLIPVisionModel, CLIPVisionConfig, ResNetModel
 
 
 class AffineRegressor(nn.Module):
-    def __init__(self, lr, batch_size, alpha, model_name=MODEL, plots_path=None, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
+    def __init__(self, lr, batch_size, alpha, avg_embeddings=AVG_EMBEDDINGS, model_name=MODEL, plots_path=None, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
         """
         Args:
@@ -35,6 +35,7 @@ class AffineRegressor(nn.Module):
         self.plots_path = plots_path
         self.use_conv = use_conv
         self.num_epochs = num_epochs
+        self.avg_embeddings = avg_embeddings
         self.start_epoch = 0
 
         # Lists to store training statistics
@@ -71,8 +72,11 @@ class AffineRegressor(nn.Module):
             # Initialize loss functions
             self.L2_loss = nn.MSELoss().to(device)
             self.huber_loss = nn.HuberLoss().to(device)
-           
-            if self.use_conv:
+            
+            if self.avg_embeddings:
+                mlp_input_shape //= (self.num_patches**2) 
+
+            elif self.use_conv:
                 self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
                 mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
 
@@ -99,6 +103,12 @@ class AffineRegressor(nn.Module):
 
         x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
         x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
+
+        if self.avg_embeddings:
+            # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
+            avg_patches = nn.AdaptiveAvgPool2d(1)
+            x1_embeddings = avg_patches(x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
+            x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
 
         if self.use_conv:
             # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
@@ -169,6 +179,8 @@ class AffineRegressor(nn.Module):
             'optimizer': self.optimizer.state_dict(),
             'vit': self.model.state_dict() ,
             'conv': self.conv.state_dict() if self.use_conv else '',
+            'alpha': self.alpha,
+            'avg_embeddings': self.avg_embeddings,
             "batch_size" : self.batch_size,
             "lr" : self.lr,
             "model_name" : self.model_name,
@@ -199,6 +211,7 @@ class AffineRegressor(nn.Module):
         self.model_name = checkpoint.get("model_name", self.model_name)
         self.plots_path = checkpoint.get("plots_path", None) if GET_OLD_PATH else self.plots_path 
         self.use_conv = checkpoint.get("use_conv", self.use_conv)
+        self.avg_embeddings = checkpoint.get("avg_embeddings", self.avg_embeddings)
         self.hidden_size = checkpoint.get("hidden_size", 0)
         self.num_patches = checkpoint.get("num_patches", 0)
         self.start_epoch = checkpoint.get("epoch", 0)
@@ -230,6 +243,9 @@ class AffineRegressor(nn.Module):
             mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
             self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
+        
+        if self.avg_embeddings:
+            mlp_input_shape //= (self.num_patches**2) 
 
         # Load MLP
         self.mlp = MLP(input_dim=mlp_input_shape).to(device)
