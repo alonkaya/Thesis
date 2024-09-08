@@ -93,7 +93,7 @@ class AffineRegressor(nn.Module):
         self.to(device)
 
     def FeatureExtractor(self, x1, x2):
-        if math.isnan(x1).any():
+        if torch.isnan(x1).any():
             print_and_write(f"0. Nan in x1_embeddings\n {x1}")
             raise ValueError("Nan in output")
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
@@ -106,7 +106,7 @@ class AffineRegressor(nn.Module):
 
         x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
         x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
-        if math.isnan(x1_embeddings).any():
+        if torch.isnan(x1_embeddings).any():
             print_and_write("1. Nan in x1_embeddings")
             raise ValueError("Nan in output")
         
@@ -115,7 +115,7 @@ class AffineRegressor(nn.Module):
             avg_patches = nn.AdaptiveAvgPool2d(1)
             x1_embeddings = avg_patches(x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
             x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
-            if math.isnan(x1_embeddings).any():
+            if torch.isnan(x1_embeddings).any():
                 print_and_write("2. Nan in x1_embeddings")
                 raise ValueError("Nan in output")
 
@@ -135,12 +135,12 @@ class AffineRegressor(nn.Module):
         embeddings = self.FeatureExtractor(x1, x2) # Output shape is (batch_size, -1)
         # output shape is (batch_size, 3)
         output = self.mlp(embeddings)
-        if math.isnan(output).any():
+        if torch.isnan(output).any():
             print_and_write("3. Nan in output")
             raise ValueError("Nan in output")
 
         output = norm_layer(output)
-        if math.isnan(output).any():
+        if torch.isnan(output).any():
             print_and_write("4. Nan in output")
             raise ValueError("Nan in output")
 
