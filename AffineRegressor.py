@@ -169,17 +169,16 @@ class AffineRegressor(nn.Module):
             'optimizer': self.optimizer.state_dict(),
             'vit': self.model.state_dict() ,
             'conv': self.conv.state_dict() if self.use_conv else '',
-            "L2_coeff" : self.L2_coeff,
-            "huber_coeff" : self.huber_coeff,
             "batch_size" : self.batch_size,
             "lr" : self.lr,
             "model_name" : self.model_name,
-            "augmentation" : self.augmentation,
             "plots_path" : self.plots_path,
             "use_conv" : self.use_conv,
             "hidden_size" : self.hidden_size,
             "num_patches" : self.num_patches,
             'epoch' : epoch,
+            'angle_range' : ANGLE_RANGE,
+            'shift_range' : SHIFT_RANGE,
             "all_train_loss" : self.all_train_loss, 
             "all_val_loss" : self.all_val_loss,
             "all_train_mae_shift" : self.all_train_mae_shift,
@@ -192,88 +191,62 @@ class AffineRegressor(nn.Module):
             "all_val_mse_angle" : self.all_val_mse_angle,
         }, checkpoint_path) 
 
-    # def load_model(self, model_path=None):
-    #     checkpoint = torch.load(model_path, map_location='cpu')
+    def load_model(self, model_path=None):
+        checkpoint = torch.load(model_path, map_location='cpu')
 
-    #     self.lr_decay = checkpoint.get("lr_decay", self.lr_decay)
-    #     self.L2_coeff = checkpoint.get("L2_coeff", self.L2_coeff)
-    #     self.huber_coeff = checkpoint.get("huber_coeff", self.huber_coeff)
-    #     self.batch_size = checkpoint.get("batch_size", self.batch_size)
-    #     self.lr = checkpoint.get("lr", self.lr)
-    #     self.min_lr = checkpoint.get("min_lr", self.min_lr)
-    #     self.model_name = checkpoint.get("model_name", self.model_name)
-    #     self.augmentation = checkpoint.get("augmentation", self.augmentation)
-    #     self.use_reconstruction = checkpoint.get("use_reconstruction", self.use_reconstruction)
-    #     self.re1_coeff = checkpoint.get("re1_coeff", self.re1_coeff)
-    #     self.alg_coeff = checkpoint.get("alg_coeff", self.alg_coeff)
-    #     self.sed_coeff = checkpoint.get("sed_coeff", self.sed_coeff)
-    #     self.plots_path = checkpoint.get("plots_path", None) if GET_OLD_PATH else self.plots_path 
-    #     self.use_conv = checkpoint.get("use_conv", self.use_conv)
-    #     self.hidden_size = checkpoint.get("hidden_size", 0)
-    #     self.num_patches = checkpoint.get("num_patches", 0)
-    #     self.frozen_layers = checkpoint.get("frozen_layers", self.frozen_layers)
-    #     self.start_epoch = checkpoint.get("epoch", 0)
-    #     self.all_train_loss = checkpoint.get("all_train_loss", [])
-    #     self.all_val_loss = checkpoint.get("all_val_loss", [])
-    #     self.all_train_mae = checkpoint.get("all_train_mae", [])
-    #     self.all_val_mae = checkpoint.get("all_val_mae", [])
-    #     self.all_algebraic_pred = checkpoint.get("all_algebraic_pred", [])
-    #     self.all_RE1_pred = checkpoint.get("all_RE1_pred", [])
-    #     self.all_SED_pred = checkpoint.get("all_SED_pred", [])
-    #     self.all_val_algebraic_pred = checkpoint.get("all_val_algebraic_pred", [])
-    #     self.all_val_RE1_pred = checkpoint.get("all_val_RE1_pred", [])
-    #     self.all_val_SED_pred = checkpoint.get("all_val_SED_pred", [])
+        self.batch_size = checkpoint.get("batch_size", self.batch_size)
+        self.lr = checkpoint.get("lr", self.lr)
+        self.model_name = checkpoint.get("model_name", self.model_name)
+        self.plots_path = checkpoint.get("plots_path", None) if GET_OLD_PATH else self.plots_path 
+        self.use_conv = checkpoint.get("use_conv", self.use_conv)
+        self.hidden_size = checkpoint.get("hidden_size", 0)
+        self.num_patches = checkpoint.get("num_patches", 0)
+        self.start_epoch = checkpoint.get("epoch", 0)
+        self.alpha = checkpoint.get("alpha", 0)
+        self.all_train_loss = checkpoint.get("all_train_loss", [])
+        self.all_val_loss = checkpoint.get("all_val_loss", [])
+        self.all_train_mae_shift = checkpoint.get("all_train_mae_shift", [])
+        self.all_val_mae_shift = checkpoint.get("all_val_mae_shift", [])
+        self.all_train_euclidean_shift = checkpoint.get("all_train_euclidean_shift", [])
+        self.all_val_euclidean_shift = checkpoint.get("all_val_euclidean_shift", [])
+        self.all_train_mae_angle = checkpoint.get("all_train_mae_angle", [])
+        self.all_val_mae_angle = checkpoint.get("all_val_mae_angle", [])
+        self.all_train_mse_angle = checkpoint.get("all_train_mse_angle", [])
+        self.all_val_mse_angle = checkpoint.get("all_val_mse_angle", [])
 
-    #     # Get input dimension for the MLP based on ViT configuration
-    #     self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]
-    #     self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
-    #     mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
+        # Get input dimension for the MLP based on ViT configuration
+        self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]
+        self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
+        mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
 
-    #     # Initialize loss functions
-    #     self.L2_loss = nn.MSELoss().to(device)
-    #     self.huber_loss = nn.HuberLoss().to(device)
+        # Initialize loss functions
+        self.L2_loss = nn.MSELoss().to(device)
+        self.huber_loss = nn.HuberLoss().to(device)
 
-    #     # Load conv/average embeddings
-    #         mlp_input_shape //= (self.num_patches**2)     
-    #     if self.use_conv:
-    #         self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
-    #         mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
-    #         self.conv.load_state_dict(checkpoint['conv'])
-    #         self.conv.to(device)
+        # Load conv/average embeddings
+        mlp_input_shape //= (self.num_patches**2)     
+        if self.use_conv:
+            self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
+            mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
+            self.conv.load_state_dict(checkpoint['conv'])
+            self.conv.to(device)
 
-    #     # Load MLP
-    #     self.mlp = MLP(input_dim=mlp_input_shape).to(device)
-    #     self.mlp.load_state_dict(checkpoint['mlp'])
-    #     self.mlp.to(device)
+        # Load MLP
+        self.mlp = MLP(input_dim=mlp_input_shape).to(device)
+        self.mlp.load_state_dict(checkpoint['mlp'])
+        self.mlp.to(device)
 
-    #     # Load model
-    #     self.model.load_state_dict(checkpoint['vit']) 
-    #     self.model.to(device)
+        # Load model
+        self.model.load_state_dict(checkpoint['vit']) 
+        self.model.to(device)
 
-    #     try:
-    #         # Load optimizer and scheduler
-    #         self.optimizer = optim.Adam([
-    #             {'params': self.model.parameters(), 'lr': self.lr},
-    #             {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
-    #             {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
-    #         ])
-    #         self.scheduler = None
-    #         if SCHED == "cosine":
-    #             self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.num_epochs, eta_min=self.min_lr)
-    #             self.scheduler.load_state_dict(checkpoint.get("scheduler"))
-    #             if self.scheduler.last_epoch >= self.schedular.T_max-1:
-    #                 self.scheduler = None
-    #         elif SCHED == "step":
-    #             self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
-    #             self.scheduler.load_state_dict(checkpoint.get("scheduler"))
-    #         self.optimizer.load_state_dict(checkpoint['optimizer'])
-    #     except Exception as e:
-    #         self.optimizer = optim.Adam([
-    #             {'params': self.model.parameters(), 'lr': self.lr},
-    #             {'params': []},
-    #             {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
-    #             {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
-    #         ])
+        # Load optimizer and scheduler
+        self.optimizer = optim.Adam([
+            {'params': self.model.parameters(), 'lr': self.lr},
+            {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
+            {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
+        ])
+        self.optimizer.load_state_dict(checkpoint['optimizer'])
 
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
@@ -328,8 +301,8 @@ class AffineRegressor(nn.Module):
         with torch.no_grad():
             loss, mae_shift, euclidean_shift, mae_angle, mse_angle = torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0)
             for epoch in range(10):
-                epoch_stats = {"test_loss": torch.tensor(0), "test_mae_shift": torch.tensor(0), "test_euclidean_shift": torch.tensor(0), \
-                               "test_mae_angle": torch.tensor(0), "test_mse_angle": torch.tensor(0)}
+                epoch_stats = {"test_loss": torch.tensor(0, dtype=torch.float32), "test_mae_shift": torch.tensor(0, dtype=torch.float32), "test_euclidean_shift": torch.tensor(0, dtype=torch.float32), \
+                               "test_mae_angle": torch.tensor(0, dtype=torch.float32), "test_mse_angle": torch.tensor(0, dtype=torch.float32)}
                 send_to_device(epoch_stats)
     
                 self.dataloader_step(test_loader, 0, epoch_stats, data_type="test")
