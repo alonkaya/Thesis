@@ -1,7 +1,7 @@
 from params import *
 from utils import *
 import torch.optim as optim
-from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetModel
+from transformers import CLIPVisionModel, CLIPVisionConfig, ResNetModel
 
 
 class AffineRegressor(nn.Module):
@@ -124,10 +124,10 @@ class AffineRegressor(nn.Module):
 
     def train_model(self, train_loader, val_loader, test_loader):
         for epoch in range(self.start_epoch, self.num_epochs):
-            epoch_stats = {"mae_shift": torch.tensor(0), "euclidean_shift": torch.tensor(0), \
-                           "loss": torch.tensor(0), "mae_angle": torch.tensor(0), "mse_angle": torch.tensor(0),
-                           "val_mae_shift": torch.tensor(0), "val_euclidean_shift": torch.tensor(0), \
-                           "val_loss": torch.tensor(0), "val_mae_angle": torch.tensor(0), "val_mse_angle": torch.tensor(0)}
+            epoch_stats = {"mae_shift": torch.tensor(0, dtype=torch.float32), "euclidean_shift": torch.tensor(0, dtype=torch.float32), \
+                           "loss": torch.tensor(0, dtype=torch.float32), "mae_angle": torch.tensor(0, dtype=torch.float32), "mse_angle": torch.tensor(0, dtype=torch.float32),
+                           "val_mae_shift": torch.tensor(0, dtype=torch.float32), "val_euclidean_shift": torch.tensor(0, dtype=torch.float32), \
+                           "val_loss": torch.tensor(0, dtype=torch.float32), "val_mae_angle": torch.tensor(0, dtype=torch.float32), "val_mse_angle": torch.tensor(0, dtype=torch.float32)}
             send_to_device(epoch_stats)
 
             # Training
@@ -192,7 +192,7 @@ class AffineRegressor(nn.Module):
             "all_val_mse_angle" : self.all_val_mse_angle,
         }, checkpoint_path) 
 
-    # # def load_model(self, model_path=None):
+    # def load_model(self, model_path=None):
     #     checkpoint = torch.load(model_path, map_location='cpu')
 
     #     self.lr_decay = checkpoint.get("lr_decay", self.lr_decay)
