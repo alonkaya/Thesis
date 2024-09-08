@@ -93,6 +93,9 @@ class AffineRegressor(nn.Module):
         self.to(device)
 
     def FeatureExtractor(self, x1, x2):
+        if math.isnan(x1).any():
+            print_and_write(f"0. Nan in x1_embeddings\n {x1}")
+            raise ValueError("Nan in output")
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state
         x2_embeddings = self.model(pixel_values=x2).last_hidden_state
@@ -103,12 +106,18 @@ class AffineRegressor(nn.Module):
 
         x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
         x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
-
+        if math.isnan(x1_embeddings).any():
+            print_and_write("1. Nan in x1_embeddings")
+            raise ValueError("Nan in output")
+        
         if self.avg_embeddings:
             # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
             avg_patches = nn.AdaptiveAvgPool2d(1)
             x1_embeddings = avg_patches(x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
             x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
+            if math.isnan(x1_embeddings).any():
+                print_and_write("2. Nan in x1_embeddings")
+                raise ValueError("Nan in output")
 
         if self.use_conv:
             # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
@@ -126,10 +135,14 @@ class AffineRegressor(nn.Module):
         embeddings = self.FeatureExtractor(x1, x2) # Output shape is (batch_size, -1)
         # output shape is (batch_size, 3)
         output = self.mlp(embeddings)
-        print(output)
+        if math.isnan(output).any():
+            print_and_write("3. Nan in output")
+            raise ValueError("Nan in output")
+
         output = norm_layer(output)
-        print(output)
-        print("\n")
+        if math.isnan(output).any():
+            print_and_write("4. Nan in output")
+            raise ValueError("Nan in output")
 
         return output
 
@@ -162,6 +175,10 @@ class AffineRegressor(nn.Module):
             Training MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
             Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}\n\n""", self.plots_path)
             
+            if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.all_train_mae_shift[-1], self.all_val_mae_shift[-1], self.plots_path):
+                self.num_epochs = epoch + 1
+                break
+
             if SAVE_MODEL:
                 self.save_model(epoch+1)
         
@@ -268,7 +285,6 @@ class AffineRegressor(nn.Module):
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
         for img1, img2, angle, shift_x, shift_y in dataloader:
-
             img1, img2, angle, shift = img1.to(device), img2.to(device), angle.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
 
             # Forward pass
