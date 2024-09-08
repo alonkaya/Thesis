@@ -124,10 +124,11 @@ class AffineRegressor(nn.Module):
     def forward(self, x1, x2):
         # x1, x2 shape is (batch_size, channels, height, width)
         embeddings = self.FeatureExtractor(x1, x2) # Output shape is (batch_size, -1)
-
+        print(output)
         # output shape is (batch_size, 3)
         output = self.mlp(embeddings)
-
+        print(output)
+        print("\n")
         output = norm_layer(output)
 
         return output
