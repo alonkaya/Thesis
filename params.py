@@ -14,7 +14,7 @@ test_length = 320 # Needs to be a multiple of batch size
 
 ### Training ###
 LR = [1e-4, 4e-5, 5e-3]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
-BATCH_SIZE = [32]                                                                     # TODO 16, 32, 64
+BATCH_SIZE = [1]                                                                     # TODO 16, 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 NUM_WORKERS = 2
