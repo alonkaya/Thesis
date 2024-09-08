@@ -171,3 +171,7 @@ def set_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)  # If using multi-GPU.
+
+
+if __name__ == "__main__":
+    plot([1, 2, 3, 4, 5], [1, 2, 3, 4, 5], [1, 2, 3, 4, 5], "Test", "plots", show=True, save=False)
