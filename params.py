@@ -6,25 +6,24 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 ### Dataset ###
 CROP = 224
 RESIZE = 256
-angle_range = 90
-shift_range = 100
-train_length = 1000
-val_length = 100
-test_length = 100
+ANGLE_RANGE = 90
+SHIFT_RANGE = 100
+train_length = 1024 # Needs to be a multiple of batch size
+val_length = 96 # Needs to be a multiple of batch size
+test_length = 96 # Needs to be a multiple of batch size
 
 ### Training ###
 LR = [1e-4]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
-BATCH_SIZE = [4]                                                          # TODO 16, 32, 64
+BATCH_SIZE = [32]                                                          # TODO 16, 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
-NUM_WORKERS = 0 
+NUM_WORKERS = 2
 SAVE_MODEL = True
-NUM_EPOCHS = 1500
+NUM_EPOCHS = 20
 ADDITIONS = ""                                     
 GET_OLD_PATH = False
 SEED = 42
-L2_COEFF = 1
-HUBER_COEFF = 1                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
+ALPHA = [0.1, 1, 10]
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
@@ -39,7 +38,6 @@ FREEZE_PRETRAINED_MODEL=False
 AVG_EMBEDDINGS = False
 USE_CONV = True
 NUM_OUTPUT = 3
-FROZEN_LAYERS = [0]
-mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
-std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
+mean = torch.tensor([0.485, 0.456, 0.406])
+std = torch.tensor([0.229, 0.224, 0.225])
 

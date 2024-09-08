@@ -113,19 +113,11 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
         plt.show()
 
 
+def norm_layer(x):
+    # Normalize the angle and shift values to [0, 1]
+    angle, shift = torch.abs(x[:, 0]) / ANGLE_RANGE, torch.abs(x[:, 1:]) / SHIFT_RANGE
 
-def normalize_max(x):
-    return x / (torch.max(torch.abs(x), dim=1, keepdim=True)[0] + 1e-8)
-
-def normalize_L1(x):
-    return x / torch.sum(torch.abs(x), dim=1, keepdim=True) 
-
-def normalize_L2(x):
-    return x / torch.linalg.norm(x, dim=1, keepdim=True)
-
-def norm_layer(unnormalized_x):
-    # Normalizes a batch of flattend 9-long vectors (i.e shape [-1, 9])
-    return normalize_L2(unnormalized_x)
+    return torch.cat((angle.unsqueeze(1), shift), dim=1)
     
 
 def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, plots_path):
