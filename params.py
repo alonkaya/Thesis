@@ -23,7 +23,7 @@ NUM_EPOCHS = 50
 ADDITIONS = ""                                     
 GET_OLD_PATH = False
 SEED = 42
-ALPHA = [1, 0.1 10]
+ALPHA = [1, 0.1, 10]
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
