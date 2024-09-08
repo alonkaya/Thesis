@@ -19,11 +19,11 @@ NORM = True
 TRAIN_FROM_SCRATCH = False
 NUM_WORKERS = 2
 SAVE_MODEL = True
-NUM_EPOCHS = 53
+NUM_EPOCHS = 60
 ADDITIONS = ""                                     
 GET_OLD_PATH = False
 SEED = 42
-ALPHA = [1, 0.1, 10]
+ALPHA = [10, 0.1, 1]
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
