@@ -1,57 +1,7 @@
 nohup: ignoring input
-/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
-  torch.utils._pytree._register_pytree_node(
-/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/huggingface_hub/file_download.py:1150: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
-  warnings.warn(
-/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/modeling_utils.py:479: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
-  return torch.load(checkpoint_file, map_location=map_location)
-/home/aviran/Alon/Thesis/AffineRegressor.py:221: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
-  checkpoint = torch.load(model_path, map_location='cpu')
-###########################################################################################################################################################
-
-                         learning rate: 4e-05,  mlp_hidden_sizes: [1024, 512], batch_size: 2, norm: True, alpha: 1, avg embeddings: True, 
-                        crop: 224 resize: 256, use conv: False pretrained: None, seed: 42, angle range: 90, shift range: 100, 
-                        train length: 1024, val length: 160, test length: 160, get old path: False
-
-
-
-##### CONTINUE TRAINING #####
-
-
-Epoch 53/53: Training Loss: 0.06100238487124443		 Val Loss: 0.17306594848632811
-            Training MAE Shift: 0.07062797993421555		 Val MAE Shift: 0.08511322140693664
-            Training Euclidean Shift: 0.11112454533576965		 Val Euclidean Shift: 0.13424668312072754
-            Training MAE Angle: 0.1724018156528473		 Val MAE Angle: 0.3075061082839966
-            Training MSE Angle: 0.05073350667953491		 Val MSE Angle: 0.1586601972579956
-
-
-## TEST RESULTS: ##
-Test Loss: 0.17602404952049255 
-Test MAE Shift: 0.0887678787112236		 Test Euclidean Shift: 0.13919657468795776
-Test MAE Angle: 0.3157464861869812		 Test MSE Angle: 0.1618843525648117
-
-
-###########################################################################################################################################################
-
-                         learning rate: 4e-05,  mlp_hidden_sizes: [1024, 512], batch_size: 2, norm: True, alpha: 0.1, avg embeddings: True, 
-                        crop: 224 resize: 256, use conv: False pretrained: None, seed: 42, angle range: 90, shift range: 100, 
-                        train length: 1024, val length: 160, test length: 160, get old path: False
-
-
-
 Traceback (most recent call last):
-  File "/home/aviran/Alon/Thesis/Main.py", line 44, in <module>
-    model.train_model(train_loader, val_loader, test_loader)
-  File "/home/aviran/Alon/Thesis/AffineRegressor.py", line 155, in train_model
-    self.dataloader_step(train_loader, epoch, epoch_stats, data_type="train")
-  File "/home/aviran/Alon/Thesis/AffineRegressor.py", line 309, in dataloader_step
-    self.optimizer.step()
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/optim/optimizer.py", line 484, in wrapper
-    out = func(*args, **kwargs)
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/optim/optimizer.py", line 89, in _use_grad
-    ret = func(self, *args, **kwargs)
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/optim/adam.py", line 216, in step
-    has_complex = self._init_group(
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/optim/adam.py", line 160, in _init_group
-    state["exp_avg_sq"] = torch.zeros_like(
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacity of 23.54 GiB of which 10.19 MiB is free. Process 1661016 has 19.74 GiB memory in use. Process 1691205 has 384.00 MiB memory in use. Including non-PyTorch memory, this process has 3.36 GiB memory in use. Of the allocated memory 2.60 GiB is allocated by PyTorch, and 313.01 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+  File "/home/aviran/Alon/Thesis/Main.py", line 9, in <module>
+    from Dataset import get_dataloaders
+  File "/home/aviran/Alon/Thesis/Dataset.py", line 2, in <module>
+    from datasets import load_dataset
+ModuleNotFoundError: No module named 'datasets'
