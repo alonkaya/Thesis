@@ -11,7 +11,6 @@ class AffineRegressor(nn.Module):
         Args:
         - lr: learning rate for the vision transformer
         - lr_mlp: learning rate for the MLP
-        - average_embeddings: whether to average the embeddings of the patches
         - batch_size: batch size for training
         - deepF_noCorrs: whether to use the deepF_noCorrs model
         - augmentation: whether to use data augmentation
@@ -72,10 +71,7 @@ class AffineRegressor(nn.Module):
             # Initialize loss functions
             self.L2_loss = nn.MSELoss().to(device)
             self.huber_loss = nn.HuberLoss().to(device)
-        
-            # Load conv/average embeddings
-            if self.average_embeddings:
-                mlp_input_shape //= (self.num_patches**2)     
+           
             if self.use_conv:
                 self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
                 mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
@@ -103,12 +99,6 @@ class AffineRegressor(nn.Module):
 
         x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
         x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
-
-        if self.average_embeddings:
-            # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
-            avg_patches = nn.AdaptiveAvgPool2d(1)
-            x1_embeddings = avg_patches(x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
-            x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
 
         if self.use_conv:
             # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
@@ -183,7 +173,6 @@ class AffineRegressor(nn.Module):
             "huber_coeff" : self.huber_coeff,
             "batch_size" : self.batch_size,
             "lr" : self.lr,
-            "average_embeddings" : self.average_embeddings,
             "model_name" : self.model_name,
             "augmentation" : self.augmentation,
             "plots_path" : self.plots_path,
@@ -212,7 +201,6 @@ class AffineRegressor(nn.Module):
     #     self.batch_size = checkpoint.get("batch_size", self.batch_size)
     #     self.lr = checkpoint.get("lr", self.lr)
     #     self.min_lr = checkpoint.get("min_lr", self.min_lr)
-    #     self.average_embeddings = checkpoint.get("average_embeddings", self.average_embeddings)
     #     self.model_name = checkpoint.get("model_name", self.model_name)
     #     self.augmentation = checkpoint.get("augmentation", self.augmentation)
     #     self.use_reconstruction = checkpoint.get("use_reconstruction", self.use_reconstruction)
@@ -246,7 +234,6 @@ class AffineRegressor(nn.Module):
     #     self.huber_loss = nn.HuberLoss().to(device)
 
     #     # Load conv/average embeddings
-    #     if self.average_embeddings:
     #         mlp_input_shape //= (self.num_patches**2)     
     #     if self.use_conv:
     #         self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)

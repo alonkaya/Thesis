@@ -35,7 +35,6 @@ PRETRAINED_PATH =  None # make sure you set GET_OLD_PATH !!
 RESNET_MODEL_NAME = 'microsoft/resnet-152'
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
-AVG_EMBEDDINGS = False
 USE_CONV = True
 NUM_OUTPUT = 3
 mean = torch.tensor([0.485, 0.456, 0.406])
