@@ -245,7 +245,7 @@ class AffineRegressor(nn.Module):
         self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]
         self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
         mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
-
+        print(mlp_input_shape)
         # Initialize loss functions
         self.L2_loss = nn.MSELoss().to(device)
         self.huber_loss = nn.HuberLoss().to(device)
