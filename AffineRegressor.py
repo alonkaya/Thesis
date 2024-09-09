@@ -316,9 +316,9 @@ class AffineRegressor(nn.Module):
             with torch.no_grad():
                 mae_angle = 0 if ANGLE_RANGE==0 else torch.mean(torch.abs(output[:,0] - angle))
                 # mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output[:,0:] - shift))
-                # euclidean_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.sqrt(torch.sum((output[:,0:] - shift)**2, dim=1)))
+                # euclidean_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.sqrt(torch.sum((output[:,0:] - shift)**2, dim=1))) # check this!!
                 mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output[:,0] - shift))
-                euclidean_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.sqrt(torch.sum((output[:,0] - shift)**2, dim=1)))
+                euclidean_shift = 0 
 
             if data_type == "train":
                 # Compute Backward pass and gradients
