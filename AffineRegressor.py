@@ -136,9 +136,9 @@ class AffineRegressor(nn.Module):
         if torch.isnan(output).any():
             print_and_write("3. Nan in output")
 
-        # output = norm_layer(output)
-        # if torch.isnan(output).any():
-        #     print_and_write("4. Nan in output")
+        output = norm_layer(output)
+        if torch.isnan(output).any():
+            print_and_write("4. Nan in output")
 
         return output
 
@@ -284,7 +284,7 @@ class AffineRegressor(nn.Module):
 
             # Forward pass
             output = self.forward(img1, img2)
-
+            print(output.shape, angle.shape)
             # Compute loss
             # huber_angle = self.huber_loss(output[:,0], angle)
             mse_angle = self.L2_loss(output[:,0], angle)

@@ -14,7 +14,7 @@ test_length = 160 # Needs to be a multiple of batch size
 
 ### Training ###
 LR = [4e-5, 5e-4, 1e-4]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
-BATCH_SIZE = [32]                                                                     # TODO 16, 32, 64
+BATCH_SIZE = [2]                                                                     # TODO 16, 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 NUM_WORKERS = 2
@@ -23,7 +23,7 @@ NUM_EPOCHS = 50
 ADDITIONS = ""                                     
 GET_OLD_PATH = False
 SEED = 42
-ALPHA = [10, 0.1, 1]
+ALPHA = [1]
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
