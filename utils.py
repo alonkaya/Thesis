@@ -114,6 +114,7 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
 
 
 def norm_layer(x):
+    print(x.shape)
     # Normalize the angle and shift values to [0, 1]
     angle, shift = x[:, 0] / ANGLE_RANGE, x[:, 1:] / SHIFT_RANGE
 
