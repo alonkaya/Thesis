@@ -31,11 +31,12 @@ class CustomDataset(torch.utils.data.Dataset):
         translated_image, original_image = F.normalize(translated_image, mean, std), F.normalize(original_image, mean, std)
 
         # Rescale params -> [0,1]
-        angle = torch.tensor(angle / self.angle_range, dtype=torch.float32)
-        # shift_x = torch.tensor(shift_x / self.shift_range, dtype=torch.float32)
-        # shift_y = torch.tensor(shift_y / self.shift_range, dtype=torch.float32)
+        angle = 0 if self.angle_range==0 else torch.tensor(angle / self.angle_range, dtype=torch.float32)
+        shift_x = 0 if self.shift_range==0 else torch.tensor(shift_x / self.shift_range, dtype=torch.float32)
+        shift_y = 0 if self.shift_range==0 else torch.tensor(shift_y / self.shift_range, dtype=torch.float32)
 
-        return original_image, translated_image, angle
+        ret =  original_image, translated_image, angle if NUM_OUTPUT == 1 else original_image, translated_image, shift_x, shift_y if NUM_OUTPUT == 2 else original_image, translated_image, angle, shift_x, shift_y
+        return ret
 
 
 def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length=val_length, test_length=test_length):

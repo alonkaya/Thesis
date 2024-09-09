@@ -284,7 +284,6 @@ class AffineRegressor(nn.Module):
 
             # Forward pass
             output = self.forward(img1, img2)
-            print(output.shape, angle.shape)
             # Compute loss
             # huber_angle = self.huber_loss(output[:,0], angle)
             mse_angle = self.L2_loss(output[:,0], angle)
