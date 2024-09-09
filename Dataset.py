@@ -38,7 +38,7 @@ class CustomDataset(torch.utils.data.Dataset):
         if SHIFT_RANGE == 0:
             return original_image, translated_image, angle
         elif ANGLE_RANGE == 0:
-            return original_image, translated_image, shift_x
+            return original_image, translated_image, shift_x, shift_y
         else:
             return original_image, translated_image, angle, shift_x, shift_y
     

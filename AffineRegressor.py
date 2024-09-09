@@ -292,32 +292,32 @@ class AffineRegressor(nn.Module):
                 img1, img2, angle = batch
                 img1, img2, angle = img1.to(device), img2.to(device), angle.to(device)
             elif ANGLE_RANGE == 0:
-                img1, img2, shift_x = batch
-                img1, img2, shift = img1.to(device), img2.to(device), shift_x.to(device)
+                img1, img2, shift_x, shift_y = batch
+                img1, img2, shift = img1.to(device), img2.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
             else:
                 img1, img2, angle, shift_x, shift_y = batch
                 img1, img2, angle, shift = img1.to(device), img2.to(device), angle.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
 
             # Forward pass
             output = self.forward(img1, img2)
-            print(output.shape, shift.shape)
+
             mae_shift, euclidean_shift, mae_angle, mse_angle = 0, 0, 0, 0
             # Compute loss
             if SHIFT_RANGE == 0:
                 mse_angle = self.L2_loss(output[:,0], angle)
                 loss = mse_angle
             elif ANGLE_RANGE == 0:
-                # mse_shift = self.L2_loss(output[:, 0:], shift)
-                mse_shift = self.L2_loss(output[:,0], shift)
+                mse_shift = self.L2_loss(output, shift)
+                # mse_shift = self.L2_loss(output[:,0], shift)
                 loss = mse_shift
             else:
                 loss = mse_angle + self.alpha * mse_shift
 
             with torch.no_grad():
                 mae_angle = 0 if ANGLE_RANGE==0 else torch.mean(torch.abs(output[:,0] - angle))
-                # mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output[:,0:] - shift))
+                mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output - shift))
                 # euclidean_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.sqrt(torch.sum((output[:,0:] - shift)**2, dim=1))) # check this!!
-                mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output[:,0] - shift))
+                # mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output[:,0] - shift))
                 euclidean_shift = 0 
 
             if data_type == "train":
