@@ -332,15 +332,16 @@ class AffineRegressor(nn.Module):
         self.all_val_loss.append(epoch_stats["val_loss"])
 
         if NUM_OUTPUT == 1 or NUM_OUTPUT == 3:
-            self.all_train_mae_shift.append(epoch_stats["mae_shift"])
-            self.all_val_mae_shift.append(epoch_stats["val_mae_shift"])
-            self.all_train_euclidean_shift.append(epoch_stats["euclidean_shift"])
-            self.all_val_euclidean_shift.append(epoch_stats["val_euclidean_shift"])
-        if NUM_OUTPUT == 2 or NUM_OUTPUT == 3:
             self.all_train_mae_angle.append(epoch_stats["mae_angle"])
             self.all_val_mae_angle.append(epoch_stats["val_mae_angle"])
             self.all_train_mse_angle.append(epoch_stats["mse_angle"])
             self.all_val_mse_angle.append(epoch_stats["val_mse_angle"])
+
+        if NUM_OUTPUT == 2 or NUM_OUTPUT == 3:
+            self.all_train_mae_shift.append(epoch_stats["mae_shift"])
+            self.all_val_mae_shift.append(epoch_stats["val_mae_shift"])
+            self.all_train_euclidean_shift.append(epoch_stats["euclidean_shift"])
+            self.all_val_euclidean_shift.append(epoch_stats["val_euclidean_shift"])
 
 
     def test(self, test_loader):
