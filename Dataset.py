@@ -35,7 +35,7 @@ class CustomDataset(torch.utils.data.Dataset):
         shift_x = 0 if self.shift_range==0 else torch.tensor(shift_x / self.shift_range, dtype=torch.float32)
         shift_y = 0 if self.shift_range==0 else torch.tensor(shift_y / self.shift_range, dtype=torch.float32)
 
-        ret =  original_image, translated_image, angle if self.shift_range==0 else original_image, translated_image, shift_x, shift_y if self.angle_range==0 else original_image, translated_image, angle, shift_x, shift_y
+        ret =  original_image, translated_image, angle 
         print(len(ret))
         return ret
 
