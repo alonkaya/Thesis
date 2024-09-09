@@ -106,16 +106,16 @@ class AffineRegressor(nn.Module):
 
         x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
         x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
-        if torch.isnan(x1_embeddings).any():
-            print_and_write("1. Nan in x1_embeddings", self.plots_path)
+        if torch.isnan(x1_embeddings).any() or torch.isnan(x2_embeddings).any():
+            print_and_write("1. Nan in vit", self.plots_path)
         
         if self.avg_embeddings:
             # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
             avg_patches = nn.AdaptiveAvgPool2d(1)
             x1_embeddings = avg_patches(x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
             x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
-            if torch.isnan(x1_embeddings).any():
-                print_and_write("2. Nan in x1_embeddings", self.plots_path)
+            if torch.isnan(x1_embeddings).any() or torch.isnan(x2_embeddings).any():
+                print_and_write("2. Nan in average embeddings", self.plots_path)
 
         if self.use_conv:
             # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
@@ -123,6 +123,8 @@ class AffineRegressor(nn.Module):
             x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
             embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
             embeddings = self.conv(embeddings)
+            if torch.isnan(embeddings).any():
+                print_and_write(f"5. Nan in conv\n", self.plots_path)
         else:
             embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
         
@@ -131,17 +133,15 @@ class AffineRegressor(nn.Module):
     def forward(self, x1, x2):
         # x1, x2 shape is (batch_size, channels, height, width)
         embeddings = self.FeatureExtractor(x1, x2) # Output shape is (batch_size, -1)
-        if torch.isnan(embeddings).any():
-            print_and_write(f"5. Nan in embeddings\n{embeddings}", self.plots_path)
 
         # output shape is (batch_size, 3)
         output = self.mlp(embeddings)
         if torch.isnan(output).any():
-            print_and_write(f"3. Nan in output\n{embeddings}", self.plots_path)
+            print_and_write(f"3. Nan in mlp\n", self.plots_path)
 
         output = norm_layer(output)
         if torch.isnan(output).any():
-            print_and_write("4. Nan in output", self.plots_path)
+            print_and_write("4. Nan in norm", self.plots_path)
 
         return output
 
