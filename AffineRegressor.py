@@ -165,12 +165,16 @@ class AffineRegressor(nn.Module):
             # Append epoch statistics to lists 
             self.append_epoch_stats(epoch_stats)
 
-            print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}
-            Training MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
-            Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}
-            Training MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
-            Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}\n\n""", self.plots_path)
-            
+            print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}""", self.plots_path)
+
+            if NUM_OUTPUT == 1 or NUM_OUTPUT == 3:
+                print_and_write(f"""Training MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
+                Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}""", self.plots_path)
+            elif NUM_OUTPUT == 2 or NUM_OUTPUT == 3:
+                print_and_write(f"""Training MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
+                Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}""", self.plots_path)
+            print_and_write("\n\n")
+
             if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.all_train_mae_shift[-1], self.all_val_mae_shift[-1], self.plots_path):
                 self.num_epochs = epoch + 1
                 break
