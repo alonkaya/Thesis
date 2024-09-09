@@ -32,10 +32,10 @@ class CustomDataset(torch.utils.data.Dataset):
 
         # Rescale params -> [0,1]
         angle = torch.tensor(angle / self.angle_range, dtype=torch.float32)
-        shift_x = torch.tensor(shift_x / self.shift_range, dtype=torch.float32)
-        shift_y = torch.tensor(shift_y / self.shift_range, dtype=torch.float32)
+        # shift_x = torch.tensor(shift_x / self.shift_range, dtype=torch.float32)
+        # shift_y = torch.tensor(shift_y / self.shift_range, dtype=torch.float32)
 
-        return original_image, translated_image, angle, shift_x, shift_y
+        return original_image, translated_image, angle
 
 
 def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length=val_length, test_length=test_length):
