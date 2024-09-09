@@ -280,7 +280,7 @@ class AffineRegressor(nn.Module):
             {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
             {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
         ])
-        self.optimizer.load_state_dict(checkpoint['optimizer'])
+        # self.optimizer.load_state_dict(checkpoint['optimizer'])
 
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
