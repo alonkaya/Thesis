@@ -124,8 +124,8 @@ def norm_layer(x):
         return torch.cat((angle.unsqueeze(1), shift), dim=1)    
     
 
-def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, plots_path):
-    if math.isnan(all_train_loss_last) or math.isnan(all_val_loss_last) or math.isnan(train_mae_last) or math.isnan(val_mae_last):
+def check_nan(all_train_loss_last, all_val_loss_last, plots_path):
+    if math.isnan(all_train_loss_last) or math.isnan(all_val_loss_last):
         print_and_write("found nan\n", plots_path)                
         return True
     return False
