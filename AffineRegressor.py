@@ -259,7 +259,7 @@ class AffineRegressor(nn.Module):
         if self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
             mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
-            self.conv.load_state_dict(checkpoint['conv'])
+            # self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
         
         if self.avg_embeddings:
