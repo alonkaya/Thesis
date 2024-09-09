@@ -131,6 +131,9 @@ class AffineRegressor(nn.Module):
     def forward(self, x1, x2):
         # x1, x2 shape is (batch_size, channels, height, width)
         embeddings = self.FeatureExtractor(x1, x2) # Output shape is (batch_size, -1)
+        if torch.isnan(embeddings).any():
+            print_and_write(f"5. Nan in embeddings\n{embeddings}", self.plots_path)
+
         # output shape is (batch_size, 3)
         output = self.mlp(embeddings)
         if torch.isnan(output).any():
@@ -167,11 +170,11 @@ class AffineRegressor(nn.Module):
 
             print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}\n""", self.plots_path)
 
-            if NUM_OUTPUT == 1 or NUM_OUTPUT == 3:
-                print_and_write(f"""Training MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
+            if ANGLE_RANGE != 0:
+                print_and_write(f"""\t\t\tTraining MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
             Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}\n""", self.plots_path)
-            elif NUM_OUTPUT == 2 or NUM_OUTPUT == 3:
-                print_and_write(f"""Training MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
+            elif SHIFT_RANGE != 0:
+                print_and_write(f"""\t\t\tTraining MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
             Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}\n""", self.plots_path)
             print_and_write("\n\n", self.plots_path)
 
@@ -185,10 +188,10 @@ class AffineRegressor(nn.Module):
         self.test(test_loader)
 
         plot(x=range(1, self.num_epochs + 1), y1=self.all_train_loss, y2=self.all_val_loss, title="Loss", plots_path=self.plots_path)
-        if NUM_OUTPUT == 1 or NUM_OUTPUT == 3:
+        if ANGLE_RANGE != 0:
             plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae_angle, y2=self.all_val_mae_angle, title="MAE Angle", plots_path=self.plots_path)
             plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mse_angle, y2=self.all_val_mse_angle, title="MSE Angle", plots_path=self.plots_path)
-        elif NUM_OUTPUT == 2 or NUM_OUTPUT == 3:            
+        elif SHIFT_RANGE != 0:          
             plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae_shift, y2=self.all_val_mae_shift, title="MAE Shift", plots_path=self.plots_path)
             plot(x=range(1, self.num_epochs + 1), y1=self.all_train_euclidean_shift, y2=self.all_val_euclidean_shift, title="Euclidean Shift", plots_path=self.plots_path)
 
@@ -285,13 +288,13 @@ class AffineRegressor(nn.Module):
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
         for batch in dataloader:
-            if NUM_OUTPUT == 1: # Angle
+            if SHIFT_RANGE == 0:
                 img1, img2, angle = batch
                 img1, img2, angle = img1.to(device), img2.to(device), angle.to(device)
-            elif  NUM_OUTPUT == 2: # Shift
-                img1, img2, shift_x, shift_y = batch
-                img1, img2, shift = img1.to(device), img2.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
-            elif NUM_OUTPUT == 3: # Angle and Shift
+            elif ANGLE_RANGE == 0:
+                img1, img2, shift_x = batch
+                img1, img2, shift = img1.to(device), img2.to(device), shift_x.to(device)
+            else:
                 img1, img2, angle, shift_x, shift_y = batch
                 img1, img2, angle, shift = img1.to(device), img2.to(device), angle.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
 
@@ -300,19 +303,19 @@ class AffineRegressor(nn.Module):
 
             mae_shift, euclidean_shift, mae_angle, mse_angle = 0, 0, 0, 0
             # Compute loss
-            if NUM_OUTPUT == 1 or NUM_OUTPUT == 3:
+            if SHIFT_RANGE == 0:
                 mse_angle = self.L2_loss(output[:,0], angle)
                 loss = mse_angle
-            elif NUM_OUTPUT == 2 or NUM_OUTPUT == 3:
+            elif ANGLE_RANGE == 0:
                 mse_shift = self.L2_loss(output[:, 1:], shift)
                 loss = mse_shift
-            if NUM_OUTPUT == 3:
+            else:
                 loss = mse_angle + self.alpha * mse_shift
 
             with torch.no_grad():
-                mae_angle = 0 if NUM_OUTPUT==2 else torch.mean(torch.abs(output[:,0] - angle))
-                mae_shift = 0 if NUM_OUTPUT==1 else torch.mean(torch.abs(output[:,1:] - shift))
-                euclidean_shift = 0 if NUM_OUTPUT==1 else torch.mean(torch.sqrt(torch.sum((output[:,1:] - shift)**2, dim=1)))
+                mae_angle = 0 if ANGLE_RANGE==0 else torch.mean(torch.abs(output[:,0] - angle))
+                mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output[:,1:] - shift))
+                euclidean_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.sqrt(torch.sum((output[:,1:] - shift)**2, dim=1)))
 
             if data_type == "train":
                 # Compute Backward pass and gradients
@@ -332,13 +335,13 @@ class AffineRegressor(nn.Module):
         self.all_train_loss.append(epoch_stats["loss"])
         self.all_val_loss.append(epoch_stats["val_loss"])
 
-        if NUM_OUTPUT == 1 or NUM_OUTPUT == 3:
+        if ANGLE_RANGE != 0:
             self.all_train_mae_angle.append(epoch_stats["mae_angle"])
             self.all_val_mae_angle.append(epoch_stats["val_mae_angle"])
             self.all_train_mse_angle.append(epoch_stats["mse_angle"])
             self.all_val_mse_angle.append(epoch_stats["val_mse_angle"])
 
-        if NUM_OUTPUT == 2 or NUM_OUTPUT == 3:
+        if SHIFT_RANGE != 0:
             self.all_train_mae_shift.append(epoch_stats["mae_shift"])
             self.all_val_mae_shift.append(epoch_stats["val_mae_shift"])
             self.all_train_euclidean_shift.append(epoch_stats["euclidean_shift"])

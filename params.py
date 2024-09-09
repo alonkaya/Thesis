@@ -20,7 +20,7 @@ TRAIN_FROM_SCRATCH = False
 NUM_WORKERS = 2
 SAVE_MODEL = True
 NUM_EPOCHS = 100
-ADDITIONS = ""                                     
+ADDITIONS = "__only_shift_x"                                     
 GET_OLD_PATH = False
 SEED = 42
 ALPHA = [1]
@@ -37,7 +37,7 @@ MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 USE_CONV = True
 AVG_EMBEDDINGS = False
-NUM_OUTPUT = 2
+NUM_OUTPUT = 1
 mean = torch.tensor([0.485, 0.456, 0.406])
 std = torch.tensor([0.229, 0.224, 0.225])
 

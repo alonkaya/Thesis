@@ -115,9 +115,9 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
 
 def norm_layer(x):
     # Normalize the angle and shift values to [-1, 1]
-    if NUM_OUTPUT == 1:
+    if SHIFT_RANGE == 0:
         return x / ANGLE_RANGE
-    elif NUM_OUTPUT == 2:
+    elif ANGLE_RANGE == 0:
         return x / SHIFT_RANGE
     else:
         angle, shift = x[:, 0] / ANGLE_RANGE, x[:, 1:] / SHIFT_RANGE
