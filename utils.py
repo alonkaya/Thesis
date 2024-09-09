@@ -114,11 +114,11 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
 
 
 def norm_layer(x):
-    print(x.shape)
+    return x / ANGLE_RANGE
     # Normalize the angle and shift values to [0, 1]
-    angle, shift = x[:, 0] / ANGLE_RANGE, x[:, 1:] / SHIFT_RANGE
+    # angle, shift = x[:, 0] / ANGLE_RANGE, x[:, 1:] / SHIFT_RANGE
 
-    return torch.cat((angle.unsqueeze(1), shift), dim=1)
+    # return torch.cat((angle.unsqueeze(1), shift), dim=1)
     
 
 def check_nan(all_train_loss_last, all_val_loss_last, train_mae_last, val_mae_last, plots_path):
