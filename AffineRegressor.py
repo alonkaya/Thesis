@@ -267,7 +267,7 @@ class AffineRegressor(nn.Module):
 
         # Load MLP
         self.mlp = MLP(input_dim=mlp_input_shape).to(device)
-        self.mlp.load_state_dict(checkpoint['mlp'])
+        # self.mlp.load_state_dict(checkpoint['mlp'])
         self.mlp.to(device)
 
         # Load model

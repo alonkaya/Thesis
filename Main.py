@@ -26,7 +26,7 @@ if __name__ == "__main__":
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
                 regrees = 'avg' if AVG_EMBEDDINGS else 'conv'
                 which = "angle" if NUM_OUTPUT == 1 else "shift" if NUM_OUTPUT == 2 else "angle_shift"
-                plots_path = os.path.join('plots', f'BS_{bs}__lr_{lr}__train_size_{train_length}__model_{model}__{regrees}__alpha_{alpha}__{which}')
+                plots_path = os.path.join('plots', f'BS_{bs}__lr_{lr}__train_size_{train_length}__model_{model}__{regrees}__alpha_{alpha}__{which}_unloaded_mlp')
    
                 train_loader, val_loader, test_loader = get_dataloaders(batch_size=bs, train_length=train_length, val_length=val_length, test_length=test_length)
 
