@@ -279,27 +279,34 @@ class AffineRegressor(nn.Module):
 
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
-        for img1, img2, angle in dataloader:
-            img1, img2, angle  = img1.to(device), img2.to(device), angle.to(device)
+        for batch in dataloader:
+            if NUM_OUTPUT == 1: # Angle
+                img1, img2, angle = batch
+                img1, img2, angle = img1.to(device), img2.to(device), angle.to(device)
+            elif  NUM_OUTPUT == 2: # Shift
+                img1, img2, shift_x, shift_y = batch
+                img1, img2, shift = img1.to(device), img2.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
+            elif NUM_OUTPUT == 3: # Angle and Shift
+                img1, img2, angle, shift_x, shift_y = batch
+                img1, img2, angle, shift = img1.to(device), img2.to(device), angle.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
 
             # Forward pass
             output = self.forward(img1, img2)
+
             # Compute loss
-            # huber_angle = self.huber_loss(output[:,0], angle)
-            mse_angle = self.L2_loss(output[:,0], angle)
-            # angle_loss = huber_angle + mse_angle
-
-            # huber_shift = self.huber_loss(output[:, 1:], shift)
-            # mse_shift = self.L2_loss(output[:, 1:], shift)
-            # shift_loss = huber_shift + mse_shift 
-
-            # loss = mse_angle + self.alpha * mse_shift
-            loss = mse_angle
+            if NUM_OUTPUT == 1 or NUM_OUTPUT == 3:
+                mse_angle = self.L2_loss(output[:,0], angle)
+                loss = mse_angle
+            elif NUM_OUTPUT == 2 or NUM_OUTPUT == 3:
+                mse_shift = self.L2_loss(output[:, 1:], shift)
+                loss = mse_shift
+            if NUM_OUTPUT == 3:
+                loss = mse_angle + self.alpha * mse_shift
 
             with torch.no_grad():
-                mae_angle = torch.mean(torch.abs(output[:,0] - angle))
-                # mae_shift = torch.mean(torch.abs(output[:,1:] - shift))
-                # euclidean_shift = torch.mean(torch.sqrt(torch.sum((output[:,1:] - shift)**2, dim=1)))
+                mae_angle = 0 if NUM_OUTPUT==2 else torch.mean(torch.abs(output[:,0] - angle))
+                mae_shift = 0 if NUM_OUTPUT==1 else torch.mean(torch.abs(output[:,1:] - shift))
+                euclidean_shift = 0 if NUM_OUTPUT==1 else torch.mean(torch.sqrt(torch.sum((output[:,1:] - shift)**2, dim=1)))
 
 
             if data_type == "train":
@@ -309,8 +316,8 @@ class AffineRegressor(nn.Module):
                 self.optimizer.step()
 
             # Extend lists with batch statistics
-            # epoch_stats[f'{prefix}mae_shift'] += mae_shift
-            # epoch_stats[f'{prefix}euclidean_shift'] += euclidean_shift
+            epoch_stats[f'{prefix}mae_shift'] += mae_shift
+            epoch_stats[f'{prefix}euclidean_shift'] += euclidean_shift
             epoch_stats[f'{prefix}mae_angle'] += mae_angle
             epoch_stats[f'{prefix}mse_angle'] += mse_angle
             epoch_stats[f'{prefix}loss'] += loss
