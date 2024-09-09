@@ -298,6 +298,7 @@ class AffineRegressor(nn.Module):
             # Forward pass
             output = self.forward(img1, img2)
 
+            mae_shift, euclidean_shift, mae_angle, mse_angle = 0, 0, 0, 0
             # Compute loss
             if NUM_OUTPUT == 1 or NUM_OUTPUT == 3:
                 mse_angle = self.L2_loss(output[:,0], angle)
