@@ -262,7 +262,7 @@ class AffineRegressor(nn.Module):
         if self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
             mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
-            self.conv.load_state_dict(checkpoint['conv'])
+            # self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
         
         if self.avg_embeddings:
@@ -270,7 +270,7 @@ class AffineRegressor(nn.Module):
 
         # Load MLP
         self.mlp = MLP(input_dim=mlp_input_shape).to(device)
-        self.mlp.load_state_dict(checkpoint['mlp'])
+        # self.mlp.load_state_dict(checkpoint['mlp'])
         self.mlp.to(device)
 
         # Load model
@@ -283,7 +283,7 @@ class AffineRegressor(nn.Module):
             {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
             {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
         ])
-        self.optimizer.load_state_dict(checkpoint['optimizer'])
+        # self.optimizer.load_state_dict(checkpoint['optimizer'])
 
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
