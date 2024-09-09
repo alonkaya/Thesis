@@ -25,7 +25,7 @@ if __name__ == "__main__":
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
                 regrees = 'avg' if AVG_EMBEDDINGS else 'conv'
-                plots_path = os.path.join('plots', f'BS_{bs}__lr_{lr}__train_size_{train_length}__model_{model}__{regrees}__alpha_{alpha}_angle')
+                plots_path = os.path.join('plots', f'BS_{bs}__lr_{lr}__train_size_{train_length}__model_{model}__{regrees}__alpha_{alpha}_angle_no_norm')
    
                 train_loader, val_loader, test_loader = get_dataloaders(batch_size=bs, train_length=train_length, val_length=val_length, test_length=test_length)
 
