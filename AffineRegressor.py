@@ -136,9 +136,9 @@ class AffineRegressor(nn.Module):
         if torch.isnan(output).any():
             print_and_write("3. Nan in output")
 
-        # output = norm_layer(output)
-        # if torch.isnan(output).any():
-        #     print_and_write("4. Nan in output")
+        output = norm_layer(output)
+        if torch.isnan(output).any():
+            print_and_write("4. Nan in output")
 
         return output
 
