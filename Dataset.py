@@ -20,13 +20,9 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         original_image = self.dataset[idx]['image']
-        if torch.isnan(original_image).any():
-            print_and_write(f"dataset 1: Found nan in original image {idx}\n", self.plots_path)
 
         # Transform: Resize, center, grayscale
         original_image = self.transform(original_image)
-        if torch.isnan(original_image).any():
-            print_and_write(f"dataset 2: Found nan in original image after transform {idx}\n", self.plots_path)
 
         # Generate random affine params
         angle, shift_x, shift_y = random.uniform(-self.angle_range, self.angle_range), random.uniform(-self.shift_range, self.shift_range), random.uniform(-self.shift_range, self.shift_range)
