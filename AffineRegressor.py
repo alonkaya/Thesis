@@ -184,11 +184,11 @@ class AffineRegressor(nn.Module):
             print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}\n""", self.plots_path)
 
             if ANGLE_RANGE != 0:
-                print_and_write(f"""\t\t\tTraining MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
-            Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}\n""", self.plots_path)
+                print_and_write(f"""\t\tTraining MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
+              Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}\n""", self.plots_path)
             elif SHIFT_RANGE != 0:
-                print_and_write(f"""\t\t\tTraining MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
-            Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}\n""", self.plots_path)
+                print_and_write(f"""\t\tTraining MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
+              Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}\n""", self.plots_path)
             print_and_write("\n\n", self.plots_path)
 
             if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.plots_path):
@@ -331,9 +331,7 @@ class AffineRegressor(nn.Module):
             with torch.no_grad():
                 mae_angle = 0 if ANGLE_RANGE==0 else torch.mean(torch.abs(output[:,0] - angle))
                 mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output - shift))
-                # euclidean_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.sqrt(torch.sum((output[:,0:] - shift)**2, dim=1))) # check this!!
-                # mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output[:,0] - shift))
-                euclidean_shift = 0 
+                euclidean_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.sqrt(torch.sum((output - shift)**2, dim=1))) # check this!!
 
             if data_type == "train":
                 # Compute Backward pass and gradients
