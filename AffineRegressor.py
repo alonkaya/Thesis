@@ -316,16 +316,14 @@ class AffineRegressor(nn.Module):
             if output is None:
                 return None
 
-            mae_shift, euclidean_shift, mae_angle, mse_angle = 0, 0, 0, 0
-            # Compute loss
-            if SHIFT_RANGE == 0:
+            mse_shift, mse_angle = 0, 0, 0, 0
+            if ANGLE_RANGE != 0:
                 mse_angle = self.L2_loss(output[:,0], angle)
                 loss = mse_angle
-            elif ANGLE_RANGE == 0:
+            if SHIFT_RANGE != 0:
                 mse_shift = self.L2_loss(output, shift)
-                # mse_shift = self.L2_loss(output[:,0], shift)
                 loss = mse_shift
-            else:
+            if SHIFT_RANGE != 0 and ANGLE_RANGE != 0:
                 loss = mse_angle + self.alpha * mse_shift
 
             with torch.no_grad():
