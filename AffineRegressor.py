@@ -145,7 +145,7 @@ class AffineRegressor(nn.Module):
             print_and_write(f"3. Nan in mlp\n", self.plots_path)
             return None
 
-        # output = norm_layer(output)
+        output = norm_layer(output)
         if torch.isnan(output).any():
             print_and_write("4. Nan in norm", self.plots_path)
             return None
@@ -330,8 +330,8 @@ class AffineRegressor(nn.Module):
 
             with torch.no_grad():
                 mae_angle = 0 if ANGLE_RANGE==0 else torch.mean(torch.abs(output[:,0] - angle))
-                mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output[:,1:] - shift))
-                euclidean_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.sqrt(torch.sum((output[:,1:] - shift)**2, dim=1))) 
+                mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output[:, 1:] - shift))
+                euclidean_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.sqrt(torch.sum((output[:, 1:] - shift)**2, dim=1))) 
 
             if data_type == "train":
                 # Compute Backward pass and gradients
