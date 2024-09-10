@@ -79,7 +79,6 @@ class AffineRegressor(nn.Module):
                 self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
                 mlp_input_shape = len(self.embedding_to_use) * self.conv.hidden_dims[-1] * 3 * 3 
             
-            print(mlp_input_shape)
             # Initialize loss functions
             self.L2_loss = nn.MSELoss().to(device)
             self.huber_loss = nn.HuberLoss().to(device)
@@ -108,7 +107,7 @@ class AffineRegressor(nn.Module):
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state.to(device)
         x2_embeddings = self.model(pixel_values=x2).last_hidden_state.to(device)
 
-        if self.cls == "cls":
+        if self.cls == True:
             x1_embeddings = x1_embeddings[:,0,:] # shape (batch_size, hidden_size)
             x2_embeddings = x2_embeddings[:,0,:] # shape (batch_size, hidden_size)
 
