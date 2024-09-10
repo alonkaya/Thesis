@@ -105,30 +105,30 @@ class AffineRegressor(nn.Module):
             return None
         
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
-        x1_embeddings = self.model(pixel_values=x1).last_hidden_state
-        x2_embeddings = self.model(pixel_values=x2).last_hidden_state
+        x1_embeddings = self.model(pixel_values=x1).last_hidden_state.to(device)
+        x2_embeddings = self.model(pixel_values=x2).last_hidden_state.to(device)
 
         if self.cls == "cls":
-            x1_embeddings = x1_embeddings[:,0,:].to(self.device)
-            x2_embeddings = x2_embeddings[:,0,:].to(self.device)
+            x1_embeddings = x1_embeddings[:,0,:]
+            x2_embeddings = x2_embeddings[:,0,:]
 
         else: # patches
-            x1_embeddings = x1_embeddings[:, 1: ,:].reshape(-1, self.hidden_size * self.num_patches * self.num_patches).to(self.device)
-            x2_embeddings = x2_embeddings[:, 1: ,:].reshape(-1, self.hidden_size * self.num_patches * self.num_patches).to(self.device)
+            x1_embeddings = x1_embeddings[:, 1: ,:].reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
+            x2_embeddings = x2_embeddings[:, 1: ,:].reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
 
             if self.avg_embeddings:
                 # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
                 avg_patches = nn.AdaptiveAvgPool2d(1)
-                x1_embeddings = avg_patches(x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size).to(self.device)
-                x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size).to(self.device)
+                x1_embeddings = avg_patches(x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
+                x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
                 if torch.isnan(x1_embeddings).any() or torch.isnan(x2_embeddings).any():
                     print_and_write("2. Nan in average embeddings", self.plots_path)
                     return None
 
             if self.use_conv:
                 # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
-                x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches).to(self.device)
-                x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches).to(self.device)
+                x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
+                x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
 
                 embeddings = torch.tensor([]).to(self.device)
                 if "rotated_embeddings" in self.embedding_to_use:
