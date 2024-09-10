@@ -93,8 +93,8 @@ class AffineRegressor(nn.Module):
         self.to(device)
 
     def FeatureExtractor(self, x1, x2):
-        if torch.isnan(x1).any():
-            print_and_write(f"0. Nan in x1_embeddings\n {x1}")
+        if torch.isnan(x1).any() or torch.isnan(x2).any():
+            print_and_write(f"0. Nan in x1_embeddings\n {x1}", self.plots_path)
             return None
 
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
@@ -110,6 +110,7 @@ class AffineRegressor(nn.Module):
         if torch.isnan(x1_embeddings).any() or torch.isnan(x2_embeddings).any():
             print_and_write("1. Nan in vit", self.plots_path)
             return None
+        
         if self.avg_embeddings:
             # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
             avg_patches = nn.AdaptiveAvgPool2d(1)
@@ -182,13 +183,12 @@ class AffineRegressor(nn.Module):
             self.append_epoch_stats(epoch_stats)
 
             print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}\n""", self.plots_path)
-
             if ANGLE_RANGE != 0:
-                print_and_write(f"""\t\tTraining MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
-              Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}\n""", self.plots_path)
+                print_and_write(f"""\t     Training MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
+            Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}\n""", self.plots_path)
             if SHIFT_RANGE != 0:
-                print_and_write(f"""\t   Training MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
-              Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}\n""", self.plots_path)
+                print_and_write(f"""\t     Training MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
+            Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}\n""", self.plots_path)
             print_and_write("\n\n", self.plots_path)
 
             if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.plots_path):
@@ -208,7 +208,61 @@ class AffineRegressor(nn.Module):
             plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae_shift, y2=self.all_val_mae_shift, title="MAE Shift", plots_path=self.plots_path)
             plot(x=range(1, self.num_epochs + 1), y1=self.all_train_euclidean_shift, y2=self.all_val_euclidean_shift, title="Euclidean Shift", plots_path=self.plots_path)
 
-           
+
+    def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
+        prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
+        for batch in dataloader:
+            if SHIFT_RANGE == 0:
+                img1, img2, angle = batch
+                img1, img2, angle = img1.to(device), img2.to(device), angle.to(device)
+            elif ANGLE_RANGE == 0:
+                img1, img2, shift_x, shift_y = batch
+                img1, img2, shift = img1.to(device), img2.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
+            else:
+                img1, img2, angle, shift_x, shift_y = batch
+                img1, img2, angle, shift = img1.to(device), img2.to(device), angle.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
+
+            # Forward pass
+            output = self.forward(img1, img2)
+            if output is None:
+                return None
+
+            mae_shift, euclidean_shift, mae_angle, mse_angle = 0, 0, 0, 0
+            if SHIFT_RANGE == 0:
+                mse_angle = self.L2_loss(output[:,0], angle)
+                loss = mse_angle
+                with torch.no_grad():
+                    mae_angle = torch.mean(torch.abs(output[:,0] - angle))
+
+            elif ANGLE_RANGE == 0:
+                mse_shift = self.L2_loss(output, shift)
+                loss = mse_shift
+                with torch.no_grad():
+                    mae_shift = torch.mean(torch.abs(output - shift))
+                    euclidean_shift = torch.mean(torch.sqrt(torch.sum((output - shift)**2, dim=1))) 
+            else:
+                mse_angle = self.L2_loss(output[:,0], angle)
+                mse_shift = self.L2_loss(output[:,1:], shift)
+                loss = mse_angle + self.alpha * mse_shift
+                with torch.no_grad():
+                    mae_angle = torch.mean(torch.abs(output[:,0] - angle))
+                    mae_shift = torch.mean(torch.abs(output[:, 1:] - shift))
+                    euclidean_shift = torch.mean(torch.sqrt(torch.sum((output[:, 1:] - shift)**2, dim=1))) 
+
+            if data_type == "train":
+                # Compute Backward pass and gradients
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+            # Extend lists with batch statistics
+            epoch_stats[f'{prefix}mae_shift'] += mae_shift
+            epoch_stats[f'{prefix}euclidean_shift'] += euclidean_shift
+            epoch_stats[f'{prefix}mae_angle'] += mae_angle
+            epoch_stats[f'{prefix}mse_angle'] += mse_angle
+            epoch_stats[f'{prefix}loss'] += loss
+        return 1
+               
     def save_model(self, epoch):
         checkpoint_path = os.path.join(self.plots_path, "model.pth")
         torch.save({
@@ -275,7 +329,7 @@ class AffineRegressor(nn.Module):
         if self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
             mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
-            # self.conv.load_state_dict(checkpoint['conv'])
+            self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
         
         if self.avg_embeddings:
@@ -283,7 +337,7 @@ class AffineRegressor(nn.Module):
 
         # Load MLP
         self.mlp = MLP(input_dim=mlp_input_shape).to(device)
-        # self.mlp.load_state_dict(checkpoint['mlp'])
+        self.mlp.load_state_dict(checkpoint['mlp'])
         self.mlp.to(device)
 
         # Load model
@@ -296,56 +350,8 @@ class AffineRegressor(nn.Module):
             {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
             {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
         ])
-        # self.optimizer.load_state_dict(checkpoint['optimizer'])
+        self.optimizer.load_state_dict(checkpoint['optimizer'])
 
-    def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
-        prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
-        for batch in dataloader:
-            if SHIFT_RANGE == 0:
-                img1, img2, angle = batch
-                img1, img2, angle = img1.to(device), img2.to(device), angle.to(device)
-            elif ANGLE_RANGE == 0:
-                img1, img2, shift_x, shift_y = batch
-                img1, img2, shift = img1.to(device), img2.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
-            else:
-                img1, img2, angle, shift_x, shift_y = batch
-                img1, img2, angle, shift = img1.to(device), img2.to(device), angle.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
-
-            # Forward pass
-            output = self.forward(img1, img2)
-            if output is None:
-                return None
-
-            mse_shift, mse_angle = 0, 0
-            if SHIFT_RANGE == 0:
-                mse_angle = self.L2_loss(output[:,0], angle)
-                loss = mse_angle
-            elif ANGLE_RANGE == 0:
-                mse_shift = self.L2_loss(output, shift)
-                loss = mse_shift
-            else:
-                mse_angle = self.L2_loss(output[:,0], angle)
-                mse_shift = self.L2_loss(output[:,1:], shift)
-                loss = mse_angle + self.alpha * mse_shift
-
-            with torch.no_grad():
-                mae_angle = 0 if ANGLE_RANGE==0 else torch.mean(torch.abs(output[:,0] - angle))
-                mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output[:, 1:] - shift))
-                euclidean_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.sqrt(torch.sum((output[:, 1:] - shift)**2, dim=1))) 
-
-            if data_type == "train":
-                # Compute Backward pass and gradients
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
-
-            # Extend lists with batch statistics
-            epoch_stats[f'{prefix}mae_shift'] += mae_shift
-            epoch_stats[f'{prefix}euclidean_shift'] += euclidean_shift
-            epoch_stats[f'{prefix}mae_angle'] += mae_angle
-            epoch_stats[f'{prefix}mse_angle'] += mse_angle
-            epoch_stats[f'{prefix}loss'] += loss
-        return 1
 
     def append_epoch_stats(self, epoch_stats):
         self.all_train_loss.append(epoch_stats["loss"])

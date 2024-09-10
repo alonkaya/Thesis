@@ -3,6 +3,7 @@ from datasets import load_dataset
 import torchvision.transforms.functional as F
 import random
 from params import *
+from utils import print_and_write
 import torchvision.transforms as v2
 from torchvision.transforms.functional import to_pil_image
 
@@ -19,16 +20,27 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         original_image = self.dataset[idx]['image']
+        if torch.isnan(original_image).any():
+            print_and_write(f"dataset 1: Found nan in original image {idx}\n", self.plots_path)
 
         # Transform: Resize, center, grayscale
         original_image = self.transform(original_image)
+        if torch.isnan(original_image).any():
+            print_and_write(f"dataset 2: Found nan in original image after transform {idx}\n", self.plots_path)
 
         # Generate random affine params
         angle, shift_x, shift_y = random.uniform(-self.angle_range, self.angle_range), random.uniform(-self.shift_range, self.shift_range), random.uniform(-self.shift_range, self.shift_range)
         translated_image = F.affine(original_image, angle=angle, translate=(shift_x, shift_y), scale=1, shear=0)
+        if torch.isnan(translated_image).any():
+            print_and_write(f"dataset 3: Found nan in translated image  {idx}\n", self.plots_path)
         
         translated_image, original_image = F.to_tensor(translated_image), F.to_tensor(original_image)
+        if torch.isnan(original_image).any() or torch.isnan(translated_image).any():
+            print_and_write(f"dataset 4: Found nan after to_tensor {idx}\n", self.plots_path)
+
         translated_image, original_image = F.normalize(translated_image, mean, std), F.normalize(original_image, mean, std)
+        if torch.isnan(original_image).any() or torch.isnan(translated_image).any():
+            print_and_write(f"dataset 5: Found nan after normalize {idx}\n", self.plots_path)
 
         # Rescale params -> [0,1]
         angle = 0 if self.angle_range==0 else torch.tensor(angle / self.angle_range, dtype=torch.float32)

@@ -1,3 +1,4 @@
+import os
 import matplotlib.pyplot as plt
 from params import *
 from AffineRegressor import AffineRegressor
@@ -85,7 +86,6 @@ def plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_s
     ax1.plot(epochs, val_loss, label='Val Loss', color='orange', marker='o')
     add_labels(epochs, train_loss, ax1, 'blue', interval=3)  # Adjust the interval for labels
     add_labels(epochs, val_loss, ax1, 'orange', interval=3)
-    ax1.set_xlabel('Epochs')
     ax1.set_ylabel('Loss')
     ax1.set_title('Loss')
     ax1.legend()
@@ -97,7 +97,6 @@ def plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_s
     ax2.plot(epochs, val_mae_shift, label='Val MAE Shift', color='orange', marker='o')
     add_labels(epochs, train_mae_shift, ax2, 'blue', interval=3)
     add_labels(epochs, val_mae_shift, ax2, 'orange', interval=3)
-    ax2.set_xlabel('Epochs')
     ax2.set_ylabel('MAE Shift')
     ax2.set_title('MAE Shift')
     ax2.legend()
@@ -109,7 +108,6 @@ def plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_s
     ax3.plot(epochs, val_euclidean_shift, label='Val Euclidean Shift', color='orange', marker='o')
     add_labels(epochs, train_euclidean_shift, ax3, 'blue', interval=3)
     add_labels(epochs, val_euclidean_shift, ax3, 'orange', interval=3)
-    ax3.set_xlabel('Epochs')
     ax3.set_ylabel('Euclidean Shift')
     ax3.set_title('Euclidean Shift')
     ax3.legend()
@@ -121,7 +119,6 @@ def plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_s
     ax4.plot(epochs, val_mae_angle, label='Val MAE Angle', color='orange', marker='o')
     add_labels(epochs, train_mae_angle, ax4, 'blue', interval=3)
     add_labels(epochs, val_mae_angle, ax4, 'orange', interval=3)
-    ax4.set_xlabel('Epochs')
     ax4.set_ylabel('MAE Angle')
     ax4.set_title('MAE Angle')
     ax4.legend()
@@ -133,7 +130,6 @@ def plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_s
     ax5.plot(epochs, val_mse_angle, label='Val MSE Angle', color='orange', marker='o')
     add_labels(epochs, train_mse_angle, ax5, 'blue', interval=3)
     add_labels(epochs, val_mse_angle, ax5, 'orange', interval=3)
-    ax5.set_xlabel('Epochs')
     ax5.set_ylabel('MSE Angle')
     ax5.set_title('MSE Angle')
     ax5.legend()
@@ -143,14 +139,14 @@ def plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_s
     plt.show()
 
 def plot_stats():
-    file_path = "plots/BS_16__lr_4e-05__train_size_4096__model_CLIP__avg__alpha_1__angle/output.log"
-    
+    file_path = "C:/Users/User/OneDrive/Thesis/Thesis/plots/BS_32__lr_6e-05__train_size_6144__model_CLIP__avg__alpha_10__angle_shift/output.log"
+
     epochs, train_loss, val_loss, train_mae_shift, val_mae_shift, train_euclidean_shift, val_euclidean_shift, \
     train_mae_angle, val_mae_angle, train_mse_angle, val_mse_angle = parse_data_from_file(file_path)
     plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_shift, train_euclidean_shift, val_euclidean_shift, train_mae_angle, val_mae_angle, train_mse_angle, val_mse_angle)
 
 def test():
-    pretrained_path = "plots/BS_32__lr_6e-05__train_size_6144__model_CLIP__avg__alpha_1__shift/"
+    pretrained_path = "plots/BS_32__lr_6e-05__train_size_6144__model_CLIP__avg__alpha_1__shift/output.log"
 
     train_loader, val_loader, test_loader = get_dataloaders(batch_size=BATCH_SIZE[0], train_length=train_length, val_length=val_length, test_length=test_length)
 
@@ -159,4 +155,7 @@ def test():
     model.test(test_loader)
 
 if __name__ == "__main__":
-    test()
+    os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+    # test()
+    plot_stats()
