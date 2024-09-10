@@ -183,7 +183,7 @@ class AffineRegressor(nn.Module):
             # Divide by the number of batches
             divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
 
-            if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.plots_path):
+            if epoch > 0 and check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.plots_path):
                 self.num_epochs = epoch
                 break
 
