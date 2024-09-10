@@ -93,9 +93,13 @@ class AffineRegressor(nn.Module):
         self.to(device)
 
     def FeatureExtractor(self, x1, x2):
-        if torch.isnan(x1).any() or torch.isnan(x2).any():
-            print_and_write(f"0. Nan in x1_embeddings\n {x1}", self.plots_path)
+        if torch.isnan(x1).any():
+            print_and_write(f"0. Nan in x1_embeddings\n", self.plots_path)
             return None
+        if torch.isnan(x2).any():
+            print_and_write(f"0. Nan in x2_embeddings\n", self.plots_path)
+            return None
+        
 
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state
@@ -165,7 +169,6 @@ class AffineRegressor(nn.Module):
             self.train()
             output = self.dataloader_step(train_loader, epoch, epoch_stats, data_type="train")
             if output is None:
-                self.num_epochs = epoch + 1
                 break
 
             # Validation
@@ -173,11 +176,13 @@ class AffineRegressor(nn.Module):
             with torch.no_grad():
                 output = self.dataloader_step(val_loader, epoch, epoch_stats, data_type="val")
                 if output is None:
-                    self.num_epochs = epoch + 1
                     break  
 
             # Divide by the number of batches
             divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
+
+            if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.plots_path):
+                break
 
             # Append epoch statistics to lists 
             self.append_epoch_stats(epoch_stats)
@@ -191,9 +196,6 @@ class AffineRegressor(nn.Module):
             Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}\n""", self.plots_path)
             print_and_write("\n\n", self.plots_path)
 
-            if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.plots_path):
-                self.num_epochs = epoch + 1
-                break
 
             if SAVE_MODEL:
                 self.save_model(epoch+1)
@@ -222,6 +224,13 @@ class AffineRegressor(nn.Module):
                 img1, img2, angle, shift_x, shift_y = batch
                 img1, img2, angle, shift = img1.to(device), img2.to(device), angle.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
 
+            if torch.isnan(img1).any():
+                print_and_write(f"step: Nan in img1\n", self.plots_path)
+                return None
+            if torch.isnan(img2).any():
+                print_and_write(f"step: Nan in img2\n", self.plots_path)
+                return None
+            
             # Forward pass
             output = self.forward(img1, img2)
             if output is None:
