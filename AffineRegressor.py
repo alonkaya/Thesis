@@ -316,20 +316,22 @@ class AffineRegressor(nn.Module):
             if output is None:
                 return None
 
-            mse_shift, mse_angle = 0, 0
-            if ANGLE_RANGE != 0:
+            mse_shift, mse_angle = 0, 0, 0, 0
+            if SHIFT_RANGE == 0:
                 mse_angle = self.L2_loss(output[:,0], angle)
                 loss = mse_angle
-            if SHIFT_RANGE != 0:
+            elif ANGLE_RANGE == 0:
                 mse_shift = self.L2_loss(output, shift)
                 loss = mse_shift
-            if SHIFT_RANGE != 0 and ANGLE_RANGE != 0:
+            else:
+                mse_angle = self.L2_loss(output[:,0], angle)
+                mse_shift = self.L2_loss(output[:,1:], shift)
                 loss = mse_angle + self.alpha * mse_shift
 
             with torch.no_grad():
                 mae_angle = 0 if ANGLE_RANGE==0 else torch.mean(torch.abs(output[:,0] - angle))
-                mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output - shift))
-                euclidean_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.sqrt(torch.sum((output - shift)**2, dim=1))) # check this!!
+                mae_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.abs(output[:,1:] - shift))
+                euclidean_shift = 0 if SHIFT_RANGE==0 else torch.mean(torch.sqrt(torch.sum((output[:,1:] - shift)**2, dim=1))) # check this!!
 
             if data_type == "train":
                 # Compute Backward pass and gradients
