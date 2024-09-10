@@ -169,6 +169,7 @@ class AffineRegressor(nn.Module):
             self.train()
             output = self.dataloader_step(train_loader, epoch, epoch_stats, data_type="train")
             if output is None:
+                self.num_epochs = epoch
                 break
 
             # Validation
@@ -176,12 +177,14 @@ class AffineRegressor(nn.Module):
             with torch.no_grad():
                 output = self.dataloader_step(val_loader, epoch, epoch_stats, data_type="val")
                 if output is None:
+                    self.num_epochs = epoch
                     break  
 
             # Divide by the number of batches
             divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
 
             if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.plots_path):
+                self.num_epochs = epoch
                 break
 
             # Append epoch statistics to lists 

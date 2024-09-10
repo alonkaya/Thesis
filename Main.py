@@ -28,7 +28,7 @@ if __name__ == "__main__":
                 which = "angle" if  SHIFT_RANGE==0 else "shift" if ANGLE_RANGE==0 else "angle_shift"
                 plots_path = os.path.join('plots', f'BS_{bs}__lr_{lr}__train_size_{train_length}__model_{model}__{regrees}__alpha_{alpha}__{which}{ADDITIONS}')
    
-                train_loader, val_loader, test_loader = get_dataloaders(batch_size=bs, train_length=train_length, val_length=val_length, test_length=test_length)
+                train_loader, val_loader, test_loader = get_dataloaders(batch_size=bs, train_length=train_length, val_length=val_length, test_length=test_length, plots_path=plots_path)
 
                 model = AffineRegressor(lr, bs, alpha, model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path=plots_path, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS)
 

@@ -9,11 +9,12 @@ from torchvision.transforms.functional import to_pil_image
 
 
 class CustomDataset(torch.utils.data.Dataset):
-    def __init__(self, dataset, transform=None, angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE):
+    def __init__(self, dataset, transform=None, angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE, plots_path=None):
         self.dataset = dataset
         self.transform = transform
         self.angle_range = angle_range
         self.shift_range = shift_range
+        self.plots_path = plots_path
 
     def __len__(self):
         return len(self.dataset)
@@ -30,11 +31,11 @@ class CustomDataset(torch.utils.data.Dataset):
         
         translated_image, original_image = F.to_tensor(translated_image), F.to_tensor(original_image)
         if torch.isnan(original_image).any() or torch.isnan(translated_image).any():
-            print(f"dataset 4: Found nan after to_tensor {idx}\n")
+            print_and_write(f"dataset 4: Found nan after to_tensor {idx}\n", self.plots_path)
 
         translated_image, original_image = F.normalize(translated_image, mean, std), F.normalize(original_image, mean, std)
         if torch.isnan(original_image).any() or torch.isnan(translated_image).any():
-            print(f"dataset 5: Found nan after normalize {idx}\n")
+            print_and_write(f"dataset 5: Found nan after normalize {idx}\n", self.plots_path)
 
         # Rescale params -> [0,1]
         angle = 0 if self.angle_range==0 else torch.tensor(angle / self.angle_range, dtype=torch.float32)
@@ -50,7 +51,7 @@ class CustomDataset(torch.utils.data.Dataset):
     
 
 
-def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length=val_length, test_length=test_length):
+def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length=val_length, test_length=test_length, plots_path=None):
     transform = v2.Compose([
         v2.Resize(256),
         v2.RandomCrop(224),
@@ -68,9 +69,9 @@ def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length
     test_data = dataset['validation'].select(range(len(dataset['validation']) - test_length, len(dataset['validation'])))
 
     # Create an instance dataset
-    custom_train_dataset = CustomDataset(train_data, transform=transform, angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE)
-    custom_val_dataset = CustomDataset(val_data, transform=transform,angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE)
-    custom_test_dataset = CustomDataset(test_data, transform=transform,angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE)
+    custom_train_dataset = CustomDataset(train_data, transform=transform, angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE, plots_path=plots_path)
+    custom_val_dataset = CustomDataset(val_data, transform=transform,angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE, plots_path=plots_path)
+    custom_test_dataset = CustomDataset(test_data, transform=transform,angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE, plots_path=plots_path)
 
     # # Create a DataLoader
     train_loader = DataLoader(custom_train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=NUM_WORKERS)
