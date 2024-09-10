@@ -5,7 +5,7 @@ from transformers import CLIPVisionModel, CLIPVisionConfig, ResNetModel
 
 
 class AffineRegressor(nn.Module):
-    def __init__(self, lr, batch_size, alpha, avg_embeddings=AVG_EMBEDDINGS, model_name=MODEL, plots_path=None, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
+    def __init__(self, lr, batch_size, alpha, embedding_to_use=None, cls=None, avg_embeddings=AVG_EMBEDDINGS, model_name=MODEL, plots_path=None, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
         """
         Args:
@@ -37,6 +37,8 @@ class AffineRegressor(nn.Module):
         self.num_epochs = num_epochs
         self.avg_embeddings = avg_embeddings
         self.start_epoch = 0
+        self.embedding_to_use = embedding_to_use
+        self.cls = cls
 
         # Lists to store training statistics
         self.all_train_loss, self.all_val_loss, \
@@ -67,18 +69,20 @@ class AffineRegressor(nn.Module):
             # Get input dimension for the MLP based on ViT configuration
             self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]
             self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
-            mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
-
-            # Initialize loss functions
-            self.L2_loss = nn.MSELoss().to(device)
-            self.huber_loss = nn.HuberLoss().to(device)
             
-            if self.avg_embeddings:
+            mlp_input_shape = len(self.embedding_to_use) * (self.num_patches**2) * self.hidden_size 
+    
+            if self.avg_embeddings or self.cls:
                 mlp_input_shape //= (self.num_patches**2) 
 
             elif self.use_conv:
                 self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
-                mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
+                mlp_input_shape = len(self.embedding_to_use) * self.conv.hidden_dims[-1] * 3 * 3 
+            
+
+            # Initialize loss functions
+            self.L2_loss = nn.MSELoss().to(device)
+            self.huber_loss = nn.HuberLoss().to(device)
 
             # Initialize MLP
             self.mlp = MLP(input_dim=mlp_input_shape).to(device)
@@ -100,42 +104,54 @@ class AffineRegressor(nn.Module):
             print_and_write(f"0. Nan in x2_embeddings\n", self.plots_path)
             return None
         
-
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
-        x1_embeddings = self.model(pixel_values=x1).last_hidden_state
-        x2_embeddings = self.model(pixel_values=x2).last_hidden_state
+        x1_embeddings = self.model(pixel_values=x1).last_hidden_state.to(self.device)
+        x2_embeddings = self.model(pixel_values=x2).last_hidden_state.to(self.device)
 
-        if not self.resnet:
-            x1_embeddings = x1_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
-            x2_embeddings = x2_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
+        if self.cls == "cls":
+            x1_embeddings = x1_embeddings[:,0,:]
+            x2_embeddings = x2_embeddings[:,0,:]
 
-        x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
-        x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
-        if torch.isnan(x1_embeddings).any() or torch.isnan(x2_embeddings).any():
-            print_and_write("1. Nan in vit", self.plots_path)
-            return None
-        
-        if self.avg_embeddings:
-            # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
-            avg_patches = nn.AdaptiveAvgPool2d(1)
-            x1_embeddings = avg_patches(x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
-            x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
-            if torch.isnan(x1_embeddings).any() or torch.isnan(x2_embeddings).any():
-                print_and_write("2. Nan in average embeddings", self.plots_path)
-                return None
+        else: # patches
+            x1_embeddings = x1_embeddings[:, 1: ,:].reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
+            x2_embeddings = x2_embeddings[:, 1: ,:].reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
 
-        if self.use_conv:
-            # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
-            x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
-            x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
-            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
-            embeddings = self.conv(embeddings)
-            if torch.isnan(embeddings).any():
-                print_and_write(f"5. Nan in conv\n", self.plots_path)
-                return None
-        else:
-            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
-        
+            if self.avg_embeddings:
+                # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
+                avg_patches = nn.AdaptiveAvgPool2d(1)
+                x1_embeddings = avg_patches(x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
+                x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
+                if torch.isnan(x1_embeddings).any() or torch.isnan(x2_embeddings).any():
+                    print_and_write("2. Nan in average embeddings", self.plots_path)
+                    return None
+
+            if self.use_conv:
+                # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
+                x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
+                x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
+
+                embeddings = torch.tensor([]).to(self.device)
+                if "rotated_embeddings" in self.embedding_to_use:
+                    embeddings = torch.cat((embeddings, x2_embeddings), dim=1)
+                if "original_embeddings" in self.embedding_to_use:
+                    embeddings = torch.cat((embeddings, x1_embeddings), dim=1)
+                if "mul_embedding" in self.embedding_to_use:
+                    embeddings = torch.cat((embeddings, torch.mul(x1_embeddings, x2_embeddings)), dim=1)
+
+                embeddings = self.conv(embeddings)
+                if torch.isnan(embeddings).any():
+                    print_and_write(f"5. Nan in conv\n", self.plots_path)
+                    return None
+                
+        if not self.use_conv:
+            embeddings = torch.tensor([]).to(self.device)
+            if "rotated_embeddings" in self.embedding_to_use:
+                embeddings = torch.cat((embeddings, x2_embeddings), dim=1)
+            if "original_embeddings" in self.embedding_to_use:
+                embeddings = torch.cat((embeddings, x1_embeddings), dim=1)
+            if "mul_embedding" in self.embedding_to_use:
+                embeddings = torch.cat((embeddings, torch.mul(x1_embeddings, x2_embeddings)), dim=1)
+
         return embeddings
 
     def forward(self, x1, x2):
@@ -285,6 +301,8 @@ class AffineRegressor(nn.Module):
             "hidden_size" : self.hidden_size,
             "num_patches" : self.num_patches,
             'epoch' : epoch,
+            'cls' : self.cls,
+            'embedding_to_use' : self.embedding_to_use,
             "all_train_loss" : self.all_train_loss, 
             "all_val_loss" : self.all_val_loss,
             "all_train_mae_shift" : self.all_train_mae_shift,
@@ -309,6 +327,8 @@ class AffineRegressor(nn.Module):
         self.hidden_size = checkpoint.get("hidden_size", 0)
         self.num_patches = checkpoint.get("num_patches", 0)
         self.start_epoch = checkpoint.get("epoch", 0)
+        self.cls = checkpoint.get("cls", self.cls)
+        self.embedding_to_use = checkpoint.get("embedding_to_use", self.embedding_to_use)
         self.alpha = checkpoint.get("alpha", 0)
         self.all_train_loss = checkpoint.get("all_train_loss", [])
         self.all_val_loss = checkpoint.get("all_val_loss", [])
@@ -324,21 +344,21 @@ class AffineRegressor(nn.Module):
         # Get input dimension for the MLP based on ViT configuration
         self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]
         self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
-        mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
+        
+        mlp_input_shape = len(self.embedding_to_use) * (self.num_patches**2) * self.hidden_size 
+
+        if self.avg_embeddings or self.cls:
+            mlp_input_shape //= (self.num_patches**2) 
+
+        elif self.use_conv:
+            self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
+            mlp_input_shape = len(self.embedding_to_use) * self.conv.hidden_dims[-1] * 3 * 3 
+            self.conv.load_state_dict(checkpoint['conv'])
+            self.conv.to(device)
 
         # Initialize loss functions
         self.L2_loss = nn.MSELoss().to(device)
         self.huber_loss = nn.HuberLoss().to(device)
-
-        # Load conv/average embeddings
-        if self.use_conv:
-            self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
-            mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
-            self.conv.load_state_dict(checkpoint['conv'])
-            self.conv.to(device)
-        
-        if self.avg_embeddings:
-            mlp_input_shape //= (self.num_patches**2) 
 
         # Load MLP
         self.mlp = MLP(input_dim=mlp_input_shape).to(device)
