@@ -205,14 +205,7 @@ class AffineRegressor(nn.Module):
         
         self.test(test_loader)
 
-        plot(x=range(1, self.num_epochs + 1), y1=self.all_train_loss, y2=self.all_val_loss, title="Loss", plots_path=self.plots_path)
-        if ANGLE_RANGE != 0:
-            plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae_angle, y2=self.all_val_mae_angle, title="MAE Angle", plots_path=self.plots_path)
-            plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mse_angle, y2=self.all_val_mse_angle, title="MSE Angle", plots_path=self.plots_path)
-        if SHIFT_RANGE != 0:          
-            plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae_shift, y2=self.all_val_mae_shift, title="MAE Shift", plots_path=self.plots_path)
-            plot(x=range(1, self.num_epochs + 1), y1=self.all_train_euclidean_shift, y2=self.all_val_euclidean_shift, title="Euclidean Shift", plots_path=self.plots_path)
-
+        self.plot_all()
 
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
@@ -364,6 +357,14 @@ class AffineRegressor(nn.Module):
         ])
         self.optimizer.load_state_dict(checkpoint['optimizer'])
 
+    def plot_all(self):
+        plot(x=range(1, self.num_epochs + 1), y1=self.all_train_loss, y2=self.all_val_loss, title="Loss", plots_path=self.plots_path)
+        if ANGLE_RANGE != 0:
+            plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae_angle, y2=self.all_val_mae_angle, title="MAE Angle", plots_path=self.plots_path)
+            plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mse_angle, y2=self.all_val_mse_angle, title="MSE Angle", plots_path=self.plots_path)
+        if SHIFT_RANGE != 0:          
+            plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae_shift, y2=self.all_val_mae_shift, title="MAE Shift", plots_path=self.plots_path)
+            plot(x=range(1, self.num_epochs + 1), y1=self.all_train_euclidean_shift, y2=self.all_val_euclidean_shift, title="Euclidean Shift", plots_path=self.plots_path)
 
     def append_epoch_stats(self, epoch_stats):
         self.all_train_loss.append(epoch_stats["loss"])
@@ -381,10 +382,10 @@ class AffineRegressor(nn.Module):
             self.all_train_euclidean_shift.append(epoch_stats["euclidean_shift"])
             self.all_val_euclidean_shift.append(epoch_stats["val_euclidean_shift"])
 
-
     def test(self, test_loader):
         with torch.no_grad():
-            loss, mae_shift, euclidean_shift, mae_angle, mse_angle = torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32)
+            loss, mae_shift, euclidean_shift, mae_angle, mse_angle = \
+                torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32)
             for epoch in range(10):
                 epoch_stats = {"test_loss": torch.tensor(0, dtype=torch.float32), "test_mae_shift": torch.tensor(0, dtype=torch.float32), "test_euclidean_shift": torch.tensor(0, dtype=torch.float32), \
                                "test_mae_angle": torch.tensor(0, dtype=torch.float32), "test_mse_angle": torch.tensor(0, dtype=torch.float32)}

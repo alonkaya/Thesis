@@ -14,13 +14,12 @@ import itertools
 
 if __name__ == "__main__":
         init_main()
-
+        set_seed(SEED)
+                
         # Iterate over each combination
         param_combinations = itertools.product(LR, BATCH_SIZE, ALPHA)
 
         for i, (lr, bs, alpha) in enumerate(param_combinations):
-                set_seed(SEED)
-                
                 scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 

@@ -1,9 +1,9 @@
+import random
 from params import *
 import matplotlib.pyplot as plt
 import torch.nn as nn
 import os
 import math
-import numpy as np
 import warnings
 import os
 import faulthandler
@@ -58,28 +58,6 @@ class ConvNet(nn.Module):
         x = self.flatten(pooled_features_with_position) # shape (batch_size, 2 * hidden_dims[-1] * 3 * 3)
 
         return x
-
-def plot_over_epoch(x, y1, y2, title, x_label="Epochs"):
-      plt.figure(figsize=(10, 5))
-      plt.plot(x, y1, color='blue', label="Train")
-      plt.plot(x, y2, color='orange', label="Val")
-
-      for i, txt in enumerate(y1):
-          plt.text(x[i], y1[i], f'{txt:.2f}', fontsize=9, color='blue', ha='center', va='bottom')
-
-      # Annotate each point on the Val line
-      for i, txt in enumerate(y2):
-          plt.text(x[i], y2[i], f'{txt:.2f}', fontsize=9, color='orange', ha='center', va='top')
-
-      plt.xlabel(x_label)
-      plt.ylabel(title)
-      plt.title(title)
-
-      plt.xticks(x)
-      plt.grid(True)
-      plt.legend()
-
-      plt.show()
 
 def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
     # if len(y1) > 3 and (y1[0] > y1[3] + 2000 or y2[0] > y2[3] + 2000):
@@ -151,7 +129,7 @@ def init_main():
     warnings.filterwarnings('always', category=RuntimeWarning)
 
     # Optionally, set NumPy error handling to 'warn' to catch overflow errors
-    np.seterr(over='warn')
+    # np.seterr(over='warn')
 
 
 def divide_by_dataloader(epoch_stats, len_train_loader=0, len_val_loader=0, len_test_loader=0):
@@ -175,7 +153,5 @@ def set_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)  # If using multi-GPU.
+    random.seed(seed)
 
-
-if __name__ == "__main__":
-    plot([1, 2, 3, 4, 5], [1, 2, 3, 4, 5], [1, 2, 3, 4, 5], "Test", "plots", show=True, save=False)
