@@ -189,11 +189,11 @@ class AffineRegressor(nn.Module):
 
             print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}\n""", self.plots_path)
             if ANGLE_RANGE != 0:
-                print_and_write(f"""\t     Training MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
-            Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}\n""", self.plots_path)
+                print_and_write(f"""\t      Training MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
+              Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}\n""", self.plots_path)
             if SHIFT_RANGE != 0:
-                print_and_write(f"""\t     Training MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
-            Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}\n""", self.plots_path)
+                print_and_write(f"""\t      Training MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
+              Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}\n""", self.plots_path)
             print_and_write("\n\n", self.plots_path)
 
 

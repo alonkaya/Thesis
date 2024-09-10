@@ -27,15 +27,14 @@ class CustomDataset(torch.utils.data.Dataset):
         # Generate random affine params
         angle, shift_x, shift_y = random.uniform(-self.angle_range, self.angle_range), random.uniform(-self.shift_range, self.shift_range), random.uniform(-self.shift_range, self.shift_range)
         translated_image = F.affine(original_image, angle=angle, translate=(shift_x, shift_y), scale=1, shear=0)
-
         
         translated_image, original_image = F.to_tensor(translated_image), F.to_tensor(original_image)
         if torch.isnan(original_image).any() or torch.isnan(translated_image).any():
-            print_and_write(f"dataset 4: Found nan after to_tensor {idx}\n", self.plots_path)
+            print(f"dataset 4: Found nan after to_tensor {idx}\n")
 
         translated_image, original_image = F.normalize(translated_image, mean, std), F.normalize(original_image, mean, std)
         if torch.isnan(original_image).any() or torch.isnan(translated_image).any():
-            print_and_write(f"dataset 5: Found nan after normalize {idx}\n", self.plots_path)
+            print(f"dataset 5: Found nan after normalize {idx}\n")
 
         # Rescale params -> [0,1]
         angle = 0 if self.angle_range==0 else torch.tensor(angle / self.angle_range, dtype=torch.float32)
