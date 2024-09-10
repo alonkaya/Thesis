@@ -130,7 +130,7 @@ class AffineRegressor(nn.Module):
                 x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
                 x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
 
-                embeddings = torch.tensor([]).to(self.device)
+                embeddings = torch.tensor([]).to(device)
                 if "rotated_embeddings" in self.embedding_to_use:
                     embeddings = torch.cat((embeddings, x2_embeddings), dim=1)
                 if "original_embeddings" in self.embedding_to_use:
@@ -144,7 +144,7 @@ class AffineRegressor(nn.Module):
                     return None
                 
         if not self.use_conv:
-            embeddings = torch.tensor([]).to(self.device)
+            embeddings = torch.tensor([]).to(device)
             if "rotated_embeddings" in self.embedding_to_use:
                 embeddings = torch.cat((embeddings, x2_embeddings), dim=1)
             if "original_embeddings" in self.embedding_to_use:
