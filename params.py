@@ -13,11 +13,11 @@ val_length = 320      # Needs to be a multiple of batch size
 test_length = 320     # Needs to be a multiple of batch size
 
 ### Training ###
-LR = [6e-5]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
-BATCH_SIZE = [32]                                                                     # TODO 16, 32, 64
+LR = [6e-5]
+BATCH_SIZE = [32]
 NORM = True
 TRAIN_FROM_SCRATCH = False
-NUM_WORKERS = 2 # Probably setting this to > 0 causes Nans. If you get Nans then set it to 0.
+NUM_WORKERS = 0 # Probably setting this to > 0 causes Nans. If you get Nans then set it to 0.
 SAVE_MODEL = True
 NUM_EPOCHS = 200
 ADDITIONS = ""                                      
