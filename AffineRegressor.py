@@ -316,7 +316,7 @@ class AffineRegressor(nn.Module):
             if output is None:
                 return None
 
-            mse_shift, mse_angle = 0, 0, 0, 0
+            mse_shift, mse_angle = 0, 0
             if ANGLE_RANGE != 0:
                 mse_angle = self.L2_loss(output[:,0], angle)
                 loss = mse_angle
