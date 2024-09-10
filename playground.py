@@ -1,4 +1,7 @@
 import matplotlib.pyplot as plt
+from params import *
+from AffineRegressor import AffineRegressor
+from Dataset import get_dataloaders
 
 def parse_data_from_file(file_path):
     with open(file_path, 'r') as f:
@@ -139,9 +142,21 @@ def plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_s
     plt.tight_layout()
     plt.show()
 
-
-if __name__ == "__main__":
+def plot_stats():
     file_path = "plots/BS_16__lr_4e-05__train_size_4096__model_CLIP__avg__alpha_1__angle/output.log"
+    
     epochs, train_loss, val_loss, train_mae_shift, val_mae_shift, train_euclidean_shift, val_euclidean_shift, \
     train_mae_angle, val_mae_angle, train_mse_angle, val_mse_angle = parse_data_from_file(file_path)
     plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_shift, train_euclidean_shift, val_euclidean_shift, train_mae_angle, val_mae_angle, train_mse_angle, val_mse_angle)
+
+def test():
+    pretrained_path = "plots/BS_32__lr_6e-05__train_size_6144__model_CLIP__avg__alpha_1__shift/"
+
+    train_loader, val_loader, test_loader = get_dataloaders(batch_size=BATCH_SIZE[0], train_length=train_length, val_length=val_length, test_length=test_length)
+
+    model = AffineRegressor(LR[0], BATCH_SIZE[0], ALPHA[0], model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path="plots/test", pretrained_path=pretrained_path, use_conv=USE_CONV, num_epochs=NUM_EPOCHS)
+
+    model.test(test_loader)
+
+if __name__ == "__main__":
+    test()
