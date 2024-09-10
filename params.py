@@ -40,6 +40,6 @@ NUM_OUTPUT = 3
 mean = torch.tensor([0.485, 0.456, 0.406])
 std = torch.tensor([0.229, 0.224, 0.225])
 # only one of the following 3 should be True
-USE_CONV = False
+USE_CONV = True
 AVG_EMBEDDINGS = False
-USE_CLS = [True, False]
+USE_CLS = [False]
