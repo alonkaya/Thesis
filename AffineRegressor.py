@@ -95,6 +95,7 @@ class AffineRegressor(nn.Module):
     def FeatureExtractor(self, x1, x2):
         if torch.isnan(x1).any():
             print_and_write(f"0. Nan in x1_embeddings\n {x1}")
+            return None
 
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state
@@ -108,7 +109,7 @@ class AffineRegressor(nn.Module):
         x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
         if torch.isnan(x1_embeddings).any() or torch.isnan(x2_embeddings).any():
             print_and_write("1. Nan in vit", self.plots_path)
-        
+            return None
         if self.avg_embeddings:
             # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
             avg_patches = nn.AdaptiveAvgPool2d(1)
@@ -116,6 +117,7 @@ class AffineRegressor(nn.Module):
             x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
             if torch.isnan(x1_embeddings).any() or torch.isnan(x2_embeddings).any():
                 print_and_write("2. Nan in average embeddings", self.plots_path)
+                return None
 
         if self.use_conv:
             # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
@@ -125,6 +127,7 @@ class AffineRegressor(nn.Module):
             embeddings = self.conv(embeddings)
             if torch.isnan(embeddings).any():
                 print_and_write(f"5. Nan in conv\n", self.plots_path)
+                return None
         else:
             embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
         
@@ -133,15 +136,19 @@ class AffineRegressor(nn.Module):
     def forward(self, x1, x2):
         # x1, x2 shape is (batch_size, channels, height, width)
         embeddings = self.FeatureExtractor(x1, x2) # Output shape is (batch_size, -1)
-
+        if embeddings is None:
+            return None
+        
         # output shape is (batch_size, 3)
         output = self.mlp(embeddings)
         if torch.isnan(output).any():
             print_and_write(f"3. Nan in mlp\n", self.plots_path)
+            return None
 
         output = norm_layer(output)
         if torch.isnan(output).any():
             print_and_write("4. Nan in norm", self.plots_path)
+            return None
 
         return output
 
@@ -155,12 +162,18 @@ class AffineRegressor(nn.Module):
 
             # Training
             self.train()
-            self.dataloader_step(train_loader, epoch, epoch_stats, data_type="train")
+            output = self.dataloader_step(train_loader, epoch, epoch_stats, data_type="train")
+            if output is None:
+                self.num_epochs = epoch + 1
+                break
 
             # Validation
             self.eval()
             with torch.no_grad():
-                self.dataloader_step(val_loader, epoch, epoch_stats, data_type="val")
+                output = self.dataloader_step(val_loader, epoch, epoch_stats, data_type="val")
+                if output is None:
+                    self.num_epochs = epoch + 1
+                    break  
 
             # Divide by the number of batches
             divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
@@ -300,6 +313,8 @@ class AffineRegressor(nn.Module):
 
             # Forward pass
             output = self.forward(img1, img2)
+            if output is None:
+                return None
 
             mae_shift, euclidean_shift, mae_angle, mse_angle = 0, 0, 0, 0
             # Compute loss
@@ -332,7 +347,7 @@ class AffineRegressor(nn.Module):
             epoch_stats[f'{prefix}mae_angle'] += mae_angle
             epoch_stats[f'{prefix}mse_angle'] += mse_angle
             epoch_stats[f'{prefix}loss'] += loss
-        
+        return 1
 
     def append_epoch_stats(self, epoch_stats):
         self.all_train_loss.append(epoch_stats["loss"])
