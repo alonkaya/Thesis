@@ -206,7 +206,7 @@ class AffineRegressor(nn.Module):
         if ANGLE_RANGE != 0:
             plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae_angle, y2=self.all_val_mae_angle, title="MAE Angle", plots_path=self.plots_path)
             plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mse_angle, y2=self.all_val_mse_angle, title="MSE Angle", plots_path=self.plots_path)
-        elif SHIFT_RANGE != 0:          
+        if SHIFT_RANGE != 0:          
             plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae_shift, y2=self.all_val_mae_shift, title="MAE Shift", plots_path=self.plots_path)
             plot(x=range(1, self.num_epochs + 1), y1=self.all_train_euclidean_shift, y2=self.all_val_euclidean_shift, title="Euclidean Shift", plots_path=self.plots_path)
 
