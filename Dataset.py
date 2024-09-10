@@ -28,16 +28,16 @@ class CustomDataset(torch.utils.data.Dataset):
         angle, shift_x, shift_y = random.uniform(-self.angle_range, self.angle_range), random.uniform(-self.shift_range, self.shift_range), random.uniform(-self.shift_range, self.shift_range)
         translated_image = F.affine(original_image, angle=angle, translate=(shift_x, shift_y), scale=1, shear=0)
         
-        translated_image, original_image = F.to_tensor(translated_image).to(device), F.to_tensor(original_image).to(device)
+        translated_image, original_image = F.to_tensor(translated_image), F.to_tensor(original_image)
         if torch.isnan(original_image).any() or torch.isnan(translated_image).any(): print_and_write(f"dataset 4: Found nan after to_tensor {idx}\n", self.plots_path)
 
         translated_image, original_image = F.normalize(translated_image, mean, std), F.normalize(original_image, mean, std)
         if torch.isnan(original_image).any() or torch.isnan(translated_image).any(): print_and_write(f"dataset 5: Found nan after normalize {idx}\n", self.plots_path)
 
         # Rescale params -> [-1,1]
-        angle = 0 if self.angle_range==0 else torch.tensor(angle / self.angle_range, dtype=torch.float32).to(device)
-        shift_x = 0 if self.shift_range==0 else torch.tensor(shift_x / self.shift_range, dtype=torch.float32).to(device)
-        shift_y = 0 if self.shift_range==0 else torch.tensor(shift_y / self.shift_range, dtype=torch.float32).to(device)
+        angle = 0 if self.angle_range==0 else torch.tensor(angle / self.angle_range, dtype=torch.float32)
+        shift_x = 0 if self.shift_range==0 else torch.tensor(shift_x / self.shift_range, dtype=torch.float32)
+        shift_y = 0 if self.shift_range==0 else torch.tensor(shift_y / self.shift_range, dtype=torch.float32)
 
         if SHIFT_RANGE == 0:
             return original_image, translated_image, angle
