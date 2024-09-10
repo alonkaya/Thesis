@@ -77,7 +77,7 @@ class AffineRegressor(nn.Module):
 
             elif self.use_conv:
                 self.conv = ConvNet(input_dim= len(self.embedding_to_use)*self.hidden_size, batch_size=self.batch_size).to(device)
-                mlp_input_shape = len(self.embedding_to_use) * self.conv.hidden_dims[-1] * 3 * 3 
+                mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
             
             # Initialize loss functions
             self.L2_loss = nn.MSELoss().to(device)
