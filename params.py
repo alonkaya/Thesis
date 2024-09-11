@@ -41,5 +41,5 @@ mean = torch.tensor([0.485, 0.456, 0.406])
 std = torch.tensor([0.229, 0.224, 0.225])
 # only one of the following 3 should be True
 USE_CONV = False
-AVG_EMBEDDINGS = True
-USE_CLS = [False]
+AVG_EMBEDDINGS = False
+USE_CLS = [False, True]
