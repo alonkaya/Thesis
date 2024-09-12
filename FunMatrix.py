@@ -40,11 +40,18 @@ def get_intrinsic_KITTI(calib_path, original_image_size, adjust_resize=True):
     return k0, k1
 
 def decompose_k(projection_matrix):
+    print(f"Input type: {type(projection_matrix)}")
+    print(f"Input device: {projection_matrix.device}")
+
     # Extract the 3x3 part of the matrix (ignoring the last column)
-    M = projection_matrix[:, :3].cpu().numpy() 
+    M = projection_matrix[:, :3].cpu().numpy()
+    print(f"M type: {type(M)}")
+    print(f"M dtype: {M.dtype}")
 
     # Perform RQ decomposition on M
     K, _ = rq(M)
+    print(f"K type after rq: {type(K)}")
+    print(f"K dtype after rq: {K.dtype}")
 
     # Adjust the signs to ensure the diagonal of K is positive
     T = np.diag(np.sign(np.diag(K)))
@@ -55,8 +62,18 @@ def decompose_k(projection_matrix):
 
     # Ensure K is float32 before converting to PyTorch tensor
     K = K.astype(np.float32)
+    print(f"K type before torch conversion: {type(K)}")
+    print(f"K dtype before torch conversion: {K.dtype}")
 
-    return torch.from_numpy(K)
+    # Convert back to PyTorch tensor and move to the same device as projection_matrix
+    try:
+        result = torch.from_numpy(K).to(projection_matrix.device)
+        print(f"Result type: {type(result)}")
+        print(f"Result dtype: {result.dtype}")
+        return result
+    except Exception as e:
+        print(f"Error during conversion: {str(e)}")
+        raise
 
 def adjust_k_resize(k, original_size, resized_size):
     # Adjust the intrinsic matrix K according to the resize
