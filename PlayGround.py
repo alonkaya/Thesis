@@ -465,7 +465,7 @@ def check_model_file(file_path):
     return True
 
 if __name__ == "__main__":
-    f = "plots/Affine/model.pth"
+    f = "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth"
     # Use this function before trying to load the model
     if check_model_file(f):
         checkpoint = torch.load(f, map_location='cpu')
