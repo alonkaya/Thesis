@@ -41,14 +41,14 @@ def get_intrinsic_KITTI(calib_path, original_image_size, adjust_resize=True):
 
 def decompose_k(projection_matrix):
     # Extract the 3x3 part of the matrix (ignoring the last column)
-    M = projection_matrix[:, :3].cpu().numpy()
+    M = projection_matrix[:, :3].cpu().numpy() 
 
     # Perform RQ decomposition on M
     K, _ = rq(M)
 
     # Adjust the signs to ensure the diagonal of K is positive
     T = np.diag(np.sign(np.diag(K)))
-    K = np.dot(K, T)
+    K = np.dot(K, T).astype(np.float32)
 
     # Normalize K to ensure the bottom-right value is 1
     K = K / K[2, 2]
