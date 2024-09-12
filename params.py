@@ -103,7 +103,7 @@ WEIGHT_DECAY = 0                                                          # TODO
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = [4]                                                          # TODO 16, 32, 64
+BATCH_SIZE = [8]                                                          # TODO 16, 32, 64
 NORM = True
 TRAIN_FROM_SCRATCH = False
 DEEPF_NOCORRS = False
@@ -142,6 +142,6 @@ AVG_EMBEDDINGS = False
 USE_CONV = True
 USE_CONV = False
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
-FROZEN_LAYERS = [8]
+FROZEN_LAYERS = [4]
 norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
 norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
