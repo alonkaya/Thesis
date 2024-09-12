@@ -93,7 +93,6 @@ class FMatrixRegressor(nn.Module):
             if self.trained_vit != None:
                 # This is for when wanting to fine-tune an already trained vit 
                 # for example fine-tuning a vit which had been trained on the affine transfomration task, on the FMatrix task
-                print(self.trained_vit)
                 checkpoint = torch.load(self.trained_vit, map_location='cpu')
                 self.model.load_state_dict(checkpoint['vit']) 
                 self.model.to(device)
@@ -232,14 +231,37 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         
         self.test(test_loader)
 
-        try:
-            plot(x=range(1, self.num_epochs + 1), y1=self.all_train_loss, y2=self.all_val_loss, title="Loss", plots_path=self.plots_path)
-            plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae, y2=self.all_val_mae, title="MAE", plots_path=self.plots_path)
-            plot(x=range(1, self.num_epochs + 1), y1=self.all_algebraic_pred, y2=self.all_val_algebraic_pred, title="Algebraic distance", plots_path=self.plots_path)
-            plot(x=range(1, self.num_epochs + 1), y1=self.all_RE1_pred, y2=self.all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
-            plot(x=range(1, self.num_epochs + 1), y1=self.all_SED_pred, y2=self.all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
-        except Exception as e:
-            print_and_write(f"Error plotting: \n{e}", self.plots_path)
+        self.plot_all()
+        
+    def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
+        prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
+        for img1, img2, label, pts1, pts2, _ in dataloader:
+            img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
+
+            # Forward pass
+            output = self.forward(img1, img2)
+
+            if data_type == "train":
+                pts1.requires_grad = True
+                pts2.requires_grad = True
+            # Update epoch statistics
+            batch_SED_pred = update_epoch_stats(
+                epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, data_type, epoch)
+            
+            # Compute loss
+            loss = self.L2_coeff*self.L2_loss(output, label) + self.huber_coeff*self.huber_loss(output, label) + \
+                    self.sed_coeff*batch_SED_pred
+            epoch_stats[f'{prefix}loss'] = epoch_stats[f'{prefix}loss'] + loss.detach()
+
+            if data_type == "train":
+                # Compute Backward pass and gradients
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+            # Extend lists with batch statistics
+            epoch_stats[f'{prefix}labels'] = torch.cat((epoch_stats[f'{prefix}labels'], label.detach()), dim=0)
+            epoch_stats[f'{prefix}outputs'] = torch.cat((epoch_stats[f'{prefix}outputs'], output.detach()), dim=0)
 
     def save_model(self, epoch):
         checkpoint_path = os.path.join(self.plots_path, "model.pth")
@@ -375,36 +397,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 self.scheduler.load_state_dict(checkpoint.get("scheduler"))
             self.optimizer.load_state_dict(checkpoint['optimizer'])
 
-    def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
-        prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
-        for img1, img2, label, pts1, pts2, _ in dataloader:
-            img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
-
-            # Forward pass
-            output = self.forward(img1, img2)
-
-            if data_type == "train":
-                pts1.requires_grad = True
-                pts2.requires_grad = True
-            # Update epoch statistics
-            batch_SED_pred = update_epoch_stats(
-                epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, data_type, epoch)
-            
-            # Compute loss
-            loss = self.L2_coeff*self.L2_loss(output, label) + self.huber_coeff*self.huber_loss(output, label) + \
-                    self.sed_coeff*batch_SED_pred
-            epoch_stats[f'{prefix}loss'] = epoch_stats[f'{prefix}loss'] + loss.detach()
-
-            if data_type == "train":
-                # Compute Backward pass and gradients
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
-
-            # Extend lists with batch statistics
-            epoch_stats[f'{prefix}labels'] = torch.cat((epoch_stats[f'{prefix}labels'], label.detach()), dim=0)
-            epoch_stats[f'{prefix}outputs'] = torch.cat((epoch_stats[f'{prefix}outputs'], output.detach()), dim=0)
-
     def append_epoch_stats(self, train_mae, val_mae, epoch_stats):
         self.all_train_mae.append(train_mae)
         self.all_train_loss.append(epoch_stats["loss"])
@@ -417,6 +409,16 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.all_val_algebraic_pred.append(epoch_stats["val_algebraic_pred"])
         self.all_val_RE1_pred.append(epoch_stats["val_RE1_pred"])
         self.all_val_SED_pred.append(epoch_stats["val_SED_pred"])
+
+    def plot_all(self):
+        try:
+            plot(x=range(1, self.num_epochs + 1), y1=self.all_train_loss, y2=self.all_val_loss, title="Loss", plots_path=self.plots_path)
+            plot(x=range(1, self.num_epochs + 1), y1=self.all_train_mae, y2=self.all_val_mae, title="MAE", plots_path=self.plots_path)
+            plot(x=range(1, self.num_epochs + 1), y1=self.all_algebraic_pred, y2=self.all_val_algebraic_pred, title="Algebraic distance", plots_path=self.plots_path)
+            plot(x=range(1, self.num_epochs + 1), y1=self.all_RE1_pred, y2=self.all_val_RE1_pred, title="RE1 distance", plots_path=self.plots_path) if RE1_DIST else None
+            plot(x=range(1, self.num_epochs + 1), y1=self.all_SED_pred, y2=self.all_val_SED_pred, title="SED distance", plots_path=self.plots_path) if SED_DIST else None
+        except Exception as e:
+            print_and_write(f"Error plotting: \n{e}", self.plots_path)
 
     def test(self, test_loader):
         with torch.no_grad():

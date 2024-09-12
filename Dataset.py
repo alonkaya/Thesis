@@ -235,10 +235,7 @@ def get_dataloaders_KITTI(data_ratio, batch_size):
 def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS):
     sequence_paths = [f'sequences/{i:02}' for i in range(11)]
     poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
-    calib_paths = [f'sequences/{i:02}/calib.txt' for i in range(11)]  
-    # sequence_paths = [f'/mnt_ssd4tb/sequences/{i:02}' for i in range(11)]
-    # poses_paths = [f'poses/{i:02}.txt' for i in range(11)]
-    # calib_paths = [f'/mnt_ssd4tb/sequences/{i:02}/calib.txt' for i in range(11)]  
+    calib_paths = [f'sequences/{i:02}/calib.txt' for i in range(11)] 
       
     R_relative = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32).to(device)
     t_relative = torch.tensor([0.54, 0, 0], dtype=torch.float32).to(device)
