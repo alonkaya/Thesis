@@ -37,6 +37,7 @@ RESNET_MODEL_NAME = 'microsoft/resnet-152'
 MODEL = CLIP_MODEL_NAME
 FREEZE_PRETRAINED_MODEL=False
 NUM_OUTPUT = 3
+FROZEN_LAYERS = 4
 mean = torch.tensor([0.485, 0.456, 0.406])
 std = torch.tensor([0.229, 0.224, 0.225])
 # only one of the following 3 should be True

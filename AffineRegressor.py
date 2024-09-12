@@ -5,7 +5,7 @@ from transformers import CLIPVisionModel, CLIPVisionConfig, ResNetModel
 
 
 class AffineRegressor(nn.Module):
-    def __init__(self, lr, batch_size, alpha, embedding_to_use=None, cls=None, avg_embeddings=AVG_EMBEDDINGS, model_name=MODEL, plots_path=None, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
+    def __init__(self, lr, batch_size, alpha, embedding_to_use=None, cls=None, avg_embeddings=AVG_EMBEDDINGS, frozen_layers=FROZEN_LAYERS, model_name=MODEL, plots_path=None, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
         """
         Args:
@@ -39,6 +39,7 @@ class AffineRegressor(nn.Module):
         self.start_epoch = 0
         self.embedding_to_use = embedding_to_use
         self.cls = cls
+        self.frozen_layers = frozen_layers
 
         # Lists to store training statistics
         self.all_train_loss, self.all_val_loss, \
@@ -60,6 +61,11 @@ class AffineRegressor(nn.Module):
             self.resnet = True
             self.model = ResNetModel.from_pretrained(model_name).to(device)
     
+        # Freeze frozen_layers bottom layers
+        for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
+            if layer_idx < self.frozen_layers:  
+                for param in layer.parameters():
+                    param.requires_grad = False
 
         if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
             model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
@@ -292,6 +298,7 @@ class AffineRegressor(nn.Module):
             'conv': self.conv.state_dict() if self.use_conv else '',
             'alpha': self.alpha,
             'avg_embeddings': self.avg_embeddings,
+            'frozen_layers': self.frozen_layers,
             "batch_size" : self.batch_size,
             "lr" : self.lr,
             "model_name" : self.model_name,
@@ -326,6 +333,7 @@ class AffineRegressor(nn.Module):
         self.hidden_size = checkpoint.get("hidden_size", 0)
         self.num_patches = checkpoint.get("num_patches", 0)
         self.start_epoch = checkpoint.get("epoch", 0)
+        self.frozen_layers = checkpoint.get("frozen_layers", self.frozen_layers)
         self.cls = checkpoint.get("cls", self.cls)
         self.embedding_to_use = checkpoint.get("embedding_to_use", self.embedding_to_use)
         self.alpha = checkpoint.get("alpha", 0)
