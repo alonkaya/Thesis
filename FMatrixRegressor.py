@@ -93,6 +93,7 @@ class FMatrixRegressor(nn.Module):
             if self.trained_vit != None:
                 # This is for when wanting to fine-tune an already trained vit 
                 # for example fine-tuning a vit which had been trained on the affine transfomration task, on the FMatrix task
+                print(self.trained_vit)
                 checkpoint = torch.load(self.trained_vit, map_location='cpu')
                 self.model.load_state_dict(checkpoint['vit']) 
                 self.model.to(device)
