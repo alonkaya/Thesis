@@ -41,7 +41,7 @@ def get_intrinsic_KITTI(calib_path, original_image_size, adjust_resize=True):
 
 def decompose_k(projection_matrix):
     # Extract the 3x3 part of the matrix (ignoring the last column)
-    M = projection_matrix[:, :3]
+    M = projection_matrix[:, :3].cpu().numpy()
 
     # Perform RQ decomposition on M
     K, _ = rq(M)
