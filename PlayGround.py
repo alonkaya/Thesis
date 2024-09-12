@@ -379,7 +379,6 @@
 
 import os
 import shutil        
-if __name__ == "__main__":
 #     # file_path = "plots/Stereo/SED_0.05__lr_2e-05__avg_embeddings_True__conv_False__model_CLIP__use_reconstruction_True__Augment_True__rc_True"
 #     # update_epochs(file_path, 114)
 #     os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
@@ -390,29 +389,29 @@ if __name__ == "__main__":
 #     # plot = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0005__conv__CLIP__use_reconstruction_True__BS_32__ratio_0.2__head_True_2.model.pth"
 #     # checkpoint = torch.load(plot, map_location='cpu')
 
-    base_dir = "plots/Stereo/Winners"
+    # base_dir = "plots/Stereo/Winners"
 
-    # Names of the target directories
-    frozen_dirs = ["frozen_0", "frozen_4", "frozen_8"]
+    # # Names of the target directories
+    # frozen_dirs = ["frozen_0", "frozen_4", "frozen_8"]
 
-    # Create target directories if they don't exist
-    for frozen_dir in frozen_dirs:
-        frozen_dir_path = os.path.join(base_dir, frozen_dir)
-        if not os.path.exists(frozen_dir_path):
-            os.makedirs(frozen_dir_path)
+    # # Create target directories if they don't exist
+    # for frozen_dir in frozen_dirs:
+    #     frozen_dir_path = os.path.join(base_dir, frozen_dir)
+    #     if not os.path.exists(frozen_dir_path):
+    #         os.makedirs(frozen_dir_path)
 
-    # Iterate over all subdirectories in the base directory
-    for subdir in os.listdir(base_dir):
-        subdir_path = os.path.join(base_dir, subdir)
+    # # Iterate over all subdirectories in the base directory
+    # for subdir in os.listdir(base_dir):
+    #     subdir_path = os.path.join(base_dir, subdir)
 
-        # Only process if it's a directory and ends with one of the target suffixes
-        if os.path.isdir(subdir_path):
-            for frozen_dir in frozen_dirs:
-                if subdir.endswith(frozen_dir):
-                    target_dir = os.path.join(base_dir, frozen_dir)
-                    # shutil.move(subdir_path, target_dir)
-                    print(f'{subdir_path}\n{target_dir}\n\n')
-                    break
+    #     # Only process if it's a directory and ends with one of the target suffixes
+    #     if os.path.isdir(subdir_path):
+    #         for frozen_dir in frozen_dirs:
+    #             if subdir.endswith(frozen_dir):
+    #                 target_dir = os.path.join(base_dir, frozen_dir)
+    #                 # shutil.move(subdir_path, target_dir)
+    #                 print(f'{subdir_path}\n{target_dir}\n\n')
+    #                 break
 
 #     # for i in range(10):
 #     # for i in [0.025, 0.0375]:
@@ -451,5 +450,24 @@ if __name__ == "__main__":
 #     #         print(f'not found {p0}')
 
 
+import torch
+def check_model_file(file_path):
+    if not os.path.exists(file_path):
+        print(f"Error: The file {file_path} does not exist.")
+        return False
+    
+    file_size = os.path.getsize(file_path)
+    if file_size == 0:
+        print(f"Error: The file {file_path} is empty.")
+        return False
+    
+    print(f"The file {file_path} exists and is {file_size} bytes.")
+    return True
 
-
+if __name__ == "__main__":
+    f = "plots/Affine/model.pth"
+    # Use this function before trying to load the model
+    if check_model_file(f):
+        checkpoint = torch.load(f, map_location='cpu')
+    else:
+        print("Unable to load the model due to file issues.")
