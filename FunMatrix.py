@@ -48,10 +48,13 @@ def decompose_k(projection_matrix):
 
     # Adjust the signs to ensure the diagonal of K is positive
     T = np.diag(np.sign(np.diag(K)))
-    K = np.dot(K, T).astype(np.float32)
+    K = np.dot(K, T)
 
     # Normalize K to ensure the bottom-right value is 1
     K = K / K[2, 2]
+
+    # Ensure K is float32 before converting to PyTorch tensor
+    K = K.astype(np.float32)
 
     return torch.from_numpy(K)
 
