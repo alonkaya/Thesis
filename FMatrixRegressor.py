@@ -9,7 +9,7 @@ from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetMode
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr, lr_decay, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
-                 deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, 
+                 deepF_noCorrs=DEEPF_NOCORRS,augmentation=AUGMENTATION, model_name=MODEL, trained_vit=TRAINED_VIT,
                  frozen_layers=0, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
                  alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
@@ -53,6 +53,8 @@ class FMatrixRegressor(nn.Module):
         self.num_epochs = num_epochs
         self.frozen_layers = frozen_layers
         self.start_epoch = 0
+        self.trained_vit = trained_vit # This is for when wanting to fine-tune an already trained vit 
+                                       #(for example fine-tuning a vit which had been trained on the affine transfomration task)
 
         # Lists to store training statistics
         self.all_train_loss, self.all_val_loss, \
@@ -88,6 +90,13 @@ class FMatrixRegressor(nn.Module):
             self.load_model(model_path=model_path)
 
         else:
+            if self.trained_vit != None:
+                # This is for when wanting to fine-tune an already trained vit 
+                # for example fine-tuning a vit which had been trained on the affine transfomration task, on the FMatrix task
+                checkpoint = torch.load(self.trained_vit, map_location='cpu')
+                self.model.load_state_dict(checkpoint['vit']) 
+                self.model.to(device)
+
             # Get input dimension for the MLP based on ViT configuration
             self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]
             self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
@@ -106,21 +115,6 @@ class FMatrixRegressor(nn.Module):
 
             # Initialize MLP
             self.mlp = MLP(input_dim=mlp_input_shape).to(device)
-
-
-########################################################################################################################################################################################
-            # model_path = os.path.join("plots/Stereo/Winners/SED_0.5__L2_1__huber_1__auged__lr_0.0001__conv__CLIP__use_reconstruction_True__BS_8__ratio_0.0375__mid__frozen_0/model.pth")
-            # if not os.path.exists(model_path):
-            #     print("Model path does not exist")
-
-            # checkpoint = torch.load(model_path, map_location='cpu')
-
-            # self.conv.load_state_dict(checkpoint['conv'])
-            # self.conv.to(device)
-
-            # self.mlp.load_state_dict(checkpoint['mlp'])
-            # self.mlp.to(device)
-########################################################################################################################################################################################   
 
             # Load optimizer and scheduler
             self.optimizer = optim.Adam([
