@@ -151,7 +151,7 @@ def not_learning(val_RE1, plots_path):
 
 def print_and_write(output, plots_path):
     os.makedirs(plots_path, exist_ok=True)
-    print(plot_path)
+    print(plots_path)
     output_path = os.path.join(plots_path, "output.log")
     with open(output_path, "a") as f:
         f.write(output)
