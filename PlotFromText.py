@@ -1,8 +1,6 @@
 import os
 import re
 import matplotlib.pyplot as plt
-plt.use('Agg')
-
 import numpy as np
 
 epochs = []
