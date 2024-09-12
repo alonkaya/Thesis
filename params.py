@@ -8,7 +8,7 @@ CROP = 224
 RESIZE = 256
 ANGLE_RANGE = 90
 SHIFT_RANGE = 110
-train_length = 10240   # Needs to be a multiple of batch size
+train_length = 9216   # Needs to be a multiple of batch size
 val_length = 1600      # Needs to be a multiple of batch size
 test_length = 1600     # Needs to be a multiple of batch size
 
