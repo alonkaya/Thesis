@@ -8,9 +8,9 @@ CROP = 224
 RESIZE = 256
 ANGLE_RANGE = 90
 SHIFT_RANGE = 110
-train_length = 2048   # Needs to be a multiple of batch size
-val_length = 320      # Needs to be a multiple of batch size
-test_length = 320     # Needs to be a multiple of batch size
+train_length = 10240   # Needs to be a multiple of batch size
+val_length = 1600      # Needs to be a multiple of batch size
+test_length = 1600     # Needs to be a multiple of batch size
 
 ### Training ###
 LR = [6e-5]
@@ -24,7 +24,7 @@ ADDITIONS = ""
 GET_OLD_PATH = False
 SEED = 42
 ALPHA = [10]
-EMBEDDINGS_TO_USE = [["rotated_embeddings", "original_embeddings", "mul_embedding"], ["rotated_embeddings", "original_embeddings"], ["mul_embedding"], ["rotated_embeddings"]]
+EMBEDDINGS_TO_USE = [["rotated_embeddings", "original_embeddings"]]
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
@@ -40,6 +40,6 @@ NUM_OUTPUT = 3
 mean = torch.tensor([0.485, 0.456, 0.406])
 std = torch.tensor([0.229, 0.224, 0.225])
 # only one of the following 3 should be True
-USE_CONV = False
+USE_CONV = True
 AVG_EMBEDDINGS = False
-USE_CLS = [False, True]
+USE_CLS = [False]
