@@ -88,7 +88,7 @@ FIRST_2_OF_3_TRAIN = False
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-SEQ_RATIOS = [0.1]      # 3251, 2166, 1082, 540, 405, 269
+SEQ_RATIOS = [0.05]      # 3251, 2166, 1082, 540, 405, 269
 CROP = 224
 RESIZE = 256
 USE_REALESTATE = False
@@ -98,7 +98,7 @@ JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True
-PART = ["mid"]                                                  
+PART = ["tail"]                                                  
 
 ### Training ###
 LR = [1e-4]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
@@ -115,7 +115,7 @@ NUM_WORKERS = 0
 SAVE_MODEL = True
 NUM_EPOCHS = 1500
 GET_OLD_PATH = False
-SEED = 100
+SEED = 200
 
 ### Epipolar geometry ###
 RE1_DIST = True
