@@ -5,816 +5,1156 @@ nohup: ignoring input
   warnings.warn(
 /home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/modeling_utils.py:479: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
   return torch.load(checkpoint_file, map_location=map_location)
-/home/aviran/Alon/Thesis/AffineRegressor.py:318: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+/home/aviran/Alon/Thesis/AffineRegressor.py:325: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
   checkpoint = torch.load(model_path, map_location='cpu')
-Model plots/Affine/BS_32__lr_6e-05__train_size_2048__CLIP__alpha_10__avg__all already trained
-Model plots/Affine/BS_32__lr_6e-05__train_size_2048__CLIP__alpha_10__avg__original_rotated already trained
-Model plots/Affine/BS_32__lr_6e-05__train_size_2048__CLIP__alpha_10__avg__mul already trained
 ###########################################################################################################################################################
 
-                         learning rate: 6e-05,  mlp_hidden_sizes: [1024, 512], batch_size: 32, norm: True, alpha: 10, avg embeddings: True, 
-                        crop: 224 resize: 256, use conv: False pretrained: None, seed: 42, angle range: 90, shift range: 110, 
-                        train length: 2048, val length: 320, test length: 320, get old path: False, embeddings to use: ['rotated_embeddings'],
-                        use_cls: False
+                         learning rate: 6e-05,  mlp_hidden_sizes: [1024, 512], batch_size: 32, norm: True, alpha: 10, avg embeddings: False, 
+                        crop: 224 resize: 256, use conv: True pretrained: None, seed: 42, angle range: 90, shift range: 110, 
+                        train length: 9216, val length: 1600, test length: 1600, get old path: False, embeddings to use: ['rotated_embeddings', 'original_embeddings'],
+                        use_cls: False, frozen layer: 4
 
 
 
 ##### CONTINUE TRAINING #####
 
 
-Epoch 230/300: Training Loss: 0.2264205664396286		 Val Loss: 0.21181948184967042
+Epoch 198/300: Training Loss: 0.022139463159773085		 Val Loss: 0.025260813236236572
 
-	      Training MAE Angle: 0.36502605676651		 Val MAE Angle: 0.3582872152328491
-              Training MSE Angle: 0.2017134726047516		 Val MSE Angle: 0.19508203268051147
+	      Training MAE Angle: 0.059429036246405706		 Val MAE Angle: 0.0532395076751709
+              Training MSE Angle: 0.016913870970408123		 Val MSE Angle: 0.017498583793640138
 
-	      Training MAE Shift: 0.03155862167477608		 Val MAE Shift: 0.028640517592430116
-              Training Euclidean Shift: 0.0495874397456646	 Val Euclidean Shift: 0.04551020264625549
+	      Training MAE Shift: 0.015043796764479743		 Val MAE Shift: 0.01883930802345276
+              Training Euclidean Shift: 0.02368009090423584	 Val Euclidean Shift: 0.029644572734832765
 
 
 
 
-Epoch 231/300: Training Loss: 0.2293301820755005		 Val Loss: 0.21063129901885985
+Epoch 199/300: Training Loss: 0.023457815249760944		 Val Loss: 0.022912755012512206
 
-	      Training MAE Angle: 0.37415099143981934		 Val MAE Angle: 0.3463158369064331
-              Training MSE Angle: 0.20948369801044464		 Val MSE Angle: 0.18702261447906493
+	      Training MAE Angle: 0.060672918955485024		 Val MAE Angle: 0.05205633640289307
+              Training MSE Angle: 0.01721603837278154		 Val MSE Angle: 0.015868340730667115
 
-	      Training MAE Shift: 0.028279973194003105		 Val MAE Shift: 0.02941083014011383
-              Training Euclidean Shift: 0.044229906052351	 Val Euclidean Shift: 0.04652144014835358
+	      Training MAE Shift: 0.01653210984336005		 Val MAE Shift: 0.015263599157333375
+              Training Euclidean Shift: 0.025956455204221938	 Val Euclidean Shift: 0.024060986042022704
 
 
 
 
-Epoch 232/300: Training Loss: 0.22072435915470123		 Val Loss: 0.21491651535034179
+Epoch 200/300: Training Loss: 0.024746500783496432		 Val Loss: 0.023853659629821777
 
-	      Training MAE Angle: 0.3662707507610321		 Val MAE Angle: 0.35688397884368894
-              Training MSE Angle: 0.2008114606142044		 Val MSE Angle: 0.1983800172805786
+	      Training MAE Angle: 0.06229532427257962		 Val MAE Angle: 0.057463574409484866
+              Training MSE Angle: 0.019555979304843478		 Val MSE Angle: 0.017632967233657836
 
-	      Training MAE Shift: 0.027492256835103035		 Val MAE Shift: 0.027821552753448487
-              Training Euclidean Shift: 0.04308565706014633	 Val Euclidean Shift: 0.04312629699707031
+	      Training MAE Shift: 0.015320347415076362		 Val MAE Shift: 0.015452959537506104
+              Training Euclidean Shift: 0.024102191130320232	 Val Euclidean Shift: 0.02415973901748657
 
 
 
 
-Epoch 233/300: Training Loss: 0.22001124918460846		 Val Loss: 0.23480472564697266
+Epoch 201/300: Training Loss: 0.0260164158211814		 Val Loss: 0.02069350242614746
 
-	      Training MAE Angle: 0.36927253007888794		 Val MAE Angle: 0.3633796453475952
-              Training MSE Angle: 0.20440523326396942		 Val MSE Angle: 0.21082513332366942
+	      Training MAE Angle: 0.06382432911131117		 Val MAE Angle: 0.05146679878234863
+              Training MSE Angle: 0.019474332531293232		 Val MSE Angle: 0.012386292219161987
 
-	      Training MAE Shift: 0.025807175785303116		 Val MAE Shift: 0.028166481852531434
-              Training Euclidean Shift: 0.040598314255476	 Val Euclidean Shift: 0.04434825181961059
+	      Training MAE Shift: 0.016131824917263456		 Val MAE Shift: 0.017795699834823608
+              Training Euclidean Shift: 0.02535184058878157	 Val Euclidean Shift: 0.02834054708480835
 
 
 
 
-Epoch 234/300: Training Loss: 0.21997545659542084		 Val Loss: 0.22935361862182618
+Epoch 202/300: Training Loss: 0.02308510575029585		 Val Loss: 0.025694713592529297
 
-	      Training MAE Angle: 0.3671644926071167		 Val MAE Angle: 0.37117705345153806
-              Training MSE Angle: 0.20290984213352203		 Val MSE Angle: 0.20950822830200194
+	      Training MAE Angle: 0.060735185941060386		 Val MAE Angle: 0.05992258071899414
+              Training MSE Angle: 0.01746920579009586		 Val MSE Angle: 0.017822500467300415
 
-	      Training MAE Shift: 0.0273435041308403		 Val MAE Shift: 0.02634456753730774
-              Training Euclidean Shift: 0.0431157723069191	 Val Euclidean Shift: 0.041727456450462344
+	      Training MAE Shift: 0.01565811038017273		 Val MAE Shift: 0.019668692350387575
+              Training Euclidean Shift: 0.02455708384513855	 Val Euclidean Shift: 0.03106397867202759
 
 
 
 
-Epoch 235/300: Training Loss: 0.2270408272743225		 Val Loss: 0.2153080463409424
+Epoch 203/300: Training Loss: 0.02231954038143158		 Val Loss: 0.026558635234832765
 
-	      Training MAE Angle: 0.37180063128471375		 Val MAE Angle: 0.35721755027770996
-              Training MSE Angle: 0.21092979609966278		 Val MSE Angle: 0.1944223165512085
+	      Training MAE Angle: 0.05824076467090183		 Val MAE Angle: 0.05707577705383301
+              Training MSE Angle: 0.01731311281522115		 Val MSE Angle: 0.020217509269714357
 
-	      Training MAE Shift: 0.026050634682178497		 Val MAE Shift: 0.029411652684211732
-              Training Euclidean Shift: 0.04099993035197258	 Val Euclidean Shift: 0.046195375919342044
+	      Training MAE Shift: 0.015056797199779086		 Val MAE Shift: 0.015268841981887818
+              Training Euclidean Shift: 0.02371326916747623	 Val Euclidean Shift: 0.02411665201187134
 
 
 
 
-Epoch 236/300: Training Loss: 0.21615289151668549		 Val Loss: 0.2157332181930542
+Epoch 204/300: Training Loss: 0.020645633339881897		 Val Loss: 0.02034226655960083
 
-	      Training MAE Angle: 0.3664340674877167		 Val MAE Angle: 0.35553274154663084
-              Training MSE Angle: 0.19967377185821533		 Val MSE Angle: 0.19521363973617553
+	      Training MAE Angle: 0.05632854832543267		 Val MAE Angle: 0.052033095359802245
+              Training MSE Angle: 0.015731773442692228		 Val MSE Angle: 0.013654972314834595
 
-	      Training MAE Shift: 0.02634781412780285		 Val MAE Shift: 0.02683461308479309
-              Training Euclidean Shift: 0.04162273555994034	 Val Euclidean Shift: 0.04253884255886078
+	      Training MAE Shift: 0.014692177375157675		 Val MAE Shift: 0.017564133405685425
+              Training Euclidean Shift: 0.02311588989363776	 Val Euclidean Shift: 0.027564175128936767
 
 
 
 
-Epoch 237/300: Training Loss: 0.21636871993541718		 Val Loss: 0.20920393466949463
+Epoch 205/300: Training Loss: 0.02239931457572513		 Val Loss: 0.022390079498291016
 
-	      Training MAE Angle: 0.3684726357460022		 Val MAE Angle: 0.3596132040023804
-              Training MSE Angle: 0.2027779221534729		 Val MSE Angle: 0.193551766872406
+	      Training MAE Angle: 0.05737737152311537		 Val MAE Angle: 0.05291940212249756
+              Training MSE Angle: 0.016964122653007507		 Val MSE Angle: 0.015820212364196777
 
-	      Training MAE Shift: 0.024970458820462227		 Val MAE Shift: 0.02557348310947418
-              Training Euclidean Shift: 0.0393810011446476	 Val Euclidean Shift: 0.03955783247947693
+	      Training MAE Shift: 0.015210411614841886		 Val MAE Shift: 0.014912402629852295
+              Training Euclidean Shift: 0.023893854684299894	 Val Euclidean Shift: 0.02334479808807373
 
 
 
 
-Epoch 238/300: Training Loss: 0.21488125622272491		 Val Loss: 0.21309380531311034
+Epoch 206/300: Training Loss: 0.022673815488815308		 Val Loss: 0.023197999000549318
 
-	      Training MAE Angle: 0.36455103754997253		 Val MAE Angle: 0.35325989723205564
-              Training MSE Angle: 0.19995151460170746		 Val MSE Angle: 0.19590247869491578
+	      Training MAE Angle: 0.05824634763929579		 Val MAE Angle: 0.06602221488952636
+              Training MSE Angle: 0.017027038666937087		 Val MSE Angle: 0.016600277423858643
 
-	      Training MAE Shift: 0.02579037845134735		 Val MAE Shift: 0.028521591424942018
-              Training Euclidean Shift: 0.0406542643904686	 Val Euclidean Shift: 0.044762080907821654
+	      Training MAE Shift: 0.01563623547554016		 Val MAE Shift: 0.01670902967453003
+              Training Euclidean Shift: 0.024563941690656874	 Val Euclidean Shift: 0.026269421577453614
 
 
 
 
-Epoch 239/300: Training Loss: 0.216939315199852		 Val Loss: 0.21291613578796387
+Epoch 207/300: Training Loss: 0.025307060943709478		 Val Loss: 0.025092811584472657
 
-	      Training MAE Angle: 0.35321375727653503		 Val MAE Angle: 0.3410913944244385
-              Training MSE Angle: 0.19275234639644623		 Val MSE Angle: 0.1873503088951111
+	      Training MAE Angle: 0.06458683808644612		 Val MAE Angle: 0.054003634452819825
+              Training MSE Angle: 0.01936429738998413		 Val MSE Angle: 0.01863022327423096
 
-	      Training MAE Shift: 0.03134633228182793		 Val MAE Shift: 0.03211564123630524
-              Training Euclidean Shift: 0.04942609742283821	 Val Euclidean Shift: 0.0511495053768158
+	      Training MAE Shift: 0.01581023136774699		 Val MAE Shift: 0.016355223655700683
+              Training Euclidean Shift: 0.024916524688402813	 Val Euclidean Shift: 0.025594072341918947
 
 
 
 
-Epoch 240/300: Training Loss: 0.21039380133152008		 Val Loss: 0.22397565841674805
+Epoch 208/300: Training Loss: 0.02402882609102461		 Val Loss: 0.017673094272613526
 
-	      Training MAE Angle: 0.352344810962677		 Val MAE Angle: 0.3556216239929199
-              Training MSE Angle: 0.19364109635353088		 Val MSE Angle: 0.20821654796600342
+	      Training MAE Angle: 0.060955696635776095		 Val MAE Angle: 0.04918758392333984
+              Training MSE Angle: 0.018407315015792847		 Val MSE Angle: 0.01252049684524536
 
-	      Training MAE Shift: 0.027668379247188568		 Val MAE Shift: 0.02774866223335266
-              Training Euclidean Shift: 0.043589748442173004	 Val Euclidean Shift: 0.04368139505386352
+	      Training MAE Shift: 0.015708676642841764		 Val MAE Shift: 0.015073779821395874
+              Training Euclidean Shift: 0.024773115913073223	 Val Euclidean Shift: 0.02379385232925415
 
 
 
 
-Epoch 241/300: Training Loss: 0.21176354587078094		 Val Loss: 0.19238097667694093
+Epoch 209/300: Training Loss: 0.022790667083528306		 Val Loss: 0.020528087615966795
 
-	      Training MAE Angle: 0.3581317663192749		 Val MAE Angle: 0.3317302465438843
-              Training MSE Angle: 0.19724592566490173		 Val MSE Angle: 0.17884401082992554
+	      Training MAE Angle: 0.05744375122918023		 Val MAE Angle: 0.05010404109954834
+              Training MSE Angle: 0.01701267229186164		 Val MSE Angle: 0.015414390563964844
 
-	      Training MAE Shift: 0.02560732699930668		 Val MAE Shift: 0.026201581954956053
-              Training Euclidean Shift: 0.040295008569955826	 Val Euclidean Shift: 0.04110264778137207
+	      Training MAE Shift: 0.015654900007777743		 Val MAE Shift: 0.014716014862060547
+              Training Euclidean Shift: 0.024548389845424227	 Val Euclidean Shift: 0.023031280040740967
 
 
 
 
-Epoch 242/300: Training Loss: 0.206829234957695		 Val Loss: 0.19411568641662597
+Epoch 210/300: Training Loss: 0.022192580832375422		 Val Loss: 0.0217635178565979
 
-	      Training MAE Angle: 0.3496938943862915		 Val MAE Angle: 0.32676029205322266
-              Training MSE Angle: 0.19070054590702057		 Val MSE Angle: 0.17943131923675537
+	      Training MAE Angle: 0.05826054679022895		 Val MAE Angle: 0.05580946922302246
+              Training MSE Angle: 0.01683239804373847		 Val MSE Angle: 0.016941570043563843
 
-	      Training MAE Shift: 0.02489856444299221		 Val MAE Shift: 0.027136555314064024
-              Training Euclidean Shift: 0.039138492196798325	 Val Euclidean Shift: 0.04279364049434662
+	      Training MAE Shift: 0.015096795227792528		 Val MAE Shift: 0.015287411212921143
+              Training Euclidean Shift: 0.023799257145987615	 Val Euclidean Shift: 0.024108717441558836
 
 
 
 
-Epoch 243/300: Training Loss: 0.22236478328704834		 Val Loss: 0.21956915855407716
+Epoch 211/300: Training Loss: 0.021494820713996887		 Val Loss: 0.023700492382049562
 
-	      Training MAE Angle: 0.37351879477500916		 Val MAE Angle: 0.3557444095611572
-              Training MSE Angle: 0.2061346024274826		 Val MSE Angle: 0.2002195358276367
+	      Training MAE Angle: 0.0553623636563619		 Val MAE Angle: 0.05912941455841064
+              Training MSE Angle: 0.015391709076033698		 Val MSE Angle: 0.01829577684402466
 
-	      Training MAE Shift: 0.02817847579717636		 Val MAE Shift: 0.028094029426574706
-              Training Euclidean Shift: 0.044420886784791946	 Val Euclidean Shift: 0.04442986845970154
+	      Training MAE Shift: 0.01618937651316325		 Val MAE Shift: 0.01638504981994629
+              Training Euclidean Shift: 0.025430990589989558	 Val Euclidean Shift: 0.02575235366821289
 
 
 
 
-Epoch 244/300: Training Loss: 0.22994031012058258		 Val Loss: 0.21114299297332764
+Epoch 212/300: Training Loss: 0.022826027539041307		 Val Loss: 0.020370094776153563
 
-	      Training MAE Angle: 0.3763927221298218		 Val MAE Angle: 0.34763331413269044
-              Training MSE Angle: 0.21486830711364746		 Val MSE Angle: 0.19208359718322754
+	      Training MAE Angle: 0.057247406906551786		 Val MAE Angle: 0.048681054115295413
+              Training MSE Angle: 0.01747046907742818		 Val MSE Angle: 0.01274266242980957
 
-	      Training MAE Shift: 0.02689843438565731		 Val MAE Shift: 0.028407147526741026
-              Training Euclidean Shift: 0.04220082238316536	 Val Euclidean Shift: 0.04449654221534729
+	      Training MAE Shift: 0.015455817182858786		 Val MAE Shift: 0.018158328533172608
+              Training Euclidean Shift: 0.024301992522345647	 Val Euclidean Shift: 0.028503811359405516
 
 
 
 
-Epoch 245/300: Training Loss: 0.21761272847652435		 Val Loss: 0.20269899368286132
+Epoch 213/300: Training Loss: 0.01989397903283437		 Val Loss: 0.016921457052230835
 
-	      Training MAE Angle: 0.3673785328865051		 Val MAE Angle: 0.3536516666412354
-              Training MSE Angle: 0.20433712005615234		 Val MSE Angle: 0.1890916109085083
+	      Training MAE Angle: 0.051665965053770274		 Val MAE Angle: 0.04434778690338135
+              Training MSE Angle: 0.013978890246815152		 Val MSE Angle: 0.011983705759048462
 
-	      Training MAE Shift: 0.02410019189119339		 Val MAE Shift: 0.024886611104011535
-              Training Euclidean Shift: 0.03793561831116676	 Val Euclidean Shift: 0.0395110011100769
+	      Training MAE Shift: 0.01606421834892697		 Val MAE Shift: 0.013978915214538574
+              Training Euclidean Shift: 0.02524891495704651	 Val Euclidean Shift: 0.02186272382736206
 
 
 
 
-Epoch 246/300: Training Loss: 0.21563050150871277		 Val Loss: 0.2262187957763672
+Epoch 214/300: Training Loss: 0.019354500704341464		 Val Loss: 0.022815372943878174
 
-	      Training MAE Angle: 0.3616810142993927		 Val MAE Angle: 0.35078227519989014
-              Training MSE Angle: 0.2004634588956833		 Val MSE Angle: 0.20234668254852295
+	      Training MAE Angle: 0.05232901374499003		 Val MAE Angle: 0.05484300136566162
+              Training MSE Angle: 0.013756545881430307		 Val MSE Angle: 0.01566945791244507
 
-	      Training MAE Shift: 0.025553269311785698		 Val MAE Shift: 0.030712223052978514
-              Training Euclidean Shift: 0.04019693285226822	 Val Euclidean Shift: 0.04830355942249298
+	      Training MAE Shift: 0.01572252478864458		 Val MAE Shift: 0.019086523056030272
+              Training Euclidean Shift: 0.024673190381791856	 Val Euclidean Shift: 0.030105810165405273
 
 
 
 
-Epoch 247/300: Training Loss: 0.20429585874080658		 Val Loss: 0.21642327308654785
+Epoch 215/300: Training Loss: 0.02264100147618188		 Val Loss: 0.01915151596069336
 
-	      Training MAE Angle: 0.3455226719379425		 Val MAE Angle: 0.35421302318573
-              Training MSE Angle: 0.18951824307441711		 Val MSE Angle: 0.20357666015625
+	      Training MAE Angle: 0.059911641809675426		 Val MAE Angle: 0.05311484813690186
+              Training MSE Angle: 0.017270109719700284		 Val MSE Angle: 0.013540494441986083
 
-	      Training MAE Shift: 0.0254585612565279		 Val MAE Shift: 0.024806949496269225
-              Training Euclidean Shift: 0.04018162935972214	 Val Euclidean Shift: 0.03906868696212769
+	      Training MAE Shift: 0.015360098746087816		 Val MAE Shift: 0.01517049789428711
+              Training Euclidean Shift: 0.024136129352781508	 Val Euclidean Shift: 0.023772146701812744
 
 
 
 
-Epoch 248/300: Training Loss: 0.2110079973936081		 Val Loss: 0.20396990776062013
+Epoch 216/300: Training Loss: 0.025173233615027532		 Val Loss: 0.02821280002593994
 
-	      Training MAE Angle: 0.3533630669116974		 Val MAE Angle: 0.3278935432434082
-              Training MSE Angle: 0.1937597543001175		 Val MSE Angle: 0.16887835264205933
+	      Training MAE Angle: 0.05752734343210856		 Val MAE Angle: 0.06761127471923828
+              Training MSE Angle: 0.016311157080862258		 Val MSE Angle: 0.021036226749420166
 
-	      Training MAE Shift: 0.027102939784526825		 Val MAE Shift: 0.03077079951763153
-              Training Euclidean Shift: 0.04253571107983589	 Val Euclidean Shift: 0.04783146977424622
+	      Training MAE Shift: 0.018362124760945637		 Val MAE Shift: 0.017014892101287843
+              Training Euclidean Shift: 0.028934780094358657	 Val Euclidean Shift: 0.026681094169616698
 
 
 
 
-Epoch 249/300: Training Loss: 0.2366243600845337		 Val Loss: 0.23343796730041505
+Epoch 217/300: Training Loss: 0.02299495041370392		 Val Loss: 0.030528864860534667
 
-	      Training MAE Angle: 0.36526551842689514		 Val MAE Angle: 0.36186192035675047
-              Training MSE Angle: 0.20005229115486145		 Val MSE Angle: 0.21354405879974364
+	      Training MAE Angle: 0.05797625250286526		 Val MAE Angle: 0.06018799304962158
+              Training MSE Angle: 0.017972025606367324		 Val MSE Angle: 0.023606493473052978
 
-	      Training MAE Shift: 0.03954325243830681		 Val MAE Shift: 0.032306423783302306
-              Training Euclidean Shift: 0.06183905154466629	 Val Euclidean Shift: 0.05008401870727539
+	      Training MAE Shift: 0.015084056390656365		 Val MAE Shift: 0.015697653293609618
+              Training Euclidean Shift: 0.02371001574728224	 Val Euclidean Shift: 0.02467240333557129
 
 
 
 
-Epoch 250/300: Training Loss: 0.22251343727111816		 Val Loss: 0.21738879680633544
+Epoch 218/300: Training Loss: 0.02239659594164954		 Val Loss: 0.018021667003631593
 
-	      Training MAE Angle: 0.3640592694282532		 Val MAE Angle: 0.36148948669433595
-              Training MSE Angle: 0.2005690038204193		 Val MSE Angle: 0.1974033832550049
+	      Training MAE Angle: 0.059469507800208196		 Val MAE Angle: 0.04479184150695801
+              Training MSE Angle: 0.017409407430224948		 Val MSE Angle: 0.011903352737426758
 
-	      Training MAE Shift: 0.030893748626112938		 Val MAE Shift: 0.03310312330722809
-              Training Euclidean Shift: 0.048728492110967636	 Val Euclidean Shift: 0.05186535716056824
+	      Training MAE Shift: 0.015131534801589118		 Val MAE Shift: 0.016731349229812623
+              Training Euclidean Shift: 0.02378140389919281	 Val Euclidean Shift: 0.026217660903930663
 
 
 
 
-Epoch 251/300: Training Loss: 0.20840175449848175		 Val Loss: 0.20215766429901122
+Epoch 219/300: Training Loss: 0.02054719626903534		 Val Loss: 0.01928787350654602
 
-	      Training MAE Angle: 0.3454244136810303		 Val MAE Angle: 0.3314871311187744
-              Training MSE Angle: 0.18979936838150024		 Val MSE Angle: 0.18378316164016723
+	      Training MAE Angle: 0.051165726449754506		 Val MAE Angle: 0.05115543365478516
+              Training MSE Angle: 0.01443991396162245		 Val MSE Angle: 0.011726732254028321
 
-	      Training MAE Shift: 0.028901981189846992		 Val MAE Shift: 0.030567675828933716
-              Training Euclidean Shift: 0.045328546315431595	 Val Euclidean Shift: 0.047620391845703124
+	      Training MAE Shift: 0.016043989194764033		 Val MAE Shift: 0.015643473863601685
+              Training Euclidean Shift: 0.025281724002626207	 Val Euclidean Shift: 0.024607505798339844
 
 
 
 
-Epoch 252/300: Training Loss: 0.20608992874622345		 Val Loss: 0.21104137897491454
+Epoch 220/300: Training Loss: 0.02074685361650255		 Val Loss: 0.025580873489379884
 
-	      Training MAE Angle: 0.35110798478126526		 Val MAE Angle: 0.33788356781005857
-              Training MSE Angle: 0.19070595502853394		 Val MSE Angle: 0.1887829542160034
+	      Training MAE Angle: 0.05173657006687588		 Val MAE Angle: 0.059096846580505374
+              Training MSE Angle: 0.01489551862080892		 Val MSE Angle: 0.020391244888305664
 
-	      Training MAE Shift: 0.0272129587829113		 Val MAE Shift: 0.028638479113578797
-              Training Euclidean Shift: 0.04283995181322098	 Val Euclidean Shift: 0.04467150270938873
+	      Training MAE Shift: 0.015513709849781461		 Val MAE Shift: 0.014787780046463013
+              Training Euclidean Shift: 0.024378539787398443	 Val Euclidean Shift: 0.02317553520202637
 
 
 
 
-Epoch 253/300: Training Loss: 0.21450045704841614		 Val Loss: 0.26291255950927733
+Epoch 221/300: Training Loss: 0.022952551643053692		 Val Loss: 0.024292283058166504
 
-	      Training MAE Angle: 0.35916727781295776		 Val MAE Angle: 0.39419941902160643
-              Training MSE Angle: 0.19574353098869324		 Val MSE Angle: 0.2446906805038452
+	      Training MAE Angle: 0.0590701699256897		 Val MAE Angle: 0.06320255279541015
+              Training MSE Angle: 0.017378750774595473		 Val MSE Angle: 0.018494385480880737
 
-	      Training MAE Shift: 0.029517890885472298		 Val MAE Shift: 0.029424774646759033
-              Training Euclidean Shift: 0.04621230438351631	 Val Euclidean Shift: 0.04664817750453949
+	      Training MAE Shift: 0.015514537692070007		 Val MAE Shift: 0.01654663562774658
+              Training Euclidean Shift: 0.024432462122705247	 Val Euclidean Shift: 0.026011090278625488
 
 
 
 
-Epoch 254/300: Training Loss: 0.212417870759964		 Val Loss: 0.22064683437347413
+Epoch 222/300: Training Loss: 0.02336405052079095		 Val Loss: 0.02009450912475586
 
-	      Training MAE Angle: 0.35727426409721375		 Val MAE Angle: 0.33420605659484864
-              Training MSE Angle: 0.19526979327201843		 Val MSE Angle: 0.1935768723487854
+	      Training MAE Angle: 0.05762677060233222		 Val MAE Angle: 0.05400800228118897
+              Training MSE Angle: 0.017634052369329665		 Val MSE Angle: 0.01354858160018921
 
-	      Training MAE Shift: 0.02754741907119751		 Val MAE Shift: 0.030467101931571962
-              Training Euclidean Shift: 0.043190598487854004	 Val Euclidean Shift: 0.048676738142967226
+	      Training MAE Shift: 0.01550586356057061		 Val MAE Shift: 0.01572028636932373
+              Training Euclidean Shift: 0.02441223959128062	 Val Euclidean Shift: 0.024678754806518554
 
 
 
 
-Epoch 255/300: Training Loss: 0.21357892453670502		 Val Loss: 0.19438470602035524
+Epoch 223/300: Training Loss: 0.021768329872025385		 Val Loss: 0.022370026111602784
 
-	      Training MAE Angle: 0.34405067563056946		 Val MAE Angle: 0.3205105304718018
-              Training MSE Angle: 0.19013449549674988		 Val MSE Angle: 0.17891570329666137
+	      Training MAE Angle: 0.05663601557413737		 Val MAE Angle: 0.05086751461029053
+              Training MSE Angle: 0.01624381707774268		 Val MSE Angle: 0.014790047407150269
 
-	      Training MAE Shift: 0.027380546554923058		 Val MAE Shift: 0.028271016478538514
-              Training Euclidean Shift: 0.04285653308033943	 Val Euclidean Shift: 0.044376683235168454
+	      Training MAE Shift: 0.015402297178904215		 Val MAE Shift: 0.017204383611679076
+              Training Euclidean Shift: 0.024254247546195984	 Val Euclidean Shift: 0.027246899604797363
 
 
 
 
-Epoch 256/300: Training Loss: 0.20931068062782288		 Val Loss: 0.21132283210754393
+Epoch 224/300: Training Loss: 0.022350094384617276		 Val Loss: 0.023362789154052734
 
-	      Training MAE Angle: 0.35006338357925415		 Val MAE Angle: 0.3496701240539551
-              Training MSE Angle: 0.19317997992038727		 Val MSE Angle: 0.18770151138305663
+	      Training MAE Angle: 0.055503533946143255		 Val MAE Angle: 0.05765693187713623
+              Training MSE Angle: 0.01688087648815579		 Val MSE Angle: 0.017427608966827393
 
-	      Training MAE Shift: 0.025327574461698532		 Val MAE Shift: 0.02783113718032837
-              Training Euclidean Shift: 0.03970353305339813	 Val Euclidean Shift: 0.04338241815567016
+	      Training MAE Shift: 0.014874509639210172		 Val MAE Shift: 0.015415840148925782
+              Training Euclidean Shift: 0.02336316638522678	 Val Euclidean Shift: 0.024244260787963868
 
 
 
 
-Epoch 257/300: Training Loss: 0.21338443458080292		 Val Loss: 0.22427940368652344
+Epoch 225/300: Training Loss: 0.01877854930029975		 Val Loss: 0.018889249563217164
 
-	      Training MAE Angle: 0.3554871678352356		 Val MAE Angle: 0.3534849166870117
-              Training MSE Angle: 0.20031636953353882		 Val MSE Angle: 0.2065713882446289
+	      Training MAE Angle: 0.05226202143563165		 Val MAE Angle: 0.04893198966979981
+              Training MSE Angle: 0.01368015342288547		 Val MSE Angle: 0.012513341903686524
 
-	      Training MAE Shift: 0.023462189361453056		 Val MAE Shift: 0.02831488847732544
-              Training Euclidean Shift: 0.0372866615653038	 Val Euclidean Shift: 0.04421029686927795
+	      Training MAE Shift: 0.01478401654296451		 Val MAE Shift: 0.015327839851379395
+              Training Euclidean Shift: 0.023313000798225403	 Val Euclidean Shift: 0.024053618907928467
 
 
 
 
-Epoch 258/300: Training Loss: 0.20318342745304108		 Val Loss: 0.18944627046585083
+Epoch 226/300: Training Loss: 0.02137369414170583		 Val Loss: 0.020781838893890382
 
-	      Training MAE Angle: 0.35150274634361267		 Val MAE Angle: 0.3207789421081543
-              Training MSE Angle: 0.1902279555797577		 Val MSE Angle: 0.17495301961898804
+	      Training MAE Angle: 0.05432388517591688		 Val MAE Angle: 0.05473234176635742
+              Training MSE Angle: 0.0158497326903873		 Val MSE Angle: 0.015423927307128906
 
-	      Training MAE Shift: 0.023622311651706696		 Val MAE Shift: 0.02375171035528183
-              Training Euclidean Shift: 0.03720986470580101	 Val Euclidean Shift: 0.037819430232048035
+	      Training MAE Shift: 0.015115544199943542		 Val MAE Shift: 0.014270408153533936
+              Training Euclidean Shift: 0.02377621829509735	 Val Euclidean Shift: 0.022417151927948
 
 
 
 
-Epoch 259/300: Training Loss: 0.20188406109809875		 Val Loss: 0.1878194808959961
+Epoch 227/300: Training Loss: 0.02161032623714871		 Val Loss: 0.0338669490814209
 
-	      Training MAE Angle: 0.34806618094444275		 Val MAE Angle: 0.3258817195892334
-              Training MSE Angle: 0.18736721575260162		 Val MSE Angle: 0.17686476707458496
+	      Training MAE Angle: 0.05587846702999539		 Val MAE Angle: 0.06752196311950684
+              Training MSE Angle: 0.015789333317014907		 Val MSE Angle: 0.02692467212677002
 
-	      Training MAE Shift: 0.02400071732699871		 Val MAE Shift: 0.023656371235847472
-              Training Euclidean Shift: 0.03766229748725891	 Val Euclidean Shift: 0.03703249990940094
+	      Training MAE Shift: 0.01521469321515825		 Val MAE Shift: 0.015771124362945557
+              Training Euclidean Shift: 0.02391162349118127	 Val Euclidean Shift: 0.024627220630645753
 
 
 
 
-Epoch 260/300: Training Loss: 0.2069360464811325		 Val Loss: 0.19922316074371338
+Epoch 228/300: Training Loss: 0.022996877630551655		 Val Loss: 0.023193461894989012
 
-	      Training MAE Angle: 0.34949198365211487		 Val MAE Angle: 0.34025576114654543
-              Training MSE Angle: 0.19211558997631073		 Val MSE Angle: 0.1851555347442627
+	      Training MAE Angle: 0.05628531508975559		 Val MAE Angle: 0.05052623748779297
+              Training MSE Angle: 0.015810820791456435		 Val MSE Angle: 0.015685269832611082
 
-	      Training MAE Shift: 0.023913968354463577		 Val MAE Shift: 0.0241487056016922
-              Training Euclidean Shift: 0.03790532797574997	 Val Euclidean Shift: 0.03825010359287262
+	      Training MAE Shift: 0.018011773626009624		 Val MAE Shift: 0.016167641878128053
+              Training Euclidean Shift: 0.028338680664698284	 Val Euclidean Shift: 0.025579357147216798
 
 
 
 
-Epoch 261/300: Training Loss: 0.21407319605350494		 Val Loss: 0.1860993504524231
+Epoch 229/300: Training Loss: 0.023188359207577176		 Val Loss: 0.026362624168395996
 
-	      Training MAE Angle: 0.3623964786529541		 Val MAE Angle: 0.33025302886962893
-              Training MSE Angle: 0.2002050131559372		 Val MSE Angle: 0.17394514083862306
+	      Training MAE Angle: 0.05407351586553785		 Val MAE Angle: 0.056802225112915036
+              Training MSE Angle: 0.015021476480695937		 Val MSE Angle: 0.019083752632141113
 
-	      Training MAE Shift: 0.024336565285921097		 Val MAE Shift: 0.023414942622184753
-              Training Euclidean Shift: 0.03827415406703949	 Val Euclidean Shift: 0.03734719753265381
+	      Training MAE Shift: 0.018087059259414673		 Val MAE Shift: 0.018821195363998414
+              Training Euclidean Shift: 0.02839132481151157	 Val Euclidean Shift: 0.029480271339416504
 
 
 
 
-Epoch 262/300: Training Loss: 0.20123635232448578		 Val Loss: 0.1866705298423767
+Epoch 230/300: Training Loss: 0.02656155824661255		 Val Loss: 0.029619777202606203
 
-	      Training MAE Angle: 0.3544716238975525		 Val MAE Angle: 0.31890087127685546
-              Training MSE Angle: 0.19114194810390472		 Val MSE Angle: 0.17803514003753662
+	      Training MAE Angle: 0.060006644990709096		 Val MAE Angle: 0.06046168327331543
+              Training MSE Angle: 0.019475277927186754		 Val MSE Angle: 0.01932886004447937
 
-	      Training MAE Shift: 0.02202477678656578		 Val MAE Shift: 0.022221027314662932
-              Training Euclidean Shift: 0.03469177335500717	 Val Euclidean Shift: 0.03509478569030762
+	      Training MAE Shift: 0.017971187829971313		 Val MAE Shift: 0.01740410566329956
+              Training Euclidean Shift: 0.028227256404028997	 Val Euclidean Shift: 0.027398433685302735
 
 
 
 
-Epoch 263/300: Training Loss: 0.20867139101028442		 Val Loss: 0.21397223472595214
+Epoch 231/300: Training Loss: 0.022403617699940998		 Val Loss: 0.02879105567932129
 
-	      Training MAE Angle: 0.3443523347377777		 Val MAE Angle: 0.35052711963653566
-              Training MSE Angle: 0.1905197948217392		 Val MSE Angle: 0.20211095809936525
+	      Training MAE Angle: 0.05498917235268487		 Val MAE Angle: 0.052778286933898924
+              Training MSE Angle: 0.016833297080463834		 Val MSE Angle: 0.01840423345565796
 
-	      Training MAE Shift: 0.025566551834344864		 Val MAE Shift: 0.024285922944545745
-              Training Euclidean Shift: 0.04041881486773491	 Val Euclidean Shift: 0.03847748935222626
+	      Training MAE Shift: 0.015782520174980164		 Val MAE Shift: 0.019982421398162843
+              Training Euclidean Shift: 0.024805827273262873	 Val Euclidean Shift: 0.03130358695983887
 
 
 
 
-Epoch 264/300: Training Loss: 0.21940283477306366		 Val Loss: 0.18580280542373656
+Epoch 232/300: Training Loss: 0.023366871807310317		 Val Loss: 0.018565834760665895
 
-	      Training MAE Angle: 0.36435139179229736		 Val MAE Angle: 0.33136188983917236
-              Training MSE Angle: 0.20511232316493988		 Val MSE Angle: 0.17347220182418824
+	      Training MAE Angle: 0.057969106568230525		 Val MAE Angle: 0.053630094528198245
+              Training MSE Angle: 0.016928109857771132		 Val MSE Angle: 0.012075861692428589
 
-	      Training MAE Shift: 0.024768248200416565		 Val MAE Shift: 0.024199230968952178
-              Training Euclidean Shift: 0.03898883983492851	 Val Euclidean Shift: 0.03801878094673157
+	      Training MAE Shift: 0.016792179809676275		 Val MAE Shift: 0.015739165544509888
+              Training Euclidean Shift: 0.026400961809688143	 Val Euclidean Shift: 0.024845077991485595
 
 
 
 
-Epoch 265/300: Training Loss: 0.1972532868385315		 Val Loss: 0.2067112445831299
+Epoch 233/300: Training Loss: 0.022134037481413946		 Val Loss: 0.023984246253967285
 
-	      Training MAE Angle: 0.34508585929870605		 Val MAE Angle: 0.34013805389404295
-              Training MSE Angle: 0.18561320006847382		 Val MSE Angle: 0.1926060914993286
+	      Training MAE Angle: 0.05425145228703817		 Val MAE Angle: 0.049357752799987796
+              Training MSE Angle: 0.01554670102066464		 Val MSE Angle: 0.016447227001190185
 
-	      Training MAE Shift: 0.022744234651327133		 Val MAE Shift: 0.02410905808210373
-              Training Euclidean Shift: 0.03585284948348999	 Val Euclidean Shift: 0.038170060515403746
+	      Training MAE Shift: 0.016293396552403767		 Val MAE Shift: 0.01601054310798645
+              Training Euclidean Shift: 0.025633702675501507	 Val Euclidean Shift: 0.025336544513702392
 
 
 
 
-Epoch 266/300: Training Loss: 0.2103545069694519		 Val Loss: 0.189939546585083
+Epoch 234/300: Training Loss: 0.0244578437672721		 Val Loss: 0.021683094501495363
 
-	      Training MAE Angle: 0.35622408986091614		 Val MAE Angle: 0.3228567123413086
-              Training MSE Angle: 0.1961776167154312		 Val MSE Angle: 0.17105568647384645
+	      Training MAE Angle: 0.058334529399871826		 Val MAE Angle: 0.04975958347320557
+              Training MSE Angle: 0.017824091845088534		 Val MSE Angle: 0.014476481676101684
 
-	      Training MAE Shift: 0.02322901040315628		 Val MAE Shift: 0.0255812406539917
-              Training Euclidean Shift: 0.036464594304561615	 Val Euclidean Shift: 0.040275394916534424
+	      Training MAE Shift: 0.0168016834391488		 Val MAE Shift: 0.018734874725341796
+              Training Euclidean Shift: 0.02648177246252696	 Val Euclidean Shift: 0.029511613845825194
 
 
 
 
-Epoch 267/300: Training Loss: 0.20380713045597076		 Val Loss: 0.1983146071434021
+Epoch 235/300: Training Loss: 0.02133167286713918		 Val Loss: 0.030576219558715822
 
-	      Training MAE Angle: 0.34766432642936707		 Val MAE Angle: 0.3282865762710571
-              Training MSE Angle: 0.19180510938167572		 Val MSE Angle: 0.18574199676513672
+	      Training MAE Angle: 0.05417480071385702		 Val MAE Angle: 0.05483355522155762
+              Training MSE Angle: 0.015732157561514113		 Val MSE Angle: 0.024200611114501953
 
-	      Training MAE Shift: 0.023323170840740204		 Val MAE Shift: 0.02448297441005707
-              Training Euclidean Shift: 0.03673543035984039	 Val Euclidean Shift: 0.038652455806732176
+	      Training MAE Shift: 0.015797608428531222		 Val MAE Shift: 0.01532886028289795
+              Training Euclidean Shift: 0.024787194199032254	 Val Euclidean Shift: 0.024009435176849364
 
 
 
 
-Epoch 268/300: Training Loss: 0.2070508450269699		 Val Loss: 0.1965026617050171
+Epoch 236/300: Training Loss: 0.021311152312490676		 Val Loss: 0.025268874168395995
 
-	      Training MAE Angle: 0.34688788652420044		 Val MAE Angle: 0.32946693897247314
-              Training MSE Angle: 0.19185179471969604		 Val MSE Angle: 0.17880262136459352
+	      Training MAE Angle: 0.05370577838685778		 Val MAE Angle: 0.0631385850906372
+              Training MSE Angle: 0.015837621357705858		 Val MSE Angle: 0.017406442165374757
 
-	      Training MAE Shift: 0.02495318092405796		 Val MAE Shift: 0.02656901180744171
-              Training Euclidean Shift: 0.03929806500673294	 Val Euclidean Shift: 0.04194473624229431
+	      Training MAE Shift: 0.015446060233645968		 Val MAE Shift: 0.018109477758407592
+              Training Euclidean Shift: 0.024270920289887324	 Val Euclidean Shift: 0.028521676063537598
 
 
 
 
-Epoch 269/300: Training Loss: 0.19898799061775208		 Val Loss: 0.2069709062576294
+Epoch 237/300: Training Loss: 0.01890137294928233		 Val Loss: 0.021027560234069823
 
-	      Training MAE Angle: 0.3435252904891968		 Val MAE Angle: 0.34175844192504884
-              Training MSE Angle: 0.18425650894641876		 Val MSE Angle: 0.18949159383773803
+	      Training MAE Angle: 0.04956227872106764		 Val MAE Angle: 0.04612196445465088
+              Training MSE Angle: 0.013606876134872437		 Val MSE Angle: 0.01274965763092041
 
-	      Training MAE Shift: 0.02610142156481743		 Val MAE Shift: 0.027665945887565612
-              Training Euclidean Shift: 0.041343629360198975	 Val Euclidean Shift: 0.04366446435451508
+	      Training MAE Shift: 0.015195411112573411		 Val MAE Shift: 0.01985515832901001
+              Training Euclidean Shift: 0.023874274558491178	 Val Euclidean Shift: 0.03073418378829956
 
 
 
 
-Epoch 270/300: Training Loss: 0.20530833303928375		 Val Loss: 0.18620083332061768
+Epoch 238/300: Training Loss: 0.01801694929599762		 Val Loss: 0.018516929149627687
 
-	      Training MAE Angle: 0.3479369580745697		 Val MAE Angle: 0.3195369720458984
-              Training MSE Angle: 0.19230204820632935		 Val MSE Angle: 0.1730346918106079
+	      Training MAE Angle: 0.04861048195097181		 Val MAE Angle: 0.04645235061645508
+              Training MSE Angle: 0.012580464283625284		 Val MSE Angle: 0.01337785005569458
 
-	      Training MAE Shift: 0.024165410548448563		 Val MAE Shift: 0.024968376755714415
-              Training Euclidean Shift: 0.03794063255190849	 Val Euclidean Shift: 0.03932874500751495
+	      Training MAE Shift: 0.015174383918444315		 Val MAE Shift: 0.014601476192474365
+              Training Euclidean Shift: 0.02386292318503062	 Val Euclidean Shift: 0.02282611846923828
 
 
 
 
-Epoch 271/300: Training Loss: 0.2557677924633026		 Val Loss: 0.24238893985748292
+Epoch 239/300: Training Loss: 0.019662491149372525		 Val Loss: 0.020204293727874755
 
-	      Training MAE Angle: 0.37725868821144104		 Val MAE Angle: 0.37647104263305664
-              Training MSE Angle: 0.20958542823791504		 Val MSE Angle: 0.20740511417388915
+	      Training MAE Angle: 0.049272623327043324		 Val MAE Angle: 0.043975930213928226
+              Training MSE Angle: 0.014386130703820122		 Val MSE Angle: 0.014276963472366334
 
-	      Training MAE Shift: 0.035897787660360336		 Val MAE Shift: 0.040894949436187746
-              Training Euclidean Shift: 0.05634240061044693	 Val Euclidean Shift: 0.06356405615806579
+	      Training MAE Shift: 0.01529519259929657		 Val MAE Shift: 0.01605322480201721
+              Training Euclidean Shift: 0.024039422472318012	 Val Euclidean Shift: 0.025416848659515382
 
 
 
 
-Epoch 272/300: Training Loss: 0.24509181082248688		 Val Loss: 0.23796439170837402
+Epoch 240/300: Training Loss: 0.019186680515607197		 Val Loss: 0.027970852851867675
 
-	      Training MAE Angle: 0.39509281516075134		 Val MAE Angle: 0.3950222015380859
-              Training MSE Angle: 0.2211008369922638		 Val MSE Angle: 0.21826257705688476
+	      Training MAE Angle: 0.05154692795541552		 Val MAE Angle: 0.05756046295166015
+              Training MSE Angle: 0.013842581046952141		 Val MSE Angle: 0.019682693481445312
 
-	      Training MAE Shift: 0.03308834135532379		 Val MAE Shift: 0.034357428550720215
-              Training Euclidean Shift: 0.05193571001291275	 Val Euclidean Shift: 0.05367366075515747
+	      Training MAE Shift: 0.015226011474927267		 Val MAE Shift: 0.015463026762008667
+              Training Euclidean Shift: 0.023960328764385648	 Val Euclidean Shift: 0.02420374870300293
 
 
 
 
-Epoch 273/300: Training Loss: 0.24607187509536743		 Val Loss: 0.2183544158935547
+Epoch 241/300: Training Loss: 0.02079917656050788		 Val Loss: 0.03888547420501709
 
-	      Training MAE Angle: 0.3750152289867401		 Val MAE Angle: 0.35009331703186036
-              Training MSE Angle: 0.2076771855354309		 Val MSE Angle: 0.1883189082145691
+	      Training MAE Angle: 0.05298599269655016		 Val MAE Angle: 0.06932271957397461
+              Training MSE Angle: 0.01568653682867686		 Val MSE Angle: 0.031628315448760984
 
-	      Training MAE Shift: 0.039945319294929504		 Val MAE Shift: 0.03833396136760712
-              Training Euclidean Shift: 0.0627770870923996	 Val Euclidean Shift: 0.060274362564086914
+	      Training MAE Shift: 0.015186347895198397		 Val MAE Shift: 0.017412055730819703
+              Training Euclidean Shift: 0.023853454324934218	 Val Euclidean Shift: 0.02747445344924927
 
 
 
 
-Epoch 274/300: Training Loss: 0.2450440526008606		 Val Loss: 0.30220177173614504
+Epoch 242/300: Training Loss: 0.01977902154127757		 Val Loss: 0.01895003318786621
 
-	      Training MAE Angle: 0.38298773765563965		 Val MAE Angle: 0.3846230983734131
-              Training MSE Angle: 0.21226966381072998		 Val MSE Angle: 0.2233539342880249
+	      Training MAE Angle: 0.05317479040887621		 Val MAE Angle: 0.04913642406463623
+              Training MSE Angle: 0.014333185222413804		 Val MSE Angle: 0.012984496355056763
 
-	      Training MAE Shift: 0.03838967904448509		 Val MAE Shift: 0.05665437579154968
-              Training Euclidean Shift: 0.060353200882673264	 Val Euclidean Shift: 0.08937055468559266
+	      Training MAE Shift: 0.01574788490931193		 Val MAE Shift: 0.015469881296157837
+              Training Euclidean Shift: 0.024751785728666518	 Val Euclidean Shift: 0.02431145668029785
 
 
 
 
-Epoch 275/300: Training Loss: 0.2657627463340759		 Val Loss: 0.2552615165710449
+Epoch 243/300: Training Loss: 0.020865696999761794		 Val Loss: 0.019811842441558838
 
-	      Training MAE Angle: 0.3901170492172241		 Val MAE Angle: 0.3798069477081299
-              Training MSE Angle: 0.2180812805891037		 Val MSE Angle: 0.22661738395690917
+	      Training MAE Angle: 0.05323534541659885		 Val MAE Angle: 0.04484151363372803
+              Training MSE Angle: 0.015401729279094271		 Val MSE Angle: 0.011707946062088012
 
-	      Training MAE Shift: 0.04488879069685936		 Val MAE Shift: 0.036870425939559935
-              Training Euclidean Shift: 0.07052520662546158	 Val Euclidean Shift: 0.05835844278335571
+	      Training MAE Shift: 0.015238011876742045		 Val MAE Shift: 0.020234181880950927
+              Training Euclidean Shift: 0.02395543290509118	 Val Euclidean Shift: 0.03207479476928711
 
 
 
 
-Epoch 276/300: Training Loss: 0.2301000952720642		 Val Loss: 0.2027745485305786
+Epoch 244/300: Training Loss: 0.019212846954663593		 Val Loss: 0.02221303939819336
 
-	      Training MAE Angle: 0.37312567234039307		 Val MAE Angle: 0.3429112434387207
-              Training MSE Angle: 0.20478114485740662		 Val MSE Angle: 0.17923147678375245
+	      Training MAE Angle: 0.050589544905556574		 Val MAE Angle: 0.04782865047454834
+              Training MSE Angle: 0.013988721701833937		 Val MSE Angle: 0.01603818655014038
 
-	      Training MAE Shift: 0.0327925980091095		 Val MAE Shift: 0.034468802809715274
-              Training Euclidean Shift: 0.051272690296173096	 Val Euclidean Shift: 0.053868579864501956
+	      Training MAE Shift: 0.015032071206304762		 Val MAE Shift: 0.016043643951416015
+              Training Euclidean Shift: 0.023607532183329265	 Val Euclidean Shift: 0.025272212028503417
 
 
 
 
-Epoch 277/300: Training Loss: 0.2253148853778839		 Val Loss: 0.17849259376525878
+Epoch 245/300: Training Loss: 0.019636457165082295		 Val Loss: 0.017857842445373535
 
-	      Training MAE Angle: 0.3680969476699829		 Val MAE Angle: 0.3042714595794678
-              Training MSE Angle: 0.20421217381954193		 Val MSE Angle: 0.1595695734024048
+	      Training MAE Angle: 0.05039307143953112		 Val MAE Angle: 0.048696556091308595
+              Training MSE Angle: 0.01493242879708608		 Val MSE Angle: 0.012842432260513306
 
-	      Training MAE Shift: 0.029431866481900215		 Val MAE Shift: 0.028027153015136717
-              Training Euclidean Shift: 0.046397995203733444	 Val Euclidean Shift: 0.04474048912525177
+	      Training MAE Shift: 0.014787145786815219		 Val MAE Shift: 0.01449611783027649
+              Training Euclidean Shift: 0.023306041955947876	 Val Euclidean Shift: 0.02276021718978882
 
 
 
 
-Epoch 278/300: Training Loss: 0.23221735656261444		 Val Loss: 0.22573068141937255
+Epoch 246/300: Training Loss: 0.023089107539918687		 Val Loss: 0.024086525440216066
 
-	      Training MAE Angle: 0.3687230050563812		 Val MAE Angle: 0.3601625919342041
-              Training MSE Angle: 0.2048185020685196		 Val MSE Angle: 0.2043018341064453
+	      Training MAE Angle: 0.05762585666444567		 Val MAE Angle: 0.05902045726776123
+              Training MSE Angle: 0.01787523263030582		 Val MSE Angle: 0.018279632329940797
 
-	      Training MAE Shift: 0.03374515101313591		 Val MAE Shift: 0.03317446708679199
-              Training Euclidean Shift: 0.052898358553647995	 Val Euclidean Shift: 0.05222023129463196
+	      Training MAE Shift: 0.015125771363576254		 Val MAE Shift: 0.015153307914733887
+              Training Euclidean Shift: 0.02384451362821791	 Val Euclidean Shift: 0.023730201721191405
 
 
 
 
-Epoch 279/300: Training Loss: 0.21796481311321259		 Val Loss: 0.2216630458831787
+Epoch 247/300: Training Loss: 0.020013242959976196		 Val Loss: 0.028210954666137697
 
-	      Training MAE Angle: 0.3523566424846649		 Val MAE Angle: 0.3595994234085083
-              Training MSE Angle: 0.19344258308410645		 Val MSE Angle: 0.20013957023620604
+	      Training MAE Angle: 0.048881719509760536		 Val MAE Angle: 0.057012815475463864
+              Training MSE Angle: 0.014018398192193773		 Val MSE Angle: 0.020804884433746337
 
-	      Training MAE Shift: 0.032486941665410995		 Val MAE Shift: 0.0323837012052536
-              Training Euclidean Shift: 0.05131543427705765	 Val Euclidean Shift: 0.05095487236976624
+	      Training MAE Shift: 0.015780541631910536		 Val MAE Shift: 0.016127077341079713
+              Training Euclidean Shift: 0.02485999299420251	 Val Euclidean Shift: 0.025372092723846437
 
 
 
 
-Epoch 280/300: Training Loss: 0.22326473891735077		 Val Loss: 0.19104256629943847
+Epoch 248/300: Training Loss: 0.019735897580782574		 Val Loss: 0.023897252082824706
 
-	      Training MAE Angle: 0.3623177707195282		 Val MAE Angle: 0.3188561201095581
-              Training MSE Angle: 0.2018289715051651		 Val MSE Angle: 0.16764150857925414
+	      Training MAE Angle: 0.05001311169730292		 Val MAE Angle: 0.05544655799865723
+              Training MSE Angle: 0.014085104068120321		 Val MSE Angle: 0.01666259527206421
 
-	      Training MAE Shift: 0.03157138079404831		 Val MAE Shift: 0.032915332913398744
-              Training Euclidean Shift: 0.04989755153656006	 Val Euclidean Shift: 0.05173678398132324
+	      Training MAE Shift: 0.015870124101638794		 Val MAE Shift: 0.016274027824401856
+              Training Euclidean Shift: 0.024971261620521545	 Val Euclidean Shift: 0.025552570819854736
 
 
 
 
-Epoch 281/300: Training Loss: 0.22336256504058838		 Val Loss: 0.1945304274559021
+Epoch 249/300: Training Loss: 0.021495790945159063		 Val Loss: 0.02558091402053833
 
-	      Training MAE Angle: 0.36551299691200256		 Val MAE Angle: 0.32781496047973635
-              Training MSE Angle: 0.20115967094898224		 Val MSE Angle: 0.1705150008201599
+	      Training MAE Angle: 0.05313965015941196		 Val MAE Angle: 0.06895342826843262
+              Training MSE Angle: 0.016419617666138545		 Val MSE Angle: 0.01957384705543518
 
-	      Training MAE Shift: 0.0290860403329134		 Val MAE Shift: 0.031290119886398314
-              Training Euclidean Shift: 0.045790355652570724	 Val Euclidean Shift: 0.04934524893760681
+	      Training MAE Shift: 0.014670184916920133		 Val MAE Shift: 0.014966751337051392
+              Training Euclidean Shift: 0.023105149467786152	 Val Euclidean Shift: 0.023454663753509523
 
 
 
 
-Epoch 282/300: Training Loss: 0.21569602191448212		 Val Loss: 0.1955638647079468
+Epoch 250/300: Training Loss: 0.02058681183391147		 Val Loss: 0.02235476016998291
 
-	      Training MAE Angle: 0.35732927918434143		 Val MAE Angle: 0.3349623203277588
-              Training MSE Angle: 0.19764865934848785		 Val MSE Angle: 0.18047101497650148
+	      Training MAE Angle: 0.05309546987215678		 Val MAE Angle: 0.05342378616333008
+              Training MSE Angle: 0.015137814813190036		 Val MSE Angle: 0.01635122060775757
 
-	      Training MAE Shift: 0.028419898822903633		 Val MAE Shift: 0.026669052243232728
-              Training Euclidean Shift: 0.04468005895614624	 Val Euclidean Shift: 0.0423611968755722
+	      Training MAE Shift: 0.01507331927617391		 Val MAE Shift: 0.01589793086051941
+              Training Euclidean Shift: 0.023789347873793706	 Val Euclidean Shift: 0.025085673332214356
 
 
 
 
-Epoch 283/300: Training Loss: 0.20385901629924774		 Val Loss: 0.18547592163085938
+Epoch 251/300: Training Loss: 0.02134195135699378		 Val Loss: 0.022656371593475343
 
-	      Training MAE Angle: 0.3474346697330475		 Val MAE Angle: 0.3272579193115234
-              Training MSE Angle: 0.1883150190114975		 Val MSE Angle: 0.17338364124298095
+	      Training MAE Angle: 0.05391734838485718		 Val MAE Angle: 0.04903463363647461
+              Training MSE Angle: 0.015757847163412306		 Val MSE Angle: 0.016586724519729614
 
-	      Training MAE Shift: 0.02624545246362686		 Val MAE Shift: 0.0255859911441803
-              Training Euclidean Shift: 0.041524529457092285	 Val Euclidean Shift: 0.0404091477394104
+	      Training MAE Shift: 0.014948038591278924		 Val MAE Shift: 0.0149056875705719
+              Training Euclidean Shift: 0.023501848181088764	 Val Euclidean Shift: 0.023499250411987305
 
 
 
 
-Epoch 284/300: Training Loss: 0.2359188348054886		 Val Loss: 0.35637655258178713
+Epoch 252/300: Training Loss: 0.019091563092337713		 Val Loss: 0.020808265209198
 
-	      Training MAE Angle: 0.363433301448822		 Val MAE Angle: 0.3810077428817749
-              Training MSE Angle: 0.2006956785917282		 Val MSE Angle: 0.2059783935546875
+	      Training MAE Angle: 0.050874167018466525		 Val MAE Angle: 0.05101423740386963
+              Training MSE Angle: 0.013916018936369155		 Val MSE Angle: 0.015167915821075439
 
-	      Training MAE Shift: 0.03479574993252754		 Val MAE Shift: 0.05470144748687744
-              Training Euclidean Shift: 0.05453164130449295	 Val Euclidean Shift: 0.08648765087127686
+	      Training MAE Shift: 0.015131860971450806		 Val MAE Shift: 0.016461046934127806
+              Training Euclidean Shift: 0.023759980996449787	 Val Euclidean Shift: 0.02593007802963257
 
 
 
 
-Epoch 285/300: Training Loss: 0.26618215441703796		 Val Loss: 0.21542654037475586
+Epoch 253/300: Training Loss: 0.02103727228111691		 Val Loss: 0.03006711483001709
 
-	      Training MAE Angle: 0.38127270340919495		 Val MAE Angle: 0.34653682708740235
-              Training MSE Angle: 0.20856477320194244		 Val MSE Angle: 0.1831601619720459
+	      Training MAE Angle: 0.05500937501589457		 Val MAE Angle: 0.05508288860321045
+              Training MSE Angle: 0.01585103240278032		 Val MSE Angle: 0.019343397617340087
 
-	      Training MAE Shift: 0.041094254702329636		 Val MAE Shift: 0.04007866978645325
-              Training Euclidean Shift: 0.06442529708147049	 Val Euclidean Shift: 0.06266591548919678
+	      Training MAE Shift: 0.015036086241404215		 Val MAE Shift: 0.016917630434036254
+              Training Euclidean Shift: 0.023678806093004014	 Val Euclidean Shift: 0.026616640090942383
 
 
 
 
-Epoch 286/300: Training Loss: 0.22738300263881683		 Val Loss: 0.2596179723739624
+Epoch 254/300: Training Loss: 0.020184889435768127		 Val Loss: 0.026971194744110107
 
-	      Training MAE Angle: 0.36642155051231384		 Val MAE Angle: 0.36918089389801023
-              Training MSE Angle: 0.20082029700279236		 Val MSE Angle: 0.22968556880950927
+	      Training MAE Angle: 0.051677544911702476		 Val MAE Angle: 0.050881757736206054
+              Training MSE Angle: 0.015067042575942146		 Val MSE Angle: 0.017899765968322753
 
-	      Training MAE Shift: 0.03634113818407059		 Val MAE Shift: 0.03669465184211731
-              Training Euclidean Shift: 0.057181794196367264	 Val Euclidean Shift: 0.05814957022666931
+	      Training MAE Shift: 0.014990275104840597		 Val MAE Shift: 0.01555428385734558
+              Training Euclidean Shift: 0.023592654201719496	 Val Euclidean Shift: 0.02443819284439087
 
 
 
 
-Epoch 287/300: Training Loss: 0.22464171051979065		 Val Loss: 0.23063879013061522
+Epoch 255/300: Training Loss: 0.02104075915283627		 Val Loss: 0.02832174062728882
 
-	      Training MAE Angle: 0.36298948526382446		 Val MAE Angle: 0.34847164154052734
-              Training MSE Angle: 0.20135565102100372		 Val MSE Angle: 0.20860791206359863
+	      Training MAE Angle: 0.05387255218293932		 Val MAE Angle: 0.05331687927246094
+              Training MSE Angle: 0.01569338970714145		 Val MSE Angle: 0.02112426280975342
 
-	      Training MAE Shift: 0.03266288712620735		 Val MAE Shift: 0.030803847312927245
-              Training Euclidean Shift: 0.05123811215162277	 Val Euclidean Shift: 0.04837951958179474
+	      Training MAE Shift: 0.015155947870678373		 Val MAE Shift: 0.016441714763641358
+              Training Euclidean Shift: 0.02386126418908437	 Val Euclidean Shift: 0.025834636688232424
 
 
 
 
-Epoch 288/300: Training Loss: 0.2156607210636139		 Val Loss: 0.19033693075180053
+Epoch 256/300: Training Loss: 0.02034761839442783		 Val Loss: 0.01652351498603821
 
-	      Training MAE Angle: 0.35695913434028625		 Val MAE Angle: 0.32347698211669923
-              Training MSE Angle: 0.19604173302650452		 Val MSE Angle: 0.1714758515357971
+	      Training MAE Angle: 0.051712433497111		 Val MAE Angle: 0.06568716049194336
+              Training MSE Angle: 0.014711285630861918		 Val MSE Angle: 0.01079795479774475
 
-	      Training MAE Shift: 0.02940097637474537		 Val MAE Shift: 0.02962386906147003
-              Training Euclidean Shift: 0.046275544911623	 Val Euclidean Shift: 0.04680173695087433
+	      Training MAE Shift: 0.01599953571955363		 Val MAE Shift: 0.016134604215621948
+              Training Euclidean Shift: 0.025154224700397916	 Val Euclidean Shift: 0.025353703498840332
 
 
 
 
-Epoch 289/300: Training Loss: 0.21347837150096893		 Val Loss: 0.20876317024230956
+Epoch 257/300: Training Loss: 0.02026032739215427		 Val Loss: 0.01680038571357727
 
-	      Training MAE Angle: 0.3622327446937561		 Val MAE Angle: 0.3383453607559204
-              Training MSE Angle: 0.19749432802200317		 Val MSE Angle: 0.18910616636276245
+	      Training MAE Angle: 0.051639709207746715		 Val MAE Angle: 0.041445074081420896
+              Training MSE Angle: 0.014903999037212796		 Val MSE Angle: 0.01091417670249939
 
-	      Training MAE Shift: 0.026207180693745613		 Val MAE Shift: 0.027356037497520448
-              Training Euclidean Shift: 0.04112953320145607	 Val Euclidean Shift: 0.04322782754898071
+	      Training MAE Shift: 0.01578459640343984		 Val MAE Shift: 0.014906830787658691
+              Training Euclidean Shift: 0.02478679849041833	 Val Euclidean Shift: 0.02360872983932495
 
 
 
 
-Epoch 290/300: Training Loss: 0.21743078529834747		 Val Loss: 0.21697187423706055
+Epoch 258/300: Training Loss: 0.020017852385838825		 Val Loss: 0.02232959747314453
 
-	      Training MAE Angle: 0.36554262042045593		 Val MAE Angle: 0.35511939525604247
-              Training MSE Angle: 0.20212066173553467		 Val MSE Angle: 0.20154638290405275
+	      Training MAE Angle: 0.051262057489819		 Val MAE Angle: 0.06460126876831054
+              Training MSE Angle: 0.014328906933466593		 Val MSE Angle: 0.01521594762802124
 
-	      Training MAE Shift: 0.027348607778549194		 Val MAE Shift: 0.028828084468841553
-              Training Euclidean Shift: 0.04311515763401985	 Val Euclidean Shift: 0.04567101001739502
+	      Training MAE Shift: 0.014771946602397494		 Val MAE Shift: 0.01799312114715576
+              Training Euclidean Shift: 0.023259787095917597	 Val Euclidean Shift: 0.02829580307006836
 
 
 
 
-Epoch 291/300: Training Loss: 0.2036602646112442		 Val Loss: 0.22053065299987792
+Epoch 259/300: Training Loss: 0.020967301395204332		 Val Loss: 0.023265886306762695
 
-	      Training MAE Angle: 0.34669145941734314		 Val MAE Angle: 0.35775730609893797
-              Training MSE Angle: 0.18816013634204865		 Val MSE Angle: 0.20335893630981444
+	      Training MAE Angle: 0.05022387040985955		 Val MAE Angle: 0.05034168720245361
+              Training MSE Angle: 0.014148604538705613		 Val MSE Angle: 0.01664741277694702
 
-	      Training MAE Shift: 0.02658066898584366		 Val MAE Shift: 0.025925225019454955
-              Training Euclidean Shift: 0.04217390716075897	 Val Euclidean Shift: 0.040804505348205566
+	      Training MAE Shift: 0.01647367411189609		 Val MAE Shift: 0.015452779531478882
+              Training Euclidean Shift: 0.026007041335105896	 Val Euclidean Shift: 0.024245166778564455
 
 
 
 
-Epoch 292/300: Training Loss: 0.2027723789215088		 Val Loss: 0.21231598854064943
+Epoch 260/300: Training Loss: 0.02384317417939504		 Val Loss: 0.024439899921417235
 
-	      Training MAE Angle: 0.35231518745422363		 Val MAE Angle: 0.33193445205688477
-              Training MSE Angle: 0.18864910304546356		 Val MSE Angle: 0.19067740440368652
+	      Training MAE Angle: 0.05553538931740655		 Val MAE Angle: 0.05494528770446777
+              Training MSE Angle: 0.016245012482007343		 Val MSE Angle: 0.017792075872421265
 
-	      Training MAE Shift: 0.0260193832218647		 Val MAE Shift: 0.02737026512622833
-              Training Euclidean Shift: 0.04106593504548073	 Val Euclidean Shift: 0.04389294981956482
+	      Training MAE Shift: 0.017679234345753986		 Val MAE Shift: 0.017145875692367554
+              Training Euclidean Shift: 0.02783189548386468	 Val Euclidean Shift: 0.02707369327545166
 
 
 
 
-Epoch 293/300: Training Loss: 0.21220649778842926		 Val Loss: 0.19584561586380006
+Epoch 261/300: Training Loss: 0.02101356287797292		 Val Loss: 0.017910377979278566
 
-	      Training MAE Angle: 0.3546408414840698		 Val MAE Angle: 0.33544671535491943
-              Training MSE Angle: 0.19382691383361816		 Val MSE Angle: 0.17519401311874389
+	      Training MAE Angle: 0.050067878431744046		 Val MAE Angle: 0.044316282272338865
+              Training MSE Angle: 0.014316308829519484		 Val MSE Angle: 0.012386671304702758
 
-	      Training MAE Shift: 0.026897776871919632		 Val MAE Shift: 0.030353683233261108
-              Training Euclidean Shift: 0.04240695759654045	 Val Euclidean Shift: 0.047862714529037474
+	      Training MAE Shift: 0.01641140381495158		 Val MAE Shift: 0.015158402919769286
+              Training Euclidean Shift: 0.025769503580199346	 Val Euclidean Shift: 0.023810088634490967
 
 
 
 
-Epoch 294/300: Training Loss: 0.2151554971933365		 Val Loss: 0.20201504230499268
+Epoch 262/300: Training Loss: 0.01891975270377265		 Val Loss: 0.023218510150909425
 
-	      Training MAE Angle: 0.357492595911026		 Val MAE Angle: 0.32730765342712403
-              Training MSE Angle: 0.19905561208724976		 Val MSE Angle: 0.17832341194152831
+	      Training MAE Angle: 0.048299041059282094		 Val MAE Angle: 0.048685159683227536
+              Training MSE Angle: 0.012817362944285074		 Val MSE Angle: 0.016963424682617186
 
-	      Training MAE Shift: 0.026799999177455902		 Val MAE Shift: 0.03131753504276276
-              Training Euclidean Shift: 0.04225371032953262	 Val Euclidean Shift: 0.04893701672554016
+	      Training MAE Shift: 0.01590237683720059		 Val MAE Shift: 0.015094795227050782
+              Training Euclidean Shift: 0.025061845779418945	 Val Euclidean Shift: 0.023642146587371828
 
 
 
 
-Epoch 295/300: Training Loss: 0.2085724025964737		 Val Loss: 0.18990957736968994
+Epoch 263/300: Training Loss: 0.01793709397315979		 Val Loss: 0.0159423828125
 
-	      Training MAE Angle: 0.350237637758255		 Val MAE Angle: 0.33088016510009766
-              Training MSE Angle: 0.18785259127616882		 Val MSE Angle: 0.17614948749542236
+	      Training MAE Angle: 0.04738491111331516		 Val MAE Angle: 0.042227959632873534
+              Training MSE Angle: 0.013141690029038323		 Val MSE Angle: 0.009586081504821778
 
-	      Training MAE Shift: 0.029082396999001503		 Val MAE Shift: 0.025835403800010683
-              Training Euclidean Shift: 0.0457761213183403	 Val Euclidean Shift: 0.040666207671165466
+	      Training MAE Shift: 0.01479601694477929		 Val MAE Shift: 0.015490862131118775
+              Training Euclidean Shift: 0.023261908027860854	 Val Euclidean Shift: 0.02439481973648071
 
 
 
 
-Epoch 296/300: Training Loss: 0.21346251666545868		 Val Loss: 0.19998408555984498
+Epoch 264/300: Training Loss: 0.0177161478334003		 Val Loss: 0.0215950608253479
 
-	      Training MAE Angle: 0.357442170381546		 Val MAE Angle: 0.3194205522537231
-              Training MSE Angle: 0.19767364859580994		 Val MSE Angle: 0.18316094875335692
+	      Training MAE Angle: 0.04724533028072781		 Val MAE Angle: 0.04633546829223633
+              Training MSE Angle: 0.011967702872223325		 Val MSE Angle: 0.014733225107192993
 
-	      Training MAE Shift: 0.02528923563659191		 Val MAE Shift: 0.028658464550971985
-              Training Euclidean Shift: 0.039640795439481735	 Val Euclidean Shift: 0.04499337673187256
+	      Training MAE Shift: 0.015131589439180162		 Val MAE Shift: 0.015541675090789795
+              Training Euclidean Shift: 0.02385465635193719	 Val Euclidean Shift: 0.02445547342300415
 
 
 
 
-Epoch 297/300: Training Loss: 0.20557592809200287		 Val Loss: 0.20127286911010742
+Epoch 265/300: Training Loss: 0.020516031318240695		 Val Loss: 0.01992047905921936
 
-	      Training MAE Angle: 0.34423568844795227		 Val MAE Angle: 0.33921613693237307
-              Training MSE Angle: 0.1902051568031311		 Val MSE Angle: 0.1744968056678772
+	      Training MAE Angle: 0.0522279077106052		 Val MAE Angle: 0.05910629272460938
+              Training MSE Angle: 0.015009767479366727		 Val MSE Angle: 0.01442046046257019
 
-	      Training MAE Shift: 0.02630210854113102		 Val MAE Shift: 0.03188928663730621
-              Training Euclidean Shift: 0.041297800838947296	 Val Euclidean Shift: 0.05027596950531006
+	      Training MAE Shift: 0.015658275948630437		 Val MAE Shift: 0.015410271883010864
+              Training Euclidean Shift: 0.024657656749089558	 Val Euclidean Shift: 0.02426866292953491
 
 
 
 
-Epoch 298/300: Training Loss: 0.19988329708576202		 Val Loss: 0.18067481517791747
+Epoch 266/300: Training Loss: 0.021475724048084684		 Val Loss: 0.018906632661819456
 
-	      Training MAE Angle: 0.3413700759410858		 Val MAE Angle: 0.3134594917297363
-              Training MSE Angle: 0.1828504055738449		 Val MSE Angle: 0.16830437183380126
+	      Training MAE Angle: 0.05087266034550137		 Val MAE Angle: 0.05025333404541016
+              Training MSE Angle: 0.014939190612898933		 Val MSE Angle: 0.013424453735351562
 
-	      Training MAE Shift: 0.0276144128292799		 Val MAE Shift: 0.026322883367538453
-              Training Euclidean Shift: 0.04358075186610222	 Val Euclidean Shift: 0.04084284007549286
+	      Training MAE Shift: 0.015335566467709012		 Val MAE Shift: 0.015982508659362793
+              Training Euclidean Shift: 0.02416772312588162	 Val Euclidean Shift: 0.025234980583190916
 
 
 
 
-Epoch 299/300: Training Loss: 0.20457978546619415		 Val Loss: 0.21427476406097412
+Epoch 267/300: Training Loss: 0.020465294520060223		 Val Loss: 0.023862278461456297
 
-	      Training MAE Angle: 0.3522586226463318		 Val MAE Angle: 0.34877948760986327
-              Training MSE Angle: 0.1915827989578247		 Val MSE Angle: 0.19946430921554564
+	      Training MAE Angle: 0.05281534128718906		 Val MAE Angle: 0.059773945808410646
+              Training MSE Angle: 0.014718784226311577		 Val MSE Angle: 0.01790435791015625
 
-	      Training MAE Shift: 0.023995591327548027		 Val MAE Shift: 0.025717952847480775
-              Training Euclidean Shift: 0.03784758597612381	 Val Euclidean Shift: 0.04058292508125305
+	      Training MAE Shift: 0.01573141250345442		 Val MAE Shift: 0.015996094942092896
+              Training Euclidean Shift: 0.024769897262255352	 Val Euclidean Shift: 0.024878852367401123
 
 
 
 
-Epoch 300/300: Training Loss: 0.19091935455799103		 Val Loss: 0.21585376262664796
+Epoch 268/300: Training Loss: 0.019610418213738337		 Val Loss: 0.01709757447242737
 
-Fatal Python error: Illegal instruction
+	      Training MAE Angle: 0.05037564370367262		 Val MAE Angle: 0.040361666679382326
+              Training MSE Angle: 0.01403052442603641		 Val MSE Angle: 0.010091630220413208
 
-Thread 0x00007764d7000640 (most recent call first):
-<no Python frame>
+	      Training MAE Shift: 0.015099757247500949		 Val MAE Shift: 0.018351054191589354
+              Training Euclidean Shift: 0.023786313003963895	 Val Euclidean Shift: 0.028922097682952883
 
-Thread 0x00007764f9e00640 (most recent call first):
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/threading.py", line 316 in wait
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/threading.py", line 581 in wait
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/tqdm/_monitor.py", line 60 in run
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/threading.py", line 980 in _bootstrap_inner
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/threading.py", line 937 in _bootstrap
 
-Current thread 0x000077662930c740 (most recent call first):
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/matplotlib/cbook.py", line 80 in _get_running_interactive_framework
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/matplotlib/pyplot.py", line 384 in switch_backend
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/matplotlib/pyplot.py", line 358 in _get_backend_mod
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/matplotlib/pyplot.py", line 526 in _warn_if_gui_out_of_main_thread
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/matplotlib/pyplot.py", line 549 in new_figure_manager
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/matplotlib/pyplot.py", line 1027 in figure
-  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/matplotlib/pyplot.py", line 1759 in subplots
-  File "/home/aviran/Alon/Thesis/utils.py", line 67 in plot
-  File "/home/aviran/Alon/Thesis/AffineRegressor.py", line 380 in plot_all
-  File "/home/aviran/Alon/Thesis/AffineRegressor.py", line 223 in train_model
-  File "/home/aviran/Alon/Thesis/Main.py", line 48 in <module>
+
+
+Epoch 269/300: Training Loss: 0.01953514748149448		 Val Loss: 0.027032198905944823
+
+	      Training MAE Angle: 0.04858464333746168		 Val MAE Angle: 0.05165836334228516
+              Training MSE Angle: 0.014046654105186462		 Val MSE Angle: 0.01903409719467163
+
+	      Training MAE Shift: 0.015443012118339539		 Val MAE Shift: 0.017421067953109742
+              Training Euclidean Shift: 0.024300406376520794	 Val Euclidean Shift: 0.027497901916503906
+
+
+
+
+Epoch 270/300: Training Loss: 0.018894299864768982		 Val Loss: 0.021187589168548585
+
+	      Training MAE Angle: 0.048187954558266535		 Val MAE Angle: 0.04592010974884033
+              Training MSE Angle: 0.01329962495300505		 Val MSE Angle: 0.01429484724998474
+
+	      Training MAE Shift: 0.01569671266608768		 Val MAE Shift: 0.016936280727386475
+              Training Euclidean Shift: 0.024727976984447904	 Val Euclidean Shift: 0.026442134380340578
+
+
+
+
+Epoch 271/300: Training Loss: 0.019248515367507935		 Val Loss: 0.023088762760162352
+
+	      Training MAE Angle: 0.05055598749054803		 Val MAE Angle: 0.05203675270080566
+              Training MSE Angle: 0.0136867579486635		 Val MSE Angle: 0.01676609992980957
+
+	      Training MAE Shift: 0.015387175811661614		 Val MAE Shift: 0.014495947360992432
+              Training Euclidean Shift: 0.024221796128484938	 Val Euclidean Shift: 0.022781004905700685
+
+
+
+
+Epoch 272/300: Training Loss: 0.019130720032585993		 Val Loss: 0.022784695625305176
+
+	      Training MAE Angle: 0.05056630571683248		 Val MAE Angle: 0.05442248821258545
+              Training MSE Angle: 0.013609738813506233		 Val MSE Angle: 0.017123048305511476
+
+	      Training MAE Shift: 0.015323130620850457		 Val MAE Shift: 0.014895873069763184
+              Training Euclidean Shift: 0.024116804202397663	 Val Euclidean Shift: 0.02360010623931885
+
+
+
+
+Epoch 273/300: Training Loss: 0.0169977777534061		 Val Loss: 0.022137362957000733
+
+	      Training MAE Angle: 0.04561368624369303		 Val MAE Angle: 0.05305028438568115
+              Training MSE Angle: 0.012019949654738108		 Val MSE Angle: 0.016534252166748045
+
+	      Training MAE Shift: 0.014709396494759453		 Val MAE Shift: 0.015183165073394775
+              Training Euclidean Shift: 0.023138875762621563	 Val Euclidean Shift: 0.02379643440246582
+
+
+
+
+Epoch 274/300: Training Loss: 0.018607851531770494		 Val Loss: 0.019155248403549194
+
+	      Training MAE Angle: 0.048529475927352905		 Val MAE Angle: 0.051291580200195315
+              Training MSE Angle: 0.012890906797515022		 Val MSE Angle: 0.012979531288146972
+
+	      Training MAE Shift: 0.015448626544740465		 Val MAE Shift: 0.015776760578155517
+              Training Euclidean Shift: 0.024296493993865118	 Val Euclidean Shift: 0.0248301362991333
+
+
+
+
+Epoch 275/300: Training Loss: 0.020101674728923373		 Val Loss: 0.02062378644943237
+
+	      Training MAE Angle: 0.05140311519304911		 Val MAE Angle: 0.05693974494934082
+              Training MSE Angle: 0.014699977305200364		 Val MSE Angle: 0.01422831416130066
+
+	      Training MAE Shift: 0.015594505601459079		 Val MAE Shift: 0.016403709650039674
+              Training Euclidean Shift: 0.02454076541794671	 Val Euclidean Shift: 0.025891513824462892
+
+
+
+
+Epoch 276/300: Training Loss: 0.02161936296357049		 Val Loss: 0.02206671953201294
+
+	      Training MAE Angle: 0.053610523541768394		 Val MAE Angle: 0.050997686386108396
+              Training MSE Angle: 0.015333836277325949		 Val MSE Angle: 0.01534745454788208
+
+	      Training MAE Shift: 0.015862931807835896		 Val MAE Shift: 0.01593734383583069
+              Training Euclidean Shift: 0.024888212482134502	 Val Euclidean Shift: 0.02516282558441162
+
+
+
+
+Epoch 277/300: Training Loss: 0.022166970703336928		 Val Loss: 0.018525819778442382
+
+	      Training MAE Angle: 0.0556980570157369		 Val MAE Angle: 0.04783637046813965
+              Training MSE Angle: 0.016295764181349013		 Val MSE Angle: 0.012903087139129639
+
+	      Training MAE Shift: 0.015629543198479548		 Val MAE Shift: 0.014905232191085815
+              Training Euclidean Shift: 0.024581831362512376	 Val Euclidean Shift: 0.023439981937408448
+
+
+
+
+Epoch 278/300: Training Loss: 0.017949203650156658		 Val Loss: 0.016562989950180053
+
+	      Training MAE Angle: 0.04779131876097785		 Val MAE Angle: 0.04073153018951416
+              Training MSE Angle: 0.013352154029740227		 Val MSE Angle: 0.011095093488693237
+
+	      Training MAE Shift: 0.014590673976474337		 Val MAE Shift: 0.014358588457107545
+              Training Euclidean Shift: 0.02294217712349362	 Val Euclidean Shift: 0.022644739151000976
+
+
+
+
+Epoch 279/300: Training Loss: 0.016991529199812148		 Val Loss: 0.02028242826461792
+
+	      Training MAE Angle: 0.04512333538797167		 Val MAE Angle: 0.04381259441375732
+              Training MSE Angle: 0.01168768025106854		 Val MSE Angle: 0.014085099697113038
+
+	      Training MAE Shift: 0.014984437161021762		 Val MAE Shift: 0.015299183130264283
+              Training Euclidean Shift: 0.02354265418317583	 Val Euclidean Shift: 0.02407771110534668
+
+
+
+
+Epoch 280/300: Training Loss: 0.019407252470652264		 Val Loss: 0.021489930152893067
+
+	      Training MAE Angle: 0.04897061983744303		 Val MAE Angle: 0.049696769714355465
+              Training MSE Angle: 0.014843477143181695		 Val MSE Angle: 0.014019570350646972
+
+	      Training MAE Shift: 0.014638577898343405		 Val MAE Shift: 0.0162957501411438
+              Training Euclidean Shift: 0.02294901841216617	 Val Euclidean Shift: 0.025599513053894043
+
+
+
+
+Epoch 281/300: Training Loss: 0.017022657725546095		 Val Loss: 0.01614981412887573
+
+	      Training MAE Angle: 0.046234962013032704		 Val MAE Angle: 0.036873087882995606
+              Training MSE Angle: 0.012409217655658722		 Val MSE Angle: 0.009958224892616272
+
+	      Training MAE Shift: 0.01461356712712182		 Val MAE Shift: 0.015581150054931641
+              Training Euclidean Shift: 0.02293927636411455	 Val Euclidean Shift: 0.024439132213592528
+
+
+
+
+Epoch 282/300: Training Loss: 0.018044590950012207		 Val Loss: 0.01792715072631836
+
+	      Training MAE Angle: 0.046172777811686196		 Val MAE Angle: 0.04731917858123779
+              Training MSE Angle: 0.011812143855624728		 Val MSE Angle: 0.012434087991714478
+
+	      Training MAE Shift: 0.015815885530577764		 Val MAE Shift: 0.01461742639541626
+              Training Euclidean Shift: 0.024888118108113606	 Val Euclidean Shift: 0.02297363042831421
+
+
+
+
+Epoch 283/300: Training Loss: 0.021214266618092854		 Val Loss: 0.025058820247650146
+
+	      Training MAE Angle: 0.05288471115960015		 Val MAE Angle: 0.04997928619384766
+              Training MSE Angle: 0.014356084995799594		 Val MSE Angle: 0.015595406293869019
+
+	      Training MAE Shift: 0.016953006386756897		 Val MAE Shift: 0.02231828689575195
+              Training Euclidean Shift: 0.026696097519662645	 Val Euclidean Shift: 0.03476999044418335
+
+
+
+
+Epoch 284/300: Training Loss: 0.020469894011815388		 Val Loss: 0.01877315640449524
+
+	      Training MAE Angle: 0.05098048514790005		 Val MAE Angle: 0.044621458053588865
+              Training MSE Angle: 0.013612738086117638		 Val MSE Angle: 0.010433974266052247
+
+	      Training MAE Shift: 0.017187837097379897		 Val MAE Shift: 0.017862863540649414
+              Training Euclidean Shift: 0.026987201637691922	 Val Euclidean Shift: 0.028244678974151612
+
+
+
+
+Epoch 285/300: Training Loss: 0.018561954299608868		 Val Loss: 0.018592100143432617
+
+	      Training MAE Angle: 0.046259638335969716		 Val MAE Angle: 0.043831801414489745
+              Training MSE Angle: 0.013066108855936263		 Val MSE Angle: 0.011649845838546754
+
+	      Training MAE Shift: 0.015835371282365587		 Val MAE Shift: 0.016683436632156372
+              Training Euclidean Shift: 0.02485038505660163	 Val Euclidean Shift: 0.026356616020202638
+
+
+
+
+Epoch 286/300: Training Loss: 0.01899902688132392		 Val Loss: 0.019388973712921143
+
+	      Training MAE Angle: 0.04850641555256314		 Val MAE Angle: 0.056042990684509277
+              Training MSE Angle: 0.013549447887473635		 Val MSE Angle: 0.01369575023651123
+
+	      Training MAE Shift: 0.015634795029958088		 Val MAE Shift: 0.01509647011756897
+              Training Euclidean Shift: 0.024489480588171218	 Val Euclidean Shift: 0.02369997262954712
+
+
+
+
+Epoch 287/300: Training Loss: 0.0171998573674096		 Val Loss: 0.018350168466567993
+
+	      Training MAE Angle: 0.04518750309944153		 Val MAE Angle: 0.04337380886077881
+              Training MSE Angle: 0.011570586926407285		 Val MSE Angle: 0.012493283748626708
+
+	      Training MAE Shift: 0.01554634173711141		 Val MAE Shift: 0.016487754583358764
+              Training Euclidean Shift: 0.02447330289416843	 Val Euclidean Shift: 0.025974535942077638
+
+
+
+
+Epoch 288/300: Training Loss: 0.019123772780100506		 Val Loss: 0.01912205696105957
+
+	      Training MAE Angle: 0.047567254967159696		 Val MAE Angle: 0.04960687637329102
+              Training MSE Angle: 0.014037741555107964		 Val MSE Angle: 0.012127465009689331
+
+	      Training MAE Shift: 0.014804075161616007		 Val MAE Shift: 0.014426743984222412
+              Training Euclidean Shift: 0.023298136062092252	 Val Euclidean Shift: 0.022769923210144042
+
+
+
+
+Epoch 289/300: Training Loss: 0.019584877623452082		 Val Loss: 0.01841365098953247
+
+	      Training MAE Angle: 0.04859421319431729		 Val MAE Angle: 0.05018877983093262
+              Training MSE Angle: 0.013877032531632317		 Val MSE Angle: 0.013058208227157593
+
+	      Training MAE Shift: 0.01521974802017212		 Val MAE Shift: 0.014782235622406006
+              Training Euclidean Shift: 0.024004179570409987	 Val Euclidean Shift: 0.023309381008148194
+
+
+
+
+Epoch 290/300: Training Loss: 0.01676952176623874		 Val Loss: 0.016651813983917237
+
+	      Training MAE Angle: 0.044815931055280894		 Val MAE Angle: 0.04027314186096191
+              Training MSE Angle: 0.0119216607676612		 Val MSE Angle: 0.011244072914123535
+
+	      Training MAE Shift: 0.014547429151005216		 Val MAE Shift: 0.014597948789596558
+              Training Euclidean Shift: 0.022900836335288152	 Val Euclidean Shift: 0.02302946090698242
+
+
+
+
+Epoch 291/300: Training Loss: 0.02014535168806712		 Val Loss: 0.023298466205596925
+
+	      Training MAE Angle: 0.05000175370110406		 Val MAE Angle: 0.051440916061401366
+              Training MSE Angle: 0.01488633950551351		 Val MSE Angle: 0.01701495051383972
+
+	      Training MAE Shift: 0.014804205960697599		 Val MAE Shift: 0.014906010627746581
+              Training Euclidean Shift: 0.023296326398849487	 Val Euclidean Shift: 0.023449389934539794
+
+
+
+
+Epoch 292/300: Training Loss: 0.018241383963161044		 Val Loss: 0.020555708408355713
+
+	      Training MAE Angle: 0.04785209231906467		 Val MAE Angle: 0.04608583927154541
+              Training MSE Angle: 0.012661186357339224		 Val MSE Angle: 0.014725345373153686
+
+	      Training MAE Shift: 0.015301980906062655		 Val MAE Shift: 0.01489449143409729
+              Training Euclidean Shift: 0.024120357301500108	 Val Euclidean Shift: 0.023525218963623046
+
+
+
+
+Epoch 293/300: Training Loss: 0.015832391050126817		 Val Loss: 0.018084044456481933
+
+	      Training MAE Angle: 0.04265051417880588		 Val MAE Angle: 0.042198476791381834
+              Training MSE Angle: 0.01093609631061554		 Val MSE Angle: 0.011003376245498657
+
+	      Training MAE Shift: 0.014662724402215745		 Val MAE Shift: 0.016481776237487793
+              Training Euclidean Shift: 0.02303968369960785	 Val Euclidean Shift: 0.02603102445602417
+
+
+
+
+Epoch 294/300: Training Loss: 0.0177388158109453		 Val Loss: 0.021926538944244386
+
+	      Training MAE Angle: 0.0443701081805759		 Val MAE Angle: 0.04701797485351562
+              Training MSE Angle: 0.01282762736082077		 Val MSE Angle: 0.014715861082077026
+
+	      Training MAE Shift: 0.0146079593234592		 Val MAE Shift: 0.017879089117050172
+              Training Euclidean Shift: 0.023035423623190984	 Val Euclidean Shift: 0.028200175762176514
+
+
+
+
+Epoch 295/300: Training Loss: 0.018086019489500258		 Val Loss: 0.016625008583068847
+
+	      Training MAE Angle: 0.04693140586217245		 Val MAE Angle: 0.04837259292602539
+              Training MSE Angle: 0.01292974998553594		 Val MSE Angle: 0.011447545289993286
+
+	      Training MAE Shift: 0.015053972601890564		 Val MAE Shift: 0.014032914638519287
+              Training Euclidean Shift: 0.02363652487595876	 Val Euclidean Shift: 0.02201746940612793
+
+
+
+
+Epoch 296/300: Training Loss: 0.01471946636835734		 Val Loss: 0.024195990562438964
+
+	      Training MAE Angle: 0.04170976413620843		 Val MAE Angle: 0.059796838760375975
+              Training MSE Angle: 0.009636777970525954		 Val MSE Angle: 0.018194226026535035
+
+	      Training MAE Shift: 0.01472401287820604		 Val MAE Shift: 0.01556959867477417
+              Training Euclidean Shift: 0.023112515608469646	 Val Euclidean Shift: 0.024419732093811035
+
+
+
+
+Epoch 297/300: Training Loss: 0.01797484854857127		 Val Loss: 0.023069670200347902
+
+	      Training MAE Angle: 0.04739315973387824		 Val MAE Angle: 0.04753592491149902
+              Training MSE Angle: 0.01275137894683414		 Val MSE Angle: 0.016761535406112672
+
+	      Training MAE Shift: 0.015273423658476936		 Val MAE Shift: 0.016589850187301636
+              Training Euclidean Shift: 0.023964403404129878	 Val Euclidean Shift: 0.0259644889831543
+
+
+
+
+Epoch 298/300: Training Loss: 0.01900540954536862		 Val Loss: 0.019400060176849365
+
+	      Training MAE Angle: 0.043981962733798556		 Val MAE Angle: 0.043333702087402344
+              Training MSE Angle: 0.011553299095895555		 Val MSE Angle: 0.012331546545028686
+
+	      Training MAE Shift: 0.016315627429220412		 Val MAE Shift: 0.016360888481140135
+              Training Euclidean Shift: 0.025626012020640902	 Val Euclidean Shift: 0.0258318567276001
+
+
+
+
+Epoch 299/300: Training Loss: 0.0145664910475413		 Val Loss: 0.014459449052810668
+
+	      Training MAE Angle: 0.04040915105077955		 Val MAE Angle: 0.03801586866378784
+              Training MSE Angle: 0.00961762335565355		 Val MSE Angle: 0.009306221008300782
+
+	      Training MAE Shift: 0.014547407627105713		 Val MAE Shift: 0.014082136154174805
+              Training Euclidean Shift: 0.022913879818386503	 Val Euclidean Shift: 0.02220879077911377
+
+
+
+
+Epoch 300/300: Training Loss: 0.01668697430027856		 Val Loss: 0.015040768384933472
+
+	      Training MAE Angle: 0.04377219080924988		 Val MAE Angle: 0.03597908735275269
+              Training MSE Angle: 0.011264331638813019		 Val MSE Angle: 0.00868682622909546
+
+	      Training MAE Shift: 0.014813775817553202		 Val MAE Shift: 0.014779833555221557
+              Training Euclidean Shift: 0.023364626699023776	 Val Euclidean Shift: 0.02311782121658325
+
+
+
+
+## TEST RESULTS: ##
+Test Loss: 0.01694357767701149 
+Test MAE Shift: 0.014151076786220074		 Test Euclidean Shift: 0.02227448858320713
+Test MAE Angle: 0.04193758964538574		 Test MSE Angle: 0.011651591397821903
+
+
