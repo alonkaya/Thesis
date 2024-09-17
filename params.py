@@ -77,7 +77,7 @@
 
 import torch
 
-DEVICE_ID = 2
+DEVICE_ID = 1
 device = torch.device(f"cuda:{DEVICE_ID}" if torch.cuda.is_available() else "cpu")
 
 ### Dataset ###
@@ -148,5 +148,3 @@ NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
 FROZEN_LAYERS = [4]
 norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
 norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
-
-# nohup python Main.py > output_0.1_mid_frozen_4.log 2>&1 &
