@@ -97,6 +97,7 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
 
 
     if save:
+        print("\n\n\n\nbbbbbbbbbbbbbbbbbbbbbb")
         os.makedirs(plots_path, exist_ok=True)
         plt.savefig(f"""{plots_path}/{title}.png""")  # Specify the filename and extension
 
