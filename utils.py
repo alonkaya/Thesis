@@ -74,6 +74,7 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
     # y1 = y1[5:]
     # y2 = y2[5:]
     # x = x[5:]
+    x = list(x)
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
