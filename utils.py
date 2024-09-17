@@ -71,6 +71,7 @@ class ConvNet(nn.Module):
         return x
 
 def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
+    print(y1)
     y1 = np.asarray(y1)
     y2 = np.asarray(y2)
     x = np.asarray(x)
