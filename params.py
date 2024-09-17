@@ -1,6 +1,6 @@
 import torch
 
-DEVICE_ID = 1
+DEVICE_ID = 3
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 ### Dataset ###
