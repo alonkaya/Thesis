@@ -450,24 +450,24 @@ import shutil
 #     #         print(f'not found {p0}')
 
 
-import torch
-def check_model_file(file_path):
-    if not os.path.exists(file_path):
-        print(f"Error: The file {file_path} does not exist.")
-        return False
+# import torch
+# def check_model_file(file_path):
+#     if not os.path.exists(file_path):
+#         print(f"Error: The file {file_path} does not exist.")
+#         return False
     
-    file_size = os.path.getsize(file_path)
-    if file_size == 0:
-        print(f"Error: The file {file_path} is empty.")
-        return False
+#     file_size = os.path.getsize(file_path)
+#     if file_size == 0:
+#         print(f"Error: The file {file_path} is empty.")
+#         return False
     
-    print(f"The file {file_path} exists and is {file_size} bytes.")
-    return True
+#     print(f"The file {file_path} exists and is {file_size} bytes.")
+#     return True
 
-if __name__ == "__main__":
-    f = "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth"
-    # Use this function before trying to load the model
-    if check_model_file(f):
-        checkpoint = torch.load(f, map_location='cpu')
-    else:
-        print("Unable to load the model due to file issues.")
+# if __name__ == "__main__":
+#     f = "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth"
+#     # Use this function before trying to load the model
+#     if check_model_file(f):
+#         checkpoint = torch.load(f, map_location='cpu')
+#     else:
+#         print("Unable to load the model due to file issues.")
