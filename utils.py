@@ -81,7 +81,7 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
         ax.plot(x, y1, color='steelblue', label="Train")
-        if y2 and len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
+        if len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
 
         for i in range(0, len(y1), max(1, len(y1)//10)):
             ax.text(x[i], y1[i], f'{y1[i]:.4g}', fontsize=9, color='blue', ha='center', va='bottom')
