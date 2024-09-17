@@ -71,15 +71,15 @@ class ConvNet(nn.Module):
         return x
 
 def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
-    # y1 = y1[5:]
-    # y2 = y2[5:]
-    # x = x[5:]
-    x = list(x)
+    # if len(y1) > 3 and (y1[0] > y1[3] + 2000 or y2[0] > y2[3] + 2000):
+    y1 = y1[5:]
+    y2 = y2[5:]
+    x = list(x[5:])
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
         ax.plot(x, y1, color='steelblue', label="Train")
-        if len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
+        if y2 and len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
 
         for i in range(0, len(y1), max(1, len(y1)//10)):
             ax.text(x[i], y1[i], f'{y1[i]:.4g}', fontsize=9, color='blue', ha='center', va='bottom')
@@ -93,11 +93,7 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
         ax.grid(True)
         ax.legend()
 
-    print(x)
-    print(y1)
-    print(y2)
     if save:
-        print("\n\n\n\nbbbbbbbbbbbbbbbbbbbbbb")
         os.makedirs(plots_path, exist_ok=True)
         plt.savefig(f"""{plots_path}/{title}.png""")  # Specify the filename and extension
 
