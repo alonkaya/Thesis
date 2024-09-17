@@ -84,7 +84,7 @@ class FMatrixRegressor(nn.Module):
             if layer_idx < self.frozen_layers:  
                 for param in layer.parameters():
                     param.requires_grad = False
-
+        print(plots_path)
         if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
             model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
             self.load_model(model_path=model_path)
