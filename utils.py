@@ -75,9 +75,9 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
     y2 = np.asarray(y2)
     x = np.asarray(x)
     # if len(y1) > 3 and (y1[0] > y1[3] + 2000 or y2[0] > y2[3] + 2000):
-    y1 = np.asarray(y1[5:])
-    y2 = np.asarray(y2[5:])
-    x = np.asarray(x[5:])
+    # y1 = np.asarray(y1[5:])
+    # y2 = np.asarray(y2[5:])
+    # x = np.asarray(x[5:])
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
     for ax, y_scale in zip(axs, ['linear', 'log']):
