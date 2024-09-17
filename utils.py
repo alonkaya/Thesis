@@ -95,7 +95,9 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
         ax.grid(True)
         ax.legend()
 
-
+    print(x)
+    print(y1)
+    print(y2)
     if save:
         print("\n\n\n\nbbbbbbbbbbbbbbbbbbbbbb")
         os.makedirs(plots_path, exist_ok=True)
