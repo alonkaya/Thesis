@@ -1,0 +1,24 @@
+###########################################################################################################################################################
+
+                         learning rate: 0.0001, lr_decay: 0.8, mlp_hidden_sizes: [1024, 512], jump_frames: 2, use_reconstruction_layer: True
+                        batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], dataset: Stereo,
+                        average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, deepF_nocorrs: False, part: tail, get_old_path: False,
+                        SVD coeff: 0, RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 4, trained vit: None,
+                        crop: 224 resize: 256, use conv: False pretrained: None, data_ratio: 0.05, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 200, 
+
+algebraic_truth: 0.016707024153541115		 val_algebraic_truth: 0.017256951850393543
+RE1_truth: 0.00018801470287144184		 val_RE1_truth: 0.00020567451239280078
+SED_truth: 0.0015041220056660036		 val_SED_truth: 0.0016454088947047358
+
+Epoch 1/5500: Training Loss: 4180.572150735294		 Val Loss: 3573.795855978261
+             Training MAE: 0.3413187861442566		 Val MAE: 0.3193032443523407
+             Algebraic dist: 2060.7679227941176		 Val Algebraic dist: 46.80496879245924
+             RE1 dist: 9309077.647058824		 Val RE1 dist: 2491.5896739130435
+             SED dist: 8360.239889705883		 Val SED dist: 7146.588315217391
+
+Epoch 2/5500: Training Loss: 2294.829044117647		 Val Loss: 2362.911175271739
+             Training MAE: 0.3192465901374817		 Val MAE: 0.3177885115146637
+             Algebraic dist: 13.336361155790442		 Val Algebraic dist: 13.402801513671875
+             RE1 dist: 260.16394761029414		 Val RE1 dist: 210.45189368206522
+             SED dist: 4588.663602941177		 Val SED dist: 4724.817934782609
+
