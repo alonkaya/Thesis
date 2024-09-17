@@ -470,16 +470,14 @@ if __name__ == "__main__":
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     x = [1,2]
     y1 = [1,2]
-    for ax, y_scale in zip(axs, ['linear', 'log']):
-        ax.plot(x, y1, color='steelblue', label="Train")
+    plt.plot(x, y1, color='steelblue', label="Train")
 
-        for i in range(0, len(y1), max(1, len(y1)//10)):
-            ax.text(x[i], y1[i], f'{y1[i]:.4g}', fontsize=9, color='blue', ha='center', va='bottom')
+    for i in range(0, len(y1), max(1, len(y1)//10)):
+        plt.text(x[i], y1[i], f'{y1[i]:.4g}', fontsize=9, color='blue', ha='center', va='bottom')
 
-    
-        ax.set_yscale(y_scale)
-        ax.grid(True)
-        ax.legend()
+
+    plt.grid(True)
+    plt.legend()
 
     plt.savefig(f"""a.png""")  # Specify the filename and extension
 #     f = "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth"
