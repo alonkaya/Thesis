@@ -61,7 +61,7 @@ if __name__ == "__main__":
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
                 compress = f'avg_embeddings' if AVG_EMBEDDINGS else f'conv'
-                ADDITIONS = ""                                     
+                ADDITIONS = "__seed_300"                                     
 
                 plots_path = os.path.join('plots', dataset, 'Winners',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
