@@ -46,7 +46,6 @@ if __name__ == "__main__":
                 set_seed(SEED)
                 if part != "head" and part != "mid" and part != "tail":
                         raise ValueError("Invalid part")
-                        continue
                 
                 lr_decay = 0.85 if lr < 1e-4 else 0.8
                 num_epochs = 2000 if data_ratio==0.3 else 3000 if data_ratio==0.2 else 4000 if data_ratio==0.1 else 5500 if data_ratio==0.05 else 9000 if data_ratio==0.0375 else 12000 if data_ratio==0.025 else 0
@@ -61,7 +60,6 @@ if __name__ == "__main__":
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
                 compress = f'avg_embeddings' if AVG_EMBEDDINGS else f'conv'
-                ADDITIONS = ""                                     
 
                 plots_path = os.path.join('plots', dataset, 'Winners',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
