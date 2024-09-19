@@ -28,7 +28,7 @@ INIT_DATA = True
 PART = ["tail"]                                                  
 
 ### Training ###
-LR = [1e-4]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
+LR = [4e-5]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
 WEIGHT_DECAY = 0                                                          # TODO 5e-4, 5e-5
 MIN_LR = 2e-5
 SCHED = None
