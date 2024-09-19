@@ -38,12 +38,12 @@ if __name__ == "__main__":
         seq_ratios = args.dr if args.dr else SEQ_RATIOS
 
         # Iterate over each combination
-        param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, seq_ratios, lrs, batch_size, part, frozen_layers)
+        param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, SEED, seq_ratios, lrs, batch_size, part, frozen_layers)
         with open ('not_good.txt', 'r') as f:
                 not_good = f.read().splitlines()
 
-        for i, (alg_coeff, re1_coeff, sed_coeff, data_ratio, lr, bs, part, fl) in enumerate(param_combinations):
-                set_seed(SEED)
+        for i, (alg_coeff, re1_coeff, sed_coeff, seed, data_ratio, lr, bs, part, fl) in enumerate(param_combinations):
+                set_seed(seed)
                 if part != "head" and part != "mid" and part != "tail":
                         raise ValueError("Invalid part")
                 
@@ -60,11 +60,12 @@ if __name__ == "__main__":
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
                 compress = f'avg_embeddings' if AVG_EMBEDDINGS else f'conv'
+                seed_param = "" if seed == 42 else f"__seed_{seed}"
 
                 plots_path = os.path.join('plots', dataset, 'Winners',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
-                                        f"""BS_{bs}__ratio_{data_ratio}__{part}__frozen_{fl}{ADDITIONS}""")
+                                        f"""BS_{bs}__ratio_{data_ratio}__{part}__frozen_{fl}{seed_param}{ADDITIONS}""")
                 
                 if plots_path in not_good:
                         continue
@@ -79,7 +80,7 @@ if __name__ == "__main__":
                         batch_size: {bs}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo if STEREO else train_seqeunces}, val_sequences: {val_sequences_stereo if STEREO else val_sequences}, dataset: {dataset},
                         average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, deepF_nocorrs: {DEEPF_NOCORRS}, part: {part}, get_old_path: {GET_OLD_PATH},
                         SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, frozen layers: {fl}, trained vit: {TRAINED_VIT},
-                        crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, data_ratio: {data_ratio}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED} seed: {SEED}, \n\n"""
+                        crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, data_ratio: {data_ratio}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED} seed: {seed}, \n\n"""
                         print_and_write(parameters, model.plots_path)
                         
                         if PRETRAINED_PATH or os.path.exists(os.path.join(plots_path, 'model.pth')):
@@ -88,6 +89,11 @@ if __name__ == "__main__":
                         model.train_model(train_loader, val_loader, test_loader)
                 else: 
                         print(f"Model {plots_path} already trained")
+                
+                if os.path.exists(os.path.join(model.plots_path, 'backup_model.pth')):
+                        os.remove(os.path.join(model.plots_path, 'backup_model.pth'))
+                else:
+                        print_and_write(f"{model.plots_path} no nackup", model.plots_path)
 
                 torch.cuda.empty_cache()
 

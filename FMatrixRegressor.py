@@ -1,3 +1,4 @@
+import shutil
 from DatasetOneSequence import data_with_one_sequence
 from params import *
 from utils import *
@@ -86,7 +87,7 @@ class FMatrixRegressor(nn.Module):
                     param.requires_grad = False
 
         if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
-            model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
+            model_path = pretrained_path if pretrained_path else plots_path
             self.load_model(model_path=model_path)
 
         else:
@@ -266,6 +267,10 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
     def save_model(self, epoch):
         checkpoint_path = os.path.join(self.plots_path, "model.pth")
+        # Backup previous checkpoint
+        if os.path.exists(checkpoint_path) and epoch//30 == 0: 
+            backup_path = os.path.join(self.plots_path, "backup_model.pth")
+            shutil.copy(checkpoint_path, backup_path)
         torch.save({
             'mlp': self.mlp.state_dict(),
             'optimizer': self.optimizer.state_dict(),
@@ -303,8 +308,18 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             "all_val_SED_pred" : self.all_val_SED_pred
         }, checkpoint_path) 
 
-    def load_model(self, model_path=None):
-        checkpoint = torch.load(model_path, map_location='cpu')
+
+    def load_model(self, path=None):
+        model_path = os.path.join(path, "model.pth")
+        if os.path.exists(model_path):
+            try:
+                checkpoint = torch.load(model_path, map_location='cpu')
+            except Exception as e:
+                print(e)
+                checkpoint = torch.load(path, "backup_model.pth", map_location='cpu')
+        else:
+            print_and_write(f"Model {model_path} not found", self.plots_path)
+            raise FileNotFoundError
 
         self.lr_decay = checkpoint.get("lr_decay", self.lr_decay)
         self.L2_coeff = checkpoint.get("L2_coeff", self.L2_coeff)
