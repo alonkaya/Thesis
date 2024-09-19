@@ -80,9 +80,9 @@ def process_epoch_stats(file_path):
 def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=False):
     sliced = ""
     # if len(y1) > 3 and (y1[0] > y1[3] + 2000 or y2[0] > y2[3] + 2000):
-    y1 = y1[5:]
-    y2 = y2[5:]
-    x = x[5:]
+    y1 = y1[30:]
+    y2 = y2[30:]
+    x = x[30:]
     sliced = " sliced"
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
@@ -110,12 +110,13 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-    plots_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__mid__frozen_4__seed_300"
+    plots_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.0375__tail__frozen_4"
     file_path = os.path.join(plots_path, "output.log")
     save = True
 
     process_epoch_stats(file_path)
     print(len(epochs), len(training_losses), len(val_losses), len(training_maes), len(val_maes), len(alg_dists), len(val_alg_dists), len(re1_dists), len(val_re1_dists), len(sed_dists), len(val_sed_dists), len(alg_sqr_dists), len(val_alg_sqr_dists))
+    print(np.mean(val_maes[-50:]), np.mean(val_alg_dists[-50:]), np.mean(val_re1_dists[-50:]), np.mean(val_sed_dists[-50:]))
     
     plot_parameter(epochs, training_losses, val_losses, "Loss", plots_path, save=save)
     plot_parameter(epochs, training_maes, val_maes, "MAE", plots_path, save=save)
@@ -128,3 +129,5 @@ if __name__ == "__main__":
     except: 
         pass
     
+    # 0.06828850582242012 0.8396587000952827 0.9139413060082329 2.0640717697143556
+    # 0.06348117679357529 0.8128136677212185 0.8167292144563463 1.8715625296698675
