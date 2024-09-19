@@ -110,7 +110,7 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-    plots_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.0375__tail__frozen_4"
+    plots_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_4e-05__conv__CLIP__use_reconstruction_True/Trained_vit/BS_8__ratio_0.0375__tail__frozen_4"
     file_path = os.path.join(plots_path, "output.log")
     save = True
 
@@ -129,5 +129,5 @@ if __name__ == "__main__":
     except: 
         pass
     
-    # 0.06828850582242012 0.8396587000952827 0.9139413060082329 2.0640717697143556
     # 0.06348117679357529 0.8128136677212185 0.8167292144563463 1.8715625296698675
+    # 0.060137820690870286 0.7785132913028494 0.7836507786021514 1.742485699373133

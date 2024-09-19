@@ -29,7 +29,7 @@ INIT_DATA = True
 PART = ["tail"]                                                  
 
 ### Training ###
-LR = [4e-5]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
+LR = [4e-4]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
 WEIGHT_DECAY = 0                                                          # TODO 5e-4, 5e-5
 MIN_LR = 2e-5
 SCHED = None
@@ -57,7 +57,7 @@ RE1_COEFF = [0]
 SED_COEFF = [0.5]                                                    # TODO 0.01, 0.05, 0.1, 0.5, 1
 L2_COEFF = 1
 HUBER_COEFF = 1                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
-ADDITIONS = "seed_500"                                     
+ADDITIONS = "__seed_500"                                     
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
