@@ -4,6 +4,7 @@ import torch
 # 801798 is 0.05 seed 600 in 5000
 # 803270 is 0.1 seed 600 in 5000
 # 296614 is 0.0375 seed 500 in 4090
+# 374785 is 0.0375 seed 300 in 4090
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 ### Dataset ###
