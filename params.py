@@ -1,6 +1,7 @@
 import torch
 # 679135 is 0.1 seed 300 in 5000
 # 709962 is 0.05 seed 400 in 5000
+# 801798 is 0.05 seed 600 in 5000
 # 296614 is 0.0375 seed 500 in 4090
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
@@ -12,7 +13,7 @@ FIRST_2_OF_3_TRAIN = False
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-SEQ_RATIOS = [0.05]      # 3251, 2166, 1082, 540, 405, 269
+SEQ_RATIOS = [0.1]      # 3251, 2166, 1082, 540, 405, 269
 CROP = 224
 RESIZE = 256
 USE_REALESTATE = False
@@ -22,7 +23,7 @@ JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True
-PART = ["tail"]                                                  
+PART = ["mid"]                                                  
 
 ### Training ###
 LR = [1e-4]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
