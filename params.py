@@ -39,7 +39,7 @@ NUM_WORKERS = 0
 SAVE_MODEL = True
 NUM_EPOCHS = 1500
 GET_OLD_PATH = False
-SEED = 500
+SEED = 600
 
 ### Epipolar geometry ###
 RE1_DIST = True
@@ -53,7 +53,7 @@ RE1_COEFF = [0]
 SED_COEFF = [0.5]                                                    # TODO 0.01, 0.05, 0.1, 0.5, 1
 L2_COEFF = 1
 HUBER_COEFF = 1                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
-ADDITIONS = "__seed_500"                                     
+ADDITIONS = "__seed_600"                                     
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
