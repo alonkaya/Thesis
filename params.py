@@ -4,7 +4,7 @@ import torch
 # 801798 is 0.05 seed 600 in 5000
 # 803270 is 0.1 seed 600 in 5000
 # 296614 is 0.0375 seed 500 in 4090
-# 374785 is 0.0375 seed 300 in 4090
+# 405774 is 0.0375 seed 300 in 4090
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 ### Dataset ###
@@ -42,7 +42,7 @@ NUM_WORKERS = 0
 SAVE_MODEL = True
 NUM_EPOCHS = 1500
 GET_OLD_PATH = False
-SEED = 300
+SEED = 500
 
 ### Epipolar geometry ###
 RE1_DIST = True
@@ -56,7 +56,7 @@ RE1_COEFF = [0]
 SED_COEFF = [0.5]                                                    # TODO 0.01, 0.05, 0.1, 0.5, 1
 L2_COEFF = 1
 HUBER_COEFF = 1                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
-ADDITIONS = ""                                     
+ADDITIONS = "seed_500"                                     
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
