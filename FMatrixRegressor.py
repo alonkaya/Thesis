@@ -81,10 +81,11 @@ class FMatrixRegressor(nn.Module):
             self.model = ViTModel.from_pretrained(model_name).to(device)
     
         # Freeze frozen_layers bottom layers
-        for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
-            if layer_idx < self.frozen_layers:  
-                for param in layer.parameters():
-                    param.requires_grad = False
+        if self.resnet == False:
+            for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
+                if layer_idx < self.frozen_layers:  
+                    for param in layer.parameters():
+                        param.requires_grad = False
 
         if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
             model_path = pretrained_path if pretrained_path else plots_path
