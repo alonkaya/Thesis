@@ -1,6 +1,7 @@
 import torch
 
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
+# 976596 is output_resnet.log
 
 ### Dataset ###
 train_seqeunces = [0, 2, 3, 5, 6, 7, 8]
