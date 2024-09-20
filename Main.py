@@ -73,8 +73,13 @@ if __name__ == "__main__":
                 train_loader, val_loader, test_loader = get_data_loaders(data_ratio, part, batch_size=bs)
 
                 model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
+                
+                if model.plots_path.endswith("__bad"):
+                        print("Already trained and got bad results")        
+                elif os.path.exists(model.plots_path.split("__seed_")[0]):
+                        print("Seed 42 already well trained, no need for other seed training")
 
-                if model.start_epoch < model.num_epochs:
+                elif model.start_epoch < model.num_epochs:
                         parameters = f"""###########################################################################################################################################################\n
                         {ADDITIONS} learning rate: {lr}, lr_decay: {lr_decay}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
                         batch_size: {bs}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo if STEREO else train_seqeunces}, val_sequences: {val_sequences_stereo if STEREO else val_sequences}, dataset: {dataset},
@@ -87,13 +92,14 @@ if __name__ == "__main__":
                                 print_and_write(f"##### CONTINUE TRAINING #####\n\n", model.plots_path)
                 
                         model.train_model(train_loader, val_loader, test_loader)
+                   
+                        if os.path.exists(os.path.join(model.plots_path, 'backup_model.pth')):
+                                os.remove(os.path.join(model.plots_path, 'backup_model.pth'))
+                        else:
+                                print_and_write(f"{model.plots_path} no backup", model.plots_path)
+
                 else: 
                         print(f"Model {plots_path} already trained")
-                
-                if os.path.exists(os.path.join(model.plots_path, 'backup_model.pth')):
-                        os.remove(os.path.join(model.plots_path, 'backup_model.pth'))
-                else:
-                        print_and_write(f"{model.plots_path} no nackup", model.plots_path)
 
                 torch.cuda.empty_cache()
 
