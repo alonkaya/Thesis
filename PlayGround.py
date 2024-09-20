@@ -527,8 +527,10 @@ def plot_errors():
     plt.show()
 
 if __name__ == "__main__":
-    plot_errors()
-
+    # plot_errors()
+    path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.05__tail__frozen_4__seed_300__bad"
+    print(path.endswith("__bad"))
+    print(os.path.exists(path.split("__seed_")[0]))
 
     
 #     f = "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth"
