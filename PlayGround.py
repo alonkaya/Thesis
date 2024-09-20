@@ -465,21 +465,71 @@ from matplotlib import pyplot as plt
     
 #     print(f"The file {file_path} exists and is {file_size} bytes.")
 #     return True
+import matplotlib.pyplot as plt
+def plot_errors():
+        # Data for Frozen 0
+    mean_alg_0 = [0.336, 0.37, 0.4867, 0.4567, 0.5533, 0.683]
+    mean_sed_0 = [0.4, 0.4733, 0.7333, 0.7117, 0.8267, 1.123]
+    mean_re1_0 = [0.1, 0.1333, 0.3267, 0.294, 0.3633, 0.556]
+    std_alg_0 = [0.049, 0.0608, 0.1021, 0.0451, 0.0416, 0.1]
+    std_sed_0 = [0.083, 0.1447, 0.2178, 0.0922, 0.0987, 0.196]
+    std_re1_0 = [0.025, 0.0493, 0.155, 0.0386, 0.0416, 0.092]
+
+    # Data for Frozen 4
+    mean_alg_4 = [0.2567, 0.4233, 0.5933, 0.7233]
+    mean_sed_4 = [0.27, 0.5833, 0.8967, 1.0467]
+    mean_re1_4 = [0.0767, 0.2157, 0.3867, 0.6767]
+    std_alg_4 = [0.0058, 0.1537, 0.2157, 0.2084]
+    std_sed_4 = [0.01, 0.3194, 0.3694, 0.2926]
+    std_re1_4 = [0.0058, 0.1431, 0.2023, 0.2926]
+
+    # Data for Frozen 8
+    mean_alg_8 = [0.2667, 0.48, 0.65, 0.6867]
+    mean_sed_8 = [0.2833, 0.7333, 1.0233, 1.2733]
+    mean_re1_8 = [0.08, 0.3067, 0.47, 0.67]
+    std_alg_8 = [0.0208, 0.1217, 0.08, 0.2013]
+    std_sed_8 = [0.0473, 0.3528, 0.208, 0.6493]
+    std_re1_8 = [0.02, 0.1762, 0.1058, 0.4687]
+
+    # New X-axis with an extra point
+    x_indices_0 = range(len(mean_alg_0))  # For Frozen 0 (has an extra point)
+    x_indices = range(1, len(mean_alg_4)+1 )  # For Frozen 4 and Frozen 8 (starts after the first point, ends earlier)
+
+
+    # Setting the X-axis labels to be flexible based on data points
+    # xticks_labels = ['2166', '1082', '540', '405']  # 5 points for Frozen 0
+    xticks_labels = ['3251', '2166', '1082', '540', '405', '269']  # 5 points for Frozen 0
+
+    # Plotting the Frozen 0 run with solid lines (with extra point)
+    # plt.errorbar(x_indices_0, mean_alg_0, yerr=std_alg_0, marker='o', color='blue', linestyle='-', label='alg Frozen 0', capsize=5)
+    plt.errorbar(x_indices_0, mean_sed_0, yerr=std_sed_0, marker='o', color='green', linestyle='-', label='SED Frozen 0', capsize=5)
+    # plt.errorbar(x_indices_0, mean_re1_0, yerr=std_re1_0, marker='o', color='orange', linestyle='-', label='RE1 Frozen 0', capsize=5)
+
+    # Plotting the Frozen 4 run with dotted lines (ends earlier, 4 points)
+    # plt.errorbar(x_indices, mean_alg_4, yerr=std_alg_4, marker='o', color='blue', linestyle='-', label='alg Frozen 4', capsize=5)
+    plt.errorbar(x_indices, mean_sed_4, yerr=std_sed_4, marker='o', color='green', linestyle=':', label='SED Frozen 4', capsize=5)
+    # plt.errorbar(x_indices, mean_re1_4, yerr=std_re1_4, marker='o', color='orange', linestyle='-', label='RE1 Frozen 4', capsize=5)
+
+    # Plotting the Frozen 8 run with dashed lines (ends earlier, 4 points)
+    # plt.errorbar(x_indices, mean_alg_8, yerr=std_alg_8, marker='o', color='blue', linestyle='-', label='alg Frozen 8', capsize=5)
+    plt.errorbar(x_indices, mean_sed_8, yerr=std_sed_8, marker='o', color='green', linestyle='--', label='SED Frozen 8', capsize=5)
+    # plt.errorbar(x_indices, mean_re1_8, yerr=std_re1_8, marker='o', color='orange', linestyle='-', label='RE1 Frozen 8', capsize=5)
+
+    # Setting plot details
+    plt.title('Mean Values with Standard Deviation for Frozen Runs (0, 4, 8)')
+    plt.xlabel('Data Points')
+    plt.ylabel('Mean Value ± STD')
+    plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
+    plt.legend()
+    plt.grid(True)
+
+    # Show the combined plot
+    plt.show()
 
 if __name__ == "__main__":
-    fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
-    x = [1,2]
-    y1 = [1,2]
-    plt.plot(x, y1, color='steelblue', label="Train")
-
-    for i in range(0, len(y1), max(1, len(y1)//10)):
-        plt.text(x[i], y1[i], f'{y1[i]:.4g}', fontsize=9, color='blue', ha='center', va='bottom')
+    plot_errors()
 
 
-    plt.grid(True)
-    plt.legend()
-
-    plt.savefig(f"""a.png""")  # Specify the filename and extension
     
 #     f = "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth"
 #     # Use this function before trying to load the model
