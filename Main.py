@@ -65,7 +65,7 @@ if __name__ == "__main__":
                 plots_path = os.path.join('plots', dataset, 'Winners',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
-                                        f"""BS_{bs}__ratio_{data_ratio}__{part}__frozen_{fl}{seed_param}{ADDITIONS}""")
+                                        f"""BS_{bs}__ratio_{data_ratio}__{part}__frozen_{fl}{ADDITIONS}{seed_param}""")
                 
                 if plots_path in not_good:
                         continue
