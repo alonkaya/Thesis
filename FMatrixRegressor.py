@@ -88,7 +88,7 @@ class FMatrixRegressor(nn.Module):
 
         if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
             model_path = pretrained_path if pretrained_path else plots_path
-            self.load_model(model_path=model_path)
+            self.load_model(model_path)
 
         else:
             if self.trained_vit != None:
