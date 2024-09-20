@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
                 # if os.path.exists((f'{model.plots_path}__bad')):
                 #         print(f"\n{model.plots_path}\nAlready trained and got bad results")        
-                elif model.plots_path.endswith("__seed_") and os.path.exists(model.plots_path.split("__seed_")[0]):
+                if model.plots_path.endswith("__seed_") and os.path.exists(model.plots_path.split("__seed_")[0]):
                         print(f"\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training")
 
                 elif model.start_epoch < model.num_epochs:
