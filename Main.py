@@ -73,9 +73,8 @@ if __name__ == "__main__":
                 train_loader, val_loader, test_loader = get_data_loaders(data_ratio, part, batch_size=bs)
 
                 model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
-                print(os.path.join(model.plots_path, "__bad"))
-                print("\n\n\n")
-                if os.path.exists(os.path.join(model.plots_path, "__bad")):
+
+                if os.path.exists((f'{model.plots_path}__bad')):
                         print("Already trained and got bad results")        
                 elif os.path.exists(model.plots_path.split("__seed_")[0]):
                         print("Seed 42 already well trained, no need for other seed training")
