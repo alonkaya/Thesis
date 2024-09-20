@@ -152,8 +152,8 @@ def not_learning(val_RE1, plots_path):
 
 def print_and_write(output, plots_path):
     os.makedirs(plots_path, exist_ok=True)
-    print(plots_path)
-    if plots_path == "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__mid__frozen_4/":
+    # print(plots_path)
+    if plots_path == "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__mid__frozen_4":
         stack_trace = ''.join(traceback.format_stack())
         print(stack_trace)
     output_path = os.path.join(plots_path, "output.log")
