@@ -210,11 +210,11 @@ class FMatrixRegressor(nn.Module):
 RE1_truth: {epoch_stats["RE1_truth"]}\t\t val_RE1_truth: {epoch_stats["val_RE1_truth"]}
 SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
-            print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}
-             Training MAE: {self.all_train_mae[-1]}\t\t Val MAE: {self.all_val_mae[-1]}
-             Algebraic dist: {self.all_algebraic_pred[-1]}\t\t Val Algebraic dist: {self.all_val_algebraic_pred[-1]}
-             RE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}
-             SED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n""", self.plots_path)
+            print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: \tTraining Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}
+             \tTraining MAE: {self.all_train_mae[-1]}\t\t Val MAE: {self.all_val_mae[-1]}
+             \tAlgebraic dist: {self.all_algebraic_pred[-1]}\t\t Val Algebraic dist: {self.all_val_algebraic_pred[-1]}
+             \tRE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}
+             \tSED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n""", self.plots_path)
 
                 
             # If the model is not learning or outputs nan, stop training
@@ -316,7 +316,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             try:
                 checkpoint = torch.load(model_path, map_location='cpu')
             except Exception as e:
-                print(e)
+                print(f'using backup:\n{e}')
                 checkpoint = torch.load(path, "backup_model.pth", map_location='cpu')
         else:
             print_and_write(f"Model {model_path} not found", self.plots_path)
