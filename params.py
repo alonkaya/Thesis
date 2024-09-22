@@ -1,9 +1,7 @@
 import torch
 
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
-# 977733 is output_resnet_0.025_0.0375_0.05.log
-# output resnet is SEQ_RATIOS = [0.1, 0.2]   
-# 1045427 is output_trained_vit_0.2_0.1.log
+# 1179397 is output_resnet_0.025_0.0375_0.05.log
 
 ### Dataset ###
 train_seqeunces = [0, 2, 3, 5, 6, 7, 8]
@@ -13,7 +11,7 @@ FIRST_2_OF_3_TRAIN = False
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-SEQ_RATIOS = [0.025, 0.0375, 0.05]      # 3251, 2166, 1082, 540, 405, 269
+SEQ_RATIOS = [0.1, 0.2]      # 3251, 2166, 1082, 540, 405, 269
 CROP = 224
 RESIZE = 256
 USE_REALESTATE = False
