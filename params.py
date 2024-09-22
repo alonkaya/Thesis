@@ -40,7 +40,7 @@ NUM_WORKERS = 0
 SAVE_MODEL = True
 NUM_EPOCHS = 1500
 GET_OLD_PATH = False
-SEED = [500, 600]
+SEED = [200, 400, 700]
 
 ### Epipolar geometry ###
 RE1_DIST = True
