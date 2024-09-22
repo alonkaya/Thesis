@@ -1,3 +1,4 @@
+import sys
 from params import *
 from PlotFromText import *
 import matplotlib.pyplot as plt
@@ -160,6 +161,7 @@ def print_and_write(output, plots_path):
     with open(output_path, "a") as f:
         f.write(output)
         print(output)
+        sys.stdout.flush()
 
 def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
     """ Reverses the scaling and normalization transformation applied on the image.

@@ -269,7 +269,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
     def save_model(self, epoch):
         checkpoint_path = os.path.join(self.plots_path, "model.pth")
         # Backup previous checkpoint
-        if os.path.exists(checkpoint_path) and epoch//30 == 0: 
+        if os.path.exists(checkpoint_path) and epoch%30 == 0: 
             backup_path = os.path.join(self.plots_path, "backup_model.pth")
             shutil.copy(checkpoint_path, backup_path)
         torch.save({
@@ -318,6 +318,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             except Exception as e:
                 print(f'using backup:\n{e}')
                 checkpoint = torch.load(os.path.join(path, "backup_model.pth"), map_location='cpu')
+                sys.stdout.flush()
         else:
             print_and_write(f"Model {model_path} not found", self.plots_path)
             raise FileNotFoundError
