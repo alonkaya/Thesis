@@ -76,10 +76,13 @@ if __name__ == "__main__":
 
                 # If the model was bad trained, skip it
                 if os.path.exists((f'{model.plots_path}__bad')):
-                        print(f"\n{model.plots_path}\nAlready trained and got bad results")        
+                        print(f"\n{model.plots_path}\nAlready trained and got bad results")   
+                        sys.stdout.flush()
+     
                 # If the model was already trained WELL with seed 42, skip training with other seed
                 elif "seed" in model.plots_path and os.path.exists(model.plots_path.split("__seed_")[0]):
                         print(f"\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training")
+                        sys.stdout.flush()
 
                 elif model.start_epoch < model.num_epochs:
                         parameters = f"""###########################################################################################################################################################\n
