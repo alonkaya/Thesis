@@ -148,7 +148,7 @@ def custom_collate_fn(batch):
         return None, None, None, None, None, None
 
     imgs0, imgs1, Fs, pts1_list, pts2_list, seq_names = zip(*filtered_batch)
-    print(f'2: {len(pts1_list)}', flush=True)
+    print(f'2: {pts1.shape}', flush=True)
 
     max_len = max(pts1.shape[0] for pts1 in pts1_list)
 
