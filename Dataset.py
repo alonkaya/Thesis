@@ -53,7 +53,7 @@ class Dataset(torch.utils.data.Dataset):
 
         # Adjust keypoints according to the crop
         pts1, pts2 = adjust_points_no_dict(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
-        print(pts1.shape)
+        print(f'inside: {pts1.shape}')
         return img0, img1, F, pts1, pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
@@ -200,9 +200,9 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
     concat_test_dataset = ConcatDataset(test_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False, custom_collate_fn=custom_collate_fn)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, custom_collate_fn=custom_collate_fn)
-    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, custom_collate_fn=custom_collate_fn)
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
     
     print(len(train_loader), len(val_loader), len(test_loader))
 
