@@ -227,16 +227,15 @@ class EpipolarGeometry:
         distances = []
         min_distance_index = 0
         for i, (m, n) in enumerate(matches):
-            print(m.distance, n.distance)
             if n.distance == 0:
                 continue
             distances.append(m.distance / n.distance)
             if distances[-1] < threshold:
                 self.good.append(m)
-            min_distance_index = i if distances[i] < distances[min_distance_index] else min_distance_index
+            # min_distance_index = i if distances[i] < distances[min_distance_index] else min_distance_index
         # If no point passed the threshold, add the smallest distance ratio point
-        if len(self.good) == 0:
-            self.good.append(matches[min_distance_index][0])
+        # if len(self.good) == 0:
+        #     self.good.append(matches[min_distance_index][0])
 
         pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32)
         pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32)
