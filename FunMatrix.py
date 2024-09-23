@@ -10,15 +10,15 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=True
     width = original_image_size[0]
     height = original_image_size[1]
 
-    K = torch.tensor([
+    k = torch.tensor([
         [width*intrinsics[0],     0,          width*intrinsics[2]],
         [0,             height*intrinsics[1],  height*intrinsics[3]],
         [0,                 0,          1]
-    ])
+    ]).to(device)
 
     if adjust_resize:
         # Adjust K according to resize and center crop transforms   
-        k = adjust_k_resize(K, original_image_size, torch.tensor([RESIZE, RESIZE]))
+        k = adjust_k_resize(k, original_image_size, torch.tensor([RESIZE, RESIZE]).to(device))
         
     center_crop_size = (RESIZE - CROP) // 2
     k = adjust_k_crop(k, center_crop_size, center_crop_size) if not RANDOM_CROP else k
