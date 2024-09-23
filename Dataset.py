@@ -148,8 +148,8 @@ def custom_collate_fn(batch):
     Fs_list = []
     seq_names_list = []
     for imgs0, imgs1, Fs, pts1, pts2, seq_names in zip(all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names):
-        # if pts1.shape[0] < 5:
-        #     continue
+        if pts1.shape[0] < 5:
+            continue
         pad_len = max_len - pts1.shape[0]
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
@@ -199,7 +199,8 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 if len(custom_dataset) > 9:
                     if RealEstate_path == 'RealEstate10K/train_images':
                         train_datasets.append(custom_dataset) 
-                    elif sequence_name not in RealEstate_test_names:
+                    elif i < os.listdir(RealEstate_path)//2:
+                    # elif sequence_name not in RealEstate_test_names:
                         val_datasets.append(custom_dataset)
                     else:
                         test_datasets.append(custom_dataset)
