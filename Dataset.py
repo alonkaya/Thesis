@@ -147,7 +147,8 @@ def custom_collate_fn(batch):
 
 
 def get_dataloaders_RealEstate(data_ratio, part, batch_size):
-    RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
+    # RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
+    RealEstate_paths = ['RealEstate10K/train_images']
     train_datasets, val_datasets, test_datasets = [], [], []
     for jump_frames in [JUMP_FRAMES]:
         for RealEstate_path in RealEstate_paths:
@@ -178,9 +179,9 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 if len(custom_dataset) > 20:
                     if RealEstate_path == 'RealEstate10K/train_images':
                         train_datasets.append(custom_dataset) 
-                    elif i < len(os.listdir(RealEstate_path)):
+                    # elif i < len(os.listdir(RealEstate_path)):
                         val_datasets.append(custom_dataset)
-                    else:
+                    # else:
                         test_datasets.append(custom_dataset)
                     print(len(custom_dataset))
 
