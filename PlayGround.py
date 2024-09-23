@@ -1,3 +1,4 @@
+import time
 from Dataset_FM import get_dataloader_FM
 from utils import print_and_write, reverse_transforms
 from FunMatrix import EpipolarGeometry, update_epoch_stats
@@ -131,6 +132,7 @@ def sed_distance_gt():
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
                    "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
     c = 0
+    start_time = time.time()
     for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
         if i == 50: break
         if img1 == None or pts1[0].shape[0] == 0:
@@ -146,6 +148,8 @@ def sed_distance_gt():
     print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(c+1)}')
     print(c/len(test_loader))
     print()
+    end_time = time.time()
+    print(f"Time: {end_time - start_time}")
 
 def sed_distance_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)

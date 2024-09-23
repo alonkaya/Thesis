@@ -166,14 +166,14 @@ def update_distances(img1, img2, F, pts1, pts2):
     # algebraic_dist_sqr = epipolar_geo.get_sqr_algebraic_distance()
     RE1_dist = epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
     SED_dist = epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
-    print(SED_dist.cpu().item())
     return algebraic_dist, RE1_dist, SED_dist
 
 def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, plots_path, data_type, epoch=0):
     prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
 
     algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2)
- 
+    print(SED_dist_pred.cpu().item())
+
     stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred.detach())
     # stats[f"{prefix}algebraic_sqr_pred"] = stats[f"{prefix}algebraic_sqr_pred"] + (algebraic_dist_sqr_pred.detach())
     stats[f"{prefix}RE1_pred"] = stats[f"{prefix}RE1_pred"] + (RE1_dist_pred.detach()) if RE1_DIST else stats[f"{prefix}RE1_pred"]
