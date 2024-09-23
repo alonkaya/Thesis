@@ -297,7 +297,7 @@ def get_data_loaders(data_ratio, part, batch_size=BATCH_SIZE):
     if STEREO:
         return get_dataloader_stereo(data_ratio, part, batch_size)
     elif USE_REALESTATE:
-        return get_dataloaders_RealEstate(data_ratio, batch_size)
+        return get_dataloaders_RealEstate(data_ratio, part, batch_size)
     else: # KITTI
         return get_dataloaders_KITTI(data_ratio, batch_size)
 

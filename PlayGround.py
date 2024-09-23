@@ -125,7 +125,7 @@ def vis_trained(plots_path):
 
 
 def sed_distance_gt():
-    train_loader, val_loader, test_loader = get_data_loaders()
+    train_loader, val_loader, test_loader = get_data_loaders(0.025, "head", batch_size=1)
 
     epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
