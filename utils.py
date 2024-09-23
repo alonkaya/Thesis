@@ -321,7 +321,7 @@ def adjust_points(keypoints_dict, idx, top_crop, left_crop, height, width):
 
     return pts1, pts2
 
-def adjust_point(pts1, pts2, top_crop, left_crop, height, width):
+def adjust_points_no_dict(pts1, pts2, top_crop, left_crop, height, width):
     # Adjust keypoints for the resized image
     scale = torch.tensor([RESIZE / width, RESIZE / height, 1], dtype=torch.float32).unsqueeze(0).to(device) # shape [1, 2]
     pts1 *= scale

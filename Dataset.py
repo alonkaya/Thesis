@@ -52,7 +52,7 @@ class Dataset(torch.utils.data.Dataset):
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
         # Adjust keypoints according to the crop
-        pts1, pts2 = adjust_points(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
+        pts1, pts2 = adjust_points_no_dict(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
 
         return img0, img1, F, pts1, pts2, self.seq_name
 
