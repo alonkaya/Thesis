@@ -142,6 +142,9 @@ def custom_collate_fn(batch):
         for img1, img2, F, pts1, pts2, seq_name in batch
         if pts1.shape[0] >= 5
     ]
+    if len(filtered_batch) == 0:
+        return None, None, None, None, None, None
+
     imgs0, imgs1, Fs, pts1_list, pts2_list, seq_names = zip(*filtered_batch)
     print(pts1.shape[0], flush=True)
 

@@ -130,18 +130,23 @@ def sed_distance_gt():
     epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
                    "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
-    
+    c = 0
     for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
+        if img1 == None:
+            print(f'no points')
+            continue
+
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
         print(f'outside: {pts1.shape}')
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
+        c += 1
+        
         if i == 50: break
-    # divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
     
-    print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(i+1)}')
-    print(f'test_algebraic_sqr_pred: {epoch_stats["test_algebraic_sqr_pred"]/(i+1)}')
-    print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(i+1)}')
-    print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(i+1)}')
+    print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(c+1)}')
+    print(f'test_algebraic_sqr_pred: {epoch_stats["test_algebraic_sqr_pred"]/(c+1)}')
+    print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(c+1)}')
+    print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(c+1)}')
     print()
 
 def sed_distance_trained(plots_path):
