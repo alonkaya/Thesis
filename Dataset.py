@@ -169,7 +169,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
                 if len(valid_indices) < 30: continue
                 
-                if i in RealEstate_test_names:
+                if sequence_name in RealEstate_test_names:
                     subset = valid_indices
                 else:
                     length = int(len(valid_indices) * data_ratio) 
@@ -194,16 +194,15 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                     else:
                         test_datasets.append(custom_dataset)
 
-
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
     concat_val_dataset = ConcatDataset(val_datasets)
     concat_test_dataset = ConcatDataset(test_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False)
-    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False)
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False, custom_collate_fn=custom_collate_fn)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, custom_collate_fn=custom_collate_fn)
+    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, custom_collate_fn=custom_collate_fn)
     
     print(len(train_loader), len(val_loader), len(test_loader))
 
