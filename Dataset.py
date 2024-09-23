@@ -173,7 +173,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
 
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-                original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{subset[0]:06}.{IMAGE_TYPE}')).size)
+                original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{subset[0]:06}.{IMAGE_TYPE}')).size).to(device)
                 K = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=False)
                 K_resized = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=True)
 
