@@ -62,10 +62,10 @@ def process_files(directory_from, directory_to, limit):
             print(f'Error: {e}')
 if __name__ == "__main__":
     # Specify the directory containing the text files
-    directory_from = 'RealEstate10K/train'
-    directory_to = 'RealEstate10K/train_images'
-    process_files(directory_from, directory_to, limit=120)
+    # directory_from = 'RealEstate10K/train'
+    # directory_to = 'RealEstate10K/train_images'
+    # process_files(directory_from, directory_to, limit=120)
 
-    # directory_from = 'RealEstate10K/test'
-    # directory_to = 'RealEstate10K/val_images'
-    # process_files(directory_from, directory_to)
+    directory_from = 'RealEstate10K/test'
+    directory_to = 'RealEstate10K/val_images'
+    process_files(directory_from, directory_to, limit=30)

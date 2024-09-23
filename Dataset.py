@@ -181,7 +181,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
 
                 custom_dataset = Dataset(sequence_path, poses, img0, img1, subset, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
 
-                if len(custom_dataset) > 10:
+                if len(custom_dataset) > 9:
                     if RealEstate_path == 'RealEstate10K/train_images':
                         train_datasets.append(custom_dataset) 
                     elif i < len(os.listdir(RealEstate_path))//2:
