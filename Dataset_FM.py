@@ -22,6 +22,7 @@ class Dataset_FM(torch.utils.data.Dataset):
         return 100
 
     def __getitem__(self, idx):
+        idx = idx + 1
         F = self.Fs[idx]
         img0 = self.images_0[idx] # shape (channels, height, width)
         img1 = self.images_1[idx] # shape (channels, height, width)
@@ -83,7 +84,6 @@ def get_dataloader_FM(batch_size, num_workers=NUM_WORKERS):
 
         images_0 = {idx: torchvision.io.read_image(os.path.join(pa_path, f'{idx:}.jpg')).to(device) for idx in valid_indices} if INIT_DATA else None    
         images_1 = {idx: torchvision.io.read_image(os.path.join(lat_path, f'{idx}.jpg')).to(device) for idx in valid_indices} if INIT_DATA else None
-
 
         dataset_FM = Dataset_FM(transform, images_0, images_1, Fs, seq_name=f"seq_{i}")
 
