@@ -107,8 +107,8 @@ def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
         img0_path = os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')
         img1_path = os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')
 
-        if os.path.exists(img0_path) and os.path.exists(img1_path):
-            valid_indices.append(idx)
+        # if os.path.exists(img0_path) and os.path.exists(img1_path):
+        valid_indices.append(idx)
 
     return valid_indices
 
