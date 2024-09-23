@@ -138,7 +138,7 @@ transform = get_transform()
 
 def custom_collate_fn(batch):
     all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names = zip(*batch)
-    print(f"1: {all_pts1.shape}")
+
     max_len = max(pts1.shape[0] for pts1 in all_pts1)
 
     padded_pts1 = []
@@ -159,7 +159,7 @@ def custom_collate_fn(batch):
         seq_names_list.append(seq_names)
     if len(padded_pts1) == 0:
         return None, None, None, None, None, None
-    print(f"2: {torch.stack(padded_pts1).shape}")
+
     return (torch.stack(img0_list), torch.stack(img1_list), torch.stack(Fs_list), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names_list)
 
 
