@@ -53,7 +53,7 @@ class Dataset(torch.utils.data.Dataset):
 
         # Adjust keypoints according to the crop
         pts1, pts2 = adjust_points_no_dict(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
-        print(f'inside: {pts1.shape}')
+        # print(f'inside: {pts1.shape}')
         return img0, img1, F, pts1, pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
@@ -137,6 +137,8 @@ def get_transform():
 transform = get_transform()    
 
 def custom_collate_fn(batch):
+    _,_,_, pts1,_,_ = zip(*batch)
+    print(f'1: {len(pts1)}', flush=True)
     filtered_batch = [
         (img1, img2, F, pts1, pts2, seq_name) 
         for img1, img2, F, pts1, pts2, seq_name in batch
@@ -146,7 +148,7 @@ def custom_collate_fn(batch):
         return None, None, None, None, None, None
 
     imgs0, imgs1, Fs, pts1_list, pts2_list, seq_names = zip(*filtered_batch)
-    print(len(pts1_list), flush=True)
+    print(f'2: {len(pts1_list)}', flush=True)
 
     max_len = max(pts1.shape[0] for pts1 in pts1_list)
 
@@ -156,7 +158,7 @@ def custom_collate_fn(batch):
         pad_len = max_len - pts1.shape[0]
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
-    print(len(padded_pts1), flush=True)
+    print(f'3: {len(padded_pts1)}', flush=True)
     print("\n\n", flush=True)
 
     return (torch.stack(imgs0), torch.stack(imgs1), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)

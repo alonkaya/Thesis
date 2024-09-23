@@ -137,7 +137,7 @@ def sed_distance_gt():
             continue
 
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
-        print(f'outside: {pts1.shape}')
+        # print(f'outside: {pts1.shape}')
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
         c += 1
         
