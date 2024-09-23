@@ -199,7 +199,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 if len(custom_dataset) > 9:
                     if RealEstate_path == 'RealEstate10K/train_images':
                         train_datasets.append(custom_dataset) 
-                    elif i < os.listdir(RealEstate_path)//2:
+                    elif i < len(os.listdir(RealEstate_path))//2:
                     # elif sequence_name not in RealEstate_test_names:
                         val_datasets.append(custom_dataset)
                     else:
