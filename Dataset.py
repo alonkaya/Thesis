@@ -53,7 +53,7 @@ class Dataset(torch.utils.data.Dataset):
 
         # Adjust keypoints according to the crop
         pts1, pts2 = adjust_points_no_dict(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
-
+        print(pts1.shape)
         return img0, img1, F, pts1, pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
@@ -167,9 +167,12 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
                 if len(valid_indices) < 30: continue
                 
-                length = int(len(valid_indices) * data_ratio) 
-                mid_start = len(valid_indices) // 2 - length // 2
-                subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
+                if i in RealEstate_test_names:
+                    subset = valid_indices
+                else:
+                    length = int(len(valid_indices) * data_ratio) 
+                    mid_start = len(valid_indices) // 2 - length // 2
+                    subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
 
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
                 original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{subset[0]:06}.{IMAGE_TYPE}')).size).to(device)
@@ -185,10 +188,8 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                     if RealEstate_path == 'RealEstate10K/train_images':
                         train_datasets.append(custom_dataset) 
                     elif sequence_name not in RealEstate_test_names:
-                        print(f"a{i}")
                         val_datasets.append(custom_dataset)
                     else:
-                        print(i)
                         test_datasets.append(custom_dataset)
 
 
