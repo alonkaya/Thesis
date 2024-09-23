@@ -228,10 +228,10 @@ class EpipolarGeometry:
         min_distance_index = 0
         c = 0
         for i, (m, n) in enumerate(matches):
-            if n.distance == 0:
-                c += 1
-                continue
-            distances.append(m.distance / n.distance)
+            # if n.distance == 0:
+            #     c += 1
+            #     continue
+            # distances.append(m.distance / n.distance)
             # if distances[-1] < threshold:
             self.good.append(m)
             # min_distance_index = i if distances[i] < distances[min_distance_index] else min_distance_index
