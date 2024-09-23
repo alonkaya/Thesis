@@ -466,11 +466,10 @@ def sed_distance_gt_FM():
         # Convert grayscale tensors to numpy arrays for matplotlib
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
         img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
-        
+        print(img1_np.shape)    
         img0_pts = img0_np.copy()
         img1_pts = img1_np.copy()
         for point in pts1:
-            print(point)
             if point[0] == 0 and point[1] == 0: continue
             img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 3, (20, 20, 160), -1)
             
