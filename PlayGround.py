@@ -470,6 +470,7 @@ def sed_distance_gt_FM():
         img0_pts = img0_np.copy()
         img1_pts = img1_np.copy()
         for point in pts1:
+            print(point)
             if point[0] == 0 and point[1] == 0: continue
             img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 3, (20, 20, 160), -1)
             
