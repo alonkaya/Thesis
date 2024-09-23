@@ -185,7 +185,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                     if RealEstate_path == 'RealEstate10K/train_images':
                         train_datasets.append(custom_dataset) 
                     elif sequence_name not in RealEstate_test_names:
-                        print(i)
+                        print(f"a{i}")
                         val_datasets.append(custom_dataset)
                     else:
                         print(i)
