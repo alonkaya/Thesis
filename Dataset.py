@@ -11,13 +11,14 @@ import torch.nn.functional as F
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, poses, img0, img1, subset, transform, k, seq_name, jump_frames=JUMP_FRAMES):
+    def __init__(self, sequence_path, poses, img0, img1, subset, transform, k, k_resized, seq_name, jump_frames=JUMP_FRAMES):
         self.sequence_path = sequence_path
         self.poses = poses
         self.images_0 = img0
         self.images_1 = img1
         self.transform = transform
         self.k = k
+        self.k_resized = k_resized
         self.subset = subset
         self.seq_name = seq_name
         self.jump_frames = jump_frames
@@ -31,11 +32,13 @@ class Dataset(torch.utils.data.Dataset):
         img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
         img1 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
         H, W = img0.shape[1], img0.shape[2]
-        
-        # Find the the keypoints 
+
+        # Gey keypoints
+        unnormalized_F = get_F(self.k, self.k, self.poses, idx, self.jump_frames)
+        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
         epi = EpipolarGeometry(img0, img1, F=F, is_scaled=False)
 
-        k=self.k.clone()
+        k=self.k_resized.clone()
         if RANDOM_CROP:
             top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
             img0, img1 = TF.resize(img0, (RESIZE, RESIZE), antialias=True), TF.resize(img1, (RESIZE, RESIZE), antialias=True)
@@ -45,11 +48,11 @@ class Dataset(torch.utils.data.Dataset):
         img0 = self.transform(img0) # shape (channels, height, width)
         img1 = self.transform(img1) # shape (channels, height, width)
 
-        # Adjust the keypoints according to the crop
-        pts1, pts2 = adjust_points(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
-
         unnormalized_F = get_F(k, k, self.poses, idx, self.jump_frames)
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
+
+        # Adjust keypoints according to the crop
+        pts1, pts2 = adjust_points(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
 
         return img0, img1, F, pts1, pts2, self.seq_name
 
@@ -171,12 +174,13 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
 
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
                 original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{subset[0]:06}.{IMAGE_TYPE}')).size)
-                K = get_intrinsic_REALESTATE(specs_path, original_image_size)
+                K = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=False)
+                K_resized = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=True)
 
                 img0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
                 img1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
 
-                custom_dataset = Dataset(sequence_path, poses, img0, img1, subset, transform, K, seq_name=sequence_name, jump_frames=jump_frames)
+                custom_dataset = Dataset(sequence_path, poses, img0, img1, subset, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
 
                 if len(custom_dataset) > 10:
                     if RealEstate_path == 'RealEstate10K/train_images':
