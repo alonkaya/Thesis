@@ -137,31 +137,30 @@ def get_transform():
 transform = get_transform()    
 
 def custom_collate_fn(batch):
-    _,_,_, pts1,_,_ = zip(*batch)
-    print(f'1: {pts1.shape}', flush=True)
-    filtered_batch = [
-        (img1, img2, F, pts1, pts2, seq_name) 
-        for img1, img2, F, pts1, pts2, seq_name in batch
-        if pts1.shape[0] >= 5
-    ]
-    if len(filtered_batch) == 0:
-        return None, None, None, None, None, None
-
-    imgs0, imgs1, Fs, pts1_list, pts2_list, seq_names = zip(*filtered_batch)
-    print(f'2: {pts1.shape}', flush=True)
-
-    max_len = max(pts1.shape[0] for pts1 in pts1_list)
+    all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names = zip(*batch)
+    print(f"1: {all_pts1.shape}")
+    max_len = max(pts1.shape[0] for pts1 in all_pts1)
 
     padded_pts1 = []
     padded_pts2 = []
-    for pts1, pts2 in zip(pts1_list, pts2_list):
+    img0_list = []
+    img1_list = []
+    Fs_list = []
+    seq_names_list = []
+    for imgs0, imgs1, Fs, pts1, pts2, seq_names in zip(all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names):
+        if pts1.shape[0] < 5:
+            continue
         pad_len = max_len - pts1.shape[0]
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
-    print(f'3: {len(torch.stack(padded_pts1))}', flush=True)
-    print("\n\n", flush=True)
-
-    return (torch.stack(imgs0), torch.stack(imgs1), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
+        img0_list.append(imgs0)
+        img1_list.append(imgs1)
+        Fs_list.append(Fs)
+        seq_names_list.append(seq_names)
+    if len(padded_pts1) == 0:
+        return None, None, None, None, None, None
+    print(f"2: {torch.stack(padded_pts1).shape}")
+    return (torch.stack(img0_list), torch.stack(img1_list), torch.stack(Fs_list), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names_list)
 
 
 def get_dataloaders_RealEstate(data_ratio, part, batch_size):
