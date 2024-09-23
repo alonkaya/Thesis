@@ -144,6 +144,8 @@ def custom_collate_fn(batch):
     padded_pts1 = []
     padded_pts2 = []
     for pts1, pts2 in zip(all_pts1, all_pts2):
+        if pts1.shape[0] < 5:
+            continue
         pad_len = max_len - pts1.shape[0]
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
@@ -204,7 +206,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
     test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False)
     
     print(len(train_loader), len(val_loader), len(test_loader))
-# 12273b41c2809e69 12130d91963c8bb5 11e9af740518ffa9 moved from train_image to val_image
+
     return train_loader, val_loader, test_loader
 
 def get_dataloaders_KITTI(data_ratio, batch_size):
