@@ -132,6 +132,7 @@ def sed_distance_gt():
                    "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
     c = 0
     for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
+        if i == 50: break
         if img1 == None:
             continue
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
@@ -139,7 +140,6 @@ def sed_distance_gt():
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
         c += 1
         
-        if i == 50: break
     
     print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(c+1)}')
     print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(c+1)}')
