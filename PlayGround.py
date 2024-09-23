@@ -133,7 +133,7 @@ def sed_distance_gt():
     c = 0
     for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
         if i == 50: break
-        if img1 == None or pts1.shape[0] == 0:
+        if img1 == None or pts1[0].shape[0] == 0:
             continue
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
         print(pts1.shape)
@@ -145,6 +145,7 @@ def sed_distance_gt():
     print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(c+1)}')
     print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(c+1)}')
     print(c/len(test_loader))
+    print()
 
 def sed_distance_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
