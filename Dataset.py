@@ -148,7 +148,7 @@ def custom_collate_fn(batch):
     Fs_list = []
     seq_names_list = []
     for imgs0, imgs1, Fs, pts1, pts2, seq_names in zip(all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names):
-        if pts1.shape[0] < 5:
+        if pts1.shape[0] < 6:
             continue
         pad_len = max_len - pts1.shape[0]
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))

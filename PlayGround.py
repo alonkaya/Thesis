@@ -134,7 +134,7 @@ def sed_distance_gt():
     c = 0
     start_time = time.time()
     for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
-        if i == 50: break
+        if i == 500: break
         if img1 == None or pts1[0].shape[0] == 0:
             continue
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
