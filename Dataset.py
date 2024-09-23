@@ -179,7 +179,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
                 if len(valid_indices) < 30: continue
                 
-                if sequence_name in RealEstate_test_names:
+                if RealEstate_path == 'RealEstate10K/val_images':
                     subset = valid_indices
                 else:
                     length = int(len(valid_indices) * data_ratio) 
@@ -199,8 +199,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 if len(custom_dataset) > 9:
                     if RealEstate_path == 'RealEstate10K/train_images':
                         train_datasets.append(custom_dataset) 
-                    elif i < len(os.listdir(RealEstate_path))//2:
-                    # elif sequence_name not in RealEstate_test_names:
+                    elif sequence_name not in RealEstate_test_names:
                         val_datasets.append(custom_dataset)
                     else:
                         test_datasets.append(custom_dataset)
