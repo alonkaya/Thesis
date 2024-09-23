@@ -221,6 +221,7 @@ class EpipolarGeometry:
         # Detect keypoints and compute descriptors for both images
         (kp1, des1) = sift.detectAndCompute(self.image1_numpy, None) # input shape (H, W, 3)
         (kp2, des2) = sift.detectAndCompute(self.image2_numpy, None) # input shape (H, W, 3)
+        cv2.imwrite('output_image.png', self.image1_numpy)
 
         matches = bf.knnMatch(des1, des2, k=2)
         self.good = []

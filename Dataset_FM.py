@@ -30,7 +30,7 @@ class Dataset_FM(torch.utils.data.Dataset):
 
         img0 = self.transform(img0) # shape (channels, height, width)
         img1 = self.transform(img1) # shape (channels, height, width)
-        print(img0.shape)
+
         epi = EpipolarGeometry(img0, img1, F=F) 
         
         return img0, img1, F, epi.pts1, epi.pts2, self.seq_name
