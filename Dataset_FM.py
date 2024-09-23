@@ -19,7 +19,7 @@ class Dataset_FM(torch.utils.data.Dataset):
         self.seq_name = seq_name
 
     def __len__(self):
-        return 100
+        return 10
 
     def __getitem__(self, idx):
         idx = idx + 1
@@ -79,7 +79,7 @@ def get_dataloader_FM(batch_size, num_workers=NUM_WORKERS):
     for i, (gt_path, pa_path, lat_path) in enumerate(zip(gt_paths, pa_paths, lat_paths)):
         Fs = read_F_FM(gt_path).to(device)
         
-        valid_indices = range(1, 101)
+        valid_indices = range(1, 11)
 
 
         images_0 = {idx: torchvision.io.read_image(os.path.join(pa_path, f'{idx:}.jpg')).to(device) for idx in valid_indices} if INIT_DATA else None    
