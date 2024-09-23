@@ -38,7 +38,7 @@ def parse_file(file_path):
     return url, timestamps
 
 def process_files(directory_from, directory_to, limit):
-    files = glob.glob(os.path.join(directory_from, '*.txt'))[:limit]
+    files = glob.glob(os.path.join(directory_from, '*.txt'))[10:limit]
 
     for file_path in files:
         try:
