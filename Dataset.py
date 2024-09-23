@@ -184,7 +184,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 if len(custom_dataset) > 9:
                     if RealEstate_path == 'RealEstate10K/train_images':
                         train_datasets.append(custom_dataset) 
-                    elif i < len(os.listdir(RealEstate_path))//2:
+                    elif sequence_name not in RealEstate_test_names:
                         val_datasets.append(custom_dataset)
                     else:
                         test_datasets.append(custom_dataset)
@@ -201,7 +201,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
     test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False)
     
     print(len(train_loader), len(val_loader), len(test_loader))
-
+# 12273b41c2809e69 12130d91963c8bb5 11e9af740518ffa9 moved from train_image to val_image
     return train_loader, val_loader, test_loader
 
 def get_dataloaders_KITTI(data_ratio, batch_size):
