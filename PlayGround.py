@@ -460,15 +460,37 @@ def sed_distance_gt_FM():
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
-        print(i)
-        if i == 50: break
-    # divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
     
+        pts1 = pts1[0].cpu().numpy()
+        pts2 = pts2[0].cpu().numpy()
+        # Convert grayscale tensors to numpy arrays for matplotlib
+        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
+        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
+        
+        img0_pts = img0_np.copy()
+        img1_pts = img1_np.copy()
+        for point in pts1:
+            if point[0] == 0 and point[1] == 0: continue
+            img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 3, (20, 20, 160), -1)
+            
+        for point in pts2:
+            if point[0] == 0 and point[1] == 0: continue
+            img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 3, (20, 20, 160), -1)
+
+        # Concatenate images horizontally
+        combined_image = np.hstack((img0_pts, img1_pts))
+
+        os.makedirs(f'gt_epilines/FM', exist_ok=True)
+        cv2.imwrite(f'gt_epilines/FM/gt_{i}.png', combined_image)
+        
+        break
+
     print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(i+1)}')
     print(f'test_algebraic_sqr_pred: {epoch_stats["test_algebraic_sqr_pred"]/(i+1)}')
     print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(i+1)}')
     print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(i+1)}')
     print()
+
 
 if __name__ == "__main__":
     sed_distance_gt_FM()
