@@ -244,7 +244,6 @@ class EpipolarGeometry:
 
     def trim_by_sed(self, threshold=SED_TRIM_THRESHOLD, min_keypoints=5):
         self.pts1, self.pts2 = self.pts1.unsqueeze(0), self.pts2.unsqueeze(0)  # shape (1, n, 3)
-        print(self.pts1.shape)
         sed = self.get_SED_distance().squeeze(0)                               # shape (n,)
         self.pts1, self.pts2 = self.pts1.squeeze(0), self.pts2.squeeze(0)      # shape (n, 3)
 

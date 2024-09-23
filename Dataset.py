@@ -36,7 +36,7 @@ class Dataset(torch.utils.data.Dataset):
         # Gey keypoints
         unnormalized_F = get_F(self.k, self.k, self.poses, idx, self.jump_frames)
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
-        epi = EpipolarGeometry(img0, img1, F=F, is_scaled=False)
+        epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False)
 
         k=self.k_resized.clone()
         if RANDOM_CROP:
