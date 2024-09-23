@@ -53,6 +53,7 @@ class Dataset(torch.utils.data.Dataset):
 
         # Adjust keypoints according to the crop
         pts1, pts2 = adjust_points_no_dict(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
+        print(len(pts1))
 
         return img0, img1, F, pts1, pts2, self.seq_name
 
