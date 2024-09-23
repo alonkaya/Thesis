@@ -148,8 +148,8 @@ def custom_collate_fn(batch):
     Fs_list = []
     seq_names_list = []
     for imgs0, imgs1, Fs, pts1, pts2, seq_names in zip(all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names):
-        if pts1.shape[0] < 5:
-            continue
+        # if pts1.shape[0] < 5:
+        #     continue
         pad_len = max_len - pts1.shape[0]
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
@@ -177,11 +177,11 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
 
                 # Indices of 'good' image frames
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
-                if len(valid_indices) < 30: continue
                 
                 if RealEstate_path == 'RealEstate10K/val_images':
                     subset = valid_indices
                 else:
+                    if len(valid_indices) < 30: continue
                     length = int(len(valid_indices) * data_ratio) 
                     mid_start = len(valid_indices) // 2 - length // 2
                     subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
