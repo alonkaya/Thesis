@@ -70,7 +70,7 @@ def custom_collate_fn(batch):
 
 
 def get_dataloader_FM(batch_size, num_workers=NUM_WORKERS):
-    gt_paths = ["FM_Net/head_F", "FM_Net/leg_F", "FM_Net/pelvis_F", "FM_Net/spine_F"]
+    gt_paths = ["FM_Net/head_F/F", "FM_Net/leg_F/F", "FM_Net/pelvis_F/F", "FM_Net/spine_F/F"]
     pa_paths = ["FM_Net/head_generator_0/generator_0", "FM_Net/leg_generator_0/generator_0", "FM_Net/pelvis_generator_0/generator_0", "FM_Net/spine_generator_0/generator_0"]
     lat_paths = ["FM_Net/head_generator_90/generator_90", "FM_Net/leg_generator_90/generator_90", "FM_Net/pelvis_generator_90/generator_90", "FM_Net/spine_generator_90/generator_90"]
 
