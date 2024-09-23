@@ -32,9 +32,7 @@ class Dataset(torch.utils.data.Dataset):
         img1 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
         H, W = img0.shape[1], img0.shape[2]
         
-        unnormalized_F = get_F(k, k, self.poses, idx, self.jump_frames)
-        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
-
+        # Find the the keypoints 
         epi = EpipolarGeometry(img0, img1, F=F, is_scaled=False)
 
         k=self.k.clone()
@@ -47,7 +45,11 @@ class Dataset(torch.utils.data.Dataset):
         img0 = self.transform(img0) # shape (channels, height, width)
         img1 = self.transform(img1) # shape (channels, height, width)
 
+        # Adjust the keypoints according to the crop
         pts1, pts2 = adjust_points(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
+
+        unnormalized_F = get_F(k, k, self.poses, idx, self.jump_frames)
+        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
         return img0, img1, F, pts1, pts2, self.seq_name
 
