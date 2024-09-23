@@ -37,6 +37,30 @@ def parse_file(file_path):
     timestamps = [int(line.split()[0]) for line in lines[1:]]
     return url, timestamps
 
+# def process_files(directory_from, directory_to, limit):
+#     files = glob.glob(os.path.join(directory_from, '*.txt'))[10:limit]
+
+#     for file_path in files:
+#         try:
+#             print(f'Processing {file_path}')
+#             filename = os.path.splitext(os.path.basename(file_path))[0]
+#             if filename in os.listdir(directory_to): continue
+            
+#             url, timestamps = parse_file(file_path)
+#             video_path = download_video(url, path=os.path.join(directory_from, f'{filename}.mp4'))
+
+#             output_dir = os.path.join(directory_to, filename)
+#             image_0_dir = os.path.join(output_dir, 'image_0')
+
+#             extract_frames(video_path, timestamps, image_0_dir)
+
+#             shutil.copy(file_path, output_dir)
+
+#             # Optionally, remove the downloaded video if not needed
+#             os.remove(video_path)
+#         except Exception as e:
+#             print(f'Error: {e}')
+
 def process_files(directory_from, directory_to, limit):
     files = glob.glob(os.path.join(directory_from, '*.txt'))[10:limit]
 
@@ -44,22 +68,37 @@ def process_files(directory_from, directory_to, limit):
         try:
             print(f'Processing {file_path}')
             filename = os.path.splitext(os.path.basename(file_path))[0]
-            if filename in os.listdir(directory_to): continue
-            
-            url, timestamps = parse_file(file_path)
-            video_path = download_video(url, path=os.path.join(directory_from, f'{filename}.mp4'))
 
+            # Check if already processed
+            if filename in os.listdir(directory_to):
+                print(f'{filename} already processed, skipping.')
+                continue
+
+            # Parse the file to extract URL and timestamps
+            url, timestamps = parse_file(file_path)
+
+            # Try to download video
+            try:
+                video_path = download_video(url, path=os.path.join(directory_from, f'{filename}.mp4'))
+            except Exception as e:
+                print(f'Failed to download video for {filename}: {e}')
+                continue
+
+            # Create output directories
             output_dir = os.path.join(directory_to, filename)
             image_0_dir = os.path.join(output_dir, 'image_0')
 
+            # Extract frames from the video based on timestamps
             extract_frames(video_path, timestamps, image_0_dir)
 
+            # Copy the original .txt file to the destination directory
             shutil.copy(file_path, output_dir)
 
-            # Optionally, remove the downloaded video if not needed
+            # Optionally, remove the downloaded video to save space
             os.remove(video_path)
         except Exception as e:
-            print(f'Error: {e}')
+            print(f'Error processing {file_path}: {e}')
+            
 if __name__ == "__main__":
     # Specify the directory containing the text files
     # directory_from = 'RealEstate10K/train'
