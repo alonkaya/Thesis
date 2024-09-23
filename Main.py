@@ -7,12 +7,12 @@ import os
 # os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 from Dataset import get_data_loaders
-from utils import print_and_write, init_main
+from utils import print_and_write, init_main, set_seed
 from FMatrixRegressor import FMatrixRegressor
 from params import *
 import itertools
-from DatasetOneSequence import * 
 import argparse
+import sys
 
 if __name__ == "__main__":
         init_main()
@@ -48,7 +48,7 @@ if __name__ == "__main__":
                         raise ValueError("Invalid part")
                 
                 lr_decay = 0.85 if lr < 1e-4 else 0.8
-                num_epochs = 2000 if data_ratio==0.3 else 3000 if data_ratio==0.2 else 4001 if data_ratio==0.1 else 5500 if data_ratio==0.05 else 9000 if data_ratio==0.0375 else 12000 if data_ratio==0.025 else 0
+                num_epochs = 2000 if data_ratio==0.3 else 3000 if data_ratio==0.2 else 4000 if data_ratio==0.1 else 5500 if data_ratio==0.05 else 9000 if data_ratio==0.0375 else 12000 if data_ratio==0.025 else 0
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
@@ -76,12 +76,12 @@ if __name__ == "__main__":
 
                 # If the model was bad trained, skip it
                 if os.path.exists((f'{model.plots_path}__bad')):
-                        print(f"\n{model.plots_path}\nAlready trained and got bad results")   
+                        print(f"\n###\n{model.plots_path}\nAlready trained and got bad results\n###")   
                         sys.stdout.flush()
      
                 # If the model was already trained WELL with seed 42, skip training with other seed
                 elif "seed" in model.plots_path and os.path.exists(model.plots_path.split("__seed_")[0]):
-                        print(f"\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training")
+                        print(f"\n###\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training\n###")
                         sys.stdout.flush()
 
                 elif model.start_epoch < model.num_epochs:
@@ -101,7 +101,7 @@ if __name__ == "__main__":
                         if os.path.exists(os.path.join(model.plots_path, 'backup_model.pth')):
                                 os.remove(os.path.join(model.plots_path, 'backup_model.pth'))
                         else:
-                                print_and_write(f"{model.plots_path} no backup", model.plots_path)
+                                print_and_write(f"###\n{model.plots_path} no backup\n###", model.plots_path)
 
                 else: 
                         print(f"Model {plots_path} already trained")

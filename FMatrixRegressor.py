@@ -1,5 +1,4 @@
 import shutil
-from DatasetOneSequence import data_with_one_sequence
 from params import *
 from utils import *
 from FunMatrix import *
@@ -210,7 +209,7 @@ class FMatrixRegressor(nn.Module):
 RE1_truth: {epoch_stats["RE1_truth"]}\t\t val_RE1_truth: {epoch_stats["val_RE1_truth"]}
 SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
 
-            print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: \tTraining Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}
+            print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}
              \tTraining MAE: {self.all_train_mae[-1]}\t\t Val MAE: {self.all_val_mae[-1]}
              \tAlgebraic dist: {self.all_algebraic_pred[-1]}\t\t Val Algebraic dist: {self.all_val_algebraic_pred[-1]}
              \tRE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}

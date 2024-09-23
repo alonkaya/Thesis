@@ -1,7 +1,6 @@
 import random
 from FunMatrix import *
 from utils import *
-from DatasetOneSequence import CustomDataset_first_two_thirds_train, CustomDataset_first_two_out_of_three_train
 from torch.utils.data import DataLoader, ConcatDataset
 from torchvision.transforms import v2
 import os
@@ -151,7 +150,9 @@ def get_dataloaders_RealEstate(data_ratio, batch_size):
     train_datasets, val_datasets = [], []
     for jump_frames in [JUMP_FRAMES]:
         for RealEstate_path in RealEstate_paths:
-            for i, sequence_name in enumerate(os.listdir(RealEstate_path)):
+            ### os.listdir() does not guarantee the order of the files as they appear in the folder!!!!!!!!!!
+            ### os.listdir() does not guarantee the order of the files as they appear in the folder!!!!!!!!!!
+            for i, sequence_name in enumerate(os.listdir(RealEstate_path)): ### os.listdir() does not guarantee the order of the files as they appear in the folder!!!!!!!!!!
                 specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
                 sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
 
@@ -173,15 +174,7 @@ def get_dataloaders_RealEstate(data_ratio, batch_size):
                             train_datasets.append(custom_dataset) 
                         else:    
                             val_datasets.append(custom_dataset)
-                else:
-                    train_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type="train") if FIRST_2_THRIDS_TRAIN else \
-                                    CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type="train")
-                    val_dataset = CustomDataset_first_two_thirds_train(sequence_path, poses, valid_indices, transform, K, dataset_type="val") if FIRST_2_THRIDS_TRAIN else \
-                                    CustomDataset_first_two_out_of_three_train(sequence_path, poses, valid_indices, transform, K, dataset_type="val")
-                    if len(val_dataset) > 25:
-                        train_datasets.append(train_dataset)
-                        val_datasets.append(val_dataset)
-                    
+
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
     concat_val_dataset = ConcatDataset(val_datasets)

@@ -125,6 +125,22 @@ def read_poses(poses_path):
 
     return torch.stack(poses)
 
+def read_F_FM(F_path):
+    files = os.listdir(F_path)
+    files.sort(key=lambda f: int(f.split('.')[0]))
+
+    Fs = torch.tensor([])
+    for p in files:
+        F = torch.tensor([])
+        with open(os.path.join(F_path, p), 'r') as f:
+            for line in f:
+                l = torch.tensor([float(x) for x in line.strip().split(",")])
+                F = torch.cat((F, l.view(1,3)), dim=0)
+
+        Fs = torch.cat((Fs, F.view(1,3,3)), dim=0)
+
+    return Fs
+
 def normalize_max(x):
     return x / (torch.max(torch.abs(x), dim=1, keepdim=True)[0] + 1e-8)
 
@@ -322,6 +338,7 @@ def load_keypoints(keypoints_path):
 
 
 def rename_files(folder_path):
+    ### os.listdir() does not guarantee the order of the files as they appear in the folder!!!!!!!!!!
     for filename in os.listdir(folder_path):
         if not filename.startswith("SED_"):
             continue  # Skip files that do not match the expected format
