@@ -227,7 +227,7 @@ class EpipolarGeometry:
         distances = []
         min_distance_index = 0
         for i, (m, n) in enumerate(matches):
-            print(m.distance, n.distance)
+            print(len(matches))
             if n.distance == 0:
                 continue
             distances.append(m.distance / n.distance)
