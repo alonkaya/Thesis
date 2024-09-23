@@ -166,7 +166,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 length = int(len(valid_indices) * data_ratio) 
                 mid_start = len(valid_indices) // 2 - length // 2
                 subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
-                print(len(valid_indices))
+                print(f'valid indices: {len(valid_indices)}')
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
                 original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{subset[0]:06}.{IMAGE_TYPE}')).size)
                 K = get_intrinsic_REALESTATE(specs_path, original_image_size)
@@ -183,7 +183,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                         val_datasets.append(custom_dataset)
                     # else:
                         test_datasets.append(custom_dataset)
-                    print(len(custom_dataset))
+                    print(f' length of dataset: {len(custom_dataset)}\n')
 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
