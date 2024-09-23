@@ -184,11 +184,10 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 if len(custom_dataset) > 10:
                     if RealEstate_path == 'RealEstate10K/train_images':
                         train_datasets.append(custom_dataset) 
-                    elif i < len(os.listdir(RealEstate_path)):
+                    elif i < len(os.listdir(RealEstate_path))//2:
                         val_datasets.append(custom_dataset)
                     else:
                         test_datasets.append(custom_dataset)
-                    print(len(custom_dataset))
 
 
     # Concatenate datasets
@@ -200,6 +199,8 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
     train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False)
     val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False)
     test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False)
+    
+    print(len(train_loader), len(val_loader), len(test_loader))
 
     return train_loader, val_loader, test_loader
 
