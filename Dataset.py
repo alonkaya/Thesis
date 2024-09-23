@@ -11,44 +11,45 @@ import torch.nn.functional as F
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, poses, valid_indices, transform, k, val, seq_name, jump_frames=JUMP_FRAMES):
+    def __init__(self, sequence_path, poses, img0, img1, subset, transform, k, seq_name, jump_frames=JUMP_FRAMES):
         self.sequence_path = sequence_path
         self.poses = poses
+        self.images_0 = img0
+        self.images_1 = img1
         self.transform = transform
         self.k = k
-        self.valid_indices = valid_indices
-        self.val = val
+        self.subset = subset
         self.seq_name = seq_name
         self.jump_frames = jump_frames
 
     def __len__(self):
-        return len(self.valid_indices) 
+        return len(self.subset) 
 
     def __getitem__(self, idx):
-        idx = self.valid_indices[idx]
+        idx = self.subset[idx]
         
-        img1 = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-        img2 = torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
+        img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+        img1 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
+        H, W = img0.shape[1], img0.shape[2]
         
+        unnormalized_F = get_F(k, k, self.poses, idx, self.jump_frames)
+        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
+
+        epi = EpipolarGeometry(img0, img1, F=F, is_scaled=False)
+
         k=self.k.clone()
         if RANDOM_CROP:
             top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
-            img1, img2 = TF.resize(img1, (RESIZE, RESIZE), antialias=True), TF.resize(img2, (RESIZE, RESIZE), antialias=True)
-            img1, img2 = TF.crop(img1, top_crop, left_crop, CROP, CROP), TF.crop(img2, top_crop, left_crop, CROP, CROP)
+            img0, img1 = TF.resize(img0, (RESIZE, RESIZE), antialias=True), TF.resize(img1, (RESIZE, RESIZE), antialias=True)
+            img0, img1 = TF.crop(img0, top_crop, left_crop, CROP, CROP), TF.crop(img1, top_crop, left_crop, CROP, CROP)
             k = adjust_k_crop(k, top_crop, left_crop)
 
-        img1 = self.transform(img1)
-        img2 = self.transform(img2)
-        
-        unnormalized_F = get_F(k, k, self.poses, idx, self.jump_frames)
-        # R_relative, t_relative = compute_relative_transformations(self.poses[idx], self.poses[idx+JUMP_FRAMES])
-        
-        # Normalize F-Matrix
-        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
+        img0 = self.transform(img0) # shape (channels, height, width)
+        img1 = self.transform(img1) # shape (channels, height, width)
 
-        epi = EpipolarGeometry(img1, img2, F=F)
+        pts1, pts2 = adjust_points(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
 
-        return img1, img2, F, epi.pts1, epi.pts2, self.seq_name
+        return img0, img1, F, pts1, pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
     def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, keypoints, subset_valid_indices, seq_name, test, data_ratio):
@@ -145,45 +146,55 @@ def custom_collate_fn(batch):
     return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
 
 
-def get_dataloaders_RealEstate(data_ratio, batch_size):
+def get_dataloaders_RealEstate(data_ratio, part, batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
-    train_datasets, val_datasets = [], []
+    train_datasets, val_datasets, test_datasets = [], [], []
     for jump_frames in [JUMP_FRAMES]:
         for RealEstate_path in RealEstate_paths:
-            ### os.listdir() does not guarantee the order of the files as they appear in the folder!!!!!!!!!!
-            ### os.listdir() does not guarantee the order of the files as they appear in the folder!!!!!!!!!!
-            for i, sequence_name in enumerate(os.listdir(RealEstate_path)): ### os.listdir() does not guarantee the order of the files as they appear in the folder!!!!!!!!!!
+            for i, sequence_name in enumerate(os.listdir(RealEstate_path)): 
                 specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
                 sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
 
                 # Get a list of all poses [R,t] in this sequence
-                poses = read_poses(specs_path)
+                poses = read_poses(specs_path).to(device)
 
                 # Indices of 'good' image frames
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
                 if len(valid_indices) == 0: continue
+                
+                length = int(len(valid_indices) * data_ratio) 
+                mid_start = len(valid_indices) // 2 - length // 2
+                subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
 
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-                original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
+                original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{subset[0]:06}.{IMAGE_TYPE}')).size)
                 K = get_intrinsic_REALESTATE(specs_path, original_image_size)
-                
-                if not FIRST_2_THRIDS_TRAIN and not FIRST_2_OF_3_TRAIN:
-                    custom_dataset = Dataset(sequence_path, poses, valid_indices, transform, K, val=False, seq_name=sequence_name, jump_frames=jump_frames)
-                    if len(custom_dataset) > 20:
-                        if RealEstate_path == 'RealEstate10K/train_images':
-                            train_datasets.append(custom_dataset) 
-                        else:    
-                            val_datasets.append(custom_dataset)
+
+                img0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
+                img1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
+
+                custom_dataset = Dataset(sequence_path, poses, img0, img1, subset, transform, K, seq_name=sequence_name, jump_frames=jump_frames)
+
+                if len(custom_dataset) > 20:
+                    if RealEstate_path == 'RealEstate10K/train_images':
+                        train_datasets.append(custom_dataset) 
+                    elif i < len(os.listdir(RealEstate_path)):
+                        val_datasets.append(custom_dataset)
+                    else:
+                        test_datasets.append(custom_dataset)
+                    print(len(custom_dataset))
 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
     concat_val_dataset = ConcatDataset(val_datasets)
+    concat_test_dataset = ConcatDataset(test_datasets)
 
     # Create a DataLoader
     train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
     val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
 
-    return train_loader, val_loader
+    return train_loader, val_loader, test_loader
 
 def get_dataloaders_KITTI(data_ratio, batch_size):
     sequence_paths = [f'sequences/0{i}' for i in range(11)]

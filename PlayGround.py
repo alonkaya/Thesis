@@ -493,4 +493,4 @@ def sed_distance_gt_FM():
 
 
 if __name__ == "__main__":
-    sed_distance_gt_FM()
+    sed_distance_gt()

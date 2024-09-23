@@ -179,15 +179,15 @@ def print_and_write(output, plots_path):
         print(output)
         sys.stdout.flush()
 
-def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std):
+def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std, is_scaled=True):
     """ Reverses the scaling and normalization transformation applied on the image.
         This function is called when computing the epipolar error.
     """
     # The mean and std have to be reshaped to [3, 1, 1] to match the tensor dimensions for broadcasting
     mean = mean.view(-1, 1, 1)
     std = std.view(-1, 1, 1)
-    img_tensor = img_tensor * std + mean
-    return (img_tensor.permute(1, 2, 0).numpy() * 255).astype(np.uint8)
+    img_tensor = (img_tensor * std + mean) * 255 if is_scaled else img_tensor
+    return (img_tensor.permute(1, 2, 0).numpy()).astype(np.uint8)
 
 def init_main():
     faulthandler.enable()
@@ -304,6 +304,24 @@ def adjust_points(keypoints_dict, idx, top_crop, left_crop, height, width):
     pts1 = torch.tensor(keypoints_dict[idx][0], dtype=torch.float32).to(device) # shape [num_keypoints, 3]
     pts2 = torch.tensor(keypoints_dict[idx][1], dtype=torch.float32).to(device) # shape [num_keypoints, 3]
 
+    # Adjust keypoints for the resized image
+    scale = torch.tensor([RESIZE / width, RESIZE / height, 1], dtype=torch.float32).unsqueeze(0).to(device) # shape [1, 2]
+    pts1 *= scale
+    pts2 *= scale
+
+    # Filter and adjust keypoints for the cropped image
+    mask = (pts1[:, 0] >= left_crop+1) & (pts1[:, 0] < left_crop + CROP-1) & (pts1[:, 1] >= top_crop+1) & (pts1[:, 1] < top_crop + CROP-1) & \
+           (pts2[:, 0] >= left_crop+1) & (pts2[:, 0] < left_crop + CROP-1) & (pts2[:, 1] >= top_crop+1) & (pts2[:, 1] < top_crop + CROP-1) # shape [num_keypoints]
+    pts1 = pts1[mask] 
+    pts2 = pts2[mask]
+    
+    crop_offset = torch.tensor([left_crop, top_crop, 0], dtype=torch.float32).unsqueeze(0).to(device) # shape [1, 2]
+    pts1 -= crop_offset
+    pts2 -= crop_offset
+
+    return pts1, pts2
+
+def adjust_point(pts1, pts2, top_crop, left_crop, height, width):
     # Adjust keypoints for the resized image
     scale = torch.tensor([RESIZE / width, RESIZE / height, 1], dtype=torch.float32).unsqueeze(0).to(device) # shape [1, 2]
     pts1 *= scale

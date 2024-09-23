@@ -5,7 +5,7 @@ import os
 from scipy.linalg import rq
 import numpy as np
 
-def get_intrinsic_REALESTATE(specs_path, original_image_size):
+def get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=True):
     intrinsics, _ = read_camera_intrinsic(specs_path)
     width = original_image_size[0]
     height = original_image_size[1]
@@ -16,9 +16,10 @@ def get_intrinsic_REALESTATE(specs_path, original_image_size):
         [0,                 0,          1]
     ])
 
-    # Adjust K according to resize and center crop transforms   
-    k = adjust_k_resize(K, original_image_size, torch.tensor([RESIZE, RESIZE]))
-
+    if adjust_resize:
+        # Adjust K according to resize and center crop transforms   
+        k = adjust_k_resize(K, original_image_size, torch.tensor([RESIZE, RESIZE]))
+        
     center_crop_size = (RESIZE - CROP) // 2
     k = adjust_k_crop(k, center_crop_size, center_crop_size) if not RANDOM_CROP else k
 
@@ -190,15 +191,13 @@ def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, plots_path,
 
 
 class EpipolarGeometry:
-    def __init__(self, image1_tensors, image2_tensors, F, pts1=None, pts2=None):
+    def __init__(self, image1_tensors, image2_tensors, F, pts1=None, pts2=None, is_scaled=True):
         self.F = F
 
         if pts1 is None:
             # Convert images back to original
-            self.image1_numpy = reverse_transforms(image1_tensors.cpu(), mean=norm_mean.cpu(), std=norm_std.cpu()) # shape (H, W, 3)
-            self.image2_numpy = reverse_transforms(image2_tensors.cpu(), mean=norm_mean.cpu(), std=norm_std.cpu()) # shape (H, W, 3)
-            # self.image1_numpy = image1_tensors.cpu().numpy().transpose(1, 2, 0)
-            # self.image2_numpy = image2_tensors.cpu().numpy().transpose(1, 2, 0) 
+            self.image1_numpy = reverse_transforms(image1_tensors.cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=is_scaled) # shape (H, W, 3)
+            self.image2_numpy = reverse_transforms(image2_tensors.cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=is_scaled) # shape (H, W, 3)
             self.get_keypoints()
 
         else:
@@ -226,28 +225,22 @@ class EpipolarGeometry:
         self.good = []
         distances = []
         min_distance_index = 0
-        c = 0
         for i, (m, n) in enumerate(matches):
-            if n.distance == 0:
-                c += 1
-                continue
             distances.append(m.distance / n.distance)
-            threshold = 0.75
-            # if distances[-1] < threshold:
-            self.good.append(m)
-            # min_distance_index = i if distances[i] < distances[min_distance_index] else min_distance_index
+            if distances[-1] < threshold:
+                self.good.append(m)
+            min_distance_index = i if distances[i] < distances[min_distance_index] else min_distance_index
         # If no point passed the threshold, add the smallest distance ratio point
-        # if len(self.good) == 0:
-        #     self.good.append(matches[min_distance_index][0])
-        print(c)
-        print(len(self.good))
+        if len(self.good) == 0:
+            self.good.append(matches[min_distance_index][0])
+
         pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32)
         pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32)
 
         self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
         self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
         
-        # self.pts1, self.pts2 = self.trim_by_sed() ## TODO
+        self.pts1, self.pts2 = self.trim_by_sed()
 
     def trim_by_sed(self, threshold=SED_TRIM_THRESHOLD, min_keypoints=5):
         self.pts1, self.pts2 = self.pts1.unsqueeze(0), self.pts2.unsqueeze(0)  # shape (1, n, 3)
@@ -314,7 +307,6 @@ class EpipolarGeometry:
 
     def get_mean_SED_distance(self):
         sed = self.get_SED_distance()   # shape (batch_size, n)
-        print(sed)
         return self.average_batch(sed.view(-1)) # shape (1)
 
     def get_SED_distance(self, show_histogram=False, plots_path=None):
