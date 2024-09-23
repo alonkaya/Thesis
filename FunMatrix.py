@@ -236,10 +236,10 @@ class EpipolarGeometry:
         # If no point passed the threshold, add the smallest distance ratio point
         # if len(self.good) == 0:
         #     self.good.append(matches[min_distance_index][0])
-        
+
         pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32)
         pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32)
-
+        print(pts1.shape)
         self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
         self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
         
