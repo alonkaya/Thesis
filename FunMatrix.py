@@ -239,6 +239,7 @@ class EpipolarGeometry:
         # if len(self.good) == 0:
         #     self.good.append(matches[min_distance_index][0])
         print(c)
+        print(len(self.good))
         pts1 = torch.tensor([kp1[m.queryIdx].pt for m in self.good], dtype=torch.float32)
         pts2 = torch.tensor([kp2[m.trainIdx].pt for m in self.good], dtype=torch.float32)
 
