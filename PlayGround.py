@@ -485,10 +485,10 @@ def sed_distance_gt_FM():
         
         break
 
-    print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(i+1)}')
-    print(f'test_algebraic_sqr_pred: {epoch_stats["test_algebraic_sqr_pred"]/(i+1)}')
-    print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(i+1)}')
-    print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(i+1)}')
+    print(f'\ntest_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(i+1)}')
+    print(f'\ntest_algebraic_sqr_pred: {epoch_stats["test_algebraic_sqr_pred"]/(i+1)}')
+    print(f'\ntest_RE1_pred: {epoch_stats["test_RE1_pred"]/(i+1)}')
+    print(f'\ntest_SED_pred: {epoch_stats["test_SED_pred"]/(i+1)}')
     print()
 
 

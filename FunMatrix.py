@@ -221,7 +221,6 @@ class EpipolarGeometry:
         # Detect keypoints and compute descriptors for both images
         (kp1, des1) = sift.detectAndCompute(self.image1_numpy, None) # input shape (H, W, 3)
         (kp2, des2) = sift.detectAndCompute(self.image2_numpy, None) # input shape (H, W, 3)
-        cv2.imwrite('output_image.png', self.image1_numpy)
 
         matches = bf.knnMatch(des1, des2, k=2)
         self.good = []
@@ -231,8 +230,8 @@ class EpipolarGeometry:
             if n.distance == 0:
                 continue
             distances.append(m.distance / n.distance)
-            if distances[-1] < threshold:
-                self.good.append(m)
+            # if distances[-1] < threshold:
+            self.good.append(m)
             # min_distance_index = i if distances[i] < distances[min_distance_index] else min_distance_index
         # If no point passed the threshold, add the smallest distance ratio point
         # if len(self.good) == 0:
