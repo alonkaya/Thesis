@@ -172,7 +172,7 @@ def custom_collate_fn(batch):
         seq_names_list.append(seq_names)
         a_list.append(a)
         b_list.append(b)
-        if USE_REALESTATE and pts1.shape[0] <= 10:
+        if pts1.shape[0] <= 10:
             continue
         pad_len = max_len - pts1.shape[0]
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
@@ -181,7 +181,7 @@ def custom_collate_fn(batch):
         img1_list.append(imgs1)
         Fs_list.append(Fs)
 
-    if USE_REALESTATE and len(padded_pts1) == 0:
+    if len(padded_pts1) == 0:
         return -2, -2, -2, -2, -2, seq_names_list, a_list, b_list
 
     return (torch.stack(img0_list), torch.stack(img1_list), torch.stack(Fs_list), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names_list, a, b)
