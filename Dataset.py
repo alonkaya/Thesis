@@ -115,8 +115,6 @@ def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
     for idx in range(sequence_len - jump_frames):
         img0_path = os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')
         img1_path = os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')
-        if img0_path == "RealEstate10K/train_images/074375474c3e1621/image_0/000160.jpg":
-            print("dfg")
         if os.path.exists(img0_path) and os.path.exists(img1_path):
             valid_indices.append(idx)
 
@@ -171,7 +169,7 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
 
                 # Indices of 'good' image frames
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
-                print(valid_indices)
+                print(f'"{specs_path}: {valid_indices}')
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
                 original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
                 K = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=False)
