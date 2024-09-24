@@ -15,7 +15,7 @@ class Dataset(torch.utils.data.Dataset):
         self.sequence_path = sequence_path
         self.poses = poses
         self.images_0 = img0
-        # self.images_1 = img1
+        self.images_1 = img1
         self.transform = transform
         self.k = k
         self.k_resized = k_resized
@@ -25,17 +25,14 @@ class Dataset(torch.utils.data.Dataset):
         self.jump_frames = jump_frames
 
     def __len__(self):
-        return len(self.valid_indices) - self.jump_frames # check this, you can change things so that you woldnt have to subtract jump_frames
+        return len(self.valid_indices) 
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
-        try:
-            img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-            img1 = self.images_0[idx+self.jump_frames] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
-        except Exception as e:
-            print(f"Error at {self.sequence_path}, {idx}: {e}")
-            print(self.valid_indices)
-            
+        
+        img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+        img1 = self.images_1[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
+
         H, W = img0.shape[1], img0.shape[2]
 
         # Gey keypoints on original image
@@ -118,7 +115,6 @@ def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
 
         if os.path.exists(img0_path) and os.path.exists(img1_path):
             valid_indices.append(idx)
-            print(idx)
 
     return valid_indices
 
@@ -163,7 +159,6 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
     for jump_frames in [JUMP_FRAMES]:
         for RealEstate_path in RealEstate_paths:
             for i, sequence_name in enumerate(os.listdir(RealEstate_path)): 
-                if sequence_name != "018c2471932140c2": continue
                 specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
                 sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
 
@@ -197,18 +192,18 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
                     print(f"Empty dataset at {RealEstate_path}, {sequence_name}: {len(custom_dataset)}")
 
     # Concatenate datasets
-    # concat_train_dataset = ConcatDataset(train_datasets)
-    # concat_val_dataset = ConcatDataset(val_datasets)
-    # concat_test_dataset = ConcatDataset(test_datasets)
+    concat_train_dataset = ConcatDataset(train_datasets)
+    concat_val_dataset = ConcatDataset(val_datasets)
+    concat_test_dataset = ConcatDataset(test_datasets)
 
-    # # Create a DataLoader
-    # train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
-    # val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
-    # test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    # Create a DataLoader
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
     
-    # print(len(train_loader), len(val_loader), len(test_loader))
+    print(len(train_loader), len(val_loader), len(test_loader))
 
-    # return train_loader, val_loader, test_loader
+    return train_loader, val_loader, test_loader
 
 # def get_dataloaders_KITTI(data_ratio, batch_size):
 #     sequence_paths = [f'sequences/0{i}' for i in range(11)]
@@ -458,4 +453,4 @@ def save_keypoints_realestate():
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    get_dataloaders_RealEstate(0.3, 8)
+    save_keypoints_realestate()    
