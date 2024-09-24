@@ -81,8 +81,8 @@ class Dataset_stereo(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         idx = self.subset_valid_indices[idx]
 
-        img0 = self.images_0[idx] if INIT_DATA else  torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) # shape (channels, height, width)
-        img1 = self.images_1[idx] if INIT_DATA else  torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) # shape (channels, height, width)
+        img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) # shape (channels, height, width)
+        img1 = self.images_1[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) # shape (channels, height, width)
         H, W = img0.shape[1], img0.shape[2]
 
         k0=self.k0.clone()
@@ -236,45 +236,45 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
 
     return train_loader, val_loader, test_loader
 
-def get_dataloaders_KITTI(data_ratio, batch_size):
-    sequence_paths = [f'sequences/0{i}' for i in range(11)]
-    poses_paths = [f'poses/0{i}.txt' for i in range(11)]
-    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(11)]
+# def get_dataloaders_KITTI(data_ratio, batch_size):
+#     sequence_paths = [f'sequences/0{i}' for i in range(11)]
+#     poses_paths = [f'poses/0{i}.txt' for i in range(11)]
+#     calib_paths = [f'sequences/0{i}/calib.txt' for i in range(11)]
 
-    train_datasets, val_datasets = [], []
-    for jump_frames in [JUMP_FRAMES]:
-        for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
-            if i not in train_seqeunces and i not in val_sequences: continue
-            cam0_seq = os.path.join(sequence_path, 'image_0')
-            cam1_seq = os.path.join(sequence_path, 'image_1')
+#     train_datasets, val_datasets = [], []
+#     for jump_frames in [JUMP_FRAMES]:
+#         for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
+#             if i not in train_seqeunces and i not in val_sequences: continue
+#             cam0_seq = os.path.join(sequence_path, 'image_0')
+#             cam1_seq = os.path.join(sequence_path, 'image_1')
 
-            # Get a list of all poses [R,t] in this sequence
-            poses = read_poses(poses_path)
+#             # Get a list of all poses [R,t] in this sequence
+#             poses = read_poses(poses_path)
             
-            # Indices of 'good' image frames
-            valid_indices = get_valid_indices(len(poses), cam0_seq, jump_frames)
+#             # Indices of 'good' image frames
+#             valid_indices = get_valid_indices(len(poses), cam0_seq, jump_frames)
         
-            # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-            original_image_size = torch.tensor(Image.open(os.path.join(cam0_seq, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
-            k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
+#             # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
+#             original_image_size = torch.tensor(Image.open(os.path.join(cam0_seq, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
+#             k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
-            # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
-            dataset_cam0 = Dataset(cam0_seq, poses, valid_indices, transform, k0, val=False, seq_name= f'0{i}', jump_frames=jump_frames)
-            dataset_cam1 = Dataset(cam1_seq, poses, valid_indices, transform, k1, val=True, seq_name= f'0{i}', jump_frames=jump_frames)
-            if i in train_seqeunces:
-                train_datasets.append(dataset_cam0)        
-            if i in val_sequences:
-                val_datasets.append(dataset_cam1)
+#             # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
+#             dataset_cam0 = Dataset(cam0_seq, poses, valid_indices, transform, k0, val=False, seq_name= f'0{i}', jump_frames=jump_frames)
+#             dataset_cam1 = Dataset(cam1_seq, poses, valid_indices, transform, k1, val=True, seq_name= f'0{i}', jump_frames=jump_frames)
+#             if i in train_seqeunces:
+#                 train_datasets.append(dataset_cam0)        
+#             if i in val_sequences:
+#                 val_datasets.append(dataset_cam1)
 
-    # Concatenate datasets
-    concat_train_dataset = ConcatDataset(train_datasets)
-    concat_val_dataset = ConcatDataset(val_datasets)
+#     # Concatenate datasets
+#     concat_train_dataset = ConcatDataset(train_datasets)
+#     concat_val_dataset = ConcatDataset(val_datasets)
 
-    # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+#     # Create a DataLoader
+#     train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
+#     val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
 
-    return train_loader, val_loader
+#     return train_loader, val_loader
 
 def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS):
     sequence_paths = [f'sequences/{i:02}' for i in range(11)]
@@ -339,11 +339,11 @@ def get_data_loaders(train_size=None, part=None, batch_size=BATCH_SIZE):
     elif USE_REALESTATE:
         return get_dataloaders_RealEstate(train_size, batch_size)
     else: # KITTI
-        return get_dataloaders_KITTI(train_size, batch_size)
+        # return get_dataloaders_KITTI(train_size, batch_size)
+        return None
 
 
-
-def save_keypoints():
+def save_keypoints_stereo():
     """
     To work put these lines in the init of EpipolarGeometry:
         self.image1_numpy = image1_tensors.cpu().numpy().transpose(1, 2, 0)
@@ -383,7 +383,7 @@ def save_keypoints():
             # Normalize F-Matrix
             F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-            epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0))
+            epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False)
 
             filepath = os.path.join(sequence_path, f'keypoints.txt')
             with open(filepath, 'a') as f:
@@ -413,7 +413,75 @@ def save_keypoints():
             # # Show the plot
             # plt.show()
 
+
+def save_keypoints_realestate():
+    """
+    To work put these lines in the init of EpipolarGeometry:
+        self.image1_numpy = image1_tensors.cpu().numpy().transpose(1, 2, 0)
+        self.image2_numpy = image2_tensors.cpu().numpy().transpose(1, 2, 0) 
+    """
+    RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
+    for jump_frames in [JUMP_FRAMES]:
+        for RealEstate_path in RealEstate_paths:
+            for i, sequence_name in enumerate(os.listdir(RealEstate_path)): 
+                specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
+                sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
+
+                # Get a list of all poses [R,t] in this sequence
+                poses = read_poses(specs_path).to(device)
+
+                # Indices of 'good' image frames
+                valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
+
+                # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
+                original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
+                k = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=False)
+
+                for idx in valid_indices:
+                    img0 = torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+                    img1 = torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}'))
+                    
+                    img0 = TF.rgb_to_grayscale(img0, num_output_channels=1)
+                    img1 = TF.rgb_to_grayscale(img1, num_output_channels=1)
+
+                    # Gey keypoints on original image
+                    unnormalized_F = get_F(k, k, poses, idx, jump_frames)
+                    
+                    # Normalize F-Matrix
+                    F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
+
+                    epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False)
+
+                    filepath = os.path.join(os.path.dirname(sequence_path), f'keypoints.txt')
+                    with open(filepath, 'a') as f:
+                        line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
+                        f.write(line)
+
+
+                    # Convert grayscale tensors to numpy arrays for matplotlib
+                    # img0_np = img0.squeeze().numpy()
+                    # img1_np = img1.squeeze().numpy()
+
+                    # # Create a subplot with two images
+                    # fig, axs = plt.subplots(1, 2, figsize=(15, 7))
+
+                    # # Display the first image with keypoints
+                    # axs[0].imshow(img0_np, cmap='gray')
+                    # axs[0].scatter(epi.pts1[:, 0].numpy(), epi.pts1[:, 1].numpy(), c='r', s=10)
+                    # axs[0].set_title(f'Image 0 - {idx}')
+                    # axs[0].axis('off')
+
+                    # # Display the second image with keypoints
+                    # axs[1].imshow(img1_np, cmap='gray')
+                    # axs[1].scatter(epi.pts2[:, 0].numpy(), epi.pts2[:, 1].numpy(), c='r', s=10)
+                    # axs[1].set_title(f'Image 1 - {idx}')
+                    # axs[1].axis('off')
+
+                    # # Show the plot
+                    # plt.show()
+
+
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    save_keypoints()    
+    save_keypoints_realestate()    
