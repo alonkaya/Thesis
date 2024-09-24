@@ -151,7 +151,6 @@ def custom_collate_fn(batch):
 
     return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
 
-
 def get_dataloaders_RealEstate(data_ratio, part, batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
     train_datasets, val_datasets, test_datasets = [], [], []
