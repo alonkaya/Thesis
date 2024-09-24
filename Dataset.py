@@ -137,54 +137,53 @@ def get_transform():
 transform = get_transform()    
 
 
-# def custom_collate_fn(batch):
-#     imgs1, imgs2, Fs, all_pts1, all_pts2, seq_names = zip(*batch)
-
-#     max_len = max(pts1.shape[0] for pts1 in all_pts1)
-
-#     padded_pts1 = []
-#     padded_pts2 = []
-#     for pts1, pts2 in zip(all_pts1, all_pts2):
-#         if pts1.shape[0] == 0:
-#             print(f'\n################\nEmpty points at {seq_names}\n\n')
-#         pad_len = max_len - pts1.shape[0]
-#         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
-#         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
-
-#     return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
-
 def custom_collate_fn(batch):
-    all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names, ass, bs = zip(*batch)
-    if any(img is None for img in all_imgs0):
-        return None, None, None, None, None, None, None, None
+    imgs1, imgs2, Fs, all_pts1, all_pts2, seq_names = zip(*batch)
 
     max_len = max(pts1.shape[0] for pts1 in all_pts1)
 
     padded_pts1 = []
     padded_pts2 = []
-    img0_list = []
-    img1_list = []
-    Fs_list = []
-    seq_names_list = []
-    a_list = []
-    b_list = []
-    for imgs0, imgs1, Fs, pts1, pts2, seq_names, a, b in zip(all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names, ass, bs):
-        seq_names_list.append(seq_names)
-        a_list.append(a)
-        b_list.append(b)
-        if pts1.shape[0] <= 10:
-            continue
+    for pts1, pts2 in zip(all_pts1, all_pts2):
+        if pts1.shape[0] == 0:
+            print(f'\n################\nEmpty points at {seq_names}\n\n')
         pad_len = max_len - pts1.shape[0]
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
-        img0_list.append(imgs0)
-        img1_list.append(imgs1)
-        Fs_list.append(Fs)
 
-    if len(padded_pts1) == 0:
-        return None, None, None, None, None, seq_names_list, a_list, b_list
+    return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
 
-    return (torch.stack(img0_list), torch.stack(img1_list), torch.stack(Fs_list), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names_list, a, b)
+# def custom_collate_fn(batch):
+#     all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names, ass, bs = zip(*batch)
+#     if any(img is None for img in all_imgs0):
+#         return None, None, None, None, None, None, None, None
+
+#     max_len = max(pts1.shape[0] for pts1 in all_pts1)
+
+#     padded_pts1 = []
+#     padded_pts2 = []
+#     img0_list = []
+#     img1_list = []
+#     Fs_list = []
+#     seq_names_list = []
+#     a_list = []
+#     b_list = []
+#     for imgs0, imgs1, Fs, pts1, pts2, seq_names, a, b in zip(all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names, ass, bs):
+#         seq_names_list.append(seq_names)
+#         a_list.append(a)
+#         b_list.append(b)
+#         if pts1.shape[0] <= 10:
+#             continue
+#         pad_len = max_len - pts1.shape[0]
+#         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
+#         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
+#         img0_list.append(imgs0)
+#         img1_list.append(imgs1)
+#         Fs_list.append(Fs)
+
+#     if len(padded_pts1) == 0:
+#         return None, None, None, None, None, seq_names_list, a_list, b_list
+#     return (torch.stack(img0_list), torch.stack(img1_list), torch.stack(Fs_list), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names_list, a, b)
 
 
 def get_dataloaders_RealEstate(train_num_sequences, batch_size):
