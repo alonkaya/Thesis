@@ -184,8 +184,8 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
                 print(f'seq len: {len(poses)-jump_frames}')
                 if len(poses) < 15:
-                    # os.remove(os.path.join(RealEstate_paths, sequence_name))
-                    print(os.path.join(RealEstate_path, sequence_name))
+                    os.remove(os.path.join(RealEstate_path, sequence_name))
+                    # print(os.path.join(RealEstate_path, sequence_name))
                 # if RealEstate_path == 'RealEstate10K/val_images':
                 subset = valid_indices
                 # else:
