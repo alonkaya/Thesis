@@ -150,6 +150,9 @@ def custom_collate_fn(batch):
     a_list = []
     b_list = []
     for imgs0, imgs1, Fs, pts1, pts2, seq_names, a, b in zip(all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names, ass, bs):
+        seq_names_list.append(seq_names)
+        a_list.append(a)
+        b_list.append(b)
         if USE_REALESTATE and pts1.shape[0] <= 5:
             continue
         pad_len = max_len - pts1.shape[0]
@@ -158,9 +161,7 @@ def custom_collate_fn(batch):
         img0_list.append(imgs0)
         img1_list.append(imgs1)
         Fs_list.append(Fs)
-        seq_names_list.append(seq_names)
-        a_list.append(a)
-        b_list.append(b)
+
     if USE_REALESTATE and len(padded_pts1) == 0:
         return None, None, None, None, None, seq_names_list, a_list, b_list
 
