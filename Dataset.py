@@ -184,6 +184,9 @@ def custom_collate_fn(batch):
     if USE_REALESTATE and len(padded_pts1) == 0:
         return -2, -2, -2, -2, -2, seq_names_list, a_list, b_list
 
+    return (torch.stack(img0_list), torch.stack(img1_list), torch.stack(Fs_list), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names_list, a, b)
+
+
 def get_dataloaders_RealEstate(train_num_sequences, batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
     train_datasets, val_datasets, test_datasets = [], [], []
