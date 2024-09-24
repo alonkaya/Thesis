@@ -34,7 +34,6 @@ class Dataset(torch.utils.data.Dataset):
             img1 = self.images_0[idx+self.jump_frames] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
         except Exception as e:
             print(f"Error at {self.sequence_path}, {idx}: {e}")
-            print(self.images_0.keys())
             print(self.valid_indices)
             
         H, W = img0.shape[1], img0.shape[2]
@@ -119,6 +118,7 @@ def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
 
         if os.path.exists(img0_path) and os.path.exists(img1_path):
             valid_indices.append(idx)
+            print(idx)
 
     return valid_indices
 
@@ -163,6 +163,7 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
     for jump_frames in [JUMP_FRAMES]:
         for RealEstate_path in RealEstate_paths:
             for i, sequence_name in enumerate(os.listdir(RealEstate_path)): 
+                if sequence_name != "018c2471932140c2": continue
                 specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
                 sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
 
@@ -171,7 +172,6 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
 
                 # Indices of 'good' image frames
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
-                print(f'"{specs_path}: {valid_indices}')
 
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
                 original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
