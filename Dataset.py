@@ -1,5 +1,4 @@
 import random
-import shutil
 from FunMatrix import *
 from utils import *
 from torch.utils.data import DataLoader, ConcatDataset
@@ -183,10 +182,9 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
 
                 # Indices of 'good' image frames
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
+                print(f'valid indices: {len(valid_indices)}')
                 print(f'seq len: {len(poses)-jump_frames}')
-                if len(poses) < 15:
-                    shutil.rmtree(os.path.join(RealEstate_path, sequence_name))
-                    print(os.path.join(RealEstate_path, sequence_name))
+
                 # if RealEstate_path == 'RealEstate10K/val_images':
                 subset = valid_indices
                 # else:
@@ -196,37 +194,37 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 #     subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
 
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-                # original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{subset[0]:06}.{IMAGE_TYPE}')).size).to(device)
-                # K = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=False)
-                # K_resized = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=True)
+                original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{subset[0]:06}.{IMAGE_TYPE}')).size).to(device)
+                K = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=False)
+                K_resized = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=True)
 
-                # img0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
-                # img1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
+                img0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
+                img1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
 
-                # custom_dataset = Dataset(sequence_path, poses, img0, img1, subset, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
+                custom_dataset = Dataset(sequence_path, poses, img0, img1, subset, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
 
-                # # if len(custom_dataset) > 9:
-                # if len(custom_dataset) > 0:
-                #     if RealEstate_path == 'RealEstate10K/train_images':
-                #         train_datasets.append(custom_dataset) 
-                #     elif sequence_name not in RealEstate_test_names:
-                #         val_datasets.append(custom_dataset)
-                #     else:
-                #         test_datasets.append(custom_dataset)
+                # if len(custom_dataset) > 9:
+                if len(custom_dataset) > 0:
+                    if RealEstate_path == 'RealEstate10K/train_images':
+                        train_datasets.append(custom_dataset) 
+                    elif sequence_name not in RealEstate_test_names:
+                        val_datasets.append(custom_dataset)
+                    else:
+                        test_datasets.append(custom_dataset)
 
     # Concatenate datasets
-    # concat_train_dataset = ConcatDataset(train_datasets)
-    # concat_val_dataset = ConcatDataset(val_datasets)
-    # concat_test_dataset = ConcatDataset(test_datasets)
+    concat_train_dataset = ConcatDataset(train_datasets)
+    concat_val_dataset = ConcatDataset(val_datasets)
+    concat_test_dataset = ConcatDataset(test_datasets)
 
-    # # Create a DataLoader
-    # train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
-    # val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
-    # test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    # Create a DataLoader
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
     
-    # print(len(train_loader), len(val_loader), len(test_loader))
+    print(len(train_loader), len(val_loader), len(test_loader))
 
-    return 1,2,3
+    return train_loader, val_loader, test_loader
 
 def get_dataloaders_KITTI(data_ratio, batch_size):
     sequence_paths = [f'sequences/0{i}' for i in range(11)]
@@ -408,5 +406,4 @@ def save_keypoints():
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    # save_keypoints()    
-    get_dataloaders_RealEstate(batch_size=1, part=1, data_ratio=1)
+    save_keypoints()    
