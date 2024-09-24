@@ -1,4 +1,5 @@
 import random
+import shutil
 from FunMatrix import *
 from utils import *
 from torch.utils.data import DataLoader, ConcatDataset
@@ -184,7 +185,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
                 print(f'seq len: {len(poses)-jump_frames}')
                 if len(poses) < 15:
-                    os.rmdir(os.path.join(RealEstate_path, sequence_name))
+                    shutil.rmtree(os.path.join(RealEstate_path, sequence_name))
                     print(os.path.join(RealEstate_path, sequence_name))
                 # if RealEstate_path == 'RealEstate10K/val_images':
                 subset = valid_indices
