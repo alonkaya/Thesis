@@ -3,8 +3,8 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 # 58450 output_resnet_smalls.log
 ### Dataset ###  
-USE_REALESTATE = False
-STEREO = True
+USE_REALESTATE = True
+STEREO = False
 RIGHTCAMVAL = False
 CROP = 224
 RESIZE = 256

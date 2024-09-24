@@ -118,7 +118,6 @@ def read_poses(poses_path):
     poses = []
     with open(poses_path, 'r') as f:
         for i, line in enumerate(f):
-            print(line)
             if USE_REALESTATE and i == 0: continue
             line = torch.tensor([float(x) for x in line.strip().split()])
             pose = line[7:] if USE_REALESTATE else line
