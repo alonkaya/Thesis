@@ -25,7 +25,7 @@ class Dataset(torch.utils.data.Dataset):
         self.jump_frames = jump_frames
 
     def __len__(self):
-        return len(self.valid_indices) - self.jump_frames # check this, you can change things so that you woldnt have to subtract jump_frames
+        return len(self.valid_indices) 
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
@@ -116,7 +116,8 @@ def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
     for idx in range(sequence_len - jump_frames):
         img0_path = os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')
         img1_path = os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')
-
+        if img0_path == "RealEstate10K/train_images/074375474c3e1621/image_0/000160.jpg":
+            print("dfg")
         if os.path.exists(img0_path) and os.path.exists(img1_path):
             valid_indices.append(idx)
 
