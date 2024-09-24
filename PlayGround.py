@@ -139,6 +139,7 @@ def sed_distance_gt():
             seq_path_parent = os.path.dirname(seq_path[0])
             source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
             dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
+            os.makedirs(os.path.join(seq_path_parent, "bad_frames"), exist_ok=True)
             print(f'from: {source_path}, to: {dest_path}')
             os.rename(source_path, dest_path)
 
@@ -149,6 +150,7 @@ def sed_distance_gt():
             seq_path_parent = os.path.dirname(seq_path[0])
             source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
             dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
+            os.makedirs(os.path.join(seq_path_parent, "bad_frames"), exist_ok=True)
             print(f'from: {source_path}, to: {dest_path}')
             os.rename(source_path, dest_path)
 
@@ -159,6 +161,7 @@ def sed_distance_gt():
             seq_path_parent = os.path.dirname(seq_path[0])
             source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
             dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
+            os.makedirs(os.path.join(seq_path_parent, "bad_frames"), exist_ok=True)
             print(f'from: {source_path}, to: {dest_path}')
             os.rename(source_path, dest_path)            
 
