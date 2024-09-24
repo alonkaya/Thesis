@@ -25,7 +25,7 @@ class Dataset(torch.utils.data.Dataset):
         self.jump_frames = jump_frames
 
     def __len__(self):
-        return len(self.valid_indices) 
+        return len(self.valid_indices) - self.jump_frames
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
