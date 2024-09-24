@@ -134,7 +134,7 @@ def sed_distance_gt():
     c=0
     for i, (img1, img2, label, pts1, pts2, seq_name, seq_path, idx) in enumerate(test_loader):
         print(pts1.shape)
-        if pts1[0][0] == 0:
+        if pts1== None:
             c+=1
             print(f"found no points: {seq_name, idx}\n")
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
@@ -151,7 +151,7 @@ def sed_distance_gt():
     c=0
     for i, (img1, img2, label, pts1, pts2, seq_name, seq_path, idx) in enumerate(val_loader):
         print(pts1.shape)
-        if pts1[0][0] == 0:
+        if pts1 == None:
             c+=1
             print(f"found no points: {seq_name, idx}\n")
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
@@ -168,7 +168,7 @@ def sed_distance_gt():
     c=0
     for i, (img1, img2, label, pts1, pts2, seq_name, seq_path, idx) in enumerate(train_loader):
         print(pts1.shape)
-        if pts1[0][0] == 0:
+        if pts1== None:
             c+=1
             print(f"found no points: {seq_name, idx}\n")
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
