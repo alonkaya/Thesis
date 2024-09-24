@@ -154,10 +154,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
     train_datasets, val_datasets, test_datasets = [], [], []
     for jump_frames in [JUMP_FRAMES]:
         for RealEstate_path in RealEstate_paths:
-            print("i")
             for i, sequence_name in enumerate(os.listdir(RealEstate_path)): 
-                if len(train_datasets) > RealEstate_train_num_sequences: break
-
                 specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
                 sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
 
@@ -179,6 +176,7 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
 
                 if len(custom_dataset) > 9:
                     if RealEstate_path == 'RealEstate10K/train_images':
+                        if len(train_datasets) > RealEstate_train_num_sequences: break                        
                         train_datasets.append(custom_dataset) 
                     elif sequence_name not in RealEstate_test_names:
                         val_datasets.append(custom_dataset)
