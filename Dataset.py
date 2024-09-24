@@ -33,7 +33,7 @@ class Dataset(torch.utils.data.Dataset):
             img1 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
         except Exception as e:
             print(e)
-            return None, None, None, None, None, None, None, None
+            return -1, -1, -1, -1, -1, -1, -1, -1
         H, W = img0.shape[1], img0.shape[2]
 
         # Gey keypoints on original image
@@ -155,7 +155,7 @@ transform = get_transform()
 
 def custom_collate_fn(batch):
     all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names, ass, bs = zip(*batch)
-    if all_imgs0==None:
+    if all_imgs0==-1:
         return -1, -1, -1, -1, -1, -1, -1, -1
 
     max_len = max(pts1.shape[0] for pts1 in all_pts1)
@@ -182,7 +182,7 @@ def custom_collate_fn(batch):
         Fs_list.append(Fs)
 
     if USE_REALESTATE and len(padded_pts1) == 0:
-        return None, None, None, None, None, seq_names_list, a_list, b_list
+        return -2, -2, -2, -2, -2, seq_names_list, a_list, b_list
 
 def get_dataloaders_RealEstate(train_num_sequences, batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']

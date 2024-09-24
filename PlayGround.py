@@ -127,7 +127,6 @@ def vis_trained(plots_path):
 
 def sed_distance_gt():
     train_loader, val_loader, test_loader = get_data_loaders(train_size=100000000, batch_size=1)
-    print(len(train_loader))
 
     epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
@@ -136,7 +135,7 @@ def sed_distance_gt():
     for img1, img2, label, pts1, pts2, seq_name, seq_path, idx in train_loader:
         if img1==-1:
             continue
-        if img1 == None:
+        if img1 == -2:
             seq_path_parent = os.path.dirname(seq_path[0])
             source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
             dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
@@ -146,7 +145,7 @@ def sed_distance_gt():
     for img1, img2, label, pts1, pts2, seq_name, seq_path, idx in val_loader:
         if img1==-1:
             continue        
-        if img1 == None:
+        if img1 == -2:
             seq_path_parent = os.path.dirname(seq_path[0])
             source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
             dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
@@ -156,7 +155,7 @@ def sed_distance_gt():
     for img1, img2, label, pts1, pts2, seq_name, seq_path, idx in test_loader:
         if img1==-1:
             continue        
-        if img1 == None:
+        if img1 == -2:
             seq_path_parent = os.path.dirname(seq_path[0])
             source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
             dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
