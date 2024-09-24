@@ -22,7 +22,8 @@ AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = False #####TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 PART = ["head"]       
-RealEstate_test_names = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a"]                                           
+RealEstate_test_names = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a"]            
+RealEstate_train_num_sequences = 80                               
 
 ### Training ###
 LR = [1e-4]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5

@@ -11,7 +11,7 @@ import torch.nn.functional as F
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, poses, img0, img1, subset, transform, k, k_resized, seq_name, jump_frames=JUMP_FRAMES):
+    def __init__(self, sequence_path, poses, img0, img1, valid_indices, transform, k, k_resized, seq_name, jump_frames=JUMP_FRAMES):
         self.sequence_path = sequence_path
         self.poses = poses
         self.images_0 = img0
@@ -19,15 +19,15 @@ class Dataset(torch.utils.data.Dataset):
         self.transform = transform
         self.k = k
         self.k_resized = k_resized
-        self.subset = subset
+        self.valid_indices = valid_indices
         self.seq_name = seq_name
         self.jump_frames = jump_frames
 
     def __len__(self):
-        return len(self.subset) 
+        return len(self.valid_indices) 
 
     def __getitem__(self, idx):
-        idx = self.subset[idx]
+        idx = self.valid_indices[idx]
         
         img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
         img1 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
@@ -155,6 +155,8 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
     for jump_frames in [JUMP_FRAMES]:
         for RealEstate_path in RealEstate_paths:
             for i, sequence_name in enumerate(os.listdir(RealEstate_path)): 
+                if len(train_datasets) > RealEstate_train_num_sequences: break
+
                 specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
                 sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
 
@@ -163,29 +165,18 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
 
                 # Indices of 'good' image frames
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
-                print(f'valid indices: {len(valid_indices)}')
-                print(f'seq len: {len(poses)-jump_frames}')
-
-                # if RealEstate_path == 'RealEstate10K/val_images':
-                subset = valid_indices
-                # else:
-                #     if len(valid_indices) < 30: continue
-                #     length = int(len(valid_indices) * data_ratio) 
-                #     mid_start = len(valid_indices) // 2 - length // 2
-                #     subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
 
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-                original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{subset[0]:06}.{IMAGE_TYPE}')).size).to(device)
+                original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
                 K = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=False)
                 K_resized = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=True)
 
-                img0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
-                img1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
+                img0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices} if INIT_DATA else None    
+                img1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices} if INIT_DATA else None    
 
-                custom_dataset = Dataset(sequence_path, poses, img0, img1, subset, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
+                custom_dataset = Dataset(sequence_path, poses, img0, img1, valid_indices, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
 
-                # if len(custom_dataset) > 9:
-                if len(custom_dataset) > 0:
+                if len(custom_dataset) > 9:
                     if RealEstate_path == 'RealEstate10K/train_images':
                         train_datasets.append(custom_dataset) 
                     elif sequence_name not in RealEstate_test_names:
