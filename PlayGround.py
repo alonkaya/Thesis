@@ -132,51 +132,12 @@ def sed_distance_gt():
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
                    "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
     c=0
-    for i, (img1, img2, label, pts1, pts2, seq_name, seq_path, idx) in enumerate(test_loader):
-        if img1 == None:
-            seq_path_parent = os.path.dirname(seq_path[0])
-            source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
-            dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
-            print(f'from: {source_path}, to: {dest_path}')
-            os.rename(source_path, dest_path)
-        else:
-            c+=1
-            update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
-
-    print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(c+1)}')
-    print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(c+1)}')
-    print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(c+1)}')
-    print()
-
-    epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
-                   "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
-                   "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
-    c=0
-    for i, (img1, img2, label, pts1, pts2, seq_name, seq_path, idx) in enumerate(val_loader):
-        if img1 == None:
-            seq_path_parent = os.path.dirname(seq_path[0])
-            source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
-            dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
-            print(f'from: {source_path}, to: {dest_path}')
-            os.rename(source_path, dest_path)
-        else:
-            c+=1
-            update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
-
-    print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(c+1)}')
-    print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(c+1)}')
-    print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(c+1)}')
-    print()
-
-    epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
-                   "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
-                   "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
-    c=0
     for i, (img1, img2, label, pts1, pts2, seq_name, seq_path, idx) in enumerate(train_loader):
         if img1 == None:
             seq_path_parent = os.path.dirname(seq_path[0])
             source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
             dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
+            os.makedirs(os.path.join(seq_path_parent, "bad_frames"), exist_ok=True)
             print(f'from: {source_path}, to: {dest_path}')
             os.rename(source_path, dest_path)
         else:
