@@ -32,7 +32,7 @@ class Dataset(torch.utils.data.Dataset):
             img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
             img1 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
         except Exception as e:
-            print(e)
+            print(f'aaaa\n{e}')
             return None, None, None, None, None, None, None, None
         H, W = img0.shape[1], img0.shape[2]
 
