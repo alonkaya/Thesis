@@ -59,7 +59,7 @@ class Dataset(torch.utils.data.Dataset):
         # pts1, pts2 = adjust_points_no_dict(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
         pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, height=H, width=W)
 
-        return img0, img1, F, pts1, pts2, self.seq_name, self.sequence_path
+        return img0, img1, F, pts1, pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
     def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, keypoints, subset_valid_indices, seq_name, test, data_ratio):
