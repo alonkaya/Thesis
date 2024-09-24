@@ -197,18 +197,18 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
                     print(f"Empty dataset at {RealEstate_path}, {sequence_name}: {len(custom_dataset)}")
 
     # Concatenate datasets
-    concat_train_dataset = ConcatDataset(train_datasets)
-    concat_val_dataset = ConcatDataset(val_datasets)
-    concat_test_dataset = ConcatDataset(test_datasets)
+    # concat_train_dataset = ConcatDataset(train_datasets)
+    # concat_val_dataset = ConcatDataset(val_datasets)
+    # concat_test_dataset = ConcatDataset(test_datasets)
 
-    # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
-    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    # # Create a DataLoader
+    # train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    # val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    # test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
     
-    print(len(train_loader), len(val_loader), len(test_loader))
+    # print(len(train_loader), len(val_loader), len(test_loader))
 
-    return train_loader, val_loader, test_loader
+    # return train_loader, val_loader, test_loader
 
 # def get_dataloaders_KITTI(data_ratio, batch_size):
 #     sequence_paths = [f'sequences/0{i}' for i in range(11)]
@@ -458,4 +458,4 @@ def save_keypoints_realestate():
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    save_keypoints_realestate()    
+    get_dataloaders_RealEstate(0.3, 8)
