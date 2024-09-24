@@ -362,8 +362,6 @@ def load_keypoints(keypoints_path):
     return keypoints_dict
 
 
-
-
 def rename_files(folder_path):
     ### os.listdir() does not guarantee the order of the files as they appear in the folder!!!!!!!!!!
     for filename in os.listdir(folder_path):

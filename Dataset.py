@@ -11,15 +11,16 @@ import torch.nn.functional as F
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, poses, img0, img1, valid_indices, transform, k, k_resized, seq_name, jump_frames=JUMP_FRAMES):
+    def __init__(self, sequence_path, poses, img0, img1, valid_indices, keypoints, transform, k, k_resized, seq_name, jump_frames=JUMP_FRAMES):
         self.sequence_path = sequence_path
         self.poses = poses
         self.images_0 = img0
-        self.images_1 = img1
+        # self.images_1 = img1
         self.transform = transform
         self.k = k
         self.k_resized = k_resized
         self.valid_indices = valid_indices
+        self.keypoints = keypoints
         self.seq_name = seq_name
         self.jump_frames = jump_frames
 
@@ -30,16 +31,16 @@ class Dataset(torch.utils.data.Dataset):
         idx = self.valid_indices[idx]
         try:
             img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-            img1 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
+            img1 = self.images_0[idx+self.jump_frames] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
         except Exception as e:
             print(f'aaaa\n{e}')
             return None, None, None, None, None, None, None, None
         H, W = img0.shape[1], img0.shape[2]
 
         # Gey keypoints on original image
-        unnormalized_F = get_F(self.k, self.k, self.poses, idx, self.jump_frames)
-        F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
-        epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False)
+        # unnormalized_F = get_F(self.k, self.k, self.poses, idx, self.jump_frames)
+        # F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
+        # epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False)
 
         k=self.k_resized.clone()
         if RANDOM_CROP:
@@ -55,9 +56,10 @@ class Dataset(torch.utils.data.Dataset):
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
         # Adjust keypoints according to the crop
-        pts1, pts2 = adjust_points_no_dict(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
+        # pts1, pts2 = adjust_points_no_dict(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
+        pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, height=H, width=W)
 
-        return img0, img1, F, pts1, pts2, self.seq_name, self.sequence_path, idx
+        return img0, img1, F, pts1, pts2, self.seq_name, self.sequence_path
 
 class Dataset_stereo(torch.utils.data.Dataset):
     def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, keypoints, subset_valid_indices, seq_name, test, data_ratio):
@@ -209,7 +211,9 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
                 img0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices} if INIT_DATA else None    
                 img1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in valid_indices} if INIT_DATA else None    
 
-                custom_dataset = Dataset(sequence_path, poses, img0, img1, valid_indices, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
+                keypoints_dict = load_keypoints(os.path.join(os.path.dirname(sequence_path), 'keypoints.txt'))
+
+                custom_dataset = Dataset(sequence_path, poses, img0, img1, valid_indices, keypoints_dict, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
 
                 if len(custom_dataset) > 9:
                     if RealEstate_path == 'RealEstate10K/train_images':
