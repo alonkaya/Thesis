@@ -126,21 +126,42 @@ def vis_trained(plots_path):
 
 
 def sed_distance_gt():
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=5, part=None, batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=100000000, batch_size=1)
 
     epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
                    "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
-    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
-        print(pts1[0].shape)
-        if pts1[0].shape[0] == 0:
-            i -=1
+    
+    for img1, img2, label, pts1, pts2, seq_name, seq_path, idx in train_loader:
+        if img1==-1:
             continue
-        update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")        
-    print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(i+1)}')
-    print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(i+1)}')
-    print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(i+1)}')
-    print()
+        if img1 == None:
+            seq_path_parent = os.path.dirname(seq_path[0])
+            source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
+            dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
+            print(f'from: {source_path}, to: {dest_path}')
+            os.rename(source_path, dest_path)
+
+    for img1, img2, label, pts1, pts2, seq_name, seq_path, idx in val_loader:
+        if img1==-1:
+            continue        
+        if img1 == None:
+            seq_path_parent = os.path.dirname(seq_path[0])
+            source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
+            dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
+            print(f'from: {source_path}, to: {dest_path}')
+            os.rename(source_path, dest_path)
+
+    for img1, img2, label, pts1, pts2, seq_name, seq_path, idx in test_loader:
+        if img1==-1:
+            continue        
+        if img1 == None:
+            seq_path_parent = os.path.dirname(seq_path[0])
+            source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
+            dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
+            print(f'from: {source_path}, to: {dest_path}')
+            os.rename(source_path, dest_path)            
+
 
 def return_bad_frames_to_seq():
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
@@ -503,11 +524,5 @@ def sed_distance_gt_FM():
 
 if __name__ == "__main__":
     sed_distance_gt()
-
-
-
-
-
-
-
-    
+    sed_distance_gt()
+    sed_distance_gt()

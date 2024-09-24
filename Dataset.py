@@ -28,9 +28,12 @@ class Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
-        
-        img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-        img1 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
+        try:
+            img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+            img1 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
+        except Exception as e:
+            print(e)
+            return None, None, None, None, None, None, None, None
         H, W = img0.shape[1], img0.shape[2]
 
         # Gey keypoints on original image
@@ -54,7 +57,7 @@ class Dataset(torch.utils.data.Dataset):
         # Adjust keypoints according to the crop
         pts1, pts2 = adjust_points_no_dict(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
 
-        return img0, img1, F, pts1, pts2, self.seq_name
+        return img0, img1, F, pts1, pts2, self.seq_name, self.sequence_path, idx
 
 class Dataset_stereo(torch.utils.data.Dataset):
     def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, keypoints, subset_valid_indices, seq_name, test, data_ratio):
@@ -134,21 +137,52 @@ def get_transform():
 transform = get_transform()    
 
 
+# def custom_collate_fn(batch):
+#     imgs1, imgs2, Fs, all_pts1, all_pts2, seq_names = zip(*batch)
+
+#     max_len = max(pts1.shape[0] for pts1 in all_pts1)
+
+#     padded_pts1 = []
+#     padded_pts2 = []
+#     for pts1, pts2 in zip(all_pts1, all_pts2):
+#         if pts1.shape[0] == 0:
+#             print(f'\n################\nEmpty points at {seq_names}\n\n')
+#         pad_len = max_len - pts1.shape[0]
+#         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
+#         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
+
+#     return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
+
 def custom_collate_fn(batch):
-    imgs1, imgs2, Fs, all_pts1, all_pts2, seq_names = zip(*batch)
+    all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names, ass, bs = zip(*batch)
+    if all_imgs0==None:
+        return -1, -1, -1, -1, -1, -1, -1, -1
 
     max_len = max(pts1.shape[0] for pts1 in all_pts1)
 
     padded_pts1 = []
     padded_pts2 = []
-    for pts1, pts2 in zip(all_pts1, all_pts2):
-        if pts1.shape[0] == 0:
-            print(f'\n################\nEmpty points at {seq_names}\n\n')
+    img0_list = []
+    img1_list = []
+    Fs_list = []
+    seq_names_list = []
+    a_list = []
+    b_list = []
+    for imgs0, imgs1, Fs, pts1, pts2, seq_names, a, b in zip(all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names, ass, bs):
+        seq_names_list.append(seq_names)
+        a_list.append(a)
+        b_list.append(b)
+        if USE_REALESTATE and pts1.shape[0] <= 10:
+            continue
         pad_len = max_len - pts1.shape[0]
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
+        img0_list.append(imgs0)
+        img1_list.append(imgs1)
+        Fs_list.append(Fs)
 
-    return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
+    if USE_REALESTATE and len(padded_pts1) == 0:
+        return None, None, None, None, None, seq_names_list, a_list, b_list
 
 def get_dataloaders_RealEstate(train_num_sequences, batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
