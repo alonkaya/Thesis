@@ -34,7 +34,6 @@ class Dataset(torch.utils.data.Dataset):
             img1 = self.images_0[idx+self.jump_frames] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
         except Exception as e:
             print(f"Error at {self.sequence_path}, {idx}: {e}")
-            print(self.images_0.keys())
             print(self.valid_indices)
             
         H, W = img0.shape[1], img0.shape[2]
@@ -172,7 +171,7 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
 
                 # Indices of 'good' image frames
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
-
+                print(valid_indices)
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
                 original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
                 K = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=False)
