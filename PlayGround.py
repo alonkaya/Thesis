@@ -131,7 +131,7 @@ def sed_distance_gt():
     epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
                    "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
-    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
         print(pts1[0].shape)
         if pts1[0].shape[0] == 0:
             i -=1
