@@ -53,8 +53,8 @@ class Dataset(torch.utils.data.Dataset):
 
         # Adjust keypoints according to the crop
         pts1, pts2 = adjust_points_no_dict(epi.pts1, epi.pts2, top_crop, left_crop, H, W)
-        # print(f'inside: {pts1.shape}')
-        return img0, img1, F, pts1, pts2, self.seq_name
+
+        return img0, img1, F, pts1, pts2, self.seq_name, self.sequence_path, idx
 
 class Dataset_stereo(torch.utils.data.Dataset):
     def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, keypoints, subset_valid_indices, seq_name, test, data_ratio):
@@ -148,7 +148,7 @@ def custom_collate_fn(batch):
     Fs_list = []
     seq_names_list = []
     for imgs0, imgs1, Fs, pts1, pts2, seq_names in zip(all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names):
-        if pts1.shape[0] < 6:
+        if USE_REALESTATE and pts1.shape[0] <= 5:
             continue
         pad_len = max_len - pts1.shape[0]
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
@@ -157,7 +157,7 @@ def custom_collate_fn(batch):
         img1_list.append(imgs1)
         Fs_list.append(Fs)
         seq_names_list.append(seq_names)
-    if len(padded_pts1) == 0:
+    if USE_REALESTATE and len(padded_pts1) == 0:
         return None, None, None, None, None, None
 
     return (torch.stack(img0_list), torch.stack(img1_list), torch.stack(Fs_list), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names_list)
@@ -210,9 +210,9 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
     concat_test_dataset = ConcatDataset(test_datasets)
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False)
-    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False)
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
     
     print(len(train_loader), len(val_loader), len(test_loader))
 

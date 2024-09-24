@@ -175,7 +175,8 @@ class FMatrixRegressor(nn.Module):
 
 
     def train_model(self, train_loader, val_loader, test_loader):
-        for epoch in range(self.start_epoch, self.num_epochs):
+        break_when_good = False
+        for epoch in range(self.start_epoch, self.num_epochs+100):
             epoch_stats = {"algebraic_pred": torch.tensor(0), "algebraic_sqr_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
                             "val_algebraic_pred": torch.tensor(0), "val_algebraic_sqr_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
                             "algebraic_truth": torch.tensor(0), "algebraic_sqr_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
@@ -230,6 +231,15 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
             if SAVE_MODEL:
                 self.save_model(epoch+1)
+            
+            # If the last epochs are not decreasing in val loss, raise break_whe_good flag
+            if (epoch > int(self.num_epochs * 2/5) and not_decreasing(self.all_val_loss, self.num_epochs)) or epoch > self.num_epochs:
+                break_when_good = True
+
+            # If last epoch got best results of psat 4 epochs, stop training
+            if break_when_good and ready_to_break(self.all_val_loss):
+                self.num_epochs = epoch + 1
+                break
         
         self.test(test_loader)
 

@@ -131,25 +131,22 @@ def sed_distance_gt():
     epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
                    "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
-    c = 0
-    start_time = time.time()
-    for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
-        if i == 500: break
-        if img1 == None or pts1[0].shape[0] == 0:
-            continue
+    for i, (img1, img2, label, pts1, pts2, seq_name, seq_path, idx) in enumerate(test_loader):
+        if img1 == None:
+            seq_path_parent = os.path.dirname(seq_path[0])
+            source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
+            dest_path = os.path.join(seq_path_parent, "bad", f'{idx[0]:06}.png')
+            print(f"Moving {source_path} to {dest_path}")
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
-        update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
-        c += 1
+        # update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
         
     
-    print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(c+1)}')
-    print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(c+1)}')
-    print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(c+1)}')
-    print(c/len(test_loader))
-    print()
-    end_time = time.time()
-    print(f"Time: {end_time - start_time}")
+    # print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(c+1)}')
+    # print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(c+1)}')
+    # print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(c+1)}')
+    # print(c/len(test_loader))
+    # print()
 
 def sed_distance_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)

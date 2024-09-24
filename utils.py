@@ -167,6 +167,15 @@ def not_learning(val_RE1, plots_path):
         return True
     return False
 
+def not_decreasing(val_loss, num_epochs):
+    x = num_epochs/10
+    if sum(val_loss[-x:]) > sum(val_loss[-2*x:-x]) + 0.05*x:
+        return True
+    
+def ready_to_break(val_loss):
+    if (val_loss[-1] < val_loss[-2]) and (val_loss[-1] < val_loss[-3]) and (val_loss[-1] < val_loss[-4]) and (val_loss[-1] < val_loss[-5]):
+        return True
+
 def print_and_write(output, plots_path):
     os.makedirs(plots_path, exist_ok=True)
 
