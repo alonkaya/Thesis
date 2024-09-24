@@ -155,7 +155,7 @@ transform = get_transform()
 
 def custom_collate_fn(batch):
     all_imgs0, all_imgs1, all_Fs, all_pts1, all_pts2, all_seq_names, ass, bs = zip(*batch)
-    if all_imgs0==None or all_pts1 is None:
+    if any(img is None for img in all_imgs0):
         return None, None, None, None, None, None, None, None
 
     max_len = max(pts1.shape[0] for pts1 in all_pts1)
