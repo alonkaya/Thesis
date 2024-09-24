@@ -137,8 +137,8 @@ def sed_distance_gt():
             seq_path_parent = os.path.dirname(seq_path[0])
             source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
             dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
-            print(f"Moving {source_path} to {dest_path}")
-            os.rename(source_path, dest_path)
+            # print(f"Moving {source_path} to {dest_path}")
+            # os.rename(source_path, dest_path)
             c +=1
         else:
             print(pts1.shape)
