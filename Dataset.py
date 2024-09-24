@@ -183,6 +183,8 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
                         val_datasets.append(custom_dataset)
                     else:
                         test_datasets.append(custom_dataset)
+                else: 
+                    print(f"Empty dataset at {RealEstate_path}, {sequence_name}: {len(custom_dataset)}")
 
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
