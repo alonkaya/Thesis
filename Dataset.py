@@ -29,12 +29,9 @@ class Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
-        try:
-            img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-            img1 = self.images_0[idx+self.jump_frames] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
-        except Exception as e:
-            print(f'aaaa\n{e}')
-            return None, None, None, None, None, None, None, None
+        img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+        img1 = self.images_0[idx+self.jump_frames] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
+
         H, W = img0.shape[1], img0.shape[2]
 
         # Gey keypoints on original image
