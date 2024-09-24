@@ -34,21 +34,21 @@ if __name__ == "__main__":
         L2_coeff = args.l2
         huber_coeff = args.huber
         frozen_layers = args.fl if args.fl else FROZEN_LAYERS
-        part = args.parts if args.parts else PART
-        seq_ratios = args.dr if args.dr else SEQ_RATIOS
+
+        parts = PART if STEREO else [None]
+        train_sizes = SEQ_RATIOS if STEREO else RL_TRAIN_NUM
 
         # Iterate over each combination
-        param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, SEED, seq_ratios, lrs, batch_size, part, frozen_layers)
-        with open ('not_good.txt', 'r') as f:
-                not_good = f.read().splitlines()
-
-        for i, (alg_coeff, re1_coeff, sed_coeff, seed, data_ratio, lr, bs, part, fl) in enumerate(param_combinations):
+        param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, SEED, train_sizes, lrs, batch_size, parts, frozen_layers)
+        for i, (alg_coeff, re1_coeff, sed_coeff, seed, train_size, lr, bs, part, fl) in enumerate(param_combinations):
                 set_seed(seed)
-                if part != "head" and part != "mid" and part != "tail":
+                if STEREO and part != "head" and part != "mid" and part != "tail":
                         raise ValueError("Invalid part")
                 
-                lr_decay = 0.85 if lr < 1e-4 else 0.8
-                num_epochs = 2000 if data_ratio==0.3 else 3000 if data_ratio==0.2 else 4000 if data_ratio==0.1 else 5500 if data_ratio==0.05 else 9000 if data_ratio==0.0375 else 12000 if data_ratio==0.025 else 0
+                if STEREO:
+                        num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 5500 if train_size==0.05 else 9000 if train_size==0.0375 else 12000 if train_size==0.025 else 0
+                elif USE_REALESTATE:
+                        num_epochs = 2000 
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
@@ -60,18 +60,16 @@ if __name__ == "__main__":
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
                 compress = f'avg_embeddings' if AVG_EMBEDDINGS else f'conv'
                 seed_param = "" if seed == 42 else f"__seed_{seed}"
+                data_config = f'ratio_{train_size}__{part}' if STEREO else f'train_{train_size}'
 
-                plots_path = os.path.join('plots', dataset, 'Winners',
+                plots_path = os.path.join('plots', dataset, 'Winners' if STEREO else '',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
-                                        f"""BS_{bs}__ratio_{data_ratio}__{part}__frozen_{fl}{ADDITIONS}{seed_param}""")
-                
-                if plots_path in not_good:
-                        continue
+                                        f"""BS_{bs}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
 
-                train_loader, val_loader, test_loader = get_data_loaders(data_ratio, part, batch_size=bs)
+                train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=bs)
 
-                model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
+                model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
 
                 # If the model was bad trained, skip it
                 if os.path.exists((f'{model.plots_path}__bad')):
@@ -85,11 +83,11 @@ if __name__ == "__main__":
 
                 elif model.start_epoch < model.num_epochs:
                         parameters = f"""###########################################################################################################################################################\n
-                        {ADDITIONS} learning rate: {lr}, lr_decay: {lr_decay}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
-                        batch_size: {bs}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo if STEREO else train_seqeunces}, val_sequences: {val_sequences_stereo if STEREO else val_sequences}, dataset: {dataset},
+                        {ADDITIONS} learning rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
+                        batch_size: {bs}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo}, val_sequences: {val_sequences_stereo}, RL_TEST_NAMES: {RL_TEST_NAMES}, dataset: {dataset},
                         average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, part: {part}, get_old_path: {GET_OLD_PATH},
-                        SVD coeff: {LAST_SV_COEFF}, RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, frozen layers: {fl}, trained vit: {TRAINED_VIT},
-                        crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, data_ratio: {data_ratio}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED} seed: {seed}, \n\n"""
+                        RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, frozen layers: {fl}, trained vit: {TRAINED_VIT},
+                        crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, train_size: {train_size}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED} seed: {seed}, \n\n"""
                         print_and_write(parameters, model.plots_path)
                         
                         if PRETRAINED_PATH or os.path.exists(os.path.join(plots_path, 'model.pth')):

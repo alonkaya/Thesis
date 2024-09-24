@@ -33,7 +33,7 @@ class Dataset(torch.utils.data.Dataset):
         img1 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
         H, W = img0.shape[1], img0.shape[2]
 
-        # Gey keypoints
+        # Gey keypoints on original image
         unnormalized_F = get_F(self.k, self.k, self.poses, idx, self.jump_frames)
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
         epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False)
@@ -118,7 +118,6 @@ def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
 
 def get_transform():
     transforms = []
-    
     if not RANDOM_CROP: # original image size ~ 1200 * 700
         transforms.extend([
             v2.Resize((RESIZE, RESIZE), antialias=True),
@@ -143,13 +142,15 @@ def custom_collate_fn(batch):
     padded_pts1 = []
     padded_pts2 = []
     for pts1, pts2 in zip(all_pts1, all_pts2):
+        if pts1.shape[0] == 0:
+            print(f'\n################\nEmpty points at {seq_names}\n\n')
         pad_len = max_len - pts1.shape[0]
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
 
     return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
 
-def get_dataloaders_RealEstate(data_ratio, part, batch_size):
+def get_dataloaders_RealEstate(train_num_sequences, batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
     train_datasets, val_datasets, test_datasets = [], [], []
     for jump_frames in [JUMP_FRAMES]:
@@ -176,9 +177,9 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
 
                 if len(custom_dataset) > 9:
                     if RealEstate_path == 'RealEstate10K/train_images':
-                        if len(train_datasets) > RealEstate_train_num_sequences: break                        
+                        if len(train_datasets) > train_num_sequences: break                        
                         train_datasets.append(custom_dataset) 
-                    elif sequence_name not in RealEstate_test_names:
+                    elif sequence_name not in RL_TEST_NAMES:
                         val_datasets.append(custom_dataset)
                     else:
                         test_datasets.append(custom_dataset)
@@ -294,13 +295,13 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
 
     return train_loader, val_loader, test_loader
 
-def get_data_loaders(data_ratio, part, batch_size=BATCH_SIZE):
+def get_data_loaders(train_size=None, part=None, batch_size=BATCH_SIZE):
     if STEREO:
-        return get_dataloader_stereo(data_ratio, part, batch_size)
+        return get_dataloader_stereo(train_size, part, batch_size)
     elif USE_REALESTATE:
-        return get_dataloaders_RealEstate(data_ratio, part, batch_size)
+        return get_dataloaders_RealEstate(train_size, batch_size)
     else: # KITTI
-        return get_dataloaders_KITTI(data_ratio, batch_size)
+        return get_dataloaders_KITTI(train_size, batch_size)
 
 
 

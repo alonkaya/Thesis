@@ -8,10 +8,10 @@ from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetMode
 
 
 class FMatrixRegressor(nn.Module):
-    def __init__(self, lr, lr_decay, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
+    def __init__(self, lr, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
                  augmentation=AUGMENTATION, model_name=MODEL, trained_vit=TRAINED_VIT,
                  frozen_layers=0, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
-                 alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
+                 alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=0):
 
         """
         Args:
@@ -37,7 +37,6 @@ class FMatrixRegressor(nn.Module):
         self.to(device)
         self.batch_size = batch_size
         self.lr = lr
-        self.lr_decay = lr_decay
         self.min_lr = min_lr
         self.average_embeddings = average_embeddings
         self.model_name = model_name
@@ -124,15 +123,10 @@ class FMatrixRegressor(nn.Module):
                 {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
             ])
             self.scheduler = None
-            if SCHED == "cosine":
-                self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.num_epochs, eta_min=self.min_lr)
-            elif SCHED == "step":
-                self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
 
         self.to(device)
 
     def FeatureExtractor(self, x1, x2):
-        # TODO Train with convs before VIT?
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state
         x2_embeddings = self.model(pixel_values=x2).last_hidden_state
@@ -287,7 +281,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             'vit': self.model.state_dict() ,
             'conv': self.conv.state_dict() if self.use_conv else '',
             "scheduler" : None if self.scheduler==None else self.scheduler.state_dict(),
-            "lr_decay" : self.lr_decay,
             "L2_coeff" : self.L2_coeff,
             "huber_coeff" : self.huber_coeff,
             "batch_size" : self.batch_size,
@@ -325,14 +318,13 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             try:
                 checkpoint = torch.load(model_path, map_location='cpu')
             except Exception as e:
-                print(f'using backup:\n{e}')
+                print(f'\n#########\nusing backup:\n{e}')
                 checkpoint = torch.load(os.path.join(path, "backup_model.pth"), map_location='cpu')
                 sys.stdout.flush()
         else:
             print_and_write(f"Model {model_path} not found", self.plots_path)
             raise FileNotFoundError
 
-        self.lr_decay = checkpoint.get("lr_decay", self.lr_decay)
         self.L2_coeff = checkpoint.get("L2_coeff", self.L2_coeff)
         self.huber_coeff = checkpoint.get("huber_coeff", self.huber_coeff)
         self.batch_size = checkpoint.get("batch_size", self.batch_size)
@@ -389,40 +381,14 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.model.load_state_dict(checkpoint['vit']) 
         self.model.to(device)
 
-        try:
-            # Load optimizer and scheduler
-            self.optimizer = optim.Adam([
-                {'params': self.model.parameters(), 'lr': self.lr},
-                {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
-                {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
-            ])
-            self.scheduler = None
-            if SCHED == "cosine":
-                self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.num_epochs, eta_min=self.min_lr)
-                self.scheduler.load_state_dict(checkpoint.get("scheduler"))
-                if self.scheduler.last_epoch >= self.schedular.T_max-1:
-                    self.scheduler = None
-            elif SCHED == "step":
-                self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
-                self.scheduler.load_state_dict(checkpoint.get("scheduler"))
-            self.optimizer.load_state_dict(checkpoint['optimizer'])
-        except Exception as e:
-            self.optimizer = optim.Adam([
-                {'params': self.model.parameters(), 'lr': self.lr},
-                {'params': []},
-                {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
-                {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
-            ])
-            self.scheduler = None
-            if SCHED == "cosine":
-                self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.num_epochs, eta_min=self.min_lr)
-                self.scheduler.load_state_dict(checkpoint.get("scheduler"))
-                if self.scheduler.last_epoch >= self.schedular.T_max-1:
-                    self.scheduler = None
-            elif SCHED == "step":
-                self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=self.lr_decay)
-                self.scheduler.load_state_dict(checkpoint.get("scheduler"))
-            self.optimizer.load_state_dict(checkpoint['optimizer'])
+        # Load optimizer and scheduler
+        self.optimizer = optim.Adam([
+            {'params': self.model.parameters(), 'lr': self.lr},
+            {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
+            {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
+        ])
+        self.scheduler = None
+        self.optimizer.load_state_dict(checkpoint['optimizer'])
 
     def append_epoch_stats(self, train_mae, val_mae, epoch_stats):
         self.all_train_mae.append(train_mae)
