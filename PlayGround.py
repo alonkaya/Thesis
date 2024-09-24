@@ -513,4 +513,4 @@ def sed_distance_gt_FM():
 
 
 if __name__ == "__main__":
-    return_bad_frames_to_seq()
+    sed_distance_gt()
