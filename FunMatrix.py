@@ -172,7 +172,7 @@ def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, plots_path,
     prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
 
     algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2)
-    print(SED_dist_pred)
+    print(f'sed: {SED_dist_pred}')
 
     stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred.detach())
     # stats[f"{prefix}algebraic_sqr_pred"] = stats[f"{prefix}algebraic_sqr_pred"] + (algebraic_dist_sqr_pred.detach())
