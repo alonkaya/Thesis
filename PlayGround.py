@@ -147,6 +147,17 @@ def sed_distance_gt():
     # print(c/len(test_loader))
     # print()
 
+def return_bad_frames_to_seq():
+    RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
+
+    for RealEstate_path in RealEstate_paths:
+        for sequence_name in os.listdir(RealEstate_path): 
+            bad_seq_path = os.path.join(RealEstate_path, sequence_name, 'bad_frames')
+            image_0_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
+            for img in os.listdir(bad_seq_path):
+                print(f'from: {os.path.join(bad_seq_path, img)}, to: {os.path.join(image_0_path, img)}') 
+                # os.rename(os.path.join(bad_seq_path, img), os.path.join(image_0_path, img))
+
 def sed_distance_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
     train_loader, val_loader, test_loader = get_data_loaders()
@@ -495,4 +506,4 @@ def sed_distance_gt_FM():
 
 
 if __name__ == "__main__":
-    sed_distance_gt()
+    return_bad_frames_to_seq()
