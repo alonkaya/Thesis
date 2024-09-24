@@ -137,7 +137,6 @@ def sed_distance_gt():
             source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
             dest_path = os.path.join(seq_path_parent, "bad", f'{idx[0]:06}.png')
             print(f"Moving {source_path} to {dest_path}")
-        img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
         # update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
         

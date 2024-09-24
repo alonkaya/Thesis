@@ -162,7 +162,7 @@ def custom_collate_fn(batch):
         a_list.append(a)
         b_list.append(b)
     if USE_REALESTATE and len(padded_pts1) == 0:
-        return None, None, None, None, None, None, None, None
+        return None, None, None, None, None, seq_names_list, a_list, b_list
 
     return (torch.stack(img0_list), torch.stack(img1_list), torch.stack(Fs_list), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names_list, a_list, b_list)
 
