@@ -182,14 +182,16 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
 
                 # Indices of 'good' image frames
                 valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
-                
-                if RealEstate_path == 'RealEstate10K/val_images':
-                    subset = valid_indices
-                else:
-                    if len(valid_indices) < 30: continue
-                    length = int(len(valid_indices) * data_ratio) 
-                    mid_start = len(valid_indices) // 2 - length // 2
-                    subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
+                print(f'valid indices: {len(valid_indices)}')
+                print(f'seq len: {len(poses)-jump_frames}')
+
+                # if RealEstate_path == 'RealEstate10K/val_images':
+                subset = valid_indices
+                # else:
+                #     if len(valid_indices) < 30: continue
+                #     length = int(len(valid_indices) * data_ratio) 
+                #     mid_start = len(valid_indices) // 2 - length // 2
+                #     subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
 
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
                 original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{subset[0]:06}.{IMAGE_TYPE}')).size).to(device)
@@ -201,7 +203,8 @@ def get_dataloaders_RealEstate(data_ratio, part, batch_size):
 
                 custom_dataset = Dataset(sequence_path, poses, img0, img1, subset, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
 
-                if len(custom_dataset) > 9:
+                # if len(custom_dataset) > 9:
+                if len(custom_dataset) > 0:
                     if RealEstate_path == 'RealEstate10K/train_images':
                         train_datasets.append(custom_dataset) 
                     elif sequence_name not in RealEstate_test_names:

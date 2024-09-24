@@ -131,15 +131,21 @@ def sed_distance_gt():
     epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
                    "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
+    c=0
     for i, (img1, img2, label, pts1, pts2, seq_name, seq_path, idx) in enumerate(test_loader):
         if img1 == None:
             seq_path_parent = os.path.dirname(seq_path[0])
             source_path = os.path.join(seq_path[0], f'{idx[0]:06}.jpg')
-            dest_path = os.path.join(seq_path_parent, "bad", f'{idx[0]:06}.png')
+            dest_path = os.path.join(seq_path_parent, "bad_frames", f'{idx[0]:06}.png')
             print(f"Moving {source_path} to {dest_path}")
+            os.rename(source_path, dest_path)
+            c +=1
+        else:
+            print(pts1.shape)
 
         # update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
-        
+    print(c)
+    print(len(test_loader))
     
     # print(f'test_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(c+1)}')
     # print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(c+1)}')
@@ -155,9 +161,8 @@ def return_bad_frames_to_seq():
             bad_seq_path = os.path.join(RealEstate_path, sequence_name, 'bad_frames')
             image_0_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
             if os.path.exists(bad_seq_path):
-                print("dfgfdg")
-                # for img in os.listdir(bad_seq_path):
-                    # print(f'from: {os.path.join(bad_seq_path, img)}, to: {os.path.join(image_0_path, img)}') 
+                for img in os.listdir(bad_seq_path):
+                    print(f'from: {os.path.join(bad_seq_path, img)}, to: {os.path.join(image_0_path, img)}') 
                     # os.rename(os.path.join(bad_seq_path, img), os.path.join(image_0_path, img))
 
 def sed_distance_trained(plots_path):

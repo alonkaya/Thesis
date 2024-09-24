@@ -20,7 +20,7 @@ RIGHTCAMVAL = False
 JUMP_FRAMES = 6 if USE_REALESTATE else 2
 AUGMENTATION = True
 RANDOM_CROP = True
-INIT_DATA = True
+INIT_DATA = False #####TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 PART = ["head"]       
 RealEstate_test_names = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a"]                                           
 
@@ -45,7 +45,7 @@ RE1_DIST = True
 SED_DIST = True
 SED_BAD_THRESHOLD = 0.01 if STEREO else 0.1
 EPIPOLAR_THRESHOLD = 0.3 
-SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.02
+SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.03
 LAST_SV_COEFF = 0 if USE_RECONSTRUCTION_LAYER else 1
 ALG_COEFF = [0]
 RE1_COEFF = [0]
