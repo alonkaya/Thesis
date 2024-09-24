@@ -25,7 +25,7 @@ class Dataset(torch.utils.data.Dataset):
         self.jump_frames = jump_frames
 
     def __len__(self):
-        return len(self.valid_indices) - self.jump_frames
+        return len(self.valid_indices) - self.jump_frames # check this, you can change things so that you woldnt have to subtract jump_frames
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
@@ -35,6 +35,7 @@ class Dataset(torch.utils.data.Dataset):
         except Exception as e:
             print(f"Error at {self.sequence_path}, {idx}: {e}")
             print(self.images_0.keys())
+            print(self.valid_indices)
             
         H, W = img0.shape[1], img0.shape[2]
 
