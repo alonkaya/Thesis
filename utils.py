@@ -168,7 +168,7 @@ def not_learning(val_RE1, plots_path):
     return False
 
 def not_decreasing(val_loss, num_epochs):
-    x = num_epochs/10
+    x = int(num_epochs/10)
     if sum(val_loss[-x:]) > sum(val_loss[-2*x:-x]) + 0.05*x:
         return True
     

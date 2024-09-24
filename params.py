@@ -57,13 +57,13 @@ CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 # CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 PRETRAINED_PATH =  None # make sure you set GET_OLD_PATH !! 
-TRAINED_VIT =  "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
 RESNET_MODEL_NAME = 'microsoft/resnet-152'
-MODEL = CLIP_MODEL_NAME
+MODEL = RESNET_MODEL_NAME
+TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
 AVG_EMBEDDINGS = False
 USE_CONV = True
 USE_CONV = False
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
-FROZEN_LAYERS = [0, 4, 8] # SET TO 0 IF RESNET!
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4, 8] # SET TO 0 IF RESNET!
 norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
 norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
