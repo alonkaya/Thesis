@@ -528,6 +528,5 @@ def sed_distance_gt_FM():
 
 
 if __name__ == "__main__":
-    sed_distance_gt()
-    sed_distance_gt()
-    sed_distance_gt()
+
+    vis_gt()
