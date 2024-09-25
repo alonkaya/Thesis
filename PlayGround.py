@@ -110,8 +110,8 @@ def vis_gt():
         # Combine the two images with padding in between
         combined_image = np.hstack((img0_pts, padding, img1_pts))
 
-        os.makedirs(f'gt_epilines/{seq_name[0]}', exist_ok=True)
-        cv2.imwrite(f'gt_epilines/{seq_name[0]}/gt_{i}.png', combined_image)
+        os.makedirs(f'gt_epilines/RealEstate_after_transform/{seq_name[0]}', exist_ok=True)
+        cv2.imwrite(f'gt_epilines/RealEstate_after_transform/{seq_name[0]}/gt_{i}.png', combined_image)
 
         if i == 100: break
         
