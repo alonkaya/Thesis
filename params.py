@@ -1,18 +1,18 @@
 import torch
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
-
+# plots/RealEstate/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__train_20__frozen_0/output.log
 
 # 173600 output_realestate_18_seed_300.log
-
+# 193911 output_affine_alg_1.log
 ### Dataset ###  
-USE_REALESTATE = False
-STEREO = True
+USE_REALESTATE = True
+STEREO = False
 RIGHTCAMVAL = False
 CROP = 224
 RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
-INIT_DATA = True ###############################
+INIT_DATA = True 
 
 ### STEREO ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
@@ -23,7 +23,7 @@ PART = ["head", "mid", "tail"]
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
-RL_TRAIN_NUM = [18]   # 14=1872 # 18=2136 # 20=2368   
+RL_TRAIN_NUM = [20]   # 14=1872 # 18=2136 # 20=2368   
 JUMP_FRAMES = 6 
 
 ### Training ###

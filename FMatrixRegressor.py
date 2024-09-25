@@ -215,7 +215,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.all_train_mae[-1], self.all_val_mae[-1], self.plots_path):
                 self.num_epochs = epoch + 1
                 break
-            if epoch == int(self.num_epochs * 2/5) and not_learning(self.all_val_RE1_pred, self.plots_path):
+            if STEREO and epoch == int(self.num_epochs * 2/5) and not_learning(self.all_val_RE1_pred, self.plots_path):
                 self.num_epochs = epoch + 1
                 os.rename(self.plots_path, self.plots_path + "__bad")
                 self.plots_path = self.plots_path + "__bad"
