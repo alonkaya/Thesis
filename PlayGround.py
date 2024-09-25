@@ -130,7 +130,7 @@ def vis_trained(plots_path):
         epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("predicted_RealEstate", seq_name[0]))
 
 def sed_gt():
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=3, batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=3, batch_size=2)
 
     epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
@@ -141,7 +141,7 @@ def sed_gt():
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, seq_name, data_type="test")
         if i==2: break
-
+    print(epoch_stats["test_SED_pred"])
     print(f"""SED distance: {epoch_stats["test_SED_pred"]/i+1}
 Algebraic distance: {epoch_stats["test_algebraic_pred"]/i+1}
 RE1 distance: {epoch_stats["test_RE1_pred"]/i+1}""")
