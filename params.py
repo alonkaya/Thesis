@@ -1,9 +1,9 @@
 import torch
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
-# plots/RealEstate/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__train_20__frozen_0/output.log
 
 # 173600 output_realestate_18_seed_300.log
 # 193911 output_affine_alg_1.log
+# 208078 output_eralestate_20_cont.log
 ### Dataset ###  
 USE_REALESTATE = True
 STEREO = False
@@ -45,7 +45,7 @@ RE1_DIST = True
 SED_DIST = True
 EPIPOLAR_THRESHOLD = 0.3 
 SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.02
-ALG_COEFF = [1]
+ALG_COEFF = [0]
 RE1_COEFF = [0]
 SED_COEFF = [0.5]                                                    
 L2_COEFF = 1
