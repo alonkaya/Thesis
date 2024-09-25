@@ -251,12 +251,12 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 pts1.requires_grad = True
                 pts2.requires_grad = True
             # Update epoch statistics
-            batch_SED_pred = update_epoch_stats(
+            batch_SED_pred, alg_sqr_pred = update_epoch_stats(
                 epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, self.plots_path, data_type, epoch)
             
             # Compute loss
             loss = self.L2_coeff*self.L2_loss(output, label) + self.huber_coeff*self.huber_loss(output, label) + \
-                    self.sed_coeff*batch_SED_pred
+                    self.sed_coeff*batch_SED_pred + self.alg_coeff*alg_sqr_pred
             epoch_stats[f'{prefix}loss'] = epoch_stats[f'{prefix}loss'] + loss.detach()
 
             if data_type == "train":
