@@ -150,13 +150,8 @@ def normalize_L1(x):
 def normalize_L2(x):
     return x / torch.linalg.norm(x, dim=1, keepdim=True)
 
-def normalize_L22(x):
-    return x / torch.linalg.norm(x, 'fro', keepdim=True)
-
 def norm_layer(unnormalized_x):
     # Normalizes a batch of flattend 9-long vectors (i.e shape [-1, 9])
-    print(f'by row: \n{normalize_L2(unnormalized_x).view(-1,3,3).cpu().numpy()}')
-    print(f'fro: \n{normalize_L22(unnormalized_x).view(-1,3,3).cpu().numpy()}\n\n')
     return normalize_L2(unnormalized_x)
     
 

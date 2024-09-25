@@ -23,11 +23,11 @@ PART = ["head", "mid", "tail"]
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
-RL_TRAIN_NUM = [18]   # 14=1872 # 18=2136 # 20=2368   
+RL_TRAIN_NUM = [14]   # 14=1872 # 18=2136 # 20=2368   
 JUMP_FRAMES = 6 
 
 ### Training ###
-LR = [1e-4, 5e-5] if USE_REALESTATE else [1e-4]                                                             
+LR = [5e-5] if USE_REALESTATE else [1e-4]                                                             
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
@@ -38,7 +38,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-SEED = [42, 300]
+SEED = [42, 400]
 
 ### Epipolar geometry ###
 RE1_DIST = True

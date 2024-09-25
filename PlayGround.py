@@ -140,7 +140,7 @@ def sed_gt():
         img1, img2, label = img1.to(device), img2.to(device), label.to(device)
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, seq_name, data_type="test")
-        if i==2: break
+        if i==0: break
 
     print(f"""SED distance: {epoch_stats["test_SED_pred"]/i}
 Algebraic distance: {epoch_stats["test_algebraic_pred"]/i}
