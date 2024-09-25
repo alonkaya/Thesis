@@ -29,7 +29,7 @@ class Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         idx = self.valid_indices[idx]
-        
+
         img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
         img1 = self.images_1[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, f'{idx+self.jump_frames:06}.{IMAGE_TYPE}'))
 
@@ -384,11 +384,6 @@ def save_keypoints_stereo():
 
 
 def save_keypoints_realestate():
-    """
-    To work put these lines in the init of EpipolarGeometry:
-        self.image1_numpy = image1_tensors.cpu().numpy().transpose(1, 2, 0)
-        self.image2_numpy = image2_tensors.cpu().numpy().transpose(1, 2, 0) 
-    """
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
     for jump_frames in [JUMP_FRAMES]:
         for RealEstate_path in RealEstate_paths:
@@ -421,33 +416,34 @@ def save_keypoints_realestate():
 
                     epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False)
 
-                    filepath = os.path.join(os.path.dirname(sequence_path), f'keypoints.txt')
-                    with open(filepath, 'a') as f:
-                        line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
-                        f.write(line)
+                    # filepath = os.path.join(os.path.dirname(sequence_path), f'keypoints.txt')
+                    # with open(filepath, 'a') as f:
+                    #     line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
+                    #     f.write(line)
 
 
                     # Convert grayscale tensors to numpy arrays for matplotlib
-                    # img0_np = img0.squeeze().numpy()
-                    # img1_np = img1.squeeze().numpy()
+                    img0_np = img0.squeeze().numpy()
+                    img1_np = img1.squeeze().numpy()
 
-                    # # Create a subplot with two images
-                    # fig, axs = plt.subplots(1, 2, figsize=(15, 7))
+                    # Create a subplot with two images
+                    fig, axs = plt.subplots(1, 2, figsize=(15, 7))
 
-                    # # Display the first image with keypoints
-                    # axs[0].imshow(img0_np, cmap='gray')
-                    # axs[0].scatter(epi.pts1[:, 0].numpy(), epi.pts1[:, 1].numpy(), c='r', s=10)
-                    # axs[0].set_title(f'Image 0 - {idx}')
-                    # axs[0].axis('off')
+                    # Display the first image with keypoints
+                    axs[0].imshow(img0_np, cmap='gray')
+                    axs[0].scatter(epi.pts1[:, 0].numpy(), epi.pts1[:, 1].numpy(), c='r', s=10)
+                    axs[0].set_title(f'Image 0 - {idx}')
+                    axs[0].axis('off')
 
-                    # # Display the second image with keypoints
-                    # axs[1].imshow(img1_np, cmap='gray')
-                    # axs[1].scatter(epi.pts2[:, 0].numpy(), epi.pts2[:, 1].numpy(), c='r', s=10)
-                    # axs[1].set_title(f'Image 1 - {idx}')
-                    # axs[1].axis('off')
+                    # Display the second image with keypoints
+                    axs[1].imshow(img1_np, cmap='gray')
+                    axs[1].scatter(epi.pts2[:, 0].numpy(), epi.pts2[:, 1].numpy(), c='r', s=10)
+                    axs[1].set_title(f'Image 1 - {idx}')
+                    axs[1].axis('off')
 
-                    # # Show the plot
+                    # Show the plot
                     # plt.show()
+                    plt.savefig(f'keypoints_{sequence_name}_{idx}.png')
 
 
 if __name__ == "__main__":
