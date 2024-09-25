@@ -403,8 +403,9 @@ def save_keypoints_realestate():
                 original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
 
                 for idx in valid_indices:
+                    print(valid_indices[idx])
                     a = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[idx]:06}.{IMAGE_TYPE}')).size).to(device)
-                    if a.cpu().numpy()[0] != original_image_size.cpu().numpy()[0]:
+                    if a.cpu().numpy()[0] != original_image_size.cpu().numpy()[0] or a.cpu().numpy()[1] != original_image_size.cpu().numpy()[1]:
                         print(f"Different sizes: {a}, {original_image_size}")
                     # img0 = torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
                     # img1 = torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}'))
