@@ -5,8 +5,8 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 # 173600 output_realestate_18_seed_300.log
 
 ### Dataset ###  
-USE_REALESTATE = True
-STEREO = False
+USE_REALESTATE = False
+STEREO = True
 RIGHTCAMVAL = False
 CROP = 224
 RESIZE = 256
@@ -18,7 +18,7 @@ INIT_DATA = True ###############################
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-SEQ_RATIOS = [0.2, 0.1]      # 3251, 2166, 1082, 540, 405, 269
+SEQ_RATIOS = [0.025]      # 3251, 2166, 1082, 540, 405, 269
 PART = ["head", "mid", "tail"]    
 
 ### RealEstate ###
