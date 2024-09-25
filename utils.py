@@ -155,8 +155,8 @@ def normalize_L22(x):
 
 def norm_layer(unnormalized_x):
     # Normalizes a batch of flattend 9-long vectors (i.e shape [-1, 9])
-    print(f'by row: {normalize_L2(unnormalized_x)}')
-    print(f'fro: {normalize_L22(unnormalized_x)}')
+    print(f'by row: {normalize_L2(unnormalized_x).cpu().numpy()}')
+    print(f'fro: {normalize_L22(unnormalized_x).cpu().numpy()}')
     return normalize_L2(unnormalized_x)
     
 
