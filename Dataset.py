@@ -447,11 +447,11 @@ def save_keypoints_realestate():
 
 
                     # Draw keypoints on image 0
-                    for pt in epi.pts1.numpy():
+                    for pt in epi.pts1.cpu().numpy():
                         cv2.circle(img0_np, (int(pt[0]), int(pt[1])), radius=5, color=(0, 0, 255), thickness=-1)
 
                     # Draw keypoints on image 1
-                    for pt in epi.pts2.numpy():
+                    for pt in epi.pts2.cpu().numpy():
                         cv2.circle(img1_np, (int(pt[0]), int(pt[1])), radius=5, color=(0, 0, 255), thickness=-1)
 
                     # Save the images
