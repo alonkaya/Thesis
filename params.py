@@ -12,7 +12,7 @@ CROP = 224
 RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
-INIT_DATA = True
+INIT_DATA = False ###############################
 
 ### STEREO ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
