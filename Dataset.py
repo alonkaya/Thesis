@@ -455,8 +455,8 @@ def save_keypoints_realestate():
                         cv2.circle(img1_np, (int(pt[0]), int(pt[1])), radius=5, color=(0, 0, 255), thickness=-1)
 
                     # Save the images
-                    cv2.imwrite(f'image_0_with_keypoints_{idx}.png', img0_np)
-                    cv2.imwrite(f'image_1_with_keypoints_{idx}.png', img1_np)
+                    cv2.imwrite(f'draw0/image_0_with_keypoints_{idx}.png', img0_np)
+                    cv2.imwrite(f'draw1/image_1_with_keypoints_{idx}.png', img1_np)
 
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
