@@ -167,9 +167,10 @@ def not_learning(val_RE1, plots_path):
         return True
     return False
 
-def not_decreasing(val_loss, num_epochs):
+def not_decreasing(val_loss, num_epochs, plots_path):
     x = int(num_epochs/10)
     if sum(val_loss[-x:]) > sum(val_loss[-2*x:-x]) + 0.05*x:
+        print_and_write("### Not decreasing ###", plots_path)
         return True
     
 def ready_to_break(val_loss):

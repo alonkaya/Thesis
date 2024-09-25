@@ -227,7 +227,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 self.save_model(epoch+1)
             
             # If the last epochs are not decreasing in val loss, raise break_whe_good flag
-            if (epoch > int(self.num_epochs * 2/5) and not_decreasing(self.all_val_loss, self.num_epochs)) or epoch > self.num_epochs:
+            if (epoch > int(self.num_epochs * 2/5) and not_decreasing(self.all_val_loss, self.num_epochs, self.plots_path)) or epoch > self.num_epochs:
                 break_when_good = True
 
             # If last epoch got best results of psat 4 epochs, stop training
