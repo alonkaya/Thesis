@@ -141,10 +141,10 @@ def sed_gt():
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, seq_name, data_type="test")
         if i==2: break
-    print(epoch_stats["test_SED_pred"])
-    print(f"""SED distance: {epoch_stats["test_SED_pred"]/i+1}
-Algebraic distance: {epoch_stats["test_algebraic_pred"]/i+1}
-RE1 distance: {epoch_stats["test_RE1_pred"]/i+1}""")
+
+    print(f"""SED distance: {epoch_stats["test_SED_pred"]/i}
+Algebraic distance: {epoch_stats["test_algebraic_pred"]/i}
+RE1 distance: {epoch_stats["test_RE1_pred"]/i}""")
 
 
 def move_bad_frames_realestate():
