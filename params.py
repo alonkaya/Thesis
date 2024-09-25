@@ -2,7 +2,6 @@ import torch
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 
-# 58450 output_resnet_smalls.log
 # 173600 output_realestate_18_seed_300.log
 
 ### Dataset ###  

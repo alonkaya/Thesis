@@ -94,11 +94,13 @@ def vis_gt():
         
         img0_pts = img0_np.copy()
         img1_pts = img1_np.copy()
-        for point in pts1:
+        for i,point in enumerate(pts1):
+            if i == 30: break
             if point[0] == 0 and point[1] == 0: continue
             img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 3, (20, 20, 160), -1)
             
-        for point in pts2:
+        for i, point in enumerate(pts2):
+            if i == 30: break
             if point[0] == 0 and point[1] == 0: continue
             img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 3, (20, 20, 160), -1)
 
