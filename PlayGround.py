@@ -141,7 +141,7 @@ def sed_gt():
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), seq_path, data_type="test")
         if i==50: break
-        
+
     print(f"""SED distance: {epoch_stats["test_SED_pred"]/i+1}
     Algebraic distance: {epoch_stats["test_algebraic_pred"]/i+1}
     RE1 distance: {epoch_stats["test_RE1_pred"]/i+1}""")
@@ -546,4 +546,4 @@ def sed_distance_gt_FM():
 
 if __name__ == "__main__":
 
-    vis_gt()
+    sed_gt()
