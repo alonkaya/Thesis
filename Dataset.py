@@ -384,7 +384,7 @@ def save_keypoints_stereo():
 
 
 def save_keypoints_realestate():
-    RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
+    RealEstate_paths = ['RealEstate10K/val_images']
     for jump_frames in [JUMP_FRAMES]:
         for RealEstate_path in RealEstate_paths:
             for i, sequence_name in enumerate(os.listdir(RealEstate_path)): 
