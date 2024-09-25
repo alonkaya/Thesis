@@ -4,8 +4,8 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 # 58450 output_resnet_smalls.log
 ### Dataset ###  
-USE_REALESTATE = True
-STEREO = False
+USE_REALESTATE = False
+STEREO = True
 RIGHTCAMVAL = False
 CROP = 224
 RESIZE = 256
@@ -21,16 +21,16 @@ SEQ_RATIOS = [0.025, 0.0375, 0.05]      # 3251, 2166, 1082, 540, 405, 269
 PART = ["head", "mid", "tail"]    
 
 ### RealEstate ###
-RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  
+RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
 RL_TRAIN_NUM = [20]   # 14=1872 # 20=2368   
 JUMP_FRAMES = 6 
 
 ### Training ###
-LR = [1e-4, 5e-5]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
+LR = [1e-4, 5e-5] if USE_REALESTATE else [1e-4]                                                             
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = [8]                                                          # TODO 16, 32, 64
+BATCH_SIZE = [8]                                                          
 NORM = True
 TRAIN_FROM_SCRATCH = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
@@ -46,9 +46,9 @@ EPIPOLAR_THRESHOLD = 0.3
 SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.02
 ALG_COEFF = [0]
 RE1_COEFF = [0]
-SED_COEFF = [0.5]                                                    # TODO 0.01, 0.05, 0.1, 0.5, 1
+SED_COEFF = [0.5]                                                    
 L2_COEFF = 1
-HUBER_COEFF = 1                                                      # TODO: coeffs (1,1), (0.5,0.5), (0.1,0.1), (0.1,1), (1,0.1)
+HUBER_COEFF = 1                                                      
 ADDITIONS = ""                                     
 
 #### Model ###
