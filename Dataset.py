@@ -427,24 +427,36 @@ def save_keypoints_realestate():
                     img1_np = img1.squeeze().numpy()
 
                     # Create a subplot with two images
-                    fig, axs = plt.subplots(1, 2, figsize=(15, 7))
+                    # fig, axs = plt.subplots(1, 2, figsize=(15, 7))
 
-                    # Display the first image with keypoints
-                    axs[0].imshow(img0_np, cmap='gray')
-                    axs[0].scatter(epi.pts1[:, 0].numpy(), epi.pts1[:, 1].numpy(), c='r', s=10)
-                    axs[0].set_title(f'Image 0 - {idx}')
-                    axs[0].axis('off')
+                    # # Display the first image with keypoints
+                    # axs[0].imshow(img0_np, cmap='gray')
+                    # axs[0].scatter(epi.pts1[:, 0].numpy(), epi.pts1[:, 1].numpy(), c='r', s=10)
+                    # axs[0].set_title(f'Image 0 - {idx}')
+                    # axs[0].axis('off')
 
-                    # Display the second image with keypoints
-                    axs[1].imshow(img1_np, cmap='gray')
-                    axs[1].scatter(epi.pts2[:, 0].numpy(), epi.pts2[:, 1].numpy(), c='r', s=10)
-                    axs[1].set_title(f'Image 1 - {idx}')
-                    axs[1].axis('off')
+                    # # Display the second image with keypoints
+                    # axs[1].imshow(img1_np, cmap='gray')
+                    # axs[1].scatter(epi.pts2[:, 0].numpy(), epi.pts2[:, 1].numpy(), c='r', s=10)
+                    # axs[1].set_title(f'Image 1 - {idx}')
+                    # axs[1].axis('off')
 
                     # Show the plot
                     # plt.show()
-                    plt.savefig(f'keypoints_{sequence_name}_{idx}.png')
+                    # plt.savefig(f'keypoints_{sequence_name}_{idx}.png')
 
+
+                    # Draw keypoints on image 0
+                    for pt in epi.pts1.numpy():
+                        cv2.circle(img0_np, (int(pt[0]), int(pt[1])), radius=5, color=(0, 0, 255), thickness=-1)
+
+                    # Draw keypoints on image 1
+                    for pt in epi.pts2.numpy():
+                        cv2.circle(img1_np, (int(pt[0]), int(pt[1])), radius=5, color=(0, 0, 255), thickness=-1)
+
+                    # Save the images
+                    cv2.imwrite(f'image_0_with_keypoints_{idx}.png', img0_np)
+                    cv2.imwrite(f'image_1_with_keypoints_{idx}.png', img1_np)
 
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
