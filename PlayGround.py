@@ -143,8 +143,8 @@ def sed_gt():
         if i==2: break
 
     print(f"""SED distance: {epoch_stats["test_SED_pred"]/i+1}
-    Algebraic distance: {epoch_stats["test_algebraic_pred"]/i+1}
-    RE1 distance: {epoch_stats["test_RE1_pred"]/i+1}""")
+Algebraic distance: {epoch_stats["test_algebraic_pred"]/i+1}
+RE1 distance: {epoch_stats["test_RE1_pred"]/i+1}""")
 
 
 def move_bad_frames_realestate():
