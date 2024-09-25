@@ -136,7 +136,7 @@ def sed_gt():
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
                    "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
     
-    for i, img1, img2, label, pts1, pts2, seq_name in enumerate(test_loader):
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
         img1, img2, label = img1.to(device), img2.to(device), label.to(device)
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), seq_name, data_type="test")
