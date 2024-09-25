@@ -400,35 +400,31 @@ def save_keypoints_realestate():
                 # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
                 original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
                 k = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=False)
-                original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
 
                 for idx in valid_indices:
-                    a = torch.tensor(Image.open(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')).size).to(device)
-                    if a.cpu().numpy()[0] != original_image_size.cpu().numpy()[0] or a.cpu().numpy()[1] != original_image_size.cpu().numpy()[1]:
-                        print(f"Different sizes: {a}, {original_image_size}")
-                    # img0 = torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
-                    # img1 = torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}'))
+                    img0 = torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}'))
+                    img1 = torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}'))
                     
-                    # img0 = TF.rgb_to_grayscale(img0, num_output_channels=1)
-                    # img1 = TF.rgb_to_grayscale(img1, num_output_channels=1)
+                    img0 = TF.rgb_to_grayscale(img0, num_output_channels=1)
+                    img1 = TF.rgb_to_grayscale(img1, num_output_channels=1)
 
-                    # # Gey keypoints on original image
-                    # unnormalized_F = get_F(k, k, poses, idx, jump_frames)
+                    # Gey keypoints on original image
+                    unnormalized_F = get_F(k, k, poses, idx, jump_frames)
                     
-                    # # Normalize F-Matrix
-                    # F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
+                    # Normalize F-Matrix
+                    F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-                    # epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False)
+                    epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False)
 
-                    # # filepath = os.path.join(os.path.dirname(sequence_path), f'keypoints.txt')
-                    # # with open(filepath, 'a') as f:
-                    # #     line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
-                    # #     f.write(line)
+                    # filepath = os.path.join(os.path.dirname(sequence_path), f'keypoints.txt')
+                    # with open(filepath, 'a') as f:
+                    #     line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
+                    #     f.write(line)
 
 
-                    # # Convert grayscale tensors to numpy arrays for matplotlib
-                    # img0_np = img0.squeeze().numpy()
-                    # img1_np = img1.squeeze().numpy()
+                    # Convert grayscale tensors to numpy arrays for matplotlib
+                    img0_np = img0.squeeze().numpy()
+                    img1_np = img1.squeeze().numpy()
 
                     # Create a subplot with two images
                     # fig, axs = plt.subplots(1, 2, figsize=(15, 7))
@@ -451,21 +447,21 @@ def save_keypoints_realestate():
 
 
                     # Draw keypoints on image 0
-                    # for i,(pt) in enumerate(epi.pts1.cpu().numpy()):
-                    #     if i == 20:break
-                    #     cv2.circle(img0_np, (int(pt[0]), int(pt[1])), radius=5, color=(255, 255, 0), thickness=-1)
+                    for i,(pt) in enumerate(epi.pts1.cpu().numpy()):
+                        if i == 20:break
+                        cv2.circle(img0_np, (int(pt[0]), int(pt[1])), radius=5, color=(255, 255, 0), thickness=-1)
 
-                    # # Draw keypoints on image 1
-                    # for i,(pt) in enumerate(epi.pts2.cpu().numpy()):
-                    #     if i == 20:break
-                    #     cv2.circle(img1_np, (int(pt[0]), int(pt[1])), radius=5, color=(255, 255, 0), thickness=-1)
+                    # Draw keypoints on image 1
+                    for i,(pt) in enumerate(epi.pts2.cpu().numpy()):
+                        if i == 20:break
+                        cv2.circle(img1_np, (int(pt[0]), int(pt[1])), radius=5, color=(255, 255, 0), thickness=-1)
 
-                    # # Save the images
-                    # os.makedirs('draw0', exist_ok=True)
-                    # combined_image = np.hstack((img0_np, img1_np))
+                    # Save the images
+                    os.makedirs('draw0', exist_ok=True)
+                    combined_image = np.hstack((img0_np, img1_np))
 
-                    # cv2.imwrite(f'draw0/images_with_keypoints_{idx}.png', combined_image)
-                    # print("Saved images")
+                    cv2.imwrite(f'draw0/images_with_keypoints_{idx}.png', combined_image)
+                    print("Saved images")
 
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"

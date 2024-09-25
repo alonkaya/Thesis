@@ -12,7 +12,7 @@ RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True
-# TODO: check if all images in realestate are of the same size. this is for original_image_size
+
 ### STEREO ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
