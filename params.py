@@ -1,17 +1,17 @@
 import torch
-
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
+# 58450 output_resnet_smalls.log
 ### Dataset ###  
-USE_REALESTATE = False
-STEREO = True
+USE_REALESTATE = True
+STEREO = False
 RIGHTCAMVAL = False
 CROP = 224
 RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True
-
+# TODO: check if all images in realestate are of the same size. this is for original_image_size
 ### STEREO ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
@@ -21,11 +21,11 @@ PART = ["head", "mid", "tail"]
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a"]     
-RL_TRAIN_NUM = [5]               
+RL_TRAIN_NUM = [14]               
 JUMP_FRAMES = 6 
 
 ### Training ###
-LR = [1e-4]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
+LR = [1e-4, 5e-5]                                                               # TODO lr: 5e-4, 1e-4, 5e-5, 2e-5
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
@@ -58,7 +58,7 @@ CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 PRETRAINED_PATH =  None # make sure you set GET_OLD_PATH !! 
 RESNET_MODEL_NAME = 'microsoft/resnet-152'
-MODEL = RESNET_MODEL_NAME
+MODEL = CLIP_MODEL_NAME
 TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
 AVG_EMBEDDINGS = False
 USE_CONV = True

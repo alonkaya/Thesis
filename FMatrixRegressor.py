@@ -318,7 +318,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             try:
                 checkpoint = torch.load(model_path, map_location='cpu')
             except Exception as e:
-                print(f'\n#########\nusing backup:\n{e}')
+                print_and_write(f'\n#########\nusing backup:\n{e}')
                 checkpoint = torch.load(os.path.join(path, "backup_model.pth"), map_location='cpu')
                 sys.stdout.flush()
         else:
