@@ -97,15 +97,18 @@ def vis_gt():
         for i,point in enumerate(pts1):
             if i == 30: break
             if point[0] == 0 and point[1] == 0: continue
-            img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 3, (20, 20, 160), -1)
+            img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
             
         for i, point in enumerate(pts2):
             if i == 30: break
             if point[0] == 0 and point[1] == 0: continue
-            img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 3, (20, 20, 160), -1)
+            img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
 
-        # Concatenate images horizontally
-        combined_image = np.hstack((img0_pts, img1_pts))
+        # Create padding (e.g., 10-pixel wide, white vertical strip)
+        padding = 255 * np.ones((img0_pts.shape[0], 10, 3), dtype=np.uint8)  # 10-pixel wide white space
+
+        # Combine the two images with padding in between
+        combined_image = np.hstack((img0_pts, padding, img1_pts))
 
         os.makedirs(f'gt_epilines/{seq_name[0]}', exist_ok=True)
         cv2.imwrite(f'gt_epilines/{seq_name[0]}/gt_{i}.png', combined_image)
