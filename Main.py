@@ -48,7 +48,7 @@ if __name__ == "__main__":
                 if STEREO:
                         num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 5500 if train_size==0.05 else 9000 if train_size==0.0375 else 12000 if train_size==0.025 else 0
                 elif USE_REALESTATE:
-                        num_epochs = 2000 
+                        num_epochs = 3000 
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
@@ -105,4 +105,6 @@ if __name__ == "__main__":
                         sys.stdout.flush()
 
                 torch.cuda.empty_cache()
+                del train_loader, val_loader, test_loader, model
+
 
