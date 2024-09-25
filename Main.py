@@ -103,8 +103,8 @@ if __name__ == "__main__":
                 else: 
                         print(f"Model {plots_path} already trained")
                         sys.stdout.flush()
-
-                torch.cuda.empty_cache()
+                
                 del train_loader, val_loader, test_loader, model
+                torch.cuda.empty_cache()
 
 

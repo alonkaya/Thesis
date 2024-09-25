@@ -3,9 +3,11 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 
 # 58450 output_resnet_smalls.log
+# 173600 output_realestate_18_seed_300.log
+
 ### Dataset ###  
-USE_REALESTATE = True
-STEREO = False
+USE_REALESTATE = False
+STEREO = True
 RIGHTCAMVAL = False
 CROP = 224
 RESIZE = 256
@@ -22,7 +24,7 @@ PART = ["head", "mid", "tail"]
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
-RL_TRAIN_NUM = [18]   # 14=1872 # 20=2368   
+RL_TRAIN_NUM = [18]   # 14=1872 # 18=2136 # 20=2368   
 JUMP_FRAMES = 6 
 
 ### Training ###
@@ -37,7 +39,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-SEED = [300]
+SEED = [42, 300]
 
 ### Epipolar geometry ###
 RE1_DIST = True
