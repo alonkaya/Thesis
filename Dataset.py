@@ -448,17 +448,17 @@ def save_keypoints_realestate():
 
                     # Draw keypoints on image 0
                     for pt in epi.pts1.cpu().numpy():
-                        cv2.circle(img0_np, (int(pt[0]), int(pt[1])), radius=5, color=(0, 0, 255), thickness=-1)
+                        cv2.circle(img0_np, (int(pt[0]), int(pt[1])), radius=5, color=(255, 0, 0), thickness=-1)
 
                     # Draw keypoints on image 1
                     for pt in epi.pts2.cpu().numpy():
-                        cv2.circle(img1_np, (int(pt[0]), int(pt[1])), radius=5, color=(0, 0, 255), thickness=-1)
+                        cv2.circle(img1_np, (int(pt[0]), int(pt[1])), radius=5, color=(255, 0, 0), thickness=-1)
 
                     # Save the images
                     os.makedirs('draw0', exist_ok=True)
-                    os.makedirs('draw1', exist_ok=True)
-                    cv2.imwrite(f'draw0/image_0_with_keypoints_{idx}.png', img0_np)
-                    cv2.imwrite(f'draw1/image_1_with_keypoints_{idx}.png', img1_np)
+                    combined_image = np.hstack((img0_np, img1_np))
+
+                    cv2.imwrite(f'draw0/images_with_keypoints_{idx}.png', combined_image)
                     print("Saved images")
 
 if __name__ == "__main__":
