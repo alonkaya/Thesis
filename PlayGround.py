@@ -105,7 +105,7 @@ def vis_gt():
             img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
 
         # Create padding (e.g., 10-pixel wide, white vertical strip)
-        padding = 255 * np.ones((img0_pts.shape[0], 10, 3), dtype=np.uint8)  # 10-pixel wide white space
+        padding = 255 * np.zeros((img0_pts.shape[0], 30, 3), dtype=np.uint8)  # 10-pixel wide white space
 
         # Combine the two images with padding in between
         combined_image = np.hstack((img0_pts, padding, img1_pts))
@@ -129,13 +129,27 @@ def vis_trained(plots_path):
         epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach(), pts1=pts1[0], pts2=pts2[0])
         epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("predicted_RealEstate", seq_name[0]))
 
-
-def sed_distance_gt():
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=100000000, batch_size=1)
+def sed_gt():
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=10, batch_size=1)
 
     epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
                    "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
+    
+    for i, img1, img2, label, pts1, pts2, seq_name, seq_path, idx in enumerate(test_loader):
+        img1, img2, label = img1.to(device), img2.to(device), label.to(device)
+
+        update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), seq_path, data_type="test")
+        if i==50: break
+        
+    print(f"""SED distance: {epoch_stats["test_SED_pred"]/i+1}
+    Algebraic distance: {epoch_stats["test_algebraic_pred"]/i+1}
+    RE1 distance: {epoch_stats["test_RE1_pred"]/i+1}""")
+
+
+def move_bad_frames_realestate():
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=100000000, batch_size=1)
+
     
     for img1, img2, label, pts1, pts2, seq_name, seq_path, idx in train_loader:
         if seq_path==None:
