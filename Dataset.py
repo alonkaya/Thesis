@@ -144,9 +144,9 @@ def custom_collate_fn(batch):
 
     padded_pts1 = []
     padded_pts2 = []
-    for pts1, pts2 in zip(all_pts1, all_pts2):
+    for i, (pts1, pts2) in enumerate(zip(all_pts1, all_pts2)):
         if pts1.shape[0] == 0:
-            print(f'\n################\nEmpty points at {seq_names}\n\n')
+            print(f'\n################\nEmpty points at {seq_names[i]}\n\n')
         pad_len = max_len - pts1.shape[0]
         padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
