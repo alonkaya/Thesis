@@ -457,6 +457,7 @@ def save_keypoints_realestate():
                     # Save the images
                     cv2.imwrite(f'draw0/image_0_with_keypoints_{idx}.png', img0_np)
                     cv2.imwrite(f'draw1/image_1_with_keypoints_{idx}.png', img1_np)
+                    print("Saved images")
 
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
