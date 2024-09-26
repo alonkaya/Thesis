@@ -110,13 +110,13 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-    plots_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_4e-05__conv__CLIP__use_reconstruction_True/Trained_vit/BS_8__ratio_0.0375__tail__frozen_4"
+    plots_path = "plots/RealEstate/SED_0.5__L2_1__huber_1__lr_5e-05__conv__CLIP__use_reconstruction_True/BS_8__train_14__frozen_0__seed_400"
     file_path = os.path.join(plots_path, "output.log")
     save = True
 
     process_epoch_stats(file_path)
     print(len(epochs), len(training_losses), len(val_losses), len(training_maes), len(val_maes), len(alg_dists), len(val_alg_dists), len(re1_dists), len(val_re1_dists), len(sed_dists), len(val_sed_dists), len(alg_sqr_dists), len(val_alg_sqr_dists))
-    print(np.mean(val_maes[-50:]), np.mean(val_alg_dists[-50:]), np.mean(val_re1_dists[-50:]), np.mean(val_sed_dists[-50:]))
+    # print(np.mean(val_maes[-50:]), np.mean(val_alg_dists[-50:]), np.mean(val_re1_dists[-50:]), np.mean(val_sed_dists[-50:]))
     
     plot_parameter(epochs, training_losses, val_losses, "Loss", plots_path, save=save)
     plot_parameter(epochs, training_maes, val_maes, "MAE", plots_path, save=save)

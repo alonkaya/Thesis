@@ -48,7 +48,7 @@ if __name__ == "__main__":
                 if STEREO:
                         num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 5500 if train_size==0.05 else 9000 if train_size==0.0375 else 12000 if train_size==0.025 else 0
                 elif USE_REALESTATE:
-                        num_epochs = 5000 
+                        num_epochs = 10000 
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
@@ -83,11 +83,11 @@ if __name__ == "__main__":
 
                 elif model.start_epoch < model.num_epochs:
                         parameters = f"""###########################################################################################################################################################\n
-                        {ADDITIONS} learning rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
-                        batch_size: {bs}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo}, val_sequences: {val_sequences_stereo}, RL_TEST_NAMES: {RL_TEST_NAMES}, dataset: {dataset},
-                        average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, part: {part}, get_old_path: {GET_OLD_PATH},
-                        RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, frozen layers: {fl}, trained vit: {TRAINED_VIT},
-                        crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, train_size: {train_size}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED} seed: {seed}, \n\n"""
+{ADDITIONS} learning rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
+batch_size: {bs}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo}, val_sequences: {val_sequences_stereo}, RL_TEST_NAMES: {RL_TEST_NAMES}, dataset: {dataset},
+average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, part: {part}, get_old_path: {GET_OLD_PATH},
+RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, frozen layers: {fl}, trained vit: {TRAINED_VIT},
+crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, train_size: {train_size}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED} seed: {seed}, \n\n"""
                         print_and_write(parameters, model.plots_path)
                         
                         if PRETRAINED_PATH or os.path.exists(os.path.join(plots_path, 'model.pth')):
