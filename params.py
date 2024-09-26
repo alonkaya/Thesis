@@ -1,9 +1,9 @@
 import torch
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
-# 173600 output_realestate_18_seed_300.log
-# 193911 output_affine_alg_1.log
 # 208561 output_realestate_20_cont.log
+# 209982 output_realestate_alg_cont.log
+
 ### Dataset ###  
 USE_REALESTATE = True
 STEREO = False
@@ -27,7 +27,7 @@ RL_TRAIN_NUM = [18]   # 14=1872 # 18=2136 # 20=2368
 JUMP_FRAMES = 6 
 
 ### Training ###
-LR = [1e-4, 5e-5] if USE_REALESTATE else [1e-4]                                                             
+LR = [1e-4] if USE_REALESTATE else [1e-4]                                                             
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
@@ -38,14 +38,14 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-SEED = [42, 400]
+SEED = [42]
 
 ### Epipolar geometry ###
 RE1_DIST = True
 SED_DIST = True
 EPIPOLAR_THRESHOLD = 0.3 
 SED_TRIM_THRESHOLD = 0.01 if STEREO else 0.02
-ALG_COEFF = [1]
+ALG_COEFF = [0]
 RE1_COEFF = [0]
 SED_COEFF = [0.5]                                                    
 L2_COEFF = 1
