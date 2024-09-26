@@ -3,6 +3,7 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 # 208561 output_realestate_20_cont.log
 # 262354 output_rl_alg_cont_2.log
+# delete "/home/alonkay/Thesis/RealEstate10K/train_images/099ebecf954ec2ac/", "/home/alonkay/Thesis/RealEstate10K/train_images/07ad3c9e67f8bf95/", "/home/alonkay/Thesis/RealEstate10K/train_images/06a2e5bec5c290ff/", "/home/alonkay/Thesis/RealEstate10K/train_images/064f86a52bb038ef/", "/home/alonkay/Thesis/RealEstate10K/train_images/04957bd8c248b3dc/", "/home/alonkay/Thesis/RealEstate10K/train_images/036fe0f0da10b04f/"
 
 ### Dataset ###  
 USE_REALESTATE = True
@@ -12,7 +13,7 @@ CROP = 224
 RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
-INIT_DATA = True 
+INIT_DATA = False 
 
 ### STEREO ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
@@ -23,7 +24,7 @@ PART = ["head", "mid", "tail"]
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
-RL_TRAIN_NUM = [50]   #  14=1872  #  18=2136  #  20=2368  #  40=
+RL_TRAIN_NUM = [20]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
 JUMP_FRAMES = 6 
 
 ### Training ###
