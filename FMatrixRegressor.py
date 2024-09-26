@@ -211,10 +211,12 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
              \tSED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n""", self.plots_path)
 
                 
-            # If the model is not learning or outputs nan, stop training
+            # Found Nan 
             if check_nan(self.all_train_loss[-1], self.all_val_loss[-1], self.all_train_mae[-1], self.all_val_mae[-1], self.plots_path):
                 self.num_epochs = epoch + 1
                 break
+            
+            # BAD PLOTS
             if STEREO and epoch == int(self.num_epochs * 2/5) and not_learning(self.all_val_RE1_pred, self.plots_path):
                 self.num_epochs = epoch + 1
                 os.rename(self.plots_path, self.plots_path + "__bad")

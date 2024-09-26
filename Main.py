@@ -58,7 +58,7 @@ if __name__ == "__main__":
                 scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
-                compress = f'avg_embeddings' if AVG_EMBEDDINGS else f'conv'
+                compress = f'avg_embeddings' if AVG_EMBEDDINGS else 'conv' if USE_CONV else 'all_embeddings'
                 seed_param = "" if seed == 42 else f"__seed_{seed}"
                 data_config = f'ratio_{train_size}__{part}' if STEREO else f'train_{train_size}'
 

@@ -117,7 +117,7 @@ def compute_fundamental(E, K1, K2):
 
     if torch.linalg.matrix_rank(F) != 2:
         U, S, V = torch.svd(F)
-        print(f"""rank of gt F not 2: {torch.linalg.matrix_rank(F)}
+        print(f"""######\nrank of gt F not 2: {torch.linalg.matrix_rank(F)}
 singular values: {S.cpu().tolist()}\n""")
 
     return F
@@ -493,7 +493,7 @@ def paramterization_layer(x, plots_path):
             print_and_write(f'{f}\n', plots_path)
         if rank != 2:
             U, S, V = torch.svd(f)
-            print_and_write(f"""rank of estimated F not 2: {torch.linalg.matrix_rank(f)}                            
+            print_and_write(f"""rank of estimated F not 2: {rank}                            
 singular values: {S.cpu().tolist()}
 {f}\n\n""", plots_path)
 
