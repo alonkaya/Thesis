@@ -25,7 +25,7 @@ PART = ["head", "mid", "tail"]
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
-RL_TRAIN_NUM = [50]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
+RL_TRAIN_NUM = [20]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
 JUMP_FRAMES = 6 
 
 ### Training ###
