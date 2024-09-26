@@ -3,6 +3,7 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 # 208561 output_realestate_20_cont.log
 # 262354 output_rl_alg_cont_2.log
+# 270351 output_realestate_20_cont_2.log
 # delete "/home/alonkay/Thesis/RealEstate10K/train_images/099ebecf954ec2ac/", "/home/alonkay/Thesis/RealEstate10K/train_images/07ad3c9e67f8bf95/", "/home/alonkay/Thesis/RealEstate10K/train_images/06a2e5bec5c290ff/", "/home/alonkay/Thesis/RealEstate10K/train_images/064f86a52bb038ef/", "/home/alonkay/Thesis/RealEstate10K/train_images/04957bd8c248b3dc/", "/home/alonkay/Thesis/RealEstate10K/train_images/036fe0f0da10b04f/"
 
 ### Dataset ###  
@@ -39,7 +40,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-SEED = [500]
+SEED = [42]
 
 ### Epipolar geometry ###
 RE1_DIST = True
