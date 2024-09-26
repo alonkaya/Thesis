@@ -3,12 +3,12 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 # 208561 output_realestate_20_cont.log
 # 262354 output_rl_alg_cont_2.log
-# 271074 output_realestate_20_cont_2.log
+# 271934 output_realestate_20_cont_2.log
 # delete "/home/alonkay/Thesis/RealEstate10K/train_images/099ebecf954ec2ac/", "/home/alonkay/Thesis/RealEstate10K/train_images/07ad3c9e67f8bf95/", "/home/alonkay/Thesis/RealEstate10K/train_images/06a2e5bec5c290ff/", "/home/alonkay/Thesis/RealEstate10K/train_images/064f86a52bb038ef/", "/home/alonkay/Thesis/RealEstate10K/train_images/04957bd8c248b3dc/", "/home/alonkay/Thesis/RealEstate10K/train_images/036fe0f0da10b04f/"
 
 ### Dataset ###  
-USE_REALESTATE = True
-STEREO = False
+USE_REALESTATE = False
+STEREO = True
 RIGHTCAMVAL = False
 CROP = 224
 RESIZE = 256
@@ -20,7 +20,7 @@ INIT_DATA = True
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-SEQ_RATIOS = [0.025]      # 3251, 2166, 1082, 540, 405, 269
+SEQ_RATIOS = [0.025, 0.0375, 0.05]      # 3251, 2166, 1082, 540, 405, 269
 PART = ["head", "mid", "tail"]    
 
 ### RealEstate ###
@@ -40,7 +40,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-SEED = [42]
+SEED = [42, 300, 500]
 
 ### Epipolar geometry ###
 RE1_DIST = True
@@ -66,7 +66,6 @@ MODEL = CLIP_MODEL_NAME
 TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
 AVG_EMBEDDINGS = False
 USE_CONV = True
-USE_CONV = False
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4, 8] # SET TO 0 IF RESNET!
 norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
