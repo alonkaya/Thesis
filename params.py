@@ -4,7 +4,7 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 ###########################################  OFIR   #################################################################################
 option = 1      # 1 = clip, 2 = resnet
-computer = 1    # 1 = 250, 2 = 146
+computer = 2    # 1 = 250, 2 = 146
 
 # Notes for Ofir:
 
@@ -13,17 +13,18 @@ computer = 1    # 1 = 250, 2 = 146
 
 # When using computer = 1:
 #    First do: conda activate alon_env
-#    git pull
+#     git pull   ->   git add .   ->   git commit -m "."   ->   git push
 #    nohup env CUDA_VISIBLE_DEVICES=0 python Main.py > output_i.log 2>&1 &
 #    (change i by increasing the number by 1 each time you run a new run)
+# My project aviran Main.py (under the command)
 
 # When using computer = 2:
-#    git pull
+#    git pull   ->   git add .   ->   git commit -m "."   ->   git push
 #    Run 2 runs on the SAME GPU.
 #        For the first run use:
 #            gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_i.log 2>&1"
 #            (change i by increasing the number by 1 each time you run a new run)
-#        For the second run:
+#        For the second run on the same GPU:
 #            First check which GPU is used by the first run by running nvtop. The GPU number is the one under 'DEV' by the user alonkay
 #            Then run the following command with the GPU number you found and replace X with that number: 
 #            nohup env CUDA_VISIBLE_DEVICES=X python Main.py > output_i.log 2>&1 &
