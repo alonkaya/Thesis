@@ -5,26 +5,16 @@ CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 
 # 262354 output_rl_alg_cont_2.log
 # 271934 output_realestate_20_cont_2.log
-
+# 285959 output_0.05_tail_frozen_4.log
 
 STEREO = True
 USE_REALESTATE = False
-
 MODEL = CLIP_MODEL_NAME
-
-#  TODO ##############################################################################
-FROZEN_LAYERS = [4]
-TRAINED_VIT = None
-SEED = [42, 500]
-SEQ_RATIOS = [0.05]
-PART = ["tail"]    
-#######################################################################################
-
-# PART = ["head", "mid", "tail"]    
-# FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
-# TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
-# SEED = [42, 300, 500]
-# SEQ_RATIOS = [0.025, 0.0375, 0.05]      # 3251, 2166, 1082, 540, 405, 269
+PART = ["head", "mid", "tail"]    
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
+TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
+SEED = [42, 300, 500]
+SEQ_RATIOS = [0.025, 0.0375]      # 3251, 2166, 1082, 540, 405, 269
 
 LR = [1e-4] if USE_REALESTATE else [1e-4]                                                             
 RL_TRAIN_NUM = [20]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
@@ -55,7 +45,7 @@ RL_TRAIN_NUM = [20]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
 
 
 
-# delete these because they are aerial frames:  "/home/alonkay/Thesis/RealEstate10K/train_images/099ebecf954ec2ac/", "/home/alonkay/Thesis/RealEstate10K/train_images/07ad3c9e67f8bf95/", "/home/alonkay/Thesis/RealEstate10K/train_images/06a2e5bec5c290ff/", "/home/alonkay/Thesis/RealEstate10K/train_images/064f86a52bb038ef/", "/home/alonkay/Thesis/RealEstate10K/train_images/04957bd8c248b3dc/", "/home/alonkay/Thesis/RealEstate10K/train_images/036fe0f0da10b04f/"
+# TODO: delete these because they are aerial frames:  "/home/alonkay/Thesis/RealEstate10K/train_images/099ebecf954ec2ac/", "/home/alonkay/Thesis/RealEstate10K/train_images/07ad3c9e67f8bf95/", "/home/alonkay/Thesis/RealEstate10K/train_images/06a2e5bec5c290ff/", "/home/alonkay/Thesis/RealEstate10K/train_images/064f86a52bb038ef/", "/home/alonkay/Thesis/RealEstate10K/train_images/04957bd8c248b3dc/", "/home/alonkay/Thesis/RealEstate10K/train_images/036fe0f0da10b04f/"
 
 ### Dataset ###  
 RIGHTCAMVAL = False
