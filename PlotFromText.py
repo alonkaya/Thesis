@@ -110,7 +110,7 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 
 if __name__ == "__main__":
-    plots_path = "plots/RealEstate/SED_0.5__L2_1__huber_1__lr_5e-05__conv__CLIP__use_reconstruction_True/BS_8__train_14__frozen_0__seed_400"
+    plots_path = "plots/RealEstate/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__train_50__frozen_0__seed_500"
     file_path = os.path.join(plots_path, "output.log")
     save = True
 

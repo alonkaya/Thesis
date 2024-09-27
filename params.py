@@ -1,23 +1,89 @@
 import torch
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
+
+
+###########################################  OFIR   #################################################################################
+option = 1      # 1 = clip, 2 = resnet
+computer = 1    # 1 = 250, 2 = 146
+
+# Notes for Ofir:
+
+# Each time you make a change in the code you need to do these steps here on VS code:
+# git pull   ->   git add .   ->   git commit -m "."   ->   git push
+
+# When using computer = 1:
+#    First do: conda activate alon_env
+#    git pull
+#    nohup env CUDA_VISIBLE_DEVICES=0 python Main.py > output_i.log 2>&1 &
+#    (change i by increasing the number by 1 each time you run a new run)
+
+# When using computer = 2:
+#    git pull
+#    Run 2 runs on the SAME GPU.
+#        For the first run use:
+#            gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_i.log 2>&1"
+#            (change i by increasing the number by 1 each time you run a new run)
+#        For the second run:
+#            First check which GPU is used by the first run by running nvtop. The GPU number is the one under 'DEV' by the user alonkay
+#            Then run the following command with the GPU number you found and replace X with that number: 
+#            nohup env CUDA_VISIBLE_DEVICES=X python Main.py > output_i.log 2>&1 &
+#            (change i by increasing the number by 1 each time you run a new run)
+
+## To see the runs: nvtop
+
+## To kill a run: nvtop -> highlight the process -> fn+f9 -> SIGILL (IF SIGILL DOESN'T WORK USE SIGINT) -> Enter
+
+## If after a while you see that when you submit a run it exists after a short time, then it might mean that you are done with 
+## this task, so send an image to me with the output you get when running 'cat output_i.log' (replace i with the LATEST number you submitted)
+
+###########################################  OFIR   #################################################################################
+
+
+
+
+
+
+# Notes for Alon:
+# Run all tests with one more epoch
+# If resnet doesnt look good try to change learning rate
+# If Affined pretrained ViT doesnt look good try to change learning rate
+# For RealEstate you can try freezing layers, playing with the learning rate or trying pretrained ViT on affine task
+
+
+SEQ_RATIOS = [0.025, 0.0375] if computer==1 else [0.05, 0.1, 0.2]     # 3251, 2166, 1082, 540, 405, 269
+SEED = [42, 300, 500]
+LR = [1e-4]             
+
 RESNET_MODEL_NAME = 'microsoft/resnet-152'
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
-
-# 262354 output_rl_alg_cont_2.log
-# 271934 output_realestate_20_cont_2.log
-# 285959 output_0.05_tail_frozen_4.log
-
-STEREO = True
+MODEL = CLIP_MODEL_NAME if option==1 else RESNET_MODEL_NAME
 USE_REALESTATE = False
-MODEL = CLIP_MODEL_NAME
-PART = ["head", "mid", "tail"]    
-FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
+STEREO = True
+RL_TRAIN_NUM = [80]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
+INIT_DATA = True 
 TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
-SEED = [42, 300, 500]
-SEQ_RATIOS = [0.025, 0.0375]      # 3251, 2166, 1082, 540, 405, 269
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
 
-LR = [1e-4] if USE_REALESTATE else [1e-4]                                                             
-RL_TRAIN_NUM = [20]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -53,12 +119,12 @@ CROP = 224
 RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
-INIT_DATA = True 
 
 ### STEREO ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
+PART = ["head", "mid", "tail"]    
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
