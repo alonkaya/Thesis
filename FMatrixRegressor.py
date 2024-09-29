@@ -384,16 +384,25 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         # Load model
         self.model.load_state_dict(checkpoint['vit']) 
         self.model.to(device)
-
-        # Load optimizer and scheduler
-        self.optimizer = optim.Adam([
-            {'params': self.model.parameters(), 'lr': self.lr},
-            {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
-            {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
-        ])
-        self.scheduler = None
-        self.optimizer.load_state_dict(checkpoint['optimizer'])
-
+        try:
+            # Load optimizer and scheduler
+            self.optimizer = optim.Adam([
+                {'params': self.model.parameters(), 'lr': self.lr},
+                {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
+                {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
+            ])
+            self.scheduler = None
+            self.optimizer.load_state_dict(checkpoint['optimizer'])
+        except Exception as e:
+            self.optimizer = optim.Adam([
+                {'params': self.model.parameters(), 'lr': self.lr} if not self.deepF_noCorrs else {'params': []},  # Lower learning rate for the pre-trained vision transformer
+                {'params': self.feat_ext_deepF.parameters(), 'lr': self.lr} if self.deepF_noCorrs else {'params': []},
+                {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
+                {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
+            ])
+            self.scheduler = None
+            self.optimizer.load_state_dict(checkpoint['optimizer'])
+            
     def append_epoch_stats(self, train_mae, val_mae, epoch_stats):
         self.all_train_mae.append(train_mae)
         self.all_train_loss.append(epoch_stats["loss"])
