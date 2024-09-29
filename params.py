@@ -67,6 +67,7 @@ INIT_DATA = True
 TRAINED_VIT = None
 # FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4, 8] # SET TO 0 IF RESNET!
+BATCH_SIZE = [4, 8]                                                          
 
 
 
@@ -137,7 +138,7 @@ JUMP_FRAMES = 6
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = [8]                                                          
+# BATCH_SIZE = [8]                                                          
 NORM = True
 TRAIN_FROM_SCRATCH = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
