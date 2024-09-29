@@ -68,9 +68,7 @@ if __name__ == "__main__":
                                         f"""BS_{bs}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
                 
 ##########################################################################################################################################################################
-                if not os.path.exists(os.path.join(plots_path, 'model.pth')):
-                        del train_loader, val_loader, test_loader, model
-                        torch.cuda.empty_cache()                        
+                if not os.path.exists(os.path.join(plots_path, 'model.pth')):            
                         continue
 ##########################################################################################################################################################################
                         
