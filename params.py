@@ -3,8 +3,8 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 
 ###########################################  OFIR   #################################################################################
-option = 2      # 1 = clip, 2 = resnet
-computer = 2    # 1 = 250, 2 = 146
+option = 1      # 1 = clip, 2 = resnet
+computer = 1    # 1 = 250, 2 = 146
 
 # Notes for Ofir:
 
@@ -14,7 +14,7 @@ computer = 2    # 1 = 250, 2 = 146
 # When using computer = 1:
 #    First do: conda activate alon_env
 #     git pull   ->   git add .   ->   git commit -m "."   ->   git push
-#    nohup env CUDA_VISIBLE_DEVICES=0 python Main.py > output_i.log 2>&1 &
+#    nohup env CUDA_VISIBLE_DEVICES=0 python Main.py > output_250_i.log 2>&1 &
 #    (change i by increasing the number by 1 each time you run a new run)
 # My project aviran Main.py (under the command)
 
@@ -27,11 +27,12 @@ computer = 2    # 1 = 250, 2 = 146
 #        For the second run on the same GPU:
 #            First check which GPU is used by the first run by running nvtop. The GPU number is the one under 'DEV' by the user alonkay
 #            Then run the following command with the GPU number you found and replace X with that number: 
-#            nohup env CUDA_VISIBLE_DEVICES=X python Main.py > output_i.log 2>&1 &
+#            nohup env CUDA_VISIBLE_DEVICES=X python Main.py > output_146_i.log 2>&1 &
 #            (change i by increasing the number by 1 each time you run a new run)
 
 ## To see the runs: nvtop
 
+## To see the list of the queue: gpuQ.py list
 ## To kill a run: nvtop -> highlight the process -> fn+f9 -> SIGILL (IF SIGILL DOESN'T WORK USE SIGINT) -> Enter
 
 ## If after a while you see that when you submit a run it exists after a short time, then it might mean that you are done with 
@@ -47,11 +48,11 @@ computer = 2    # 1 = 250, 2 = 146
 # Notes for Alon:
 # Run all tests with one more epoch
 # If resnet doesnt look good try to change learning rate
-# If Affined pretrained ViT doesnt look good try to change learning rate
-# For RealEstate you can try freezing layers, playing with the learning rate or trying pretrained ViT on affine task
+# For RealEstate you can try freezing layers, playing with the learning rate or trying pretrained ViT on affine task (if its better in kitti stereo), or increasing the train size
 
 
-SEQ_RATIOS = [0.025, 0.0375] if computer==1 else [0.05, 0.1, 0.2]     # 3251, 2166, 1082, 540, 405, 269
+# SEQ_RATIOS = [0.025, 0.0375] if computer==1 else [0.05, 0.1, 0.2]     # 3251, 2166, 1082, 540, 405, 269
+SEQ_RATIOS = [0.025, 0.0375, 0.05, 0.1, 0.2]
 SEED = [42, 300, 500]
 LR = [1e-4]             
 
@@ -62,9 +63,10 @@ USE_REALESTATE = False
 STEREO = True
 RL_TRAIN_NUM = [80]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
 INIT_DATA = True 
-TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
-FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
-
+# TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
+TRAINED_VIT = None
+# FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4, 8] # SET TO 0 IF RESNET!
 
 
 

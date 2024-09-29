@@ -46,7 +46,7 @@ if __name__ == "__main__":
                         raise ValueError("Invalid part")
                 
                 if STEREO:
-                        num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 5500 if train_size==0.05 else 9000 if train_size==0.0375 else 12000 if train_size==0.025 else 0
+                        num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 5500 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 0
                 elif USE_REALESTATE:
                         num_epochs = 10000 
                 if num_epochs == 0:
@@ -66,6 +66,14 @@ if __name__ == "__main__":
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
                                         f"""BS_{bs}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
+                
+##########################################################################################################################################################################
+                if not os.path.exists(os.path.join(plots_path, 'model.pth')):
+                        del train_loader, val_loader, test_loader, model
+                        torch.cuda.empty_cache()                        
+                        continue
+##########################################################################################################################################################################
+                        
 
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=bs)
 
