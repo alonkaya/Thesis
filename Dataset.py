@@ -239,7 +239,7 @@ def get_dataloaders_RealEstate_split(batch_size):
                 img1_val = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in val_subset} if INIT_DATA else None    
 
                 img0_test = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in test_subset} if INIT_DATA else None    
-                img1_test = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in train_subset} if INIT_DATA else None    
+                img1_test = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in test_subset} if INIT_DATA else None    
 
                 keypoints_dict = load_keypoints(os.path.join(os.path.dirname(sequence_path), 'keypoints.txt'))
 
