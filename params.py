@@ -49,21 +49,38 @@ computer = 1    # 1 = 250, 2 = 146
 # For RealEstate you can try freezing layers, playing with the learning rate or trying pretrained ViT on affine task (if its better in kitti stereo), or increasing the train size
 
 
-SEQ_RATIOS = [0.025, 0.0375] if computer==1 else [0.05, 0.1, 0.2]     # 3251, 2166, 1082, 540, 405, 269
-SEED = [42, 300, 500]
+# SEQ_RATIOS = [0.025, 0.0375] if computer==1 else [0.05, 0.1, 0.2]     # 3251, 2166, 1082, 540, 405, 269
+# SEED = [42, 300, 500]
+# LR = [1e-4]             
+
+# RESNET_MODEL_NAME = 'microsoft/resnet-152'
+# CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
+# MODEL = CLIP_MODEL_NAME if option==1 else RESNET_MODEL_NAME
+# USE_REALESTATE = True
+# REALESTATE_SPLIT = True # 50=4632
+# STEREO = False
+# RL_TRAIN_NUM = [50]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
+# INIT_DATA = True 
+# TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
+# FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
+
+
+
+SEQ_RATIOS = [0.05]     # 3251, 2166, 1082, 540, 405, 269
+SEED = [42]
 LR = [1e-4]             
 
 RESNET_MODEL_NAME = 'microsoft/resnet-152'
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 MODEL = CLIP_MODEL_NAME if option==1 else RESNET_MODEL_NAME
-USE_REALESTATE = True
-REALESTATE_SPLIT = True # 50=4632
-STEREO = False
+USE_REALESTATE = False
+REALESTATE_SPLIT = False # 50=4632
+STEREO = True
 RL_TRAIN_NUM = [50]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
 INIT_DATA = True 
-TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
-FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
-
+TRAINED_VIT = None 
+FROZEN_LAYERS = [8]
+PART = ["head"]    
 
 
 
@@ -124,7 +141,7 @@ RANDOM_CROP = True
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-PART = ["head", "mid", "tail"]    
+# PART = ["head", "mid", "tail"]    
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
