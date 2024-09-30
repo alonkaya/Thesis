@@ -33020,3 +33020,50 @@ Test Algebraic dist truth: 0.017703863014852193
 Test SED dist truth: 0.0017227578656117718
 Test RE1 dist truth: 0.0002153668888753518
 
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 4, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: head, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 4, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.05, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+##### CONTINUE TRAINING #####
+
+Epoch 5501/5502: Training Loss: 0.273774747495298		 Val Loss: 0.46259842748227326
+             	Training MAE: 0.06318923085927963		 Val MAE: 0.07148590683937073
+             	Algebraic dist: 0.41425614533600985		 Val Algebraic dist: 0.612411291702934
+             	RE1 dist: 0.1804429089581525		 Val RE1 dist: 0.3306291621664296
+             	SED dist: 0.5142848262080439		 Val SED dist: 0.8883918264637822
+
+Epoch 5502/5502: Training Loss: 0.26827991626880787		 Val Loss: 0.7735045889149541
+             	Training MAE: 0.0608534999191761		 Val MAE: 0.057606346905231476
+             	Algebraic dist: 0.4224048473216869		 Val Algebraic dist: 0.8257855954377548
+             	RE1 dist: 0.17903573777940537		 Val RE1 dist: 0.7540359497070312
+             	SED dist: 0.5045239483868634		 Val SED dist: 1.5161598868992017
+
+Epoch 5503/5502: Training Loss: 0.23271775422272858		 Val Loss: 0.40335286181905994
+             	Training MAE: 0.06048445776104927		 Val MAE: 0.05759350582957268
+             	Algebraic dist: 0.3922223691587095		 Val Algebraic dist: 0.5496881319128949
+             	RE1 dist: 0.15122016624168114		 Val RE1 dist: 0.3610082709270975
+             	SED dist: 0.4334969132034867		 Val SED dist: 0.7756557464599609
+
+Epoch 5504/5502: Training Loss: 0.2744669596354167		 Val Loss: 0.3209445165551227
+             	Training MAE: 0.061561353504657745		 Val MAE: 0.05744914710521698
+             	Algebraic dist: 0.4210397508409288		 Val Algebraic dist: 0.4761973256650178
+             	RE1 dist: 0.18025166546856916		 Val RE1 dist: 0.2559098368105681
+             	SED dist: 0.5165517736364293		 Val SED dist: 0.6112646434618079
+
+## TEST RESULTS: ##
+Test Loss: 0.35476969381920376		 Test MAE: 0.05754173621535301
+Test Algebraic dist: 0.46287091477472975
+Test SED dist: 0.6787742729473832
+Test RE1 dist: 0.2933269271276947
+
+Test Algebraic dist truth: 0.01770695170065514
+Test SED dist truth: 0.001724670143952047
+Test RE1 dist truth: 0.00021560366888691607
+
+###
+plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_4__ratio_0.05__head__frozen_4 no backup
+###

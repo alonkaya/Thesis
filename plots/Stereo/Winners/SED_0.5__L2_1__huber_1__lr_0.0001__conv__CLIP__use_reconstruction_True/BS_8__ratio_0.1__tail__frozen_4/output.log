@@ -24020,3 +24020,62 @@ Test Algebraic dist truth: 0.01768576112904943
 Test SED dist truth: 0.0017179694390834722
 Test RE1 dist truth: 0.00021477045029177702
 
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: tail, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 4, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.1, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+##### CONTINUE TRAINING #####
+
+Epoch 4001/4002: Training Loss: 0.23636728174546184		 Val Loss: 0.9553149679432744
+             	Training MAE: 0.07005024701356888		 Val MAE: 0.06702478229999542
+             	Algebraic dist: 0.35633118012372184		 Val Algebraic dist: 0.7463107731031335
+             	RE1 dist: 0.1309337054981905		 Val RE1 dist: 0.6597426041312839
+             	SED dist: 0.43108146330889535		 Val SED dist: 1.870160310164742
+
+Epoch 4002/4002: Training Loss: 0.2477293575511259		 Val Loss: 1.3567538054093071
+             	Training MAE: 0.07044713944196701		 Val MAE: 0.07739301770925522
+             	Algebraic dist: 0.37589244281544404		 Val Algebraic dist: 1.069701733796493
+             	RE1 dist: 0.1384433157303754		 Val RE1 dist: 0.9222539818805197
+             	SED dist: 0.4536394231459674		 Val SED dist: 2.6686577174974526
+
+Epoch 4003/4002: Training Loss: 0.35930364272173715		 Val Loss: 0.5219437972359036
+             	Training MAE: 0.07048855721950531		 Val MAE: 0.06606658548116684
+             	Algebraic dist: 0.45069728178136487		 Val Algebraic dist: 0.5447330474853516
+             	RE1 dist: 0.21671089004067814		 Val RE1 dist: 0.3535259080969769
+             	SED dist: 0.6768293380737305		 Val SED dist: 1.0038322780443274
+
+Epoch 4004/4002: Training Loss: 0.20208465351777918		 Val Loss: 0.7768369757610819
+             	Training MAE: 0.0702895075082779		 Val MAE: 0.06898089498281479
+             	Algebraic dist: 0.3342099189758301		 Val Algebraic dist: 0.6372976717741593
+             	RE1 dist: 0.11220906762515798		 Val RE1 dist: 0.5688363365505053
+             	SED dist: 0.3624757317935719		 Val SED dist: 1.5128338025963826
+
+Epoch 4005/4002: Training Loss: 0.27242304297054515		 Val Loss: 0.7259745390518851
+             	Training MAE: 0.07107021659612656		 Val MAE: 0.07339299470186234
+             	Algebraic dist: 0.39267444610595703		 Val Algebraic dist: 0.6272584666376528
+             	RE1 dist: 0.15614628791809082		 Val RE1 dist: 0.5308809695036515
+             	SED dist: 0.502721954794491		 Val SED dist: 1.409655695376189
+
+Epoch 4006/4002: Training Loss: 0.2418656068689683		 Val Loss: 0.47699302175770636
+             	Training MAE: 0.06984712183475494		 Val MAE: 0.06813212484121323
+             	Algebraic dist: 0.3670096958384794		 Val Algebraic dist: 0.51726946623429
+             	RE1 dist: 0.13918514812693877		 Val RE1 dist: 0.33513081592062244
+             	SED dist: 0.4422012216904584		 Val SED dist: 0.9130564150602921
+
+## TEST RESULTS: ##
+Test Loss: 0.23456813554118452		 Test MAE: 0.0682586669921875
+Test Algebraic dist: 0.3637558958584205
+Test SED dist: 0.42794128934243564
+Test RE1 dist: 0.1479970229299445
+
+Test Algebraic dist truth: 0.017712440705837162
+Test SED dist truth: 0.0017239533196714589
+Test RE1 dist truth: 0.00021549695192423082
+
+###
+plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__tail__frozen_4 no backup
+###
