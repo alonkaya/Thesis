@@ -24,6 +24,7 @@ computer = 2    # 1 = 250, 2 = 146
 #            gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_i.log 2>&1"
 #            (change i by increasing the number by 1 each time you run a new run)
 #        For the second run on the same GPU:
+#            FIRST DO GIT ADD/COMMIT/PUSH FROM VS CODE AND GIT PULL FROM TERMINAL!!!!!
 #            First check which GPU is used by the first run by running nvtop. The GPU number is the one under 'DEV' by the user alonkay
 #            Then run the following command with the GPU number you found and replace X with that number: 
 #            nohup env CUDA_VISIBLE_DEVICES=X python Main.py > output_146_i.log 2>&1 &
