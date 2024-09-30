@@ -2,7 +2,7 @@ import torch
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 ###########################################  OFIR   #################################################################################
-option = 1      # 1 = clip, 2 = resnet
+option = 2      # 1 = clip, 2 = resnet
 computer = 2    # 1 = 250, 2 = 146
 
 # Notes for Ofir:
