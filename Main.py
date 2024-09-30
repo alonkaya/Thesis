@@ -66,13 +66,7 @@ if __name__ == "__main__":
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
                                         f"""BS_{bs}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
- 
-##########################################################################################################################################################################
-                if not os.path.exists(os.path.join(plots_path, 'model.pth')):
-                        print(f'\n###\n{plots_path}\nModel already trained \n###')            
-                        continue
-##########################################################################################################################################################################
-                        
+  
 
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=bs)
 
