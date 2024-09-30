@@ -1,0 +1,58 @@
+nohup: ignoring input
+/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/huggingface_hub/file_download.py:1150: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/modeling_utils.py:479: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return torch.load(checkpoint_file, map_location=map_location)
+/home/aviran/Alon/Thesis/FMatrixRegressor.py:326: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(model_path, map_location='cpu')
+Model plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/Trained_vit/BS_8__ratio_0.025__head__frozen_0 already trained
+Model plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/Trained_vit/BS_8__ratio_0.025__head__frozen_4 already trained
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: mid, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.025, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+
+##### CONTINUE TRAINING #####
+
+
+Epoch 12407/14013: Training Loss: 0.25439680323881264		 Val Loss: 0.8312555154164633
+             	Training MAE: 0.05888591334223747		 Val MAE: 0.0553710050880909
+             	Algebraic dist: 0.497162145726821		 Val Algebraic dist: 0.7179670333862305
+             	RE1 dist: 0.22740709080415614		 Val RE1 dist: 0.6836108366648356
+             	SED dist: 0.4791871239157284		 Val SED dist: 1.6340230305989583
+
+
+Epoch 12408/14013: Training Loss: 0.25052603553323183		 Val Loss: 0.9869524637858073
+             	Training MAE: 0.06076553091406822		 Val MAE: 0.05835706740617752
+             	Algebraic dist: 0.4664295140434714		 Val Algebraic dist: 0.7588449319203695
+             	RE1 dist: 0.2153017661150764		 Val RE1 dist: 0.8267066478729248
+             	SED dist: 0.47054461871876435		 Val SED dist: 1.9445956548055012
+
+
+Epoch 12409/14013: Training Loss: 0.27855704812442555		 Val Loss: 0.798098087310791
+             	Training MAE: 0.05950560048222542		 Val MAE: 0.05672372877597809
+             	Algebraic dist: 0.5159683227539062		 Val Algebraic dist: 0.6861056486765543
+             	RE1 dist: 0.24616732316858628		 Val RE1 dist: 0.6473950544993082
+             	SED dist: 0.5272344140445485		 Val SED dist: 1.5670685768127441
+
+
+Epoch 12410/14013: Training Loss: 0.3433561325073242		 Val Loss: 0.7701534430185953
+             	Training MAE: 0.059257157146930695		 Val MAE: 0.061456192284822464
+             	Algebraic dist: 0.5744593564201804		 Val Algebraic dist: 0.6883425712585449
+             	RE1 dist: 0.3083471690907198		 Val RE1 dist: 0.5861686865488688
+             	SED dist: 0.6568478976978975		 Val SED dist: 1.5104503631591797
+
+
+Epoch 12411/14013: Training Loss: 0.24836941326365752		 Val Loss: 0.9849427541097006
+             	Training MAE: 0.05923045426607132		 Val MAE: 0.05679962411522865
+             	Algebraic dist: 0.47307928870705995		 Val Algebraic dist: 0.7932700316111246
+             	RE1 dist: 0.216874220791985		 Val RE1 dist: 0.8215603828430176
+             	SED dist: 0.4669162525850184		 Val SED dist: 1.9410200119018555
+
+
