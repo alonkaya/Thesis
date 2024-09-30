@@ -226,7 +226,7 @@ def get_dataloaders_RealEstate_split(train_num_sequences, batch_size):
                 K = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=False)
                 K_resized = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=True)
 
-                train_length = int(RL_TRAIN_LENGTH_RATIO * len(valid_indices))
+                train_length = int(RL_TRAIN_SPLIT_RATIO * len(valid_indices))
                 test_val_split = (len(valid_indices) - train_length)//2 + train_length
                 train_subset = valid_indices[:train_length]
                 val_subset = valid_indices[train_length:test_val_split]

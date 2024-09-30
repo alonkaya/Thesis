@@ -13,7 +13,7 @@ computer = 1    # 1 = 250, 2 = 146
 # When using computer = 1:
 #    First do: conda activate alon_env
 #     git pull   ->   git add .   ->   git commit -m "."   ->   git push
-#    nohup env CUDA_VISIBLE_DEVICES=0 python Main.py > output_250_i.log 2>&1 &
+#    nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_250_i.log 2>&1 &
 #    (change i by increasing the number by 1 each time you run a new run)
 # My project aviran Main.py (under the command)
 
@@ -37,6 +37,8 @@ computer = 1    # 1 = 250, 2 = 146
 ## If after a while you see that when you submit a run it exists after a short time, then it might mean that you are done with 
 ## this task, so send an image to me with the output you get when running 'cat output_i.log' (replace i with the LATEST number you submitted)
 
+# After computer=1 is finised with options 1 and 2, do computer=1 with option=3
+
 ###########################################  OFIR   #################################################################################
 
 
@@ -49,38 +51,24 @@ computer = 1    # 1 = 250, 2 = 146
 # For RealEstate you can try freezing layers, playing with the learning rate or trying pretrained ViT on affine task (if its better in kitti stereo), or increasing the train size
 
 
-# SEQ_RATIOS = [0.025, 0.0375] if computer==1 else [0.05, 0.1, 0.2]     # 3251, 2166, 1082, 540, 405, 269
-# SEED = [42, 300, 500]
-# LR = [1e-4]             
-
-# RESNET_MODEL_NAME = 'microsoft/resnet-152'
-# CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
-# MODEL = CLIP_MODEL_NAME if option==1 else RESNET_MODEL_NAME
-# USE_REALESTATE = True
-# REALESTATE_SPLIT = True # 50=4632
-# STEREO = False
-# RL_TRAIN_NUM = [50]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
-# INIT_DATA = True 
-# TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
-# FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
-
-
-
-SEQ_RATIOS = [0.05]     # 3251, 2166, 1082, 540, 405, 269
-SEED = [42]
+SEQ_RATIOS = [0.025, 0.0375] if computer==1 else [0.05, 0.1, 0.2]     # 3251, 2166, 1082, 540, 405, 269
+SEED = [42, 300, 500]
 LR = [1e-4]             
 
 RESNET_MODEL_NAME = 'microsoft/resnet-152'
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
-MODEL = CLIP_MODEL_NAME if option==1 else RESNET_MODEL_NAME
+MODEL = CLIP_MODEL_NAME if option==1 or option==3 else RESNET_MODEL_NAME 
 USE_REALESTATE = False
 REALESTATE_SPLIT = False # 50=4632
 STEREO = True
 RL_TRAIN_NUM = [50]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
 INIT_DATA = True 
-TRAINED_VIT = None 
-FROZEN_LAYERS = [8]
-PART = ["head"]    
+TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
+
+if option==3 and computer==1:
+    TRAINED_VIT=None
+    FROZEN_LAYERS=[0,4,8]
 
 
 
@@ -127,8 +115,6 @@ PART = ["head"]
 
 
 
-
-# TODO: delete these because they are aerial frames:  "/home/alonkay/Thesis/RealEstate10K/train_images/099ebecf954ec2ac/", "/home/alonkay/Thesis/RealEstate10K/train_images/07ad3c9e67f8bf95/", "/home/alonkay/Thesis/RealEstate10K/train_images/06a2e5bec5c290ff/", "/home/alonkay/Thesis/RealEstate10K/train_images/064f86a52bb038ef/", "/home/alonkay/Thesis/RealEstate10K/train_images/04957bd8c248b3dc/", "/home/alonkay/Thesis/RealEstate10K/train_images/036fe0f0da10b04f/"
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -141,12 +127,12 @@ RANDOM_CROP = True
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-# PART = ["head", "mid", "tail"]    
+PART = ["head", "mid", "tail"]    
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
 JUMP_FRAMES = 6 
-RL_TRAIN_LENGTH_RATIO = 0.7
+RL_TRAIN_SPLIT_RATIO = 0.7
 
 ### Training ###
 MIN_LR = 2e-5
