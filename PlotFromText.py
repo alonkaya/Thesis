@@ -128,6 +128,3 @@ if __name__ == "__main__":
         plot_parameter(epochs, alg_sqr_dists, val_alg_sqr_dists, "Algebraic Sqr Distance", plots_path, save=save)
     except: 
         pass
-    
-    # 0.06348117679357529 0.8128136677212185 0.8167292144563463 1.8715625296698675
-    # 0.060137820690870286 0.7785132913028494 0.7836507786021514 1.742485699373133

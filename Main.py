@@ -48,13 +48,13 @@ if __name__ == "__main__":
                 if STEREO:
                         num_epochs = 2002 if train_size==0.3 else 3002 if train_size==0.2 else 4002 if train_size==0.1 else 5502 if train_size==0.05 else 10009 if train_size==0.0375 else 14013 if train_size==0.025 else 0
                 elif USE_REALESTATE:
-                        num_epochs = 10000 
+                        num_epochs = 5000 
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
 
                 coeff = f'ALG_sqr_{alg_coeff}__' if alg_coeff > 0 else f'RE1_{re1_coeff}__' if re1_coeff > 0 else f'SED_{sed_coeff}__' if sed_coeff > 0 else ''
-                dataset = 'Stereo' if STEREO else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
+                dataset = 'Stereo' if STEREO else 'RealEstate' if USE_REALESTATE else 'RealEstate_split' if USE_REALESTATE and REALESTATE_SPLIT else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
                 scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 

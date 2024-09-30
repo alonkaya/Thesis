@@ -205,6 +205,69 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
 
     return train_loader, val_loader, test_loader
 
+
+def get_dataloaders_RealEstate_split(batch_size):
+    RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
+    train_datasets, val_datasets, test_datasets = [], [], []
+    for jump_frames in [JUMP_FRAMES]:
+        for RealEstate_path in RealEstate_paths:
+            for i, sequence_name in enumerate(os.listdir(RealEstate_path)): 
+                specs_path = os.path.join(RealEstate_path, sequence_name, f'{sequence_name}.txt')
+                sequence_path = os.path.join(RealEstate_path, sequence_name, 'image_0')
+
+                # Get a list of all poses [R,t] in this sequence
+                poses = read_poses(specs_path).to(device)
+
+                # Indices of 'good' image frames
+                valid_indices = get_valid_indices(len(poses), sequence_path, jump_frames)
+
+                # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
+                original_image_size = torch.tensor(Image.open(os.path.join(sequence_path, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size).to(device)
+                K = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=False)
+                K_resized = get_intrinsic_REALESTATE(specs_path, original_image_size, adjust_resize=True)
+
+                train_length = int(RL_TRAIN_LENGTH_RATIO * len(valid_indices))
+                test_val_split = (len(valid_indices) - train_length)//2 + train_length
+                train_subset = valid_indices[:train_length]
+                val_subset = valid_indices[train_length:test_val_split]
+                test_subset = valid_indices[test_val_split:]
+
+                img0_train = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in train_subset} if INIT_DATA else None    
+                img1_train = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in train_subset} if INIT_DATA else None    
+
+                img0_val = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in val_subset} if INIT_DATA else None    
+                img1_val = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in val_subset} if INIT_DATA else None    
+
+                img0_test = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in test_subset} if INIT_DATA else None    
+                img1_test = {idx: torchvision.io.read_image(os.path.join(sequence_path, f'{idx+jump_frames:06}.{IMAGE_TYPE}')).to(device) for idx in train_subset} if INIT_DATA else None    
+
+                keypoints_dict = load_keypoints(os.path.join(os.path.dirname(sequence_path), 'keypoints.txt'))
+
+                dataset_train = Dataset(sequence_path, poses, img0_train, img1_train, train_subset, keypoints_dict, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
+                dataset_val = Dataset(sequence_path, poses, img0_val, img1_val, val_subset, keypoints_dict, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
+                dataset_test = Dataset(sequence_path, poses, img0_test, img1_test, test_subset, keypoints_dict, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
+
+                if len(dataset_train) > 9:
+                    train_datasets.append(dataset_train) 
+                    val_datasets.append(dataset_val)
+                    test_datasets.append(dataset_test)
+                else: 
+                    print(f"Empty dataset at {RealEstate_path}, {sequence_name}: {len(dataset_train)}")
+
+    # Concatenate datasets
+    concat_train_dataset = ConcatDataset(train_datasets)
+    concat_val_dataset = ConcatDataset(val_datasets)
+    concat_test_dataset = ConcatDataset(test_datasets)
+
+    # Create a DataLoader
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=False, collate_fn=custom_collate_fn)
+    
+    print(len(train_loader), len(val_loader), len(test_loader))
+
+    return train_loader, val_loader, test_loader
+
 # def get_dataloaders_KITTI(data_ratio, batch_size):
 #     sequence_paths = [f'sequences/0{i}' for i in range(11)]
 #     poses_paths = [f'poses/0{i}.txt' for i in range(11)]
@@ -306,7 +369,10 @@ def get_data_loaders(train_size=None, part=None, batch_size=BATCH_SIZE):
     if STEREO:
         return get_dataloader_stereo(train_size, part, batch_size)
     elif USE_REALESTATE:
-        return get_dataloaders_RealEstate(train_size, batch_size)
+        if REALESTATE_SPLIT:
+            return get_dataloaders_RealEstate_split(batch_size=batch_size)
+        else:
+            return get_dataloaders_RealEstate(train_size, batch_size)
     else: # KITTI
         # return get_dataloaders_KITTI(train_size, batch_size)
         return None
