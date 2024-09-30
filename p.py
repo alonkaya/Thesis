@@ -1,5 +1,6 @@
 # Open the file in read mode
 import os
+import shutil
 
 
 with open('a.txt', 'r') as file:
@@ -7,5 +8,5 @@ with open('a.txt', 'r') as file:
     for line in file:
         par = os.path.dirname(line)
         dest = os.path.join(par, 'SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True_drafts')
-        print(f'from {line} to {dest}\n')
-        # os.move(line, dest)
+        # print(f'from {line} to {dest}\n')
+        shutil.move(line, dest)
