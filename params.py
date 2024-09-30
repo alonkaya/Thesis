@@ -45,7 +45,6 @@ computer = 1    # 1 = 250, 2 = 146
 
 
 # Notes for Alon:
-# Run all tests with one more epoch
 # If resnet doesnt look good try to change learning rate
 # For RealEstate you can try freezing layers, playing with the learning rate or trying pretrained ViT on affine task (if its better in kitti stereo), or increasing the train size
 
