@@ -206,7 +206,7 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
     return train_loader, val_loader, test_loader
 
 
-def get_dataloaders_RealEstate_split(batch_size):
+def get_dataloaders_RealEstate_split(train_num_sequences, batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
     train_datasets, val_datasets, test_datasets = [], [], []
     for jump_frames in [JUMP_FRAMES]:
@@ -248,6 +248,7 @@ def get_dataloaders_RealEstate_split(batch_size):
                 dataset_test = Dataset(sequence_path, poses, img0_test, img1_test, test_subset, keypoints_dict, transform, K, K_resized, seq_name=sequence_name, jump_frames=jump_frames)
 
                 if len(dataset_train) > 9:
+                    if len(train_datasets) > train_num_sequences: break                        
                     train_datasets.append(dataset_train) 
                     val_datasets.append(dataset_val)
                     test_datasets.append(dataset_test)
@@ -370,7 +371,7 @@ def get_data_loaders(train_size=None, part=None, batch_size=BATCH_SIZE):
         return get_dataloader_stereo(train_size, part, batch_size)
     elif USE_REALESTATE:
         if REALESTATE_SPLIT:
-            return get_dataloaders_RealEstate_split(batch_size=batch_size)
+            return get_dataloaders_RealEstate_split(train_size, batch_size=batch_size)
         else:
             return get_dataloaders_RealEstate(train_size, batch_size)
     else: # KITTI
