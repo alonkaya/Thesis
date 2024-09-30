@@ -3,7 +3,7 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 ###########################################  OFIR   #################################################################################
 option = 1      # 1 = clip, 2 = resnet
-computer = 1    # 1 = 250, 2 = 146
+computer = 2    # 1 = 250, 2 = 146
 
 # Notes for Ofir:
 
@@ -37,7 +37,9 @@ computer = 1    # 1 = 250, 2 = 146
 ## If after a while you see that when you submit a run it exists after a short time, then it might mean that you are done with 
 ## this task, so send an image to me with the output you get when running 'cat output_i.log' (replace i with the LATEST number you submitted)
 
-# After computer=1 is finised with options 1 and 2, do computer=1 with option=3
+# After finised with options 1 and 2, do option=3
+
+# After finising with EVERYTING, do option=4 with computer=2
 
 ###########################################  OFIR   #################################################################################
 
@@ -54,6 +56,8 @@ computer = 1    # 1 = 250, 2 = 146
 SEQ_RATIOS = [0.025, 0.0375] if computer==1 else [0.05, 0.1, 0.2]     # 3251, 2166, 1082, 540, 405, 269
 SEED = [42, 300, 500]
 LR = [1e-4]             
+BATCH_SIZE = [8]                                                          
+PART = ["head", "mid", "tail"]    
 
 RESNET_MODEL_NAME = 'microsoft/resnet-152'
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
@@ -67,13 +71,27 @@ TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Aff
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
 
 if option==3 and computer==1:
+    SEQ_RATIOS = [0.025]
+    TRAINED_VIT=None
+    FROZEN_LAYERS=[4,8]
+    PART = ["tail"]
+
+if option==3 and computer==2:
+    SEQ_RATIOS = [0.05]
     TRAINED_VIT=None
     FROZEN_LAYERS=[0,4,8]
+    BATCH_SIZE=[4]
 
 
-
-
-
+if option==4:
+    MODEL = CLIP_MODEL_NAME 
+    USE_REALESTATE = True
+    REALESTATE_SPLIT = False # 50=4632
+    STEREO = False
+    RL_TRAIN_NUM = [45]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
+    TRAINED_VIT = "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
+    FROZEN_LAYERS = [0,4]
+    SEED=[42]
 
 
 
@@ -127,7 +145,6 @@ RANDOM_CROP = True
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-PART = ["head", "mid", "tail"]    
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
@@ -138,7 +155,6 @@ RL_TRAIN_SPLIT_RATIO = 0.7
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
-BATCH_SIZE = [8]                                                          
 NORM = True
 TRAIN_FROM_SCRATCH = False
 IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"

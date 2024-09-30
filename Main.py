@@ -46,9 +46,9 @@ if __name__ == "__main__":
                         raise ValueError("Invalid part")
                 
                 if STEREO:
-                        num_epochs = 2002 if train_size==0.3 else 3002 if train_size==0.2 else 4002 if train_size==0.1 else 5502 if train_size==0.05 else 10009 if train_size==0.0375 else 14013 if train_size==0.025 else 0
+                        num_epochs = 2002 if train_size==0.3 else 3002 if train_size==0.2 else 4002 if train_size==0.1 else 8000 if train_size==0.05 else 10009 if train_size==0.0375 else 14013 if train_size==0.025 else 0
                 elif USE_REALESTATE:
-                        num_epochs = 5000 
+                        num_epochs = 6000 
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
