@@ -241,10 +241,10 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         
         self.test(test_loader)
 
-        try:
-            self.plot_all()
-        except Exception as e:
-            print_and_write(f"Error in plotting: {e}", self.plots_path)
+       # try:
+        #    self.plot_all()
+        #except Exception as e:
+        #    print_and_write(f"Error in plotting: {e}", self.plots_path)
         
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
