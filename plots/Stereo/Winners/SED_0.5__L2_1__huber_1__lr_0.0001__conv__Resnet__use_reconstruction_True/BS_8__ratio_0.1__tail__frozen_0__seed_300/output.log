@@ -15380,3 +15380,32 @@ Test Algebraic dist truth: 0.017723001035532558
 Test SED dist truth: 0.0017233015899371384
 Test RE1 dist truth: 0.00021541551371714225
 
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: microsoft/resnet-152, augmentation: True, random crop: True, part: tail, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.1, norm_mean: tensor([0.5000, 0.5000, 0.5000], device='cuda:0'), norm_std: tensor([0.5000, 0.5000, 0.5000], device='cuda:0'), sched: None seed: 300, 
+
+##### CONTINUE TRAINING #####
+
+Epoch 2561/4002: Training Loss: 0.22091374677770279		 Val Loss: 0.9102338707965353
+             	Training MAE: 0.06283488124608994		 Val MAE: 0.058493077754974365
+             	Algebraic dist: 0.4134467910317814		 Val Algebraic dist: 0.8923529749331267
+             	RE1 dist: 0.17865740551668055		 Val RE1 dist: 0.8682809083358102
+             	SED dist: 0.40872621536254883		 Val SED dist: 1.7887193431024966
+
+### Not decreasing ##### TEST RESULTS: ##
+Test Loss: 0.48138025040017035		 Test MAE: 0.058459313586354256
+Test Algebraic dist: 0.6585147255345393
+Test SED dist: 0.9309943120282396
+Test RE1 dist: 0.45388350235788444
+
+Test Algebraic dist truth: 0.017723739595341504
+Test SED dist truth: 0.0017263435555579967
+Test RE1 dist truth: 0.0002158053387376599
+
+###
+plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.1__tail__frozen_0__seed_300 no backup
+###
