@@ -2,8 +2,8 @@ import torch
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 ###########################################  OFIR   #################################################################################
-option = 2      # 1 = clip, 2 = resnet
-computer = 1    # 1 = 250, 2 = 146
+option = 3      # 1 = clip, 2 = resnet
+computer = 2    # 1 = 250, 2 = 146
 
 # Notes for Ofir:
 
@@ -16,6 +16,7 @@ computer = 1    # 1 = 250, 2 = 146
 #    nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_250_i.log 2>&1 &
 #    (change i by increasing the number by 1 each time you run a new run)
 # My project aviran Main.py (under the command)
+# option 1 - output_250_5.log
 
 # When using computer = 2:
 #    git pull   ->   git add .   ->   git commit -m "."   ->   git push
