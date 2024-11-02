@@ -3,7 +3,7 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 ###########################################  OFIR   #################################################################################
 option = 3      # 1 = clip, 2 = resnet
-computer = 2    # 1 = 250, 2 = 146
+computer = 1    # 1 = 250, 2 = 146
 
 # Notes for Ofir:
 
@@ -30,6 +30,7 @@ computer = 2    # 1 = 250, 2 = 146
 #            Then run the following command with the GPU number you found and replace X with that number: 
 #            nohup env CUDA_VISIBLE_DEVICES=X python Main.py > output_146_i.log 2>&1 &
 #            (change i by increasing the number by 1 each time you run a new run)
+# option 1 - output_146_2.log , option 2 - output_146_3.log  
 
 ## To see the runs: nvtop
 
