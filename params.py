@@ -63,7 +63,7 @@ PART = ["head", "mid", "tail"]
 
 RESNET_MODEL_NAME = 'microsoft/resnet-152'
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
-MODEL = RESNET_MODEL_NAME 
+MODEL = CLIP_MODEL_NAME 
 USE_REALESTATE = False
 REALESTATE_SPLIT = False # 50=4632
 STEREO = True
