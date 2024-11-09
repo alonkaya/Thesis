@@ -2,8 +2,6 @@ import torch
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 
 ###########################################  OFIR   #################################################################################
-option = 4      # 1 = clip, 2 = resnet
-computer = 2    # 1 = 250, 2 = 146
 
 # Notes for Ofir:
 
@@ -57,7 +55,7 @@ computer = 2    # 1 = 250, 2 = 146
 # For RealEstate you can try freezing layers, playing with the learning rate or trying pretrained ViT on affine task (if its better in kitti stereo), or increasing the train size
 
 
-SEQ_RATIOS = [0.025, 0.0375] if computer==1 else [0.05, 0.1, 0.2]     # 3251, 2166, 1082, 540, 405, 269
+SEQ_RATIOS = [0.015]     # 3251, 2166, 1082, 540, 405, 269
 SEED = [42, 300, 500]
 LR = [1e-4]             
 BATCH_SIZE = [8]                                                          
@@ -65,37 +63,19 @@ PART = ["head", "mid", "tail"]
 
 RESNET_MODEL_NAME = 'microsoft/resnet-152'
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
-MODEL = CLIP_MODEL_NAME if option==1 or option==3 else RESNET_MODEL_NAME 
+MODEL = CLIP_MODEL_NAME 
 USE_REALESTATE = False
 REALESTATE_SPLIT = False # 50=4632
 STEREO = True
 RL_TRAIN_NUM = [50]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
 INIT_DATA = True 
-TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
-FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4] # SET TO 0 IF RESNET!
 
-if option==3 and computer==1:
-    SEQ_RATIOS = [0.025]
-    TRAINED_VIT=None
-    FROZEN_LAYERS=[4,8]
-    PART = ["tail"]
-
-if option==3 and computer==2:
-    SEQ_RATIOS = [0.05]
-    TRAINED_VIT=None
-    FROZEN_LAYERS=[0,4,8]
-    BATCH_SIZE=[4]
+# TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
+TRAINED_VIT = None
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4, 8]
 
 
-if option==4:
-    MODEL = CLIP_MODEL_NAME 
-    USE_REALESTATE = True
-    REALESTATE_SPLIT = False # 50=4632
-    STEREO = False
-    RL_TRAIN_NUM = [45]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
-    TRAINED_VIT = "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
-    FROZEN_LAYERS = [0,4]
-    SEED=[42]
+
 
 
 

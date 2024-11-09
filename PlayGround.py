@@ -442,56 +442,92 @@ def check_model_file(file_path):
     return True
 
 def plot_errors():
-        # Data for Frozen 0
-    mean_alg_0 = [0.336, 0.37, 0.4867, 0.4567, 0.5533, 0.683]
-    mean_sed_0 = [0.4, 0.4733, 0.7333, 0.7117, 0.8267, 1.123]
-    mean_re1_0 = [0.1, 0.1333, 0.3267, 0.294, 0.3633, 0.556]
-    std_alg_0 = [0.049, 0.0608, 0.1021, 0.0451, 0.0416, 0.1]
-    std_sed_0 = [0.083, 0.1447, 0.2178, 0.0922, 0.0987, 0.196]
-    std_re1_0 = [0.025, 0.0493, 0.155, 0.0386, 0.0416, 0.092]
+    # Frozen: 0
+    # mean_alg_0 = [0.2723333, 0.4836667, 0.3636667, 0.5166667, 0.5033333]
+    # std_alg_0 = [0.00757, 0.0645, 0.03496, 0.03512, 0.05774]
 
-    # Data for Frozen 4
-    mean_alg_4 = [0.2567, 0.4233, 0.5933, 0.7233]
-    mean_sed_4 = [0.27, 0.5833, 0.8967, 1.0467]
-    mean_re1_4 = [0.0767, 0.2157, 0.3867, 0.6767]
-    std_alg_4 = [0.0058, 0.1537, 0.2157, 0.2084]
-    std_sed_4 = [0.01, 0.3194, 0.3694, 0.2926]
-    std_re1_4 = [0.0058, 0.1431, 0.2023, 0.2926]
+    # mean_sed_0 = [0.275, 0.6866667, 0.44, 0.7676667, 0.7056667]
+    # std_sed_0 = [0.00889, 0.16623, 0.0781, 0.11492, 0.05669]
 
-    # Data for Frozen 8
-    mean_alg_8 = [0.2667, 0.48, 0.65, 0.6867]
-    mean_sed_8 = [0.2833, 0.7333, 1.0233, 1.2733]
-    mean_re1_8 = [0.08, 0.3067, 0.47, 0.67]
-    std_alg_8 = [0.0208, 0.1217, 0.08, 0.2013]
-    std_sed_8 = [0.0473, 0.3528, 0.208, 0.6493]
-    std_re1_8 = [0.02, 0.1762, 0.1058, 0.4687]
+    # mean_re1_0 = [0.079, 0.2536667, 0.1486667, 0.302, 0.2866667]
+    # std_re1_0 = [0.00346, 0.0862, 0.02873, 0.00436, 0.05069]
+
+    # # Frozen: 4
+    # mean_alg_4 = [0.26867, 0.415, 0.39333, 0.52967, 0.59533]
+    # std_alg_4 = [0.0255, 0.06366, 0.11676, 0.04409, 0.04324]
+
+    # mean_sed_4 = [0.27933, 0.51633, 0.535, 0.749, 0.79167]
+    # std_sed_4 = [0.04347, 0.11868, 0.25372, 0.07171, 0.11389]
+
+    # mean_re1_4 = [0.08233, 0.187, 0.17533, 0.31433, 0.38933]
+    # std_re1_4 = [0.01405, 0.05444, 0.08213, 0.04267, 0.04895]
+
+    # # Frozen: 8
+    # mean_alg_8 = [0.25733, 0.50167, 0.35333, 0.564, 0.54567]
+    # std_alg_8 = [0.0181475, 0.0889288, 0.0404145, 0.0390512, 0.04782]
+
+    # mean_sed_8 = [0.26733, 0.71433, 0.429, 0.813, 0.79167]
+    # std_sed_8 = [0.0387599, 0.1795671, 0.0878806, 0.0713933, 0.11389]
+
+    # mean_re1_8 = [0.07767, 0.294, 0.14867, 0.36367, 0.37433]
+    # std_re1_8 = [0.0150444, 0.0930161, 0.0358515, 0.0119304, 0.089845]
+
+
+    # PRETAINED VIT #
+    # Frozen: 0
+    # mean_alg_0 = [0.272, 0.49, 0.53333, 0.56667, 0.61333]
+    # std_alg_0 = [0.02078, 0.04359, 0.04726, 0.15822, 0.07572]
+
+    # mean_sed_0 = [0.27067, 0.71667, 0.78333, 0.88667, 0.89]
+    # std_sed_0 = [0.02572, 0.10599, 0.10066, 0.28919, 0.10536]
+
+    # mean_re1_0 = [0.07667, 0.28, 0.331, 0.39667, 0.41667]
+    # std_re1_0 = [0.01155, 0.06083, 0.03568, 0.1601, 0.08021]
+
+    # # Frozen: 4
+    # mean_alg_4 = [0.27233, 0.45667, 0.53433, 0.50333, 0.56]
+    # std_alg_4 = [0.03219, 0.0611, 0.03502, 0.10017, 0.06083]
+
+    # mean_sed_4 = [0.28667, 0.64567, 0.76, 0.79667, 0.82]
+    # std_sed_4 = [0.04509, 0.1328, 0.03606, 0.12014, 0.15524]
+
+    # mean_re1_4 = [0.08467, 0.26, 0.33667, 0.34733, 0.39]
+    # std_re1_4 = [0.01332, 0.08185, 0.02082, 0.07128, 0.1253]
+
+
+    # RESNET #
+    mean_alg_0 = [0.3, 0.41333, 0.52667, 0.57333, 0.62]
+    std_alg_0 = [0.1852026, 0.0152753, 0.0981495, 0.0378594, 0.1493318]
+
+    mean_sed_0 = [0.64333, 0.52, 0.72667, 0.79333, 0.86333]
+    std_sed_0 = [0.2990541, 0.034641, 0.1850225, 0.065833, 0.2702468]
+
+    mean_re1_0 = [0.14633, 0.22, 0.32, 0.35767, 0.39467]
+    std_re1_0 = [0.1605937, 0.0264575, 0.1153256, 0.0292632, 0.1293265]
 
     # New X-axis with an extra point
-    x_indices_0 = range(len(mean_alg_0))  # For Frozen 0 (has an extra point)
-    x_indices = range(1, len(mean_alg_4)+1 )  # For Frozen 4 and Frozen 8 (starts after the first point, ends earlier)
-
+    x_indices = range(len(mean_alg_0))  # For Frozen 0 (has an extra point)
 
     # Setting the X-axis labels to be flexible based on data points
-    # xticks_labels = ['2166', '1082', '540', '405']  # 5 points for Frozen 0
-    xticks_labels = ['3251', '2166', '1082', '540', '405', '269']  # 5 points for Frozen 0
+    xticks_labels = ['2166', '1082', '540', '405', '269']  # 5 points for Frozen 0
 
     # Plotting the Frozen 0 run with solid lines (with extra point)
-    # plt.errorbar(x_indices_0, mean_alg_0, yerr=std_alg_0, marker='o', color='blue', linestyle='-', label='alg Frozen 0', capsize=5)
-    plt.errorbar(x_indices_0, mean_sed_0, yerr=std_sed_0, marker='o', color='green', linestyle='-', label='SED Frozen 0', capsize=5)
-    # plt.errorbar(x_indices_0, mean_re1_0, yerr=std_re1_0, marker='o', color='orange', linestyle='-', label='RE1 Frozen 0', capsize=5)
-
+    plt.errorbar(x_indices, mean_alg_0, yerr=std_alg_0, marker='o', color='blue', linestyle='-', label='alg Frozen 0', capsize=5)
+    plt.errorbar(x_indices, mean_sed_0, yerr=std_sed_0, marker='o', color='green', linestyle='-', label='SED Frozen 0', capsize=5)
+    plt.errorbar(x_indices, mean_re1_0, yerr=std_re1_0, marker='o', color='orange', linestyle='-', label='RE1 Frozen 0', capsize=5)
+    
     # Plotting the Frozen 4 run with dotted lines (ends earlier, 4 points)
-    # plt.errorbar(x_indices, mean_alg_4, yerr=std_alg_4, marker='o', color='blue', linestyle='-', label='alg Frozen 4', capsize=5)
-    plt.errorbar(x_indices, mean_sed_4, yerr=std_sed_4, marker='o', color='green', linestyle=':', label='SED Frozen 4', capsize=5)
-    # plt.errorbar(x_indices, mean_re1_4, yerr=std_re1_4, marker='o', color='orange', linestyle='-', label='RE1 Frozen 4', capsize=5)
+    # plt.errorbar(x_indices, mean_alg_4, yerr=std_alg_4, marker='o', color='blue', linestyle=':', label='alg Frozen 4', capsize=5)
+    # plt.errorbar(x_indices, mean_sed_4, yerr=std_sed_4, marker='o', color='green', linestyle=':', label='SED Frozen 4', capsize=5)
+    # plt.errorbar(x_indices, mean_re1_4, yerr=std_re1_4, marker='o', color='orange', linestyle=':', label='RE1 Frozen 4', capsize=5)
 
     # Plotting the Frozen 8 run with dashed lines (ends earlier, 4 points)
-    # plt.errorbar(x_indices, mean_alg_8, yerr=std_alg_8, marker='o', color='blue', linestyle='-', label='alg Frozen 8', capsize=5)
-    plt.errorbar(x_indices, mean_sed_8, yerr=std_sed_8, marker='o', color='green', linestyle='--', label='SED Frozen 8', capsize=5)
-    # plt.errorbar(x_indices, mean_re1_8, yerr=std_re1_8, marker='o', color='orange', linestyle='-', label='RE1 Frozen 8', capsize=5)
+    # plt.errorbar(x_indices, mean_alg_8, yerr=std_alg_8, marker='o', color='blue', linestyle='--', label='alg Frozen 8', capsize=5)
+    # plt.errorbar(x_indices, mean_sed_8, yerr=std_sed_8, marker='o', color='green', linestyle='--', label='SED Frozen 8', capsize=5)
+    # plt.errorbar(x_indices, mean_re1_8, yerr=std_re1_8, marker='o', color='orange', linestyle='--', label='RE1 Frozen 8', capsize=5)
 
     # Setting plot details
-    plt.title('Mean Values with Standard Deviation for Frozen Runs (0, 4, 8)')
+    plt.title('Mean Values with STD for frozen layers 0,4,8 with RESNET')
     plt.xlabel('Data Points')
     plt.ylabel('Mean Value ± STD')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
@@ -545,5 +581,6 @@ def sed_distance_gt_FM():
 
 
 if __name__ == "__main__":
+    os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    sed_gt()
+    plot_errors()
