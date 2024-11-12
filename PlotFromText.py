@@ -111,9 +111,9 @@ def plot_by_output(plots_path):
         
     plot_parameter(epochs, training_losses, val_losses, "Loss", plots_path, save=save)
     plot_parameter(epochs, training_maes, val_maes, "MAE", plots_path, save=save)
-    plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic Distance", plots_path, save=save)
-    plot_parameter(epochs, re1_dists, val_re1_dists, "RE1 Distance", plots_path, save=save)
-    plot_parameter(epochs, sed_dists, val_sed_dists, "SED Distance", plots_path, save=save)
+    plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic_Distance", plots_path, save=save)
+    plot_parameter(epochs, re1_dists, val_re1_dists, "RE1_Distance", plots_path, save=save)
+    plot_parameter(epochs, sed_dists, val_sed_dists, "SED_Distance", plots_path, save=save)
 
     try:
         plot_parameter(epochs, alg_sqr_dists, val_alg_sqr_dists, "Algebraic Sqr Distance", plots_path, save=save)
