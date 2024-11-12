@@ -102,6 +102,9 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
 
     if show:
         plt.show()
+    
+    plt.clf()
+    plt.close('all')
 
 
 def read_camera_intrinsic(path_to_intrinsic):

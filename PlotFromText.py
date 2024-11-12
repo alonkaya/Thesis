@@ -3,24 +3,14 @@ import re
 import matplotlib.pyplot as plt
 import numpy as np
 
-epochs = []
-training_losses = []
-val_losses = []
-training_maes = []
-val_maes = []
-alg_dists = []
-val_alg_dists = []
-alg_sqr_dists = []
-val_alg_sqr_dists = []
-re1_dists = []
-val_re1_dists = []
-sed_dists = []
-val_sed_dists = []
 
-def process_epoch_stats(file_path):
+def process_epoch_stats(file_path, epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists):
     # Open the file and iterate over each line
     with open(file_path, 'r') as file:
+        print(file_path)
         for line in file:
+            if re.search(r'Test', line):
+                continue
             # Check if the line contains epoch information
             epoch_match = re.search(r'Epoch (\d+)/', line)
             if epoch_match:
@@ -109,15 +99,16 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
         plt.show()
 
 
-if __name__ == "__main__":
-    plots_path = "plots/RealEstate/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__train_50__frozen_0__seed_500"
+def plot_by_output(plots_path):
     file_path = os.path.join(plots_path, "output.log")
     save = True
+    epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists = [], [], [], [], [], [], [], [], [], [], [], [], []  
 
-    process_epoch_stats(file_path)
-    print(len(epochs), len(training_losses), len(val_losses), len(training_maes), len(val_maes), len(alg_dists), len(val_alg_dists), len(re1_dists), len(val_re1_dists), len(sed_dists), len(val_sed_dists), len(alg_sqr_dists), len(val_alg_sqr_dists))
-    # print(np.mean(val_maes[-50:]), np.mean(val_alg_dists[-50:]), np.mean(val_re1_dists[-50:]), np.mean(val_sed_dists[-50:]))
+    epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists = \
+        process_epoch_stats(file_path, epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists)
     
+    print(len(epochs), len(training_losses), len(val_losses), len(training_maes), len(val_maes), len(alg_dists), len(val_alg_dists), len(re1_dists), len(val_re1_dists), len(sed_dists), len(val_sed_dists), len(alg_sqr_dists), len(val_alg_sqr_dists))
+        
     plot_parameter(epochs, training_losses, val_losses, "Loss", plots_path, save=save)
     plot_parameter(epochs, training_maes, val_maes, "MAE", plots_path, save=save)
     plot_parameter(epochs, alg_dists, val_alg_dists, "Algebraic Distance", plots_path, save=save)
@@ -128,3 +119,17 @@ if __name__ == "__main__":
         plot_parameter(epochs, alg_sqr_dists, val_alg_sqr_dists, "Algebraic Sqr Distance", plots_path, save=save)
     except: 
         pass
+
+def plot_all_folder(folder_path):
+    # Iterate over all items in the root directory
+    for folder_name in os.listdir(folder_path):
+        folder_path = os.path.join(folder_path, folder_name)
+        if os.path.isdir(folder_path) and len(os.listdir(folder_path)) == 1:
+            plot_by_output(folder_path)
+
+if __name__ == "__main__":
+    root_path = 'plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True'
+
+    plot_by_output(root_path)
+
+                

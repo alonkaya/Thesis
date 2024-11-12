@@ -54,8 +54,9 @@ device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 # If resnet doesnt look good try to change learning rate
 # For RealEstate you can try freezing layers, playing with the learning rate or trying pretrained ViT on affine task (if its better in kitti stereo), or increasing the train size
 
+# 611444 is pretrained 
 
-SEQ_RATIOS = [0.015]     # 3251, 2166, 1082, 540, 405, 269
+SEQ_RATIOS = [0.015]     # 3251, 2166, 1082, 540, 405, 269, 161
 SEED = [42, 300, 500]
 LR = [1e-4]             
 BATCH_SIZE = [8]                                                          
