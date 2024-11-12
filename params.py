@@ -1,6 +1,7 @@
 import torch
 device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32"
 # 611444 is pretrained 
+# output_orig.log is actually resnet
 
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
@@ -8,7 +9,7 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 MODEL = CLIP_MODEL_NAME 
 USE_REALESTATE = False
 STEREO = True
-PRETEXT_TRAIN = True
+PRETEXT_TRAIN = False
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -22,7 +23,7 @@ INIT_DATA = True
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-SEQ_RATIOS = [0.2, 0.1, 0.05, 0.0375, 0.025]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
+SEQ_RATIOS = [0.015]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
 PART = ["head", "mid", "tail"] 
 
 ### RealEstate ###
