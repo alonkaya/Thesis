@@ -1,12 +1,13 @@
 import torch
 device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32"
-# 611444 is pretrained 
+# 611444 is output_pretrained.log 
+# 950451 is output_orig_20000.log
 # output_orig.log is actually resnet
 
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 
-MODEL = CLIP_MODEL_NAME 
+MODEL = RESNET_MODEL_NAME 
 USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
