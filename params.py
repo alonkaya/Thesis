@@ -26,7 +26,7 @@ INIT_DATA = True
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-SEQ_RATIOS = [0.015]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
+SEQ_RATIOS = [0.0375, 0.025]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
 PART = ["head", "mid", "tail"] 
 
 ### RealEstate ###
@@ -67,7 +67,7 @@ MLP_HIDDEN_DIM = [1024, 512]
 CONV_HIDDEN_DIM = [256, 512]
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 PRETRAINED_PATH =  None # make sure you set GET_OLD_PATH !! 
-FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0, 4, 8]
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [8]
 TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or not PRETEXT_TRAIN else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
 AVG_EMBEDDINGS = False
 USE_CONV = True
