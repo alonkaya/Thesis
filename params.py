@@ -1,9 +1,9 @@
 import torch
 device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32"
 
-# 950451 is output_orig_20000.log
 # 1242969 output_0.0375_0.025_frozen_8.log
 # 1413056 output_0.05_frozen_8.log
+# 1483279 output_0.015_orig_25000.log
 
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
@@ -20,6 +20,7 @@ RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True 
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0,4,8]
 
 ### STEREO ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
@@ -66,7 +67,6 @@ MLP_HIDDEN_DIM = [1024, 512]
 CONV_HIDDEN_DIM = [256, 512]
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 PRETRAINED_PATH =  None # make sure you set GET_OLD_PATH !! 
-FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [8]
 TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or not PRETEXT_TRAIN else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
 AVG_EMBEDDINGS = False
 USE_CONV = True
