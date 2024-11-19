@@ -46,7 +46,7 @@ if __name__ == "__main__":
                         raise ValueError("Invalid part")
                 
                 if STEREO:
-                        num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 20000 if train_size==0.015 else 0
+                        num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 25000 if train_size==0.015 else 0
                 elif USE_REALESTATE:
                         num_epochs = 5000 
                 if num_epochs == 0:
@@ -74,12 +74,12 @@ if __name__ == "__main__":
 
                 # If the model was bad trained, skip it
                 if os.path.exists((f'{model.plots_path}__bad')):
-                        print(f"\n###\n{model.plots_path}\nAlready trained and got bad results\n###")   
+                        print(f"\n###\n{model.plots_path}\nAlready trained and got bad results\n###\n")   
                         sys.stdout.flush()
      
                 # If the model was already trained WELL with seed 42, skip training with other seed
                 elif "seed" in model.plots_path and os.path.exists(model.plots_path.split("__seed_")[0]):
-                        print(f"\n###\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training\n###")
+                        print(f"\n###\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training\n###\n")
                         sys.stdout.flush()
 
                 elif model.start_epoch < model.num_epochs:
