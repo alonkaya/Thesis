@@ -86,7 +86,7 @@ if __name__ == "__main__":
                         print(f"\n###\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training\n###\n")
                         sys.stdout.flush()
 
-                elif model.start_epoch < model.num_epochs:
+                elif model.start_epoch < model.num_epochs + 100: ##### TODO remove + 100
                         parameters = f"""###########################################################################################################################################################\n
 {ADDITIONS} learning rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
 batch_size: {bs}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo}, val_sequences: {val_sequences_stereo}, RL_TEST_NAMES: {RL_TEST_NAMES}, dataset: {dataset},
