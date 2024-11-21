@@ -60135,3 +60135,89 @@ Test Algebraic dist truth: 0.017704006424523834
 Test SED dist truth: 0.0017242709496863803
 Test RE1 dist truth: 0.00021553417681751395
 
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: head, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 4, trained vit: plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.0375, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+##### CONTINUE TRAINING #####
+
+Epoch 10013/10000: Training Loss: 0.22068163927863627		 Val Loss: 0.7843339708116319
+             	Training MAE: 0.060168374329805374		 Val MAE: 0.060848068445920944
+             	Algebraic dist: 0.37532514684340534		 Val Algebraic dist: 0.8975756963094076
+             	RE1 dist: 0.14993944355085784		 Val RE1 dist: 0.7264997694227431
+             	SED dist: 0.4094984017166437		 Val SED dist: 1.5368020799424913
+
+Epoch 10014/10000: Training Loss: 0.21375641168332568		 Val Loss: 0.6384319199456109
+             	Training MAE: 0.06125691533088684		 Val MAE: 0.06079652160406113
+             	Algebraic dist: 0.36745479060154335		 Val Algebraic dist: 0.7305692036946615
+             	RE1 dist: 0.14445138445087508		 Val RE1 dist: 0.6091719733344184
+             	SED dist: 0.3951474358053768		 Val SED dist: 1.2451278898451064
+
+Epoch 10015/10000: Training Loss: 0.28265923144770605		 Val Loss: 0.45832300186157227
+             	Training MAE: 0.060657210648059845		 Val MAE: 0.06209341436624527
+             	Algebraic dist: 0.42377150292490046		 Val Algebraic dist: 0.6275501251220703
+             	RE1 dist: 0.19101019466624541		 Val RE1 dist: 0.38670820660061306
+             	SED dist: 0.5332356247247434		 Val SED dist: 0.8840482499864366
+
+Epoch 10016/10000: Training Loss: 0.24602186913583793		 Val Loss: 0.721479680803087
+             	Training MAE: 0.06241602450609207		 Val MAE: 0.06092573329806328
+             	Algebraic dist: 0.3964236390356924		 Val Algebraic dist: 0.8355888790554471
+             	RE1 dist: 0.16058893764720245		 Val RE1 dist: 0.6856995158725314
+             	SED dist: 0.4592468785304649		 Val SED dist: 1.4103966818915472
+
+Epoch 10017/10000: Training Loss: 0.21935102051379635		 Val Loss: 0.7081702550252279
+             	Training MAE: 0.06174095347523689		 Val MAE: 0.061337631195783615
+             	Algebraic dist: 0.37293105031929763		 Val Algebraic dist: 0.8215568330552843
+             	RE1 dist: 0.14439673517264573		 Val RE1 dist: 0.6787105136447482
+             	SED dist: 0.4062821257348154		 Val SED dist: 1.3838587866889105
+
+Epoch 10018/10000: Training Loss: 0.27609961640601066		 Val Loss: 0.4987967279222276
+             	Training MAE: 0.06199537590146065		 Val MAE: 0.061534784734249115
+             	Algebraic dist: 0.4311545128915824		 Val Algebraic dist: 0.6590728229946561
+             	RE1 dist: 0.18349052877987132		 Val RE1 dist: 0.4116578896840413
+             	SED dist: 0.5195758295994178		 Val SED dist: 0.9653333028157552
+
+Epoch 10019/10000: Training Loss: 0.2202138526766908		 Val Loss: 0.47381840811835396
+             	Training MAE: 0.06082317605614662		 Val MAE: 0.060331035405397415
+             	Algebraic dist: 0.3768277261771408		 Val Algebraic dist: 0.6535664134555392
+             	RE1 dist: 0.14832144157559263		 Val RE1 dist: 0.38229600588480633
+             	SED dist: 0.40825877470128674		 Val SED dist: 0.9158218171861436
+
+Epoch 10020/10000: Training Loss: 0.2181699229221718		 Val Loss: 0.5860052638583713
+             	Training MAE: 0.061857499182224274		 Val MAE: 0.060702256858348846
+             	Algebraic dist: 0.37011176464604395		 Val Algebraic dist: 0.7472321192423502
+             	RE1 dist: 0.14392480663224763		 Val RE1 dist: 0.4919455846150716
+             	SED dist: 0.40375717013489965		 Val SED dist: 1.1400664647420247
+
+Epoch 10021/10000: Training Loss: 0.30266408359303193		 Val Loss: 1.558537695142958
+             	Training MAE: 0.06238564848899841		 Val MAE: 0.06262140721082687
+             	Algebraic dist: 0.4562588486016965		 Val Algebraic dist: 1.2840349409315321
+             	RE1 dist: 0.20775804332658357		 Val RE1 dist: 1.4903077019585504
+             	SED dist: 0.5723574021283317		 Val SED dist: 3.0837798648410373
+
+Epoch 10022/10000: Training Loss: 0.34192997801537606		 Val Loss: 0.41812218560112846
+             	Training MAE: 0.06191464141011238		 Val MAE: 0.06104869395494461
+             	Algebraic dist: 0.4812481824089499		 Val Algebraic dist: 0.6012666490342882
+             	RE1 dist: 0.2355019625495462		 Val RE1 dist: 0.3672715557946099
+             	SED dist: 0.6512573092591529		 Val SED dist: 0.8041632440355089
+
+Epoch 10023/10000: Training Loss: 0.1916961856916839		 Val Loss: 0.3855036629570855
+             	Training MAE: 0.061705756932497025		 Val MAE: 0.06234471872448921
+             	Algebraic dist: 0.3440539042154948		 Val Algebraic dist: 0.570951779683431
+             	RE1 dist: 0.12615292680029774		 Val RE1 dist: 0.32356511221991646
+             	SED dist: 0.35096033881692323		 Val SED dist: 0.738405810462104
+
+## TEST RESULTS: ##
+Test Loss: 0.3794279858582002		 Test MAE: 0.060435297340154646
+Test Algebraic dist: 0.5050296754765331
+Test SED dist: 0.7267488121090078
+Test RE1 dist: 0.3130917656690555
+
+Test Algebraic dist truth: 0.017686576771556883
+Test SED dist truth: 0.0017191103302446524
+Test RE1 dist truth: 0.00021490972853244696
+
