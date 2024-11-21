@@ -4,14 +4,14 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 # 1242969 output_0.0375_0.025_frozen_8.log
 # 1483631 output_0.015_orig_25000.log
 # 1580251 output_0.015_pretrained_25000_frozen_0_4.log
-
+# 1588374 output_0.015_pretrained_25000_frozen_8.log
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 
 USE_REALESTATE = False
 STEREO = True
-PRETEXT_TRAIN = True
-MODEL = CLIP_MODEL_NAME 
+PRETEXT_TRAIN = False
+MODEL = RESNET_MODEL_NAME 
 
 ### Dataset ###  
 RIGHTCAMVAL = False
