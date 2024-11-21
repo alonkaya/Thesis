@@ -4,14 +4,16 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 # 1242969 output_0.0375_0.025_frozen_8.log
 # 1483631 output_0.015_orig_25000.log
 # 1580251 output_0.015_pretrained_25000_frozen_0_4.log
-# 1588374 output_0.015_pretrained_25000_frozen_8.log
+# 1675862 output_resnet_0.015_25000.log
+
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 
 USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
-MODEL = RESNET_MODEL_NAME 
+MODEL = CLIP_MODEL_NAME 
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0,4,8]
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -20,13 +22,12 @@ RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True 
-FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [8]
 
 ### STEREO ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-SEQ_RATIOS = [0.015]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
+SEQ_RATIOS = [0.2, 0.1, 0.05, 0.0375, 0.025, 0.015]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
 PART = ["head", "mid", "tail"] 
 
 ### RealEstate ###

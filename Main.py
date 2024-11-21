@@ -66,8 +66,12 @@ if __name__ == "__main__":
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
                                         f"""BS_{bs}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
-  
-
+                
+                ####################################################################################################
+                if not os.path.exists(os.path.join(plots_path, 'model.pth')):
+                        continue
+                ####################################################################################################
+                
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=bs)
 
                 model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)

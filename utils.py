@@ -177,7 +177,8 @@ def not_decreasing(val_loss, num_epochs, plots_path):
         return True
     
 def ready_to_break(val_loss):
-    if (val_loss[-1] < val_loss[-2]) and (val_loss[-1] < val_loss[-3]) and (val_loss[-1] < val_loss[-4]) and (val_loss[-1] < val_loss[-5]) and (val_loss[-1] < val_loss[-6]) and (val_loss[-1] < val_loss[-7]):
+    min_100 = min(val_loss[-100:-1])
+    if val_loss[-1] < min_100:
         return True
 
 def print_and_write(output, plots_path):
