@@ -170,7 +170,7 @@ class FMatrixRegressor(nn.Module):
 
     def train_model(self, train_loader, val_loader, test_loader):
         break_when_good = False
-        for epoch in range(self.start_epoch, self.num_epochs+100):
+        for epoch in range(self.start_epoch, self.num_epochs+600):
             epoch_stats = {"algebraic_pred": torch.tensor(0), "algebraic_sqr_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
                             "val_algebraic_pred": torch.tensor(0), "val_algebraic_sqr_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
                             "algebraic_truth": torch.tensor(0), "algebraic_sqr_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
@@ -228,7 +228,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             if SAVE_MODEL:
                 self.save_model(epoch+1)
             
-            # If the last epochs are not decreasing in val loss, raise break_whe_good flag
+            # If the last epochs are not decreasing in val loss, raise break_when_good flag
             if (self.resnet and epoch > int(self.num_epochs * 3/5) and not_decreasing(self.all_val_loss, self.num_epochs, self.plots_path)) \
                 or (not self.resnet and epoch > int(self.num_epochs * 3/4) and not_decreasing(self.all_val_loss, self.num_epochs, self.plots_path)) \
                 or epoch > self.num_epochs:
