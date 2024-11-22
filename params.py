@@ -11,8 +11,8 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 
 USE_REALESTATE = False
 STEREO = True
-PRETEXT_TRAIN = True
-MODEL = CLIP_MODEL_NAME 
+PRETEXT_TRAIN = False
+MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0,4,8]
 
 ### Dataset ###  
