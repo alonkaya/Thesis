@@ -66,7 +66,8 @@ if __name__ == "__main__":
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
                                         f"""BS_{bs}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
-                
+                if plots_path == "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0":
+                        continue
                 ####################################################################################################
                 if not os.path.exists(os.path.join(plots_path, 'model.pth')):
                         continue
