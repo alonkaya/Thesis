@@ -1,9 +1,6 @@
 import torch
 device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32"
 
-# 1242969 output_0.0375_0.025_frozen_8.log
-# 1483631 output_0.015_orig_25000.log
-# 1580251 output_0.015_pretrained_25000_frozen_0_4.log
 # 1675862 output_resnet_0.015_25000.log
 
 # 1302291 output_4090_best_100_orig.log in 4090
@@ -15,7 +12,7 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
-MODEL = RESNET_MODEL_NAME 
+MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0,4,8]
 
 ### Dataset ###  
