@@ -48050,3 +48050,59 @@ Test Algebraic dist truth: 0.01770263327691788
 Test SED dist truth: 0.0017229202098416206
 Test RE1 dist truth: 0.00021537833083841136
 
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: tail, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.05, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+##### CONTINUE TRAINING #####
+
+Epoch 8006/8000: Training Loss: 0.18219870679518757		 Val Loss: 0.8241913836935292
+             	Training MAE: 0.06517450511455536		 Val MAE: 0.06494428217411041
+             	Algebraic dist: 0.34385139801922965		 Val Algebraic dist: 0.6987968942393428
+             	RE1 dist: 0.12277711139005773		 Val RE1 dist: 0.6598126784614895
+             	SED dist: 0.3271821246427648		 Val SED dist: 1.6112420455269192
+
+Epoch 8007/8000: Training Loss: 0.23578164156745463		 Val Loss: 0.7152514250382133
+             	Training MAE: 0.06604956090450287		 Val MAE: 0.06349500268697739
+             	Algebraic dist: 0.41199451334336223		 Val Algebraic dist: 0.7104320526123047
+             	RE1 dist: 0.16707912613363826		 Val RE1 dist: 0.5665182030719259
+             	SED dist: 0.4339735367718865		 Val SED dist: 1.3937144072159477
+
+Epoch 8008/8000: Training Loss: 0.22019299338845646		 Val Loss: 0.9869620281717052
+             	Training MAE: 0.0674872174859047		 Val MAE: 0.06684622913599014
+             	Algebraic dist: 0.3930618061738856		 Val Algebraic dist: 0.7782609359077786
+             	RE1 dist: 0.153791862375596		 Val RE1 dist: 0.870445500249448
+             	SED dist: 0.40202051050522747		 Val SED dist: 1.936113108759341
+
+Epoch 8009/8000: Training Loss: 0.16208460751701803		 Val Loss: 0.8788428928541101
+             	Training MAE: 0.06680871546268463		 Val MAE: 0.06480202078819275
+             	Algebraic dist: 0.3185650040121639		 Val Algebraic dist: 0.7125136333963146
+             	RE1 dist: 0.10483349070829504		 Val RE1 dist: 0.6993906601615574
+             	SED dist: 0.28625042298260855		 Val SED dist: 1.720756199048913
+
+Epoch 8010/8000: Training Loss: 0.18704794434940114		 Val Loss: 0.9189155412756879
+             	Training MAE: 0.06703238189220428		 Val MAE: 0.07224179059267044
+             	Algebraic dist: 0.3428624097038718		 Val Algebraic dist: 0.9134831635848336
+             	RE1 dist: 0.12082778706270106		 Val RE1 dist: 0.6712413870769999
+             	SED dist: 0.3360292210298426		 Val SED dist: 1.7981449624766475
+
+Epoch 8011/8000: Training Loss: 0.294948044945212		 Val Loss: 0.5803968595421832
+             	Training MAE: 0.06707638502120972		 Val MAE: 0.06767746061086655
+             	Algebraic dist: 0.46096179064582377		 Val Algebraic dist: 0.6427681135094684
+             	RE1 dist: 0.20648370069615982		 Val RE1 dist: 0.4599178562993589
+             	SED dist: 0.5518768534940832		 Val SED dist: 1.1228630231774372
+
+## TEST RESULTS: ##
+Test Loss: 0.45572656043490073		 Test MAE: 0.06660346463322639
+Test Algebraic dist: 0.5729426964781339
+Test SED dist: 0.8736791567694873
+Test RE1 dist: 0.3377662916828816
+
+Test Algebraic dist truth: 0.017715547317849065
+Test SED dist truth: 0.0017249085625311487
+Test RE1 dist truth: 0.00021564737802609466
+

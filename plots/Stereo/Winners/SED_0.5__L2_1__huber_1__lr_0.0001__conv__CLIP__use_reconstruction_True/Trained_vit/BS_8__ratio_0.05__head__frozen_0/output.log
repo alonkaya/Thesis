@@ -48038,3 +48038,32 @@ Test Algebraic dist truth: 0.017702027371055203
 Test SED dist truth: 0.0017219832293073037
 Test RE1 dist truth: 0.0002152612222764725
 
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: head, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.05, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+##### CONTINUE TRAINING #####
+
+Epoch 8004/8000: Training Loss: 0.17133411239175236		 Val Loss: 0.30438912433126697
+             	Training MAE: 0.06289470940828323		 Val MAE: 0.06467688083648682
+             	Algebraic dist: 0.3127924133749569		 Val Algebraic dist: 0.46823978424072266
+             	RE1 dist: 0.10736923358019661		 Val RE1 dist: 0.2400255825208581
+             	SED dist: 0.30840489443610697		 Val SED dist: 0.5744047994199006
+
+## TEST RESULTS: ##
+Test Loss: 0.3506781958099595		 Test MAE: 0.06482587829232216
+Test Algebraic dist: 0.45769164293332204
+Test SED dist: 0.6667331265327626
+Test RE1 dist: 0.2964365822928292
+
+Test Algebraic dist truth: 0.017704140871090998
+Test SED dist truth: 0.0017218212211938728
+Test RE1 dist truth: 0.00021523161602199527
+
+###
+plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/Trained_vit/BS_8__ratio_0.05__head__frozen_0 no backup
+###

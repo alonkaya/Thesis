@@ -24120,4 +24120,32 @@ Test RE1 dist truth: 0.00021492590413505868
 
 ###
 plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__head__frozen_0 no backup
+##############################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: head, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.1, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+##### CONTINUE TRAINING #####
+
+Epoch 4014/4000: Training Loss: 0.38946423811071057		 Val Loss: 0.36140056278394617
+             	Training MAE: 0.06827181577682495		 Val MAE: 0.06325721740722656
+             	Algebraic dist: 0.5034308714025161		 Val Algebraic dist: 0.5006671159163766
+             	RE1 dist: 0.2625239035662483		 Val RE1 dist: 0.2902912056964377
+             	SED dist: 0.7406334035536822		 Val SED dist: 0.6870185603266177
+
+## TEST RESULTS: ##
+Test Loss: 0.35089643378006785		 Test MAE: 0.06330602541565895
+Test Algebraic dist: 0.46974718481078187
+Test SED dist: 0.665851679063381
+Test RE1 dist: 0.2928565348001351
+
+Test Algebraic dist truth: 0.01770098406569402
+Test SED dist truth: 0.0017204272343700094
+Test RE1 dist truth: 0.00021507527987311658
+
+###
+plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__head__frozen_0 no backup
 ###
