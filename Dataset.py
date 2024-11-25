@@ -269,45 +269,45 @@ def get_dataloaders_RealEstate_split(train_num_sequences, batch_size):
 
     return train_loader, val_loader, test_loader
 
-# def get_dataloaders_KITTI(data_ratio, batch_size):
-#     sequence_paths = [f'sequences/0{i}' for i in range(11)]
-#     poses_paths = [f'poses/0{i}.txt' for i in range(11)]
-#     calib_paths = [f'sequences/0{i}/calib.txt' for i in range(11)]
+def get_dataloaders_KITTI(data_ratio, batch_size):
+    sequence_paths = [f'sequences/0{i}' for i in range(11)]
+    poses_paths = [f'poses/0{i}.txt' for i in range(11)]
+    calib_paths = [f'sequences/0{i}/calib.txt' for i in range(11)]
 
-#     train_datasets, val_datasets = [], []
-#     for jump_frames in [JUMP_FRAMES]:
-#         for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
-#             if i not in train_seqeunces and i not in val_sequences: continue
-#             cam0_seq = os.path.join(sequence_path, 'image_0')
-#             cam1_seq = os.path.join(sequence_path, 'image_1')
+    train_datasets, val_datasets = [], []
+    for jump_frames in [JUMP_FRAMES]:
+        for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
+            # if i not in train_seqeunces and i not in val_sequences: continue
+            # cam0_seq = os.path.join(sequence_path, 'image_0')
+            # cam1_seq = os.path.join(sequence_path, 'image_1')
 
-#             # Get a list of all poses [R,t] in this sequence
-#             poses = read_poses(poses_path)
+            # Get a list of all poses [R,t] in this sequence
+            poses = read_poses(poses_path)
             
-#             # Indices of 'good' image frames
-#             valid_indices = get_valid_indices(len(poses), cam0_seq, jump_frames)
+            # Indices of 'good' image frames
+            # valid_indices = get_valid_indices(len(poses), cam0_seq, jump_frames)
         
-#             # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
-#             original_image_size = torch.tensor(Image.open(os.path.join(cam0_seq, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
-#             k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
+            # # Get projection matrix from calib.txt, compute intrinsic K, and adjust K according to transformations
+            # original_image_size = torch.tensor(Image.open(os.path.join(cam0_seq, f'{valid_indices[0]:06}.{IMAGE_TYPE}')).size)
+            # k0, k1 = get_intrinsic_KITTI(calib_path, original_image_size)
 
-#             # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
-#             dataset_cam0 = Dataset(cam0_seq, poses, valid_indices, transform, k0, val=False, seq_name= f'0{i}', jump_frames=jump_frames)
-#             dataset_cam1 = Dataset(cam1_seq, poses, valid_indices, transform, k1, val=True, seq_name= f'0{i}', jump_frames=jump_frames)
-#             if i in train_seqeunces:
-#                 train_datasets.append(dataset_cam0)        
-#             if i in val_sequences:
-#                 val_datasets.append(dataset_cam1)
+            # # Split the dataset based on the calculated samples. Get 00 and 01 as val and the rest as train sets.
+            # dataset_cam0 = Dataset(cam0_seq, poses, valid_indices, transform, k0, val=False, seq_name= f'0{i}', jump_frames=jump_frames)
+            # dataset_cam1 = Dataset(cam1_seq, poses, valid_indices, transform, k1, val=True, seq_name= f'0{i}', jump_frames=jump_frames)
+            # if i in train_seqeunces:
+            #     train_datasets.append(dataset_cam0)        
+            # if i in val_sequences:
+            #     val_datasets.append(dataset_cam1)
 
-#     # Concatenate datasets
-#     concat_train_dataset = ConcatDataset(train_datasets)
-#     concat_val_dataset = ConcatDataset(val_datasets)
+    # Concatenate datasets
+    concat_train_dataset = ConcatDataset(train_datasets)
+    concat_val_dataset = ConcatDataset(val_datasets)
 
-#     # Create a DataLoader
-#     train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
-#     val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+    # Create a DataLoader
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
 
-#     return train_loader, val_loader
+    return train_loader, val_loader
 
 def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS):
     sequence_paths = [f'sequences/{i:02}' for i in range(11)]
@@ -339,7 +339,7 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
             length = int(len(valid_indices) * data_ratio) 
             mid_start = len(valid_indices) // 2 - length // 2
             subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
-
+        print(f'length of sequence {sequence_path}: {length}')
         images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
         images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None
 
@@ -353,7 +353,7 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
             val_datasets.append(dataset_stereo)
         if i in test_sequences_stereo:
             test_datasets.append(dataset_stereo)
-
+    return
     # Concatenate datasets
     concat_train_dataset = ConcatDataset(train_datasets)
     concat_val_dataset = ConcatDataset(val_datasets)
