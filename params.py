@@ -1,10 +1,6 @@
 import torch
 device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32"
 
-# 1783526 output_orig.log
-# 1302291 output_4090_best_100_orig.log in 4090
-# 1298613 output_4090_best_100_pretext.log in 4090
-
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 
@@ -13,7 +9,6 @@ STEREO = True
 PRETEXT_TRAIN = False
 MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0,4,8]
-BATCH_SIZE = [8]   
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -22,6 +17,7 @@ RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
 INIT_DATA = True 
+BATCH_SIZE = 8
 
 ### STEREO ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 

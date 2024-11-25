@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
         parser = argparse.ArgumentParser()
 
-        parser.add_argument("--bs", nargs="+", type=int, default=BATCH_SIZE)
+        parser.add_argument("--bs", type=int, default=BATCH_SIZE)
         parser.add_argument("--lr", nargs="+", type=float, default=LR)
         parser.add_argument("--l2", type=float, default=L2_COEFF)    
         parser.add_argument("--huber", type=float, default=HUBER_COEFF)
@@ -39,19 +39,18 @@ if __name__ == "__main__":
         train_sizes = SEQ_RATIOS if STEREO else RL_TRAIN_NUM
 
         # Iterate over each combination
-        param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, SEED, train_sizes, lrs, batch_size, parts, frozen_layers)
-        for i, (alg_coeff, re1_coeff, sed_coeff, seed, train_size, lr, bs, part, fl) in enumerate(param_combinations):
+        param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, SEED, train_sizes, lrs, parts, frozen_layers)
+        for i, (alg_coeff, re1_coeff, sed_coeff, seed, train_size, lr, part, fl) in enumerate(param_combinations):
                 set_seed(seed)
                 if STEREO and part != "head" and part != "mid" and part != "tail":
                         raise ValueError("Invalid part")
                 
-                if STEREO:
-                        num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 25000 if train_size==0.015 else 40000 if train_size==0.008 else 0
-                elif USE_REALESTATE:
-                        num_epochs = 5000 
+                num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 25000 if train_size==0.015 else 40000 if train_size==0.008 else 0
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
+
+                batch_size = 4 if train_size==0.05 and not PRETEXT_TRAIN and MODEL==CLIP_MODEL_NAME else batch_size
 
                 coeff = f'ALG_sqr_{alg_coeff}__' if alg_coeff > 0 else f'RE1_{re1_coeff}__' if re1_coeff > 0 else f'SED_{sed_coeff}__' if sed_coeff > 0 else ''
                 dataset = 'Stereo' if STEREO else 'RealEstate_split' if USE_REALESTATE and REALESTATE_SPLIT else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
@@ -65,11 +64,11 @@ if __name__ == "__main__":
                 plots_path = os.path.join('plots', dataset, 'Winners' if STEREO else '',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
-                                        f"""BS_{bs}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
+                                        f"""BS_{batch_size}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
                 
-                train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=bs)
+                train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
 
-                model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=bs, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
+                model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
 
                 # If the model was bad trained, skip it
                 if os.path.exists((f'{model.plots_path}__bad')):
@@ -84,7 +83,7 @@ if __name__ == "__main__":
                 elif model.start_epoch < model.num_epochs:
                         parameters = f"""###########################################################################################################################################################\n
 {ADDITIONS} learning rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
-batch_size: {bs}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo}, val_sequences: {val_sequences_stereo}, RL_TEST_NAMES: {RL_TEST_NAMES}, dataset: {dataset},
+batch_size: {batch_size}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo}, val_sequences: {val_sequences_stereo}, RL_TEST_NAMES: {RL_TEST_NAMES}, dataset: {dataset},
 average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, part: {part}, get_old_path: {GET_OLD_PATH},
 RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, frozen layers: {fl}, trained vit: {TRAINED_VIT},
 crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, train_size: {train_size}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED} seed: {seed}, \n\n"""
