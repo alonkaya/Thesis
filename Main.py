@@ -66,12 +66,6 @@ if __name__ == "__main__":
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
                                         f"""BS_{bs}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
-                if plots_path == "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0":
-                        continue
-                ####################################################################################################
-                if not os.path.exists(os.path.join(plots_path, 'model.pth')):
-                        continue
-                ####################################################################################################
                 
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=bs)
 
@@ -87,7 +81,7 @@ if __name__ == "__main__":
                         print(f"\n###\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training\n###\n")
                         sys.stdout.flush()
 
-                elif model.start_epoch < model.num_epochs + 100: ##### TODO remove + 100
+                elif model.start_epoch < model.num_epochs:
                         parameters = f"""###########################################################################################################################################################\n
 {ADDITIONS} learning rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
 batch_size: {bs}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo}, val_sequences: {val_sequences_stereo}, RL_TEST_NAMES: {RL_TEST_NAMES}, dataset: {dataset},
