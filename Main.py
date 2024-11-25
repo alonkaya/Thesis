@@ -46,7 +46,7 @@ if __name__ == "__main__":
                         raise ValueError("Invalid part")
                 
                 if STEREO:
-                        num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 25000 if train_size==0.015 else 35000 if train_size==0.08
+                        num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 25000 if train_size==0.015 else 35000 if train_size==0.08 else 0
                 elif USE_REALESTATE:
                         num_epochs = 5000 
                 if num_epochs == 0:
