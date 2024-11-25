@@ -337,6 +337,7 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
             subset = valid_indices
         else:
             length = int(len(valid_indices) * data_ratio) 
+            if length < 8: length=8
             mid_start = len(valid_indices) // 2 - length // 2
             subset = valid_indices[:length] if part == "head" else valid_indices[mid_start:mid_start+length] if part == "mid" else valid_indices[-length:] if part == "tail" else None
         print(f'length of sequence {sequence_path}: {length}')
@@ -363,7 +364,7 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
     train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, collate_fn=custom_collate_fn)
     val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
     test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
-
+    
     return train_loader, val_loader, test_loader
 
 def get_data_loaders(train_size=None, part=None, batch_size=BATCH_SIZE):
