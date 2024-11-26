@@ -545,8 +545,6 @@ def save_keypoints_monkaa():
             line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
             f.write(line)
 
-
-
 def save_keypoints_realestate():
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
     for jump_frames in [JUMP_FRAMES]:
@@ -628,6 +626,9 @@ def save_keypoints_realestate():
                     print("Saved images")
 
     # Function to visualize a tensor image
+
+
+# Function to visualize a tensor image
 def visualize_image(tensor_image):
     # Detach, move to CPU, and adjust data type if necessary
     img = tensor_image.cpu().detach()
@@ -639,24 +640,23 @@ def visualize_image(tensor_image):
     if img.shape[0] == 1:  # If grayscale (1 channel), repeat to make it RGB-like for visualization
         img = img.repeat(3, 1, 1)
 
-    # Check if the range of values is between [0, 1] or [0, 255] and adjust accordingly
+    # Convert the range from [0, 1] to [0, 255] if necessary
     if img.max() <= 1.0:  # If the max value is <= 1, we assume the range is [0, 1]
         img = img * 255
 
     # Ensure it is in the right data type (uint8) for PIL conversion
     img = img.to(torch.uint8)
 
-    # Convert the tensor to a PIL image
+    # Convert the tensor to a numpy array for safer handling with PIL
     try:
-        img = TF.to_pil_image(img)
+        img_np = img.numpy().transpose(1, 2, 0)  # Convert (C, H, W) to (H, W, C) for visualization
+        plt.imshow(img_np)
+        plt.axis('off')
+        plt.show()
     except Exception as e:
-        print(f"Error converting tensor to PIL image: {e}")
+        print(f"Error converting tensor to numpy image: {e}")
         print(f"Tensor shape: {img.shape}, dtype: {img.dtype}, max value: {img.max()}")
         return
-
-    # save the image:
-    img.save("image.png")
-
 
 # Example main section to iterate over dataloader and visualize images
 if __name__ == "__main__":
@@ -669,8 +669,6 @@ if __name__ == "__main__":
 
         # Visualize img0
         visualize_image(img0.squeeze(0))  # Ensure we squeeze the batch dimension as batch size is 1
-
-        # Optional: add a pause or wait for user input to continue to the next image
 
         # You could also break after a few iterations if you want to visualize a subset
         if batch_idx == 2:
