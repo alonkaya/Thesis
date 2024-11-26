@@ -290,8 +290,8 @@ def sed_distance_trained():
 
         output = model.forward(img1, img2)
 
-        pts1 = pts1[0].cpu().numpy()
-        pts2 = pts2[0].cpu().numpy()
+        pts1 = pts1[0].cpu().numpy().astype(np.uint8)
+        pts2 = pts2[0].cpu().numpy().astype(np.uint8)
 
         # Convert grayscale tensors to numpy arrays for matplotlib
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
