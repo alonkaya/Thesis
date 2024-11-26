@@ -291,7 +291,7 @@ def sed_distance_trained():
         output = model.forward(img1, img2)
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type="test")
-
+        print(epoch_stats["test_SED_pred"])
         if i == 10: break
     
 
