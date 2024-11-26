@@ -638,7 +638,7 @@ def unnormalize(img, mean, std):
 def visualize_test_dataloader(test_loader, norm_mean, norm_std):
     for batch_idx, (imgs1, imgs2, Fs, pts1, pts2, seq_names) in enumerate(test_loader):
         # Get the first image (batch size is 1)
-        img = imgs1[0]  # Shape (C, H, W)
+        img = imgs1[0].cpu().detach()  # Shape (C, H, W)
 
         # Unnormalize the image
         unnormalized_img = unnormalize(img, norm_mean.cpu(), norm_std.cpu())  # Shape (C, H, W)
