@@ -627,7 +627,32 @@ def save_keypoints_realestate():
                     cv2.imwrite(f'draw0/images_with_keypoints_{idx}.png', combined_image)
                     print("Saved images")
 
+    # Function to visualize a tensor image
+
+def visualize_image(tensor_image):
+    # Detach and move to CPU, if necessary
+    img = tensor_image.cpu().detach()
+    
+    # Convert the tensor to a PIL image and then to a numpy array for visualization
+    img = TF.to_pil_image(img)
+    plt.imshow(img)
+    plt.axis('off')
+    plt.show()
+
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+    train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.5, part='head', batch_size=1)
 
-    save_keypoints_monkaa()    
+    # Iterate over the dataloader
+    for batch_idx, (img0, img1, F, pts1, pts2, seq_name) in enumerate(test_loader):
+        print(f"Visualizing img0 from batch {batch_idx + 1}")
+
+        # Visualize img0
+        visualize_image(img0.squeeze())  # Squeeze to remove batch dimension as batch size is 1
+        
+        # Optional: add a pause or wait for user input to continue to next image
+        input("Press Enter to continue to the next image...")
+
+        # You could also break after a few iterations if you want to visualize a subset
+        # if batch_idx == 10:
+        #     break
