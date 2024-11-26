@@ -84,7 +84,7 @@ def valid_indices_of_dataset(train_loader, idx):
         print("Dataset not found for the current batch")
 
 def vis_gt():
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.1, batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.1,part='head', batch_size=1)
     total_sed = 0
 
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
