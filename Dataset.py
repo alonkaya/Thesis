@@ -631,29 +631,14 @@ def save_keypoints_realestate():
 # Function to visualize a tensor image
 def visualize_image(tensor_image):
     # Detach, move to CPU, and adjust data type if necessary
-    img = tensor_image.cpu().detach()
-
-    # Make sure the tensor has the expected shape (C, H, W)
-    if len(img.shape) == 4:  # If it still has the batch dimension
-        print("f")
-        img = img.squeeze(0)  # Remove batch dimension
-
-    if img.shape[0] == 1:  # If grayscale (1 channel), repeat to make it RGB-like for visualization
-        print("d")
-        img = img.repeat(3, 1, 1)
-
-    # Convert the range from [0, 1] to [0, 255] if necessary
-    if img.max() <= 1.0:  # If the max value is <= 1, we assume the range is [0, 1]
-        print("h")
-        img = img * 255
-
+    img = tensor_image
     # Ensure it is in the right data type (uint8) for PIL conversion
-    img = img.to(torch.uint8)
-
+    # img = img.cpu().detach().to(torch.uint8)
+    img = reverse_transforms(img.cpu().detach(), is_scaled=True)
     # Convert the tensor to a numpy array for safer handling with PIL
     try:
-        img_np = img.numpy().transpose(1, 2, 0)  # Convert (C, H, W) to (H, W, C) for visualization
-        plt.imshow(img_np)
+        # img_np = img.cpu().detach().numpy().astype(np.uint8).transpose(1, 2, 0)  # Convert (C, H, W) to (H, W, C) for visualization
+        plt.imshow(img)
         plt.axis('off')
         plt.show()
     except Exception as e:
@@ -672,6 +657,9 @@ if __name__ == "__main__":
 
         # Visualize img0
         visualize_image(img0.squeeze(0))  # Ensure we squeeze the batch dimension as batch size is 1
+
+        # Optional: add a pause or wait for user input to continue to the next image
+        input("Press Enter to continue to the next image...")
 
         # You could also break after a few iterations if you want to visualize a subset
         if batch_idx == 2:
