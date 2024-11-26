@@ -7,7 +7,7 @@ import os
 from PIL import Image
 import torchvision
 import torchvision.transforms.functional as TF
-import torch.nn.functional as F
+import torch.nn.functional as NF
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -154,8 +154,8 @@ def custom_collate_fn(batch):
         if pts1.shape[0] == 0:
             print(f'\n################\nEmpty points at {seq_names[i]}\n\n')
         pad_len = max_len - pts1.shape[0]
-        padded_pts1.append(F.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
-        padded_pts2.append(F.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
+        padded_pts1.append(NF.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
+        padded_pts2.append(NF.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
 
     return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
 
