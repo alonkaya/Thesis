@@ -635,9 +635,9 @@ def visualize_image(img):
     # mean = norm_mean.cpu().detach().view(-1, 1, 1)
     # std = norm_std.cpu().detach().view(-1, 1, 1)
     # img = (img * std + mean) * 255
-    img = img.numpy().transpose(1, 2, 0)  # Convert (C, H, W) to (H, W, C) for visualization
+    # img = img.numpy().transpose(1, 2, 0)  # Convert (C, H, W) to (H, W, C) for visualization
 
-    # img = reverse_transforms(img, mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=True)
+    img = reverse_transforms(img, mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=True)
     try:
         plt.imshow(img)
         plt.axis('off')
@@ -650,7 +650,7 @@ def visualize_image(img):
 # Example main section to iterate over dataloader and visualize images
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-    train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.2, part='head', batch_size=1)
+    train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.02, part='head', batch_size=1)
 
     # Iterate over the dataloader
     for batch_idx, (img0, img1, F, pts1, pts2, seq_name) in enumerate(test_loader):
