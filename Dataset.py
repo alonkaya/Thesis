@@ -641,10 +641,9 @@ def visualize_test_dataloader(test_loader, norm_mean, norm_std):
         img = imgs1[0].cpu().detach()  # Shape (C, H, W)
 
         # Unnormalize the image
-        unnormalized_img = unnormalize(img, norm_mean.cpu(), norm_std.cpu())  # Shape (C, H, W)
-
-        # Convert to NumPy for visualization
-        img_np = unnormalized_img.permute(1, 2, 0).numpy()  # Shape (H, W, C)
+        # unnormalized_img = unnormalize(img, norm_mean.cpu(), norm_std.cpu())  # Shape (C, H, W)
+        # img_np = unnormalized_img.permute(1, 2, 0).numpy()  # Shape (H, W, C)
+        img_np = reverse_transforms(img, norm_mean.cpu(), norm_std.cpu(), is_scaled=True)
 
         print(f'max value: {img_np.max()}')
         # Clip values to [0, 1] for display
