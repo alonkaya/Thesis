@@ -646,8 +646,9 @@ def visualize_test_dataloader(test_loader, norm_mean, norm_std):
         # Convert to NumPy for visualization
         img_np = unnormalized_img.permute(1, 2, 0).cpu().numpy()  # Shape (H, W, C)
 
+        print(f'max value: {img_np.max()}')
         # Clip values to [0, 1] for display
-        img_np = img_np.clip(0, 1)
+        # img_np = img_np.clip(0, 1)
 
         # Display the image
         plt.imshow(img_np)
