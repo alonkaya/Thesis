@@ -60,7 +60,7 @@ class Dataset(torch.utils.data.Dataset):
         return img0, img1, F, pts1, pts2, self.seq_name
 
 class Dataset_stereo(torch.utils.data.Dataset):
-    def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, keypoints, subset_valid_indices, seq_name, test, data_ratio):
+    def __init__(self, sequence_path, transform, k0, k1, R, t, images_0, images_1, keypoints, subset, seq_name):
         self.sequence_path = sequence_path
         self.transform = transform
         self.k0 = k0
@@ -70,19 +70,17 @@ class Dataset_stereo(torch.utils.data.Dataset):
         self.images_0 = images_0
         self.images_1 = images_1
         self.keypoints = keypoints
-        self.subset_valid_indices = subset_valid_indices
+        self.subset = subset
         self.seq_name = seq_name
-        self.test = test
-        self.data_ratio = data_ratio
 
     def __len__(self):
-        return int(len(self.subset_valid_indices))
+        return int(len(self.subset))
 
     def __getitem__(self, idx):
-        idx = self.subset_valid_indices[idx]
+        idx = self.subset[idx]
 
-        img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) # shape (channels, height, width)
-        img1 = self.images_1[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) # shape (channels, height, width)
+        img0 = self.images_0[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) if not SCENEFLOW else torchvision.io.read_image(os.path.join(self.sequence_path, 'left', f'{idx:04}.{IMAGE_TYPE}')).to(device)# shape (channels, height, width)
+        img1 = self.images_1[idx] if INIT_DATA else torchvision.io.read_image(os.path.join(self.sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) if not SCENEFLOW else torchvision.io.read_image(os.path.join(self.sequence_path, 'right', f'{idx:04}.{IMAGE_TYPE}')).to(device)# shape (channels, height, width)
         H, W = img0.shape[1], img0.shape[2]
 
         k0=self.k0.clone()
@@ -93,7 +91,6 @@ class Dataset_stereo(torch.utils.data.Dataset):
             img0, img1 = TF.crop(img0, top_crop, left_crop, CROP, CROP), TF.crop(img1, top_crop, left_crop, CROP, CROP)
             k0 = adjust_k_crop(k0, top_crop, left_crop)
             k1 = adjust_k_crop(k1, top_crop, left_crop)
-
 
         img0 = self.transform(img0) # shape (channels, height, width)
         img1 = self.transform(img1) # shape (channels, height, width)
@@ -107,6 +104,15 @@ class Dataset_stereo(torch.utils.data.Dataset):
         
         return img0, img1, F, pts1, pts2, self.seq_name
     
+def get_valid_indices_stereo(sequence_path):
+    valid_indices = []
+    for filename in os.listdir(sequence_path):
+        # Extract the numeric part of the filename (excluding leading zeros)
+        number_str = filename.split('.')[0]
+        valid_indices.append(int(number_str))
+    return valid_indices
+
+
 def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
     valid_indices = []
     for idx in range(sequence_len - jump_frames):
@@ -204,7 +210,6 @@ def get_dataloaders_RealEstate(train_num_sequences, batch_size):
     print(len(train_loader), len(val_loader), len(test_loader))
 
     return train_loader, val_loader, test_loader
-
 
 def get_dataloaders_RealEstate_split(train_num_sequences, batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
@@ -346,7 +351,61 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
 
         keypoints_dict = load_keypoints(os.path.join(sequence_path, 'keypoints.txt'))
 
-        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, images_0, images_1, keypoints_dict, subset, seq_name= f'0{i}', test=True if i in test_sequences_stereo else False, data_ratio=data_ratio)
+        dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, images_0, images_1, keypoints_dict, subset, seq_name= f'0{i}')
+
+        if i in train_seqeunces_stereo:
+            train_datasets.append(dataset_stereo)        
+        if i in val_sequences_stereo:
+            val_datasets.append(dataset_stereo)
+        if i in test_sequences_stereo:
+            test_datasets.append(dataset_stereo)
+
+    # Concatenate datasets
+    concat_train_dataset = ConcatDataset(train_datasets)
+    concat_val_dataset = ConcatDataset(val_datasets)
+    concat_test_dataset = ConcatDataset(test_datasets)
+
+    # Create a DataLoader
+    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, collate_fn=custom_collate_fn)
+    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
+    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
+    
+    return train_loader, val_loader, test_loader
+
+
+def get_dataloader_monkaa(data_ratio, batch_size, num_workers=NUM_WORKERS): 
+    R = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32).to(device)
+    t = torch.tensor([1, 0, 0], dtype=torch.float32).to(device)
+    K = torch.tensor([[105, 0,    479.5],
+                      [0,   1050, 269.5],
+                      [0,   0,    1]], dtype=torch.float32).to(device)
+    original_image_size = torch.tensor([960, 540]).to(device)
+    resized = torch.tensor([RESIZE, RESIZE]).to(device)
+    K = adjust_k_resize(K, original_image_size, resized)
+
+    monkaa_path = "SceneFlow/Monkaa_cleanpass"
+    train_datasets, val_datasets, test_datasets = [], [], []
+    for i, seq_name  in enumerate(os.listdir(monkaa_path)):     
+        seq_path = os.path.join(monkaa_path, seq_name) 
+        left_path = os.path.join(seq_path, 'left')
+        right_path = os.path.join(seq_path, 'right')         
+
+        # Indices of 'good' image frames
+        valid_indices = get_valid_indices_stereo(left_path)
+        
+        if i in test_sequences_stereo:
+            subset = valid_indices
+        else:
+            length = int(len(valid_indices) * data_ratio) 
+            if length < 8: length=8
+            subset = random.sample(valid_indices, length)
+
+        images_0 = {idx: torchvision.io.read_image(os.path.join(left_path, f'{idx:04}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
+        images_1 = {idx: torchvision.io.read_image(os.path.join(right_path, f'{idx:04}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None
+
+        keypoints_dict = load_keypoints(os.path.join(seq_path, 'keypoints.txt'))
+
+        dataset_stereo = Dataset_stereo(seq_path, transform, K, K, R, t, images_0, images_1, keypoints_dict, subset, seq_name=seq_name)
 
         if i in train_seqeunces_stereo:
             train_datasets.append(dataset_stereo)        
@@ -368,8 +427,10 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
     return train_loader, val_loader, test_loader
 
 def get_data_loaders(train_size=None, part=None, batch_size=BATCH_SIZE):
-    if STEREO:
+    if STEREO and not SCENEFLOW:
         return get_dataloader_stereo(train_size, part, batch_size)
+    if SCENEFLOW:
+        return get_dataloader_monkaa(train_size, batch_size)
     elif USE_REALESTATE:
         if REALESTATE_SPLIT:
             return get_dataloaders_RealEstate_split(train_size, batch_size=batch_size)
@@ -449,6 +510,41 @@ def save_keypoints_stereo():
 
             # # Show the plot
             # plt.show()
+    
+def save_keypoints_monkaa():
+    monkaa_path = "SceneFlow/Monkaa_cleanpass"
+    F_monkaa = torch.tensor([[ 0,     0,        0],
+                             [ 0,     0,       -9.5238e-04],
+                             [ 0,     9.5238e-04,     0]]).to(device)
+    
+    # for i, seq_name  in enumerate(os.listdir(monkaa_path)):
+    seq_name = "treeflight_x2"     
+    seq_path = os.path.join(monkaa_path, seq_name) 
+    left_path = os.path.join(seq_path, 'left')
+    right_path = os.path.join(seq_path, 'right')
+
+    # Indices of 'good' image frames
+    valid_indices = get_valid_indices_stereo(left_path)
+
+    for idx in valid_indices:
+        img0 = torchvision.io.read_image(os.path.join(left_path, f'{idx:04}.{IMAGE_TYPE}')) # shape (channels, height, width)
+        img1 = torchvision.io.read_image(os.path.join(right_path, f'{idx:04}.{IMAGE_TYPE}')) # shape (channels, height, width)
+        
+        img0 = TF.rgb_to_grayscale(img0, num_output_channels=1)
+        img1 = TF.rgb_to_grayscale(img1, num_output_channels=1)
+        
+        # Normalize F-Matrix
+        F = norm_layer(F_monkaa.view(-1, 9)).view(3,3)
+
+        epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False, threshold=0.3)
+        if epi.pts1.shape[0] < 5:
+            print(f'{epi.pts1.shape[0]} points at {seq_name}, {idx}')
+
+        filepath = os.path.join(seq_path, f'keypoints.txt')
+        with open(filepath, 'a') as f:
+            line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
+            f.write(line)
+
 
 
 def save_keypoints_realestate():
@@ -534,4 +630,4 @@ def save_keypoints_realestate():
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    save_keypoints_realestate()    
+    save_keypoints_monkaa()    
