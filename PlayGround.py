@@ -7,6 +7,7 @@ from FunMatrix import EpipolarGeometry, compute_fundamental, get_F, update_epoch
 from FMatrixRegressor import FMatrixRegressor
 from Dataset import get_data_loaders
 from params import LR, device, norm_mean, norm_std
+from torchvision.transforms.functional import to_pil_image
 
 import cv2
 import numpy as np
@@ -288,9 +289,14 @@ def sed_distance_trained():
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
         # Convert grayscale tensors to numpy arrays for matplotlib
-        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=False)  # shape (H, W, C)
-        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=False)  # shape (H, W, C)
-        print(img0_np.shape, type(img0_np), img0_np.dtype)
+        # img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=False)  # shape (H, W, C)
+        # img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=False)  # shape (H, W, C)
+        # print(img0_np.shape, type(img0_np), img0_np.dtype)
+        img_tensor = (img_tensor * norm_std.view(-1, 1, 1) + norm_mean.view(-1, 1, 1))
+        img_tensor = torch.clamp(img_tensor, 0, 1)  # Ensure values are within [0, 1]
+
+        # Convert tensor to PIL image
+        img_pil = to_pil_image(img_tensor)        
         # output = model.forward(img1, img2)
 
         pts1 = pts1[0].cpu().numpy()
@@ -298,8 +304,8 @@ def sed_distance_trained():
         
         # Plot the image
         plt.figure(figsize=(8, 8))
-        plt.imshow(img0_np)
-        plt.axis('off')  # Remove axis labels
+        plt.imshow(img_pil)
+        plt.axis('off')
         
         # Scatter plot the keypoints
         plt.scatter(pts1[:, 0], pts1[:, 1], c='red', s=20, marker='o')
