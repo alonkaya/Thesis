@@ -627,12 +627,12 @@ def save_keypoints_realestate():
 
     # Function to visualize a tensor image
 
-
 # Unnormalize the image
 def unnormalize(img, mean, std):
-    mean = torch.tensor(mean).view(3, 1, 1)  # Reshape to match image dimensions
-    std = torch.tensor(std).view(3, 1, 1)
+    mean = mean.clone().detach().view(3, 1, 1)  # Reshape to match image dimensions
+    std = std.clone().detach().view(3, 1, 1)
     return img * std + mean
+
 
 # Iterate over the test DataLoader
 def visualize_test_dataloader(test_loader, norm_mean, norm_std):
