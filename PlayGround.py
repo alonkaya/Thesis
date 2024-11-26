@@ -297,8 +297,8 @@ def sed_distance_trained():
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
         img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
         
-        img0_pts = img0_np.copy()
-        img1_pts = img1_np.copy()
+        img0_pts = img0_np.copy().astype(np.uint8)
+        img1_pts = img1_np.copy().astype(np.uint8)
 
         print(img0_pts.shape, type(pts1))  # Should have 2 or 3 dimensions, depending on the image     
         print(pts1.shape ,type(pts1))
