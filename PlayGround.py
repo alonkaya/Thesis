@@ -7,7 +7,6 @@ from FunMatrix import EpipolarGeometry, compute_fundamental, get_F, update_epoch
 from FMatrixRegressor import FMatrixRegressor
 from Dataset import get_data_loaders
 from params import LR, device, norm_mean, norm_std
-from torchvision.transforms.functional import to_pil_image
 
 import cv2
 import numpy as np
@@ -85,7 +84,7 @@ def valid_indices_of_dataset(train_loader, idx):
         print("Dataset not found for the current batch")
 
 def vis_gt():
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=10, batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.1, batch_size=1)
     total_sed = 0
 
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
@@ -94,7 +93,7 @@ def vis_gt():
         # Convert grayscale tensors to numpy arrays for matplotlib
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
         img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
-
+        
         img0_pts = img0_np.copy()
         img1_pts = img1_np.copy()
         for i,point in enumerate(pts1):
@@ -113,8 +112,8 @@ def vis_gt():
         # Combine the two images with padding in between
         combined_image = np.hstack((img0_pts, padding, img1_pts))
 
-        os.makedirs(f'gt_epilines/RealEstate_after_transform/{seq_name[0]}', exist_ok=True)
-        cv2.imwrite(f'gt_epilines/RealEstate_after_transform/{seq_name[0]}/gt_{i}.png', combined_image)
+        os.makedirs(f'gt_epilines/Sceneflow/{seq_name[0]}', exist_ok=True)
+        cv2.imwrite(f'gt_epilines/Sceneflow/{seq_name[0]}/gt_{i}.png', combined_image)
 
         if i == 100: break
         
@@ -274,7 +273,7 @@ def return_bad_frames_to_seq():
 def sed_distance_trained():
     pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
     model = FMatrixRegressor(lr=LR[0], batch_size=1, L2_coeff=1, huber_coeff=1, pretrained_path=pretrained_path)
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.3, part="head", batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.3, batch_size=1)
 
     epoch_stats = {"algebraic_pred": torch.tensor(0), "algebraic_sqr_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
                 "val_algebraic_pred": torch.tensor(0), "val_algebraic_sqr_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
@@ -288,55 +287,11 @@ def sed_distance_trained():
     
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
-        # Convert grayscale tensors to numpy arrays for matplotlib
-        # img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=False)  # shape (H, W, C)
-        # img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=False)  # shape (H, W, C)
-        # print(img0_np.shape, type(img0_np), img0_np.dtype)
-        img_tensor = (img1[0] * norm_std.view(-1, 1, 1) + norm_mean.view(-1, 1, 1))
-        img_tensor = torch.clamp(img_tensor, 0, 1)  # Ensure values are within [0, 1]
 
-        # Convert tensor to PIL image
-        img_pil = to_pil_image(img_tensor)        
-        # output = model.forward(img1, img2)
+        output = model.forward(img1, img2)
 
-        pts1 = pts1[0].cpu().numpy()
-        pts2 = pts2[0].cpu().numpy()
-        
-        # Plot the image
-        plt.figure(figsize=(8, 8))
-        plt.imshow(img_pil)
-        plt.axis('off')
-        
-        # Scatter plot the keypoints
-        plt.scatter(pts1[:, 0], pts1[:, 1], c='red', s=20, marker='o')
-        
-        plt.show()
-
-
-        # img0_pts = img0_np.copy()
-        # img1_pts = img1_np.copy()
-        # for i,point in enumerate(pts1):
-        #     if i == 30: break
-        #     if point[0] == 0 and point[1] == 0: continue
-        #     img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
-            
-        # for i, point in enumerate(pts2):
-        #     if i == 30: break
-        #     if point[0] == 0 and point[1] == 0: continue
-        #     img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
-
-        # # Create padding (e.g., 10-pixel wide, white vertical strip)
-        # padding = 255 * np.zeros((img0_pts.shape[0], 30, 3), dtype=np.uint8)  # 10-pixel wide white space
-
-        # # Combine the two images with padding in between
-        # combined_image = np.hstack((img0_pts, padding, img1_pts))
-
-        # os.makedirs(f'gt_epilines/monkaa/{seq_name[0]}', exist_ok=True)
-        # cv2.imwrite(f'gt_epilines/monkaa/{seq_name[0]}/gt_{i}.png', combined_image)
-
-        # update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type="test")
-
-        if i == 0: break
+        update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type="test")
+        if i == 10000: break
     
 
     print(f"""SED distance: {epoch_stats["test_SED_pred"]/(i+1)}
@@ -746,4 +701,4 @@ def delete_odd_files(folder_path):
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    sed_distance_trained()
+    vis_gt()
