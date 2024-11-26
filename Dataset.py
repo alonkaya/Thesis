@@ -654,10 +654,9 @@ def visualize_image(tensor_image):
         print(f"Tensor shape: {img.shape}, dtype: {img.dtype}, max value: {img.max()}")
         return
 
-    # Display the image using matplotlib
-    plt.imshow(img)
-    plt.axis('off')
-    plt.show()
+    # save the image:
+    img.save("image.png")
+
 
 # Example main section to iterate over dataloader and visualize images
 if __name__ == "__main__":
@@ -672,8 +671,7 @@ if __name__ == "__main__":
         visualize_image(img0.squeeze(0))  # Ensure we squeeze the batch dimension as batch size is 1
 
         # Optional: add a pause or wait for user input to continue to the next image
-        input("Press Enter to continue to the next image...")
 
         # You could also break after a few iterations if you want to visualize a subset
-        # if batch_idx == 10:
-        #     break
+        if batch_idx == 2:
+            break
