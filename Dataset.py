@@ -629,16 +629,33 @@ def save_keypoints_realestate():
 
     # Function to visualize a tensor image
 
+# Function to visualize a tensor image
 def visualize_image(tensor_image):
-    # Detach and move to CPU, if necessary
+    # Detach, move to CPU, and adjust data type if necessary
     img = tensor_image.cpu().detach()
+
+    # De-normalize if required (assuming normalization was applied with mean and std previously)
+    if isinstance(norm_mean, torch.Tensor) and isinstance(norm_std, torch.Tensor):
+        norm_mean_cpu = norm_mean.cpu().numpy()
+        norm_std_cpu = norm_std.cpu().numpy()
+        for t, m, s in zip(img, norm_mean_cpu, norm_std_cpu):
+            t.mul_(s).add_(m)
     
-    # Convert the tensor to a PIL image and then to a numpy array for visualization
+    # Convert the range from [0, 1] to [0, 255] if necessary
+    img = torch.clamp(img, 0, 1) * 255
+
+    # Ensure it is in the right data type (uint8) for PIL conversion
+    img = img.to(torch.uint8)
+
+    # Convert the tensor to a PIL image
     img = TF.to_pil_image(img)
+    
+    # Display the image using matplotlib
     plt.imshow(img)
     plt.axis('off')
     plt.show()
 
+# Example main section to iterate over dataloader and visualize images
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
     train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.2, part='head', batch_size=1)
