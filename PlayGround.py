@@ -93,7 +93,7 @@ def vis_gt():
         # Convert grayscale tensors to numpy arrays for matplotlib
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
         img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
-        print(img0_np.shape, img0_np.dtype)
+
         img0_pts = img0_np.copy()
         img1_pts = img1_np.copy()
         for i,point in enumerate(pts1):
@@ -296,6 +296,7 @@ def sed_distance_trained():
         # Convert grayscale tensors to numpy arrays for matplotlib
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
         img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
+        print(img0_np.shape, img0_np.dtype)
 
         img0_np = cv2.cvtColor(img0_np, cv2.COLOR_GRAY2RGB)
         img1_np = cv2.cvtColor(img1_np, cv2.COLOR_GRAY2RGB)
