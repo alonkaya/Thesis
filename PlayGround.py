@@ -288,43 +288,49 @@ def sed_distance_trained():
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
         # Convert grayscale tensors to numpy arrays for matplotlib
-        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
-        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
-        print(img0_np.shape, img0_np.dtype)
+        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=False)  # shape (H, W, C)
+        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=False)  # shape (H, W, C)
 
-        output = model.forward(img1, img2)
+        # output = model.forward(img1, img2)
 
         pts1 = pts1[0].cpu().numpy()
         pts2 = pts2[0].cpu().numpy()
         
+        # Plot the image
+        plt.figure(figsize=(8, 8))
+        plt.imshow(img0_np)
+        plt.axis('off')  # Remove axis labels
+        
+        # Scatter plot the keypoints
+        plt.scatter(pts1[:, 0], pts1[:, 1], c='red', s=20, marker='o')
+        
+        plt.show()
 
 
-        # img0_np = cv2.cvtColor(img0_np, cv2.COLOR_GRAY2RGB)
-        # img1_np = cv2.cvtColor(img1_np, cv2.COLOR_GRAY2RGB)
-
-        img0_pts = img0_np.copy()
-        img1_pts = img1_np.copy()
-        for i,point in enumerate(pts1):
-            if i == 30: break
-            if point[0] == 0 and point[1] == 0: continue
-            img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
+        # img0_pts = img0_np.copy()
+        # img1_pts = img1_np.copy()
+        # for i,point in enumerate(pts1):
+        #     if i == 30: break
+        #     if point[0] == 0 and point[1] == 0: continue
+        #     img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
             
-        for i, point in enumerate(pts2):
-            if i == 30: break
-            if point[0] == 0 and point[1] == 0: continue
-            img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
+        # for i, point in enumerate(pts2):
+        #     if i == 30: break
+        #     if point[0] == 0 and point[1] == 0: continue
+        #     img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
 
-        # Create padding (e.g., 10-pixel wide, white vertical strip)
-        padding = 255 * np.zeros((img0_pts.shape[0], 30, 3), dtype=np.uint8)  # 10-pixel wide white space
+        # # Create padding (e.g., 10-pixel wide, white vertical strip)
+        # padding = 255 * np.zeros((img0_pts.shape[0], 30, 3), dtype=np.uint8)  # 10-pixel wide white space
 
-        # Combine the two images with padding in between
-        combined_image = np.hstack((img0_pts, padding, img1_pts))
+        # # Combine the two images with padding in between
+        # combined_image = np.hstack((img0_pts, padding, img1_pts))
 
-        os.makedirs(f'gt_epilines/monkaa/{seq_name[0]}', exist_ok=True)
-        cv2.imwrite(f'gt_epilines/monkaa/{seq_name[0]}/gt_{i}.png', combined_image)
+        # os.makedirs(f'gt_epilines/monkaa/{seq_name[0]}', exist_ok=True)
+        # cv2.imwrite(f'gt_epilines/monkaa/{seq_name[0]}/gt_{i}.png', combined_image)
 
-        update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type="test")
-        if i == 10: break
+        # update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type="test")
+        
+        if i == 0: break
     
 
     print(f"""SED distance: {epoch_stats["test_SED_pred"]/(i+1)}
