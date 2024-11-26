@@ -167,7 +167,7 @@ def update_distances(img1, img2, F, pts1, pts2):
     SED_dist = epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
     return algebraic_dist, RE1_dist, SED_dist
 
-def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, plots_path, data_type, epoch=0):
+def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, data_type, epoch=0):
     prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
 
     algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2)

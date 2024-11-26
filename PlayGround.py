@@ -270,7 +270,7 @@ def return_bad_frames_to_seq():
                     print(f'from: {os.path.join(bad_seq_path, img)}, to: {os.path.join(image_0_path, img)}') 
                     # os.rename(os.path.join(bad_seq_path, img), os.path.join(image_0_path, img))
 
-def sed_distance_trained(plots_path):
+def sed_distance_trained():
     pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0/"
     model = FMatrixRegressor(lr=LR[0], batch_size=1, L2_coeff=1, huber_coeff=1, pretrained_path=pretrained_path)
     train_loader, val_loader, test_loader = get_data_loaders()
@@ -290,7 +290,7 @@ def sed_distance_trained(plots_path):
 
         output = model.forward(img1, img2)
 
-        update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, plots_path, data_type="test")
+        update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, data_type="test")
 
         if i == 10: break
     
