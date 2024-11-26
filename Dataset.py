@@ -628,42 +628,48 @@ def save_keypoints_realestate():
     # Function to visualize a tensor image
 
 
-# Function to visualize a tensor image
-def visualize_image(img):
-    img = img.cpu().detach()
-    print(img.shape, img.max())
-    # mean = norm_mean.cpu().detach().view(-1, 1, 1)
-    # std = norm_std.cpu().detach().view(-1, 1, 1)
-    # img = (img * std + mean) * 255
-    # img = img.numpy().transpose(1, 2, 0)  # Convert (C, H, W) to (H, W, C) for visualization
+def unnormalize_image(tensor_image, mean=norm_mean.cpu(), std=norm_std.cpu()):
+    """Unnormalize a tensor image for visualization"""
+    # Normalize mean and std should have a length of number of channels (3 here)
+    for t, m, s in zip(tensor_image, mean, std):
+        t.mul_(s).add_(m)
+    return tensor_image
 
-    img = reverse_transforms(img, mean=norm_mean.cpu().detach(), std=norm_std.cpu().detach(), is_scaled=True)
-    # print(img.shape, np.max(img))
-
-    try:
-        plt.imshow(img)
-        plt.axis('off')
-        plt.show()
-    except Exception as e:
-        print(f"Error converting tensor to numpy image: {e}")
-        print(f"Tensor shape: {img.shape}, dtype: {img.dtype}, max value: {img.max()}")
-        return
-
-# Example main section to iterate over dataloader and visualize images
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-    train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.02, part='head', batch_size=1)
 
-    # Iterate over the dataloader
-    for batch_idx, (img0, img1, F, pts1, pts2, seq_name) in enumerate(test_loader):
-        print(f"Visualizing img0 from batch {batch_idx + 1}")
+    _, _, test_loader = get_dataloader_stereo(data_ratio=0.2, part="tail", batch_size=1)
+    for batch in test_loader:
+        imgs1, imgs2, _, _, _, _ = batch  # Extract imgs1 and imgs2 (other items can be ignored for visualization)
 
-        # Visualize img0
-        visualize_image(img0.squeeze(0))  # Ensure we squeeze the batch dimension as batch size is 1
+        # Unnormalize and convert each image in the batch for visualization
+        for img_idx in range(imgs1.size(0)):
+            img1 = imgs1[img_idx]
+            img2 = imgs2[img_idx]
 
-        # Optional: add a pause or wait for user input to continue to the next image
-        input("Press Enter to continue to the next image...")
+            # Unnormalize images
+            img1_unnorm = unnormalize_image(img1.clone(), mean=norm_mean, std=norm_std)
+            img2_unnorm = unnormalize_image(img2.clone(), mean=norm_mean, std=norm_std)
 
-        # You could also break after a few iterations if you want to visualize a subset
-        if batch_idx == 2:
-            break
+            # Convert torch.Tensor to NumPy array for matplotlib
+            img1_np = img1_unnorm.permute(1, 2, 0).cpu().numpy()  # (C, H, W) -> (H, W, C)
+            img2_np = img2_unnorm.permute(1, 2, 0).cpu().numpy()
+
+            # Clip values to be in range [0, 1] for proper display
+            img1_np = np.clip(img1_np, 0, 1)
+            img2_np = np.clip(img2_np, 0, 1)
+
+            # Plot the images side-by-side
+            fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+            axs[0].imshow(img1_np)
+            axs[0].set_title("Image 1")
+            axs[0].axis("off")
+
+            axs[1].imshow(img2_np)
+            axs[1].set_title("Image 2")
+            axs[1].axis("off")
+
+            plt.show()
+
+        # Assuming you want to visualize just one batch and then break.
+        break    
