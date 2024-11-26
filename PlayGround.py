@@ -188,17 +188,72 @@ def vis_cognata():
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+def vis_trained():
+    pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
+    model = FMatrixRegressor(lr=LR[0], batch_size=1, L2_coeff=1, huber_coeff=1, pretrained_path=pretrained_path)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.3, batch_size=1)
 
-def vis_trained(plots_path):
-    model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
+    epoch_stats = {"algebraic_pred": torch.tensor(0), "algebraic_sqr_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
+                "val_algebraic_pred": torch.tensor(0), "val_algebraic_sqr_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
+                "test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
+                "algebraic_truth": torch.tensor(0), "algebraic_sqr_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
+                "val_algebraic_truth": torch.tensor(0), "val_algebraic_sqr_truth": torch.tensor(0), "val_RE1_truth": torch.tensor(0), "val_SED_truth": torch.tensor(0), 
+                "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
+                "loss": torch.tensor(0), "val_loss": torch.tensor(0), "test_loss": torch.tensor(0), 
+                "labels": torch.tensor([]), "outputs": torch.tensor([]), "val_labels": torch.tensor([]), "val_outputs": torch.tensor([]), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([]),
+                "file_num": 0}
     
-    train_loader, val_loader, test_loader = get_data_loaders(batch_size=1)
-    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
-        img1, img2 = img1.to(device), img2.to(device)
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
+        img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
+
+        # output = model.forward(img1, img2)
+
+        img = img1[0].cpu().detach()  # Shape (C, H, W)
+
+        # Unnormalize the image
+        img_np = reverse_transforms(img, norm_mean.cpu(), norm_std.cpu(), is_scaled=True)
+
+        # Display the image
+        plt.imshow(img_np)
+        plt.title(f"Image from sequence: {seq_name[0]}")
+        plt.axis('off')
+        plt.show()
+
+        if i == 0:
+            break
+
+def sed_distance_trained():
+    pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
+    model = FMatrixRegressor(lr=LR[0], batch_size=1, L2_coeff=1, huber_coeff=1, pretrained_path=pretrained_path)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.3, batch_size=1)
+
+    epoch_stats = {"algebraic_pred": torch.tensor(0), "algebraic_sqr_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
+                "val_algebraic_pred": torch.tensor(0), "val_algebraic_sqr_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
+                "test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
+                "algebraic_truth": torch.tensor(0), "algebraic_sqr_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
+                "val_algebraic_truth": torch.tensor(0), "val_algebraic_sqr_truth": torch.tensor(0), "val_RE1_truth": torch.tensor(0), "val_SED_truth": torch.tensor(0), 
+                "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
+                "loss": torch.tensor(0), "val_loss": torch.tensor(0), "test_loss": torch.tensor(0), 
+                "labels": torch.tensor([]), "outputs": torch.tensor([]), "val_labels": torch.tensor([]), "val_outputs": torch.tensor([]), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([]),
+                "file_num": 0}
+    
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
+        img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
+
         output = model.forward(img1, img2)
 
-        epipolar_geo = EpipolarGeometry(img1[0], img2[0], output[0].detach(), pts1=pts1[0], pts2=pts2[0])
-        epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("predicted_RealEstate", seq_name[0]))
+        update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type="test")
+        if i == 10000: break
+    
+
+    print(f"""SED distance: {epoch_stats["test_SED_pred"]/(i+1)}
+Algebraic distance: {epoch_stats["test_algebraic_pred"]/(i+1)}
+RE1 distance: {epoch_stats["test_RE1_pred"]/(i+1)}
+
+SED distance truth: {epoch_stats["test_SED_truth"]/(i+1)}
+Algebraic distance truth: {epoch_stats["test_algebraic_truth"]/(i+1)}
+RE1 distance truth: {epoch_stats["test_RE1_truth"]/(i+1)}""")
+
 
 def sed_gt():
     train_loader, val_loader, test_loader = get_data_loaders(train_size=0.3, batch_size=1)
@@ -269,39 +324,6 @@ def return_bad_frames_to_seq():
                 for img in os.listdir(bad_seq_path):
                     print(f'from: {os.path.join(bad_seq_path, img)}, to: {os.path.join(image_0_path, img)}') 
                     # os.rename(os.path.join(bad_seq_path, img), os.path.join(image_0_path, img))
-
-def sed_distance_trained():
-    pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
-    model = FMatrixRegressor(lr=LR[0], batch_size=1, L2_coeff=1, huber_coeff=1, pretrained_path=pretrained_path)
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.3, batch_size=1)
-
-    epoch_stats = {"algebraic_pred": torch.tensor(0), "algebraic_sqr_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
-                "val_algebraic_pred": torch.tensor(0), "val_algebraic_sqr_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
-                "test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
-                "algebraic_truth": torch.tensor(0), "algebraic_sqr_truth": torch.tensor(0), "RE1_truth": torch.tensor(0), "SED_truth": torch.tensor(0), 
-                "val_algebraic_truth": torch.tensor(0), "val_algebraic_sqr_truth": torch.tensor(0), "val_RE1_truth": torch.tensor(0), "val_SED_truth": torch.tensor(0), 
-                "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
-                "loss": torch.tensor(0), "val_loss": torch.tensor(0), "test_loss": torch.tensor(0), 
-                "labels": torch.tensor([]), "outputs": torch.tensor([]), "val_labels": torch.tensor([]), "val_outputs": torch.tensor([]), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([]),
-                "file_num": 0}
-    
-    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
-        img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
-
-        output = model.forward(img1, img2)
-
-        update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type="test")
-        if i == 10000: break
-    
-
-    print(f"""SED distance: {epoch_stats["test_SED_pred"]/(i+1)}
-Algebraic distance: {epoch_stats["test_algebraic_pred"]/(i+1)}
-RE1 distance: {epoch_stats["test_RE1_pred"]/(i+1)}
-
-SED distance truth: {epoch_stats["test_SED_truth"]/(i+1)}
-Algebraic distance truth: {epoch_stats["test_algebraic_truth"]/(i+1)}
-RE1 distance truth: {epoch_stats["test_RE1_truth"]/(i+1)}""")
-
 
 def sed_histogram_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
@@ -701,4 +723,4 @@ def delete_odd_files(folder_path):
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    vis_gt()
+    vis_trained()

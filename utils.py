@@ -198,8 +198,7 @@ def reverse_transforms(img_tensor, mean=norm_mean, std=norm_std, is_scaled=True)
     std = std.view(-1, 1, 1)
     img_tensor = (img_tensor * std + mean) * 255 if is_scaled else img_tensor
     return (img_tensor.permute(1, 2, 0).numpy()).astype(np.uint8)
-    # return img_tensor.numpy().transpose(1, 2, 0)
-    
+
 def init_main():
     faulthandler.enable()
     
