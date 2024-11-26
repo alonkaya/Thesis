@@ -191,7 +191,7 @@ def vis_cognata():
 def vis_trained():
     pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
     model = FMatrixRegressor(lr=LR[0], batch_size=1, L2_coeff=1, huber_coeff=1, pretrained_path=pretrained_path)
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.3, batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.3, part='head', batch_size=1)
 
     epoch_stats = {"algebraic_pred": torch.tensor(0), "algebraic_sqr_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
                 "val_algebraic_pred": torch.tensor(0), "val_algebraic_sqr_pred": torch.tensor(0), "val_RE1_pred": torch.tensor(0), "val_SED_pred": torch.tensor(0), 
