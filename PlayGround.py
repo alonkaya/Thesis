@@ -214,16 +214,22 @@ def vis_trained():
         # Unnormalize the image
         img1_np = reverse_transforms(img1, norm_mean.cpu(), norm_std.cpu(), is_scaled=True)
         img2_np = reverse_transforms(img2, norm_mean.cpu(), norm_std.cpu(), is_scaled=True)
-    
+
+        # Get the first set of keypoints
+        pts1_np = pts1[0].cpu().detach().numpy()  # Shape (N, 2)
+        pts2_np = pts2[0].cpu().detach().numpy()  # Shape (N, 2)
+
         fig, axes = plt.subplots(1, 2, figsize=(15, 10))  # 1 row, 2 columns
         
         # Plot the first image
         axes[0].imshow(img1_np)
+        axes[0].scatter(pts1_np[:, 0], pts1_np[:, 1], c='red', s=10, marker='o')  # Plot keypoints on img1
         axes[0].set_title(f"Image 1 from sequence: {seq_name[0]}")
         axes[0].axis('off')
 
         # Plot the second image
         axes[1].imshow(img2_np)
+        axes[1].scatter(pts2_np[:, 0], pts2_np[:, 1], c='blue', s=10, marker='o')  # Plot keypoints on img2
         axes[1].set_title(f"Image 2 from sequence: {seq_name[0]}")
         axes[1].axis('off')
 
@@ -231,7 +237,6 @@ def vis_trained():
         plt.tight_layout()
         plt.show()
 
-        # Stop after displaying the first batch (optional)
         break
 
 def sed_distance_trained():
