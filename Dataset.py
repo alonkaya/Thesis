@@ -638,7 +638,7 @@ def visualize_image(img):
     # img = img.numpy().transpose(1, 2, 0)  # Convert (C, H, W) to (H, W, C) for visualization
 
     img = reverse_transforms(img, mean=norm_mean.cpu().detach(), std=norm_std.cpu().detach(), is_scaled=True)
-    print(img.shape, img.max())
+    print(img.shape, np.max(img))
 
     try:
         plt.imshow(img)
