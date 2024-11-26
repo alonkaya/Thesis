@@ -163,42 +163,39 @@ def update_distances(img1, img2, F, pts1, pts2):
     epipolar_geo = EpipolarGeometry(img1, img2, F, pts1, pts2)
 
     algebraic_dist = epipolar_geo.get_mean_algebraic_distance()
-    algebraic_dist_sqr = epipolar_geo.get_sqr_algebraic_distance()
     RE1_dist = epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
     SED_dist = epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
-    return algebraic_dist, algebraic_dist_sqr, RE1_dist, SED_dist
+    return algebraic_dist, RE1_dist, SED_dist
 
 def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, plots_path, data_type, epoch=0):
     prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
 
-    algebraic_dist_pred, algebraic_dist_sqr_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2)
+    algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2)
 
     stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred.detach())
-    # stats[f"{prefix}algebraic_sqr_pred"] = stats[f"{prefix}algebraic_sqr_pred"] + (algebraic_dist_sqr_pred.detach())
-    stats[f"{prefix}RE1_pred"] = stats[f"{prefix}RE1_pred"] + (RE1_dist_pred.detach()) if RE1_DIST else stats[f"{prefix}RE1_pred"]
-    stats[f"{prefix}SED_pred"] = stats[f"{prefix}SED_pred"] + (SED_dist_pred.detach()) if SED_DIST else stats[f"{prefix}SED_pred"]
+    stats[f"{prefix}RE1_pred"] = stats[f"{prefix}RE1_pred"] + (RE1_dist_pred.detach())
+    stats[f"{prefix}SED_pred"] = stats[f"{prefix}SED_pred"] + (SED_dist_pred.detach())
 
     # Compute the distances from the ground truth
     if epoch == 0 or data_type == "test":
-        algebraic_dist_truth, algebraic_dist_sqr_truth, RE1_dist_truth, SED_dist_truth = update_distances(img1, img2, label, pts1.detach(), pts2.detach())
+        algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img1, img2, label, pts1.detach(), pts2.detach())
 
         stats[f"{prefix}algebraic_truth"] = stats[f"{prefix}algebraic_truth"] + (algebraic_dist_truth)
-        # stats[f"{prefix}algebraic_sqr_truth"] = stats[f"{prefix}algebraic_sqr_truth"] + (algebraic_dist_sqr_truth)
-        stats[f"{prefix}RE1_truth"] = stats[f"{prefix}RE1_truth"] + (RE1_dist_truth) if RE1_DIST else stats[f"{prefix}RE1_truth"]
-        stats[f"{prefix}SED_truth"] = stats[f"{prefix}SED_truth"] + (SED_dist_truth) if SED_DIST else stats[f"{prefix}SED_truth"]
+        stats[f"{prefix}RE1_truth"] = stats[f"{prefix}RE1_truth"] + (RE1_dist_truth) 
+        stats[f"{prefix}SED_truth"] = stats[f"{prefix}SED_truth"] + (SED_dist_truth) 
 
-    return SED_dist_pred, algebraic_dist_sqr_pred
+    return SED_dist_pred
 
 
 class EpipolarGeometry:
-    def __init__(self, image1_tensors, image2_tensors, F, pts1=None, pts2=None, is_scaled=True):
+    def __init__(self, image1_tensors, image2_tensors, F, pts1=None, pts2=None, is_scaled=True, threshold=EPIPOLAR_THRESHOLD):
         self.F = F
 
         if pts1 is None:
             # Convert images back to original
             self.image1_numpy = reverse_transforms(image1_tensors.cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=is_scaled) # shape (H, W, 3)
             self.image2_numpy = reverse_transforms(image2_tensors.cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=is_scaled) # shape (H, W, 3)
-            self.get_keypoints()
+            self.get_keypoints(threshold)
 
         else:
             self.pts1 = pts1
@@ -239,10 +236,10 @@ class EpipolarGeometry:
 
         self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
         self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
-        
+
         self.pts1, self.pts2 = self.trim_by_sed()
 
-    def trim_by_sed(self, threshold=SED_TRIM_THRESHOLD, min_keypoints=5):
+    def trim_by_sed(self, threshold=SED_TRIM_THRESHOLD, min_keypoints=5, max_keypoints=100):
         self.pts1, self.pts2 = self.pts1.unsqueeze(0), self.pts2.unsqueeze(0)  # shape (1, n, 3)
         sed = self.get_SED_distance().squeeze(0)                               # shape (n,)
         self.pts1, self.pts2 = self.pts1.squeeze(0), self.pts2.squeeze(0)      # shape (n, 3)
@@ -255,7 +252,9 @@ class EpipolarGeometry:
         # If there are fewer than min_keypoints below threshold, select the smallest min_keypoints keypoints
         if len(selected_indices) < min_keypoints:
             selected_indices = sorted_indices[:min_keypoints]
-        
+
+        if SCENEFLOW and len(selected_indices) > max_keypoints:
+            selected_indices = selected_indices[:max_keypoints]
         # Select corresponding keypoints
         trimmed_pts1 = self.pts1[selected_indices].view(-1, 3)
         trimmed_pts2 = self.pts2[selected_indices].view(-1, 3)
@@ -498,3 +497,26 @@ singular values: {S.cpu().tolist()}
 {f}\n\n""", plots_path)
 
     return F
+
+if __name__ == "__main__":
+    R = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32).to(device)
+    t = torch.tensor([1, 0, 0], dtype=torch.float32).to(device)
+    K = torch.tensor([[105, 0,    479.5],
+                      [0,   1050, 269.5],
+                      [0,   0,    1]], dtype=torch.float32).to(device)
+    
+    t_stereo = torch.tensor([0.54, 0, 0], dtype=torch.float32).to(device)
+    K_stereo = torch.tensor([[7.188560000000e+02, 0.000000000000e+00, 6.071928000000e+02],
+    [0.000000000000e+00, 7.188560000000e+02, 1.852157000000e+02],
+    [0.000000000000e+00, 0.000000000000e+00, 1.000000000000e+00]], dtype=torch.float32).to(device)
+
+    E_stereo = compute_essential(R, t_stereo)
+    F_stereo = compute_fundamental(E_stereo, K_stereo, K_stereo)
+    print(F_stereo)
+
+    E = compute_essential(R, t)
+    F = compute_fundamental(E, K, K)
+    print(F)
+    F_monkaa = torch.tensor([[ 0,     0,        0],
+                      [ 0,     0,       -9.5238e-04],
+                      [ 0,     9.5238e-04,     0]]).to(device)

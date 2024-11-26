@@ -101,7 +101,7 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 def plot_by_output(plots_path):
     file_path = os.path.join(plots_path, "output.log")
-    save = True
+    save = False
     epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists = [], [], [], [], [], [], [], [], [], [], [], [], []  
 
     epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists = \
@@ -128,7 +128,7 @@ def plot_all_folder(folder_path):
             plot_by_output(folder_path)
 
 if __name__ == "__main__":
-    root_path = 'plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True'
+    root_path = 'plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.015__tail__frozen_0'
 
     plot_by_output(root_path)
 

@@ -1,10 +1,12 @@
 import time
+
+import torchvision
 from Dataset_FM import get_dataloader_FM
 from utils import print_and_write, reverse_transforms
-from FunMatrix import EpipolarGeometry, update_epoch_stats
+from FunMatrix import EpipolarGeometry, compute_fundamental, get_F, update_epoch_stats
 from FMatrixRegressor import FMatrixRegressor
 from Dataset import get_data_loaders
-from params import device, norm_mean, norm_std
+from params import LR, device, norm_mean, norm_std
 
 import cv2
 import numpy as np
@@ -118,6 +120,75 @@ def vis_gt():
     total_sed /= i
     print(f'SED distance: {total_sed}') 
 
+def vis_cognata():
+    img0_path = "SceneFlow/Monkaa_cleanpass/flower_storm_x2/left/0000.png"
+    img1_path = "SceneFlow/Monkaa_cleanpass/flower_storm_x2/right/0000.png"
+
+    img0 = torchvision.io.read_image(img0_path)
+    img1 = torchvision.io.read_image(img1_path)
+    F_monkaa = torch.tensor([[ 0,     0,        0],
+                             [ 0,     0,       -9.5238e-04],
+                             [ 0,     9.5238e-04,     0]]).to(device)
+    
+    # R = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32).to(device)
+    # t = torch.tensor([-0.6, 0, 0], dtype=torch.float32).to(device)
+    # E = torch.tensor([[0, -t[2], t[1]],
+    #                     [t[2], 0, -t[0]],
+    #                     [-t[1], t[0], 0]]).to(device)
+    # k = torch.tensor([[  1372.4844291261174,     0.0,                640.0], 
+    #                    [  0.0,                   1372.4844291261174, 200.0], 
+    #                    [  0,                     0,                  1.0]])
+    # F = compute_fundamental(E, k, k)
+    # F = torch.tensor([[4.233936605179281233e-06,3.347417379233607752e-05,-1.758078923829230200e-02],
+    # [-5.645440844391099376e-06,-4.503873870436473856e-05,2.423103527713659985e-02],
+    # [-2.996264635733713070e-04,-2.243601003810080305e-03,1.000000000000000000e+00]])
+
+    ep = EpipolarGeometry(img0, img1, F=F_monkaa.unsqueeze(0), is_scaled=False, threshold=0.3)
+    pts0, pts1 = ep.pts1, ep.pts2
+
+    # # Compute epipolar lines in img1 corresponding to points in img0
+    # lines1 = cv2.computeCorrespondEpilines(pts0[:, :2].reshape(-1, 1, 2).numpy(), 1, F.numpy()).reshape(-1, 3)  # 1 indicates that points are in img0
+    # img1_with_lines = ep.image2_numpy.copy()
+    
+    # thickness = 1
+    # h, w = ep.image2_numpy.shape[:2]
+
+    # # Draw each line in lines1 on img1
+    # for line, pt in zip(lines1, pts1):
+    #     color = tuple(np.random.randint(0, 255, 3).tolist())  # Random color for each line
+    #     # line has the form [a, b, c] and represents the line equation ax + by + c = 0
+    #     a, b, c = line
+    #     # Calculate two points on the line to draw it within the image dimensions
+    #     x0, y0 = 0, int(-c / b)  # When x = 0
+    #     x1, y1 = w, int(-(c + a * w) / b)  # When x = width of the image
+
+    #     # Draw the line on img1
+    #     img1_with_lines = cv2.line(img1_with_lines, (x0, y0), (x1, y1), color, thickness)
+    #     img1_with_lines = cv2.circle(img1_with_lines, (int(pt[0]), int(pt[1])), 2, color, -1)
+
+    # # Show or save the image with epipolar lines
+    # cv2.imshow("Epipolar Lines on img1", img1_with_lines)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+    img0_pts = ep.image1_numpy.copy()
+    img1_pts = ep.image2_numpy.copy()
+    for i, (pt0, pt1) in enumerate(zip(pts0, pts1)):
+        # if i == 30: break
+        img0_pts = cv2.circle(img0_pts, (int(pt0[0]), int(pt0[1])), 5, (20, 20, 160), -1)
+        img1_pts = cv2.circle(img1_pts, (int(pt1[0]), int(pt1[1])), 5, (20, 20, 160), -1)
+
+    # Create padding (e.g., 10-pixel wide, white vertical strip)
+    padding = 255 * np.zeros((img0_pts.shape[0], 30, 3), dtype=np.uint8)  # 10-pixel wide white space
+
+    # Combine the two images with padding in between
+    combined_image = np.hstack((img0_pts, padding, img1_pts))
+
+    cv2.imshow("Epipolar Lines on img1", combined_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
 def vis_trained(plots_path):
     model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
     
@@ -130,7 +201,7 @@ def vis_trained(plots_path):
         epipolar_geo.visualize(idx=i, epipolar_lines_path=os.path.join("predicted_RealEstate", seq_name[0]))
 
 def sed_gt():
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=3, batch_size=2)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.3, batch_size=1)
 
     epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
                    "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
@@ -140,11 +211,13 @@ def sed_gt():
         img1, img2, label = img1.to(device), img2.to(device), label.to(device)
 
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, seq_name, data_type="test")
-        if i==0: break
+        print(epoch_stats["test_SED_pred"])
 
-    print(f"""SED distance: {epoch_stats["test_SED_pred"]/i}
-Algebraic distance: {epoch_stats["test_algebraic_pred"]/i}
-RE1 distance: {epoch_stats["test_RE1_pred"]/i}""")
+        if i==10: break
+
+    print(f"""SED distance: {epoch_stats["test_SED_pred"]/(i+1)}
+Algebraic distance: {epoch_stats["test_algebraic_pred"]/(i+1)}
+RE1 distance: {epoch_stats["test_RE1_pred"]/(i+1)}""")
 
 
 def move_bad_frames_realestate():
@@ -198,7 +271,8 @@ def return_bad_frames_to_seq():
                     # os.rename(os.path.join(bad_seq_path, img), os.path.join(image_0_path, img))
 
 def sed_distance_trained(plots_path):
-    model = FMatrixRegressor(lr_vit=2e-5, lr_mlp=2e-5, pretrained_path=plots_path)
+    pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0/"
+    model = FMatrixRegressor(lr=LR[0], batch_size=1, L2_coeff=1, huber_coeff=1, pretrained_path=pretrained_path)
     train_loader, val_loader, test_loader = get_data_loaders()
 
     epoch_stats = {"algebraic_pred": torch.tensor(0), "algebraic_sqr_pred": torch.tensor(0), "RE1_pred": torch.tensor(0), "SED_pred": torch.tensor(0), 
@@ -211,8 +285,8 @@ def sed_distance_trained(plots_path):
                 "labels": torch.tensor([]), "outputs": torch.tensor([]), "val_labels": torch.tensor([]), "val_outputs": torch.tensor([]), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([]),
                 "file_num": 0}
     
-    for i, (img1, img2, F, _) in enumerate(test_loader):
-        img1, img2, label = img1.to(device), img2.to(device), label.to(device)
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
+        img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
         output = model.forward(img1, img2)
 
@@ -221,12 +295,13 @@ def sed_distance_trained(plots_path):
         if i == 10: break
     
 
-    print(f"""SED distance: {epoch_stats["test_SED_pred"]/i}
-    Algebraic distance: {epoch_stats["test_algebraic_pred"]/i}
-    RE1 distance: {epoch_stats["test_RE1_pred"]/i}
-    SED distance truth: {epoch_stats["test_SED_truth"]/i}
-    Algebraic distance truth: {epoch_stats["test_algebraic_truth"]/i}
-    RE1 distance truth: {epoch_stats["test_RE1_truth"]}"""/i)
+    print(f"""SED distance: {epoch_stats["test_SED_pred"]/(i+1)}
+    Algebraic distance: {epoch_stats["test_algebraic_pred"]/(i+1)}
+    RE1 distance: {epoch_stats["test_RE1_pred"]/(i+1)}
+
+    SED distance truth: {epoch_stats["test_SED_truth"]/(i+1)}
+    Algebraic distance truth: {epoch_stats["test_algebraic_truth"]/(i+1)}
+    RE1 distance truth: {epoch_stats["test_RE1_truth"]}"""/(i+1))
 
 
 def sed_histogram_trained(plots_path):
@@ -427,7 +502,6 @@ def move():
                 break
 
 
-
 def check_model_file(file_path):
     if not os.path.exists(file_path):
         print(f"Error: The file {file_path} does not exist.")
@@ -442,100 +516,98 @@ def check_model_file(file_path):
     return True
 
 def plot_errors():
-    # Frozen: 0
-    mean_alg_0 = [0.2723333, 0.4836667, 0.3636667, 0.5166667, 0.5033333]
-    std_alg_0 = [0.00757, 0.0645, 0.03496, 0.03512, 0.05774]
+    # # Frozen: 0
+    mean_alg_0 = [0.275666667, 0.386333333, 0.333333333, 0.463333333, 0.576666667, 0.538333333]
+    std_alg_0 = [0.0246, 0.0718, 0.0252, 0.0252, 0.0611, 0.1173]
+    mean_SED_0 = [0.28, 0.493333333, 0.4, 0.613333333, 0.84, 0.77]
+    std_SED_0 = [0.0265, 0.1447, 0.06, 0.0208, 0.1353, 0.283]
+    mean_RE1_0 = [0.079666667, 0.183333333, 0.13, 0.236666667, 0.333333333, 0.356666667]
+    std_RE1_0 = [0.0095, 0.0924, 0.02, 0.0058, 0.0603, 0.2043]
 
-    mean_sed_0 = [0.275, 0.6866667, 0.44, 0.7676667, 0.7056667]
-    std_sed_0 = [0.00889, 0.16623, 0.0781, 0.11492, 0.05669]
+    mean_alg_4 = [0.26833333, 0.43, 0.34433333, 0.49666667, 0.56333333, 0.54333333]
+    std_alg_4 = [0.02466441, 0.03605551, 0.01250333, 0.09451631, 0.04932883, 0.10692677]
+    mean_SED_4 = [0.26766667, 0.59, 0.41666667, 0.70333333, 0.84, 0.78333833]
+    std_SED_4 = [0.02400694, 0.07549834, 0.04163332, 0.17156146, 0.09848858, 0.19553846]
+    mean_RE1_4 = [0.07466667, 0.21333333, 0.13333333, 0.27333333, 0.36, 0.343333]
+    std_RE1_4 = [0.00493288, 0.04041452, 0.02516611, 0.07234178, 0.05291503, 0.13796135]
 
-    mean_re1_0 = [0.079, 0.2536667, 0.1486667, 0.302, 0.2866667]
-    std_re1_0 = [0.00346, 0.0862, 0.02873, 0.00436, 0.05069]
-
-    # Frozen: 4
-    mean_alg_4 = [0.26867, 0.415, 0.39333, 0.52967, 0.59533]
-    std_alg_4 = [0.0255, 0.06366, 0.11676, 0.04409, 0.04324]
-
-    mean_sed_4 = [0.27933, 0.51633, 0.535, 0.749, 0.79167]
-    std_sed_4 = [0.04347, 0.11868, 0.25372, 0.07171, 0.11389]
-
-    mean_re1_4 = [0.08233, 0.187, 0.17533, 0.31433, 0.38933]
-    std_re1_4 = [0.01405, 0.05444, 0.08213, 0.04267, 0.04895]
-
-    # Frozen: 8
-    # mean_alg_8 = [0.25733, 0.50167, 0.35333, 0.564, 0.54567]
-    # std_alg_8 = [0.0181475, 0.0889288, 0.0404145, 0.0390512, 0.04782]
-
-    # mean_sed_8 = [0.26733, 0.71433, 0.429, 0.813, 0.79167]
-    # std_sed_8 = [0.0387599, 0.1795671, 0.0878806, 0.0713933, 0.11389]
-
-    # mean_re1_8 = [0.07767, 0.294, 0.14867, 0.36367, 0.37433]
-    # std_re1_8 = [0.0150444, 0.0930161, 0.0358515, 0.0119304, 0.089845]
-
+    mean_alg_8 = [0.251333333, 0.43, 0.373333333, 0.52, 0.556666667, 0.553333333]
+    std_alg_8 = [0.02967041, 0.01, 0.04163332, 0.06244998, 0.04725816, 0.11150486]
+    mean_SED_8 = [0.251666667, 0.576, 0.481333333, 0.733333333, 0.823333333, 0.8]
+    std_SED_8 = [0.04964205, 0.002915, 0.07710599, 0.09073772, 0.106044, 0.24576411]
+    mean_RE1_8 = [0.071333333, 0.213333333, 0.17, 0.293333333, 0.366666667, 0.35]
+    std_RE1_8 = [0.01761628, 0.02516611, 0.04358899, 0.05033223, 0.04163332, 0.17578396]
 
     # PRETAINED VIT #
-    # Frozen: 0
-    # mean_alg_0 = [0.272, 0.49, 0.53333, 0.56667, 0.61333]
-    # std_alg_0 = [0.02078, 0.04359, 0.04726, 0.15822, 0.07572]
+    pretext_mean_alg_0 = [0.263333333, 0.390333, 0.473, 0.513333333, 0.528333333, 0.556333333]
+    pretext_std_alg_0 = [0.0321, 0.087, 0.0878, 0.0586, 0.0679, 0.1245]
+    pretext_mean_SED_0 = [0.258, 0.506, 0.665333333, 0.724666667, 0.752333333, 0.823333333]
+    pretext_std_SED_0 = [0.0365, 0.0898, 0.205, 0.0609, 0.1234, 0.2603]
+    pretext_mean_RE1_0 = [0.321, 0.179, 0.264333333, 0.313666667, 0.315666667, 0.375666667]
+    pretext_std_RE1_0 = [0.4495, 0.0347, 0.0955, 0.049, 0.0915, 0.2047]
 
-    # mean_sed_0 = [0.27067, 0.71667, 0.78333, 0.88667, 0.89]
-    # std_sed_0 = [0.02572, 0.10599, 0.10066, 0.28919, 0.10536]
+    pretext_mean_alg_4 = [0.27433333, 0.41, 0.51333333, 0.52333333, 0.60733333, 0.54666667]
+    pretext_std_alg_4 = [0.01628906, 0.04, 0.04454586, 0.05859865, 0.03523256, 0.16010813]
+    pretext_mean_SED_4 = [0.28366667, 0.54333333, 0.74533333, 0.75333333, 0.885, 0.82666667]
+    pretext_std_SED_4 = [0.02345918, 0.11372481, 0.10929471, 0.14294521, 0.10331989, 0.35076108]
+    pretext_mean_RE1_4 = [0.08433333, 0.21, 0.297, 0.31866667, 0.39366667, 0.389]
+    pretext_std_RE1_4 = [0.00971253, 0.08717798, 0.03819686, 0.06344551, 0.04324735, 0.2606396]
 
-    # mean_re1_0 = [0.07667, 0.28, 0.331, 0.39667, 0.41667]
-    # std_re1_0 = [0.01155, 0.06083, 0.03568, 0.1601, 0.08021]
-
-    # # Frozen: 4
-    # mean_alg_4 = [0.27233, 0.45667, 0.53433, 0.50333, 0.56]
-    # std_alg_4 = [0.03219, 0.0611, 0.03502, 0.10017, 0.06083]
-
-    # mean_sed_4 = [0.28667, 0.64567, 0.76, 0.79667, 0.82]
-    # std_sed_4 = [0.04509, 0.1328, 0.03606, 0.12014, 0.15524]
-
-    # mean_re1_4 = [0.08467, 0.26, 0.33667, 0.34733, 0.39]
-    # std_re1_4 = [0.01332, 0.08185, 0.02082, 0.07128, 0.1253]
-
+    pretext_mean_alg_8 = [0.265666667, 0.423333333, 0.486666667, 0.566666667, 0.593333333, 0.66]
+    pretext_std_alg_8 = [0.02223361, 0.03511885, 0.03511885, 0.05507571, 0.005505, 0.08185353]
+    pretext_mean_SED_8 = [0.275, 0.557333333, 0.681666667, 0.845333333, 0.893333333, 1.07]
+    pretext_std_SED_8 = [0.031, 0.08967348, 0.10774198, 0.11360164, 0.05131601, 0.23]
+    pretext_mean_RE1_8 = [0.079666667, 0.2212, 0.266666667, 0.365333333, 0.498333333, 0.523]
+    pretext_std_RE1_8 = [0.01250333, 0.06982922, 0.05773503, 0.0080829, 0.04843897, 0.21488804]
 
     # RESNET #
-    # mean_alg_0 = [0.3, 0.41333, 0.52667, 0.57333, 0.62]
-    # std_alg_0 = [0.1852026, 0.0152753, 0.0981495, 0.0378594, 0.1493318]
+    resnet_mean_alg_0 = [0.267, 0.410333333, 0.491333333, 0.54, 0.576666667, 0.570333333]
+    resnet_std_alg_0 = [0.131, 0.0542, 0.0776, 0.0529, 0.1159, 0.1124]
+    resnet_mean_SED_0 = [0.523333333, 0.518666667, 0.6432, 0.72, 0.783333333, 0.763666667]
+    resnet_std_SED_0 = [0.2351, 0.0924, 0.1414, 0.0721, 0.185, 0.2048]
+    resnet_mean_RE1_0 = [0.114033333, 0.222333333, 0.27, 0.33, 0.350666667, 0.371333333]
+    resnet_std_RE1_0 = [0.1106, 0.0686, 0.0755, 0.0557, 0.0853, 0.1634]
 
-    # mean_sed_0 = [0.64333, 0.52, 0.72667, 0.79333, 0.86333]
-    # std_sed_0 = [0.2990541, 0.034641, 0.1850225, 0.065833, 0.2702468]
 
-    # mean_re1_0 = [0.14633, 0.22, 0.32, 0.35767, 0.39467]
-    # std_re1_0 = [0.1605937, 0.0264575, 0.1153256, 0.0292632, 0.1293265]
+    x_indices = range(len(mean_SED_0))  # For Frozen 0 (has an extra point)
+    xticks_labels = ['2166', '1082', '540', '405', '269', '161']  # 5 points for Frozen 0
+    x = np.arange(len(xticks_labels))  # x-coordinates for the groups
+    width = 0.25  # Width of each bar
 
-    # New X-axis with an extra point
-    x_indices = range(len(mean_sed_0))  # For Frozen 0 (has an extra point)
+    # plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED Frozen 0', capsize=5)
+    # plt.errorbar(x_indices, mean_SED_4, yerr=std_SED_4, marker='o', color='green', linestyle='-', label='SED Frozen 4', capsize=5)
+    # plt.errorbar(x_indices, mean_SED_8, yerr=std_SED_8, marker='o', color='orange', linestyle='-', label='SED Frozen 8', capsize=5)
+    # plt.title('SED comparison of original model with different frozen layers')
+    # plt.bar(x, mean_SED_0, width, yerr=std_SED_0, capsize=5, label='SED Frozen 0', alpha=0.8, color='blue')
+    # plt.bar(x - width, mean_SED_4, width, yerr=std_SED_4, capsize=5, label='SED Frozen 4', alpha=0.8, color='green')
+    # plt.bar(x + width, mean_SED_8, width, yerr=std_SED_8, capsize=5, label='SED Frozen 8', alpha=0.8, color='orange')
+    # plt.title('Barplot SED comparison of original model with different frozen layers')
 
-    # Setting the X-axis labels to be flexible based on data points
-    xticks_labels = ['2166', '1082', '540', '405', '269']  # 5 points for Frozen 0
+    # plt.errorbar(x_indices, pretext_mean_SED_0, yerr=pretext_std_SED_0, marker='o', color='blue', linestyle='-', label='SED Frozen 0', capsize=5)
+    # plt.errorbar(x_indices, pretext_mean_SED_4, yerr=pretext_std_SED_4, marker='o', color='green', linestyle='-', label='SED Frozen 4', capsize=5)
+    # plt.errorbar(x_indices, pretext_mean_SED_8, yerr=pretext_std_SED_8, marker='o', color='orange', linestyle='-', label='SED Frozen 8', capsize=5)
+    # plt.title('SED comparison of pretext model with different frozen layers')
+    plt.bar(x, pretext_mean_SED_0, width, yerr=pretext_std_SED_0, capsize=5, label='SED Frozen 0', alpha=0.8, color='blue')
+    plt.bar(x - width, pretext_mean_SED_4, width, yerr=pretext_std_SED_4, capsize=5, label='SED Frozen 4', alpha=0.8, color='green')
+    plt.bar(x + width, pretext_mean_SED_8, width, yerr=pretext_std_SED_8, capsize=5, label='SED Frozen 8', alpha=0.8, color='orange')
+    plt.title('Barplot SED comparison of pretext model with different frozen layers')
 
-    # Plotting the Frozen 0 run with solid lines (with extra point)
-    plt.errorbar(x_indices, mean_alg_0, yerr=std_alg_0, marker='o', color='blue', linestyle='-', label='alg Frozen 0', capsize=5)
-    plt.errorbar(x_indices, mean_sed_0, yerr=std_sed_0, marker='o', color='green', linestyle='-', label='SED Frozen 0', capsize=5)
-    plt.errorbar(x_indices, mean_re1_0, yerr=std_re1_0, marker='o', color='orange', linestyle='-', label='RE1 Frozen 0', capsize=5)
-    
-    # Plotting the Frozen 4 run with dotted lines (ends earlier, 4 points)
-    # plt.errorbar(x_indices, mean_alg_4, yerr=std_alg_4, marker='o', color='blue', linestyle=':', label='alg Frozen 4', capsize=5)
-    # plt.errorbar(x_indices, mean_sed_4, yerr=std_sed_4, marker='o', color='green', linestyle=':', label='SED Frozen 4', capsize=5)
-    # plt.errorbar(x_indices, mean_re1_4, yerr=std_re1_4, marker='o', color='orange', linestyle=':', label='RE1 Frozen 4', capsize=5)
-
-    # Plotting the Frozen 8 run with dashed lines (ends earlier, 4 points)
-    # plt.errorbar(x_indices, mean_alg_8, yerr=std_alg_8, marker='o', color='blue', linestyle='--', label='alg Frozen 8', capsize=5)
-    # plt.errorbar(x_indices, mean_sed_8, yerr=std_sed_8, marker='o', color='green', linestyle='--', label='SED Frozen 8', capsize=5)
-    # plt.errorbar(x_indices, mean_re1_8, yerr=std_re1_8, marker='o', color='orange', linestyle='--', label='RE1 Frozen 8', capsize=5)
-
-    # Setting plot details
-    plt.title('Mean Values with STD for frozen layers 0,4,8 with RESNET')
+    # plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED Original Frozen 0', capsize=5)
+    # plt.errorbar(x_indices, pretext_mean_SED_0, yerr=pretext_std_SED_0, marker='o', color='green', linestyle='-', label='SED Pretext Frozen 0', capsize=5)
+    # plt.errorbar(x_indices, resnet_mean_SED_0, yerr=resnet_std_SED_0, marker='o', color='orange', linestyle='-', label='SED ResNet', capsize=5)
+    # plt.title('SED comparison of original, pretext and resnet models')
+    # plt.bar(x, mean_SED_0, width, yerr=std_SED_0, capsize=5, label='Original model', alpha=0.8, color='blue')
+    # plt.bar(x - width, pretext_mean_SED_0, width, yerr=pretext_std_SED_0, capsize=5, label='Pretext model', alpha=0.8, color='green')
+    # plt.bar(x + width, resnet_mean_SED_0, width, yerr=resnet_std_SED_0, capsize=5, label='ResNet', alpha=0.8, color='orange')
+    # plt.title('Barplot SED comparison of original, pretext and resnet models')
+              
     plt.xlabel('Data Points')
     plt.ylabel('Mean Value ± STD')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
 
-    # Show the combined plot
-    plt.show()
+    plt.savefig("5")
 
 def sed_distance_gt_FM():
     train_loader = get_dataloader_FM(batch_size=1)
@@ -580,7 +652,54 @@ def sed_distance_gt_FM():
     print()
 
 
+
+import struct
+
+def read_cam_file(file_path):
+    with open(file_path, "rb") as f:
+        # Step 1: Read and check the "PIEH" tag (4 bytes, float format)
+        tag_data = f.read(4)
+        tag = struct.unpack("f", tag_data)[0]
+        
+        # Check if the tag matches 202021.25
+        if tag != 202021.25:
+            raise ValueError("Invalid .cam file: Tag does not match expected value")
+
+        # Step 2: Read the intrinsic 3x3 matrix (9 floats, 64-bit)
+        intrinsic_data = f.read(9 * 8)
+        intrinsic_matrix = struct.unpack("9d", intrinsic_data)  # 'd' for double (64-bit float)
+        intrinsic_matrix = np.array(intrinsic_matrix).reshape((3, 3))
+
+        # Step 3: Read the extrinsic 3x4 matrix (12 floats, 64-bit)
+        extrinsic_data = f.read(12 * 8)
+        extrinsic_matrix = struct.unpack("12d", extrinsic_data)
+        extrinsic_matrix = np.array(extrinsic_matrix).reshape((3, 4))
+
+    return intrinsic_matrix, extrinsic_matrix
+
+
+def delete_odd_files(folder_path):
+    right_path = os.path.join(folder_path, "right")
+    left_path = os.path.join(folder_path, "left")
+    for filename in os.listdir(right_path):
+        file_number = int(filename.split('.')[0])  # Convert to an integer
+        if file_number % 2 != 0:  # Check if the number is odd
+            right_file_path = os.path.join(right_path, filename)
+            left_file_path = os.path.join(left_path, filename)
+            try:
+                # os.remove(right_file_path)  
+                print(f"Deleted: {right_file_path}")
+            except OSError as e:
+                print(f"Error deleting {right_file_path}: {e}")
+            try:
+                # os.remove(left_file_path)
+                print(f"Deleted: {left_file_path}")
+            except OSError as e:    
+                print(f"Error deleting {left_file_path}: {e}")
+
+
+
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    plot_errors()
+    sed_distance_trained()
