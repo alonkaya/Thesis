@@ -290,18 +290,18 @@ def sed_distance_trained():
 
         output = model.forward(img1, img2)
 
-        pts1 = pts1[0].cpu().numpy().astype(np.uint8)
-        pts2 = pts2[0].cpu().numpy().astype(np.uint8)
-
+        pts1 = pts1[0].cpu().numpy()
+        pts2 = pts2[0].cpu().numpy()
+        
         # Convert grayscale tensors to numpy arrays for matplotlib
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
         img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
         
-        img0_pts = img0_np.copy().astype(np.uint8)
-        img1_pts = img1_np.copy().astype(np.uint8)
+        img0_np = cv2.cvtColor(img0_np, cv2.COLOR_RGB2BGR)
+        img1_np = cv2.cvtColor(img1_np, cv2.COLOR_RGB2BGR)
 
-        print(img0_pts.shape, type(pts1))  # Should have 2 or 3 dimensions, depending on the image     
-        print(pts1.shape ,type(pts1))
+        img0_pts = img0_np.copy()
+        img1_pts = img1_np.copy()
         for i,point in enumerate(pts1):
             if i == 30: break
             if point[0] == 0 and point[1] == 0: continue
