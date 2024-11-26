@@ -634,8 +634,7 @@ def visualize_image(tensor_image):
     img = tensor_image
     # Ensure it is in the right data type (uint8) for PIL conversion
     # img = img.cpu().detach().to(torch.uint8)
-    img = reverse_transforms(img.cpu().detach(), is_scaled=True)
-    # Convert the tensor to a numpy array for safer handling with PIL
+    img = reverse_transforms(img.cpu().detach(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=True)
     try:
         # img_np = img.cpu().detach().numpy().astype(np.uint8).transpose(1, 2, 0)  # Convert (C, H, W) to (H, W, C) for visualization
         plt.imshow(img)
