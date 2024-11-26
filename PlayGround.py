@@ -88,8 +88,8 @@ def vis_gt():
     total_sed = 0
 
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
-        pts1 = pts1[0].cpu().numpy()
-        pts2 = pts2[0].cpu().numpy()
+        # pts1 = pts1[0].cpu().numpy()
+        # pts2 = pts2[0].cpu().numpy()
         # Convert grayscale tensors to numpy arrays for matplotlib
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
         img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
@@ -208,19 +208,31 @@ def vis_trained():
 
         # output = model.forward(img1, img2)
 
-        img = img1[0].cpu().detach()  # Shape (C, H, W)
+        img1 = img1[0].cpu().detach()  # Shape (C, H, W)
+        img2 = img2[0].cpu().detach()  # Shape (C, H, W)
 
         # Unnormalize the image
-        img_np = reverse_transforms(img, norm_mean.cpu(), norm_std.cpu(), is_scaled=True)
+        img1_np = reverse_transforms(img1, norm_mean.cpu(), norm_std.cpu(), is_scaled=True)
+        img2_np = reverse_transforms(img2, norm_mean.cpu(), norm_std.cpu(), is_scaled=True)
+    
+        fig, axes = plt.subplots(1, 2, figsize=(15, 10))  # 1 row, 2 columns
+        
+        # Plot the first image
+        axes[0].imshow(img1_np)
+        axes[0].set_title(f"Image 1 from sequence: {seq_name[0]}")
+        axes[0].axis('off')
 
-        # Display the image
-        plt.imshow(img_np)
-        plt.title(f"Image from sequence: {seq_name[0]}")
-        plt.axis('off')
+        # Plot the second image
+        axes[1].imshow(img2_np)
+        axes[1].set_title(f"Image 2 from sequence: {seq_name[0]}")
+        axes[1].axis('off')
+
+        # Show the figure
+        plt.tight_layout()
         plt.show()
 
-        if i == 0:
-            break
+        # Stop after displaying the first batch (optional)
+        break
 
 def sed_distance_trained():
     pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
