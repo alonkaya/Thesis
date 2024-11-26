@@ -297,8 +297,8 @@ def sed_distance_trained():
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
         img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
 
-        img0_np = cv2.cvtColor(img0_np, cv2.COLOR_BGR2RGB)
-        img1_np = cv2.cvtColor(img1_np, cv2.COLOR_RGB2BGR)
+        img0_np = cv2.cvtColor(img0_np, cv2.COLOR_GRAY2RGB)
+        img1_np = cv2.cvtColor(img1_np, cv2.COLOR_GRAY2RGB)
 
         img0_pts = img0_np.copy()
         img1_pts = img1_np.copy()
