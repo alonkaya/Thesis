@@ -290,7 +290,7 @@ def sed_distance_trained():
         # Convert grayscale tensors to numpy arrays for matplotlib
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=False)  # shape (H, W, C)
         img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=False)  # shape (H, W, C)
-
+        print(img0_np.shape, type(img0_np), img0_np.dtype)
         # output = model.forward(img1, img2)
 
         pts1 = pts1[0].cpu().numpy()
@@ -329,7 +329,7 @@ def sed_distance_trained():
         # cv2.imwrite(f'gt_epilines/monkaa/{seq_name[0]}/gt_{i}.png', combined_image)
 
         # update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type="test")
-        
+
         if i == 0: break
     
 
