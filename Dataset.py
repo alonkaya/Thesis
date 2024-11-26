@@ -630,8 +630,10 @@ def save_keypoints_realestate():
 
 # Function to visualize a tensor image
 def visualize_image(img):
-    img = img.cpu().detach().to(torch.uint8)
-    img = (img * norm_std.cpu().detach() + norm_mean.cpu().detach()) * 255
+    img = img.cpu().detach()
+    mean = norm_mean.cpu().detach().view(-1, 1, 1)
+    std = norm_std.cpu().detach().view(-1, 1, 1)
+    img = (img * std + mean) * 255
     img = img.numpy().transpose(1, 2, 0)  # Convert (C, H, W) to (H, W, C) for visualization
 
     # img = reverse_transforms(img, mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=True)
