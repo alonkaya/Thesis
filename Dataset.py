@@ -637,7 +637,7 @@ def visualize_image(img):
     # img = (img * std + mean) * 255
     # img = img.numpy().transpose(1, 2, 0)  # Convert (C, H, W) to (H, W, C) for visualization
 
-    img = reverse_transforms(img, mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=True)
+    img = reverse_transforms(img, mean=norm_mean.cpu().detach(), std=norm_std.cpu().detach(), is_scaled=True)
     try:
         plt.imshow(img)
         plt.axis('off')
