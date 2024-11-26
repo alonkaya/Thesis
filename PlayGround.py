@@ -219,8 +219,7 @@ def vis_trained():
         pts1_np = pts1[0].cpu().detach().numpy()  # Shape (N, 2)
         pts2_np = pts2[0].cpu().detach().numpy()  # Shape (N, 2)
 
-        fig, axes = plt.subplots(1, 2, figsize=(15, 10))  # 1 row, 2 columns
-        
+        fig, axes = plt.subplots(1, 2, figsize=(12, 8))  # 1 row, 2 columns
         # Plot the first image
         axes[0].imshow(img1_np)
         axes[0].scatter(pts1_np[:, 0], pts1_np[:, 1], c='red', s=10, marker='o')  # Plot keypoints on img1
@@ -235,7 +234,7 @@ def vis_trained():
 
         # Show the figure
         plt.tight_layout()
-        plt.show()
+        plt.savefig("monkaa")
 
         break
 
