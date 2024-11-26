@@ -290,8 +290,35 @@ def sed_distance_trained():
 
         output = model.forward(img1, img2)
 
+        pts1 = pts1[0].cpu().numpy()
+        pts2 = pts2[0].cpu().numpy()
+        # Convert grayscale tensors to numpy arrays for matplotlib
+        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
+        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
+        
+        img0_pts = img0_np.copy()
+        img1_pts = img1_np.copy()
+        for i,point in enumerate(pts1):
+            if i == 30: break
+            if point[0] == 0 and point[1] == 0: continue
+            img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
+            
+        for i, point in enumerate(pts2):
+            if i == 30: break
+            if point[0] == 0 and point[1] == 0: continue
+            img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
+
+        # Create padding (e.g., 10-pixel wide, white vertical strip)
+        padding = 255 * np.zeros((img0_pts.shape[0], 30, 3), dtype=np.uint8)  # 10-pixel wide white space
+
+        # Combine the two images with padding in between
+        combined_image = np.hstack((img0_pts, padding, img1_pts))
+
+        os.makedirs(f'gt_epilines/monkaa/{seq_name[0]}', exist_ok=True)
+        cv2.imwrite(f'gt_epilines/monkaa/{seq_name[0]}/gt_{i}.png', combined_image)
+
         update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type="test")
-        if i == 10000: break
+        if i == 10: break
     
 
     print(f"""SED distance: {epoch_stats["test_SED_pred"]/(i+1)}
