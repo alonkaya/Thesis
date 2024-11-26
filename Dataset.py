@@ -628,30 +628,34 @@ def save_keypoints_realestate():
                     print("Saved images")
 
     # Function to visualize a tensor image
-
-# Function to visualize a tensor image
 def visualize_image(tensor_image):
     # Detach, move to CPU, and adjust data type if necessary
     img = tensor_image.cpu().detach()
 
-    # De-normalize if required (assuming normalization was applied with mean and std previously)
-    if isinstance(norm_mean, torch.Tensor) and isinstance(norm_std, torch.Tensor):
-        norm_mean_cpu = norm_mean.cpu().numpy()
-        norm_std_cpu = norm_std.cpu().numpy()
-        for t, m, s in zip(img, norm_mean_cpu, norm_std_cpu):
-            t.mul_(s).add_(m)
-    
-    # Convert the range from [0, 1] to [0, 255] if necessary
-    img = torch.clamp(img, 0, 1) * 255
+    # Make sure the tensor has the expected shape (C, H, W)
+    if len(img.shape) == 4:  # If it still has the batch dimension
+        img = img.squeeze(0)  # Remove batch dimension
+
+    if img.shape[0] == 1:  # If grayscale (1 channel), repeat to make it RGB-like for visualization
+        img = img.repeat(3, 1, 1)
+
+    # Check if the range of values is between [0, 1] or [0, 255] and adjust accordingly
+    if img.max() <= 1.0:  # If the max value is <= 1, we assume the range is [0, 1]
+        img = img * 255
 
     # Ensure it is in the right data type (uint8) for PIL conversion
     img = img.to(torch.uint8)
 
     # Convert the tensor to a PIL image
-    img = TF.to_pil_image(img)
-    
+    try:
+        img = TF.to_pil_image(img)
+    except Exception as e:
+        print(f"Error converting tensor to PIL image: {e}")
+        print(f"Tensor shape: {img.shape}, dtype: {img.dtype}, max value: {img.max()}")
+        return
+
     # Display the image using matplotlib
-    plt.savefig(img)
+    plt.imshow(img)
     plt.axis('off')
     plt.show()
 
@@ -665,9 +669,9 @@ if __name__ == "__main__":
         print(f"Visualizing img0 from batch {batch_idx + 1}")
 
         # Visualize img0
-        visualize_image(img0.squeeze())  # Squeeze to remove batch dimension as batch size is 1
-        
-        # Optional: add a pause or wait for user input to continue to next image
+        visualize_image(img0.squeeze(0))  # Ensure we squeeze the batch dimension as batch size is 1
+
+        # Optional: add a pause or wait for user input to continue to the next image
         input("Press Enter to continue to the next image...")
 
         # You could also break after a few iterations if you want to visualize a subset
