@@ -651,7 +651,7 @@ def visualize_image(tensor_image):
     img = TF.to_pil_image(img)
     
     # Display the image using matplotlib
-    plt.imshow(img)
+    plt.savefig(img)
     plt.axis('off')
     plt.show()
 
