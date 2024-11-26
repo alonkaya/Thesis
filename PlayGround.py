@@ -287,19 +287,20 @@ def sed_distance_trained():
     
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
         img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
+        # Convert grayscale tensors to numpy arrays for matplotlib
+        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
+        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
+        print(img0_np.shape, img0_np.dtype)
 
         output = model.forward(img1, img2)
 
         pts1 = pts1[0].cpu().numpy()
         pts2 = pts2[0].cpu().numpy()
         
-        # Convert grayscale tensors to numpy arrays for matplotlib
-        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
-        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
-        print(img0_np.shape, img0_np.dtype)
 
-        img0_np = cv2.cvtColor(img0_np, cv2.COLOR_GRAY2RGB)
-        img1_np = cv2.cvtColor(img1_np, cv2.COLOR_GRAY2RGB)
+
+        # img0_np = cv2.cvtColor(img0_np, cv2.COLOR_GRAY2RGB)
+        # img1_np = cv2.cvtColor(img1_np, cv2.COLOR_GRAY2RGB)
 
         img0_pts = img0_np.copy()
         img1_pts = img1_np.copy()
