@@ -635,13 +635,16 @@ def visualize_image(tensor_image):
 
     # Make sure the tensor has the expected shape (C, H, W)
     if len(img.shape) == 4:  # If it still has the batch dimension
+        print("f")
         img = img.squeeze(0)  # Remove batch dimension
 
     if img.shape[0] == 1:  # If grayscale (1 channel), repeat to make it RGB-like for visualization
+        print("d")
         img = img.repeat(3, 1, 1)
 
     # Convert the range from [0, 1] to [0, 255] if necessary
     if img.max() <= 1.0:  # If the max value is <= 1, we assume the range is [0, 1]
+        print("h")
         img = img * 255
 
     # Ensure it is in the right data type (uint8) for PIL conversion
