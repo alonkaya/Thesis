@@ -301,7 +301,7 @@ def sed_distance_trained():
         img1_pts = img1_np.copy()
 
         print(img0_pts.shape)  # Should have 2 or 3 dimensions, depending on the image     
-        print(pts1.shape ,pts1.dtype)   
+        print(pts1.shape ,type(pts1)   
         for i,point in enumerate(pts1):
             if i == 30: break
             if point[0] == 0 and point[1] == 0: continue
