@@ -629,11 +629,9 @@ def save_keypoints_realestate():
 
 
 # Function to visualize a tensor image
-def visualize_image(tensor_image):
-    # Detach, move to CPU, and adjust data type if necessary
-    img = tensor_image
-    # Ensure it is in the right data type (uint8) for PIL conversion
+def visualize_image(img):
     img = img.cpu().detach().to(torch.uint8)
+    img = (img * norm_std.cpu().detach() + norm_mean.cpu().detach()) * 255
     img = img.numpy().transpose(1, 2, 0)  # Convert (C, H, W) to (H, W, C) for visualization
 
     # img = reverse_transforms(img, mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=True)
