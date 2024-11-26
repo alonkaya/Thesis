@@ -629,8 +629,8 @@ def save_keypoints_realestate():
 
 # Unnormalize the image
 def unnormalize(img, mean, std):
-    mean = mean.clone().detach().view(3, 1, 1)  # Reshape to match image dimensions
-    std = std.clone().detach().view(3, 1, 1)
+    mean = mean.detach().view(3, 1, 1)  # Reshape to match image dimensions
+    std = std.detach().view(3, 1, 1)
     return img * std + mean
 
 
@@ -644,7 +644,7 @@ def visualize_test_dataloader(test_loader, norm_mean, norm_std):
         unnormalized_img = unnormalize(img, norm_mean.cpu(), norm_std.cpu())  # Shape (C, H, W)
 
         # Convert to NumPy for visualization
-        img_np = unnormalized_img.permute(1, 2, 0).cpu().numpy()  # Shape (H, W, C)
+        img_np = unnormalized_img.permute(1, 2, 0).numpy()  # Shape (H, W, C)
 
         print(f'max value: {img_np.max()}')
         # Clip values to [0, 1] for display
