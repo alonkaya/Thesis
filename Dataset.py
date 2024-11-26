@@ -641,7 +641,7 @@ def visualize_image(tensor_image):
 
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-    train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.5, part='head', batch_size=1)
+    train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.2, part='head', batch_size=1)
 
     # Iterate over the dataloader
     for batch_idx, (img0, img1, F, pts1, pts2, seq_name) in enumerate(test_loader):
