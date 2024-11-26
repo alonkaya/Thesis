@@ -292,7 +292,7 @@ def sed_distance_trained():
         # img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=False)  # shape (H, W, C)
         # img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu(), is_scaled=False)  # shape (H, W, C)
         # print(img0_np.shape, type(img0_np), img0_np.dtype)
-        img_tensor = (img1 * norm_std.view(-1, 1, 1) + norm_mean.view(-1, 1, 1))
+        img_tensor = (img1[0] * norm_std.view(-1, 1, 1) + norm_mean.view(-1, 1, 1))
         img_tensor = torch.clamp(img_tensor, 0, 1)  # Ensure values are within [0, 1]
 
         # Convert tensor to PIL image
