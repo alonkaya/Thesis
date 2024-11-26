@@ -292,9 +292,6 @@ def sed_distance_trained():
 
         pts1 = pts1[0].cpu().numpy()
         pts2 = pts2[0].cpu().numpy()
-        print(type(img0_pts))  # Should be <class 'numpy.ndarray'>
-        print(img0_pts.dtype)  # Should be 'uint8', 'int32', etc.
-        print(img0_pts.shape)  # Should have 2 or 3 dimensions, depending on the image
 
         # Convert grayscale tensors to numpy arrays for matplotlib
         img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
@@ -302,6 +299,10 @@ def sed_distance_trained():
         
         img0_pts = img0_np.copy()
         img1_pts = img1_np.copy()
+
+        print(type(img0_pts))  # Should be <class 'numpy.ndarray'>
+        print(img0_pts.dtype)  # Should be 'uint8', 'int32', etc.
+        print(img0_pts.shape)  # Should have 2 or 3 dimensions, depending on the image        
         for i,point in enumerate(pts1):
             if i == 30: break
             if point[0] == 0 and point[1] == 0: continue
