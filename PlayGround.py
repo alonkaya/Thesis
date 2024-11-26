@@ -300,8 +300,6 @@ def sed_distance_trained():
         img0_pts = img0_np.copy()
         img1_pts = img1_np.copy()
 
-        print(type(img0_pts))  # Should be <class 'numpy.ndarray'>
-        print(img0_pts.dtype)  # Should be 'uint8', 'int32', etc.
         print(img0_pts.shape)  # Should have 2 or 3 dimensions, depending on the image        
         for i,point in enumerate(pts1):
             if i == 30: break
