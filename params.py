@@ -30,9 +30,9 @@ SEQ_RATIOS = [0.008]     # 3251, 2166, 1082, 540, 405, 269, 161
 PART = ["head", "mid", "tail"] 
 
 ### MONKAA ###
-train_seqeunces_monkaa = ["a_rain_of_stones_x2", "eating_naked_camera2_x2", "eating_x2", "family_x2", "flower_storm_x2", "funnyworld_x2"] #  10840 images 
-val_sequences_monkaa =  ["lonetree_difftex_x2", "lonetree_winter_x2", "top_view_x2", "treeflight_augmented0_x2", "treeflight_augmented1_x2", "treeflight_x2"]    #  3682 images
-test_sequences_monkaa = ["eating_camera2_x2"]        #  1064 images
+train_seqeunces_monkaa =  ["treeflight_augmented0_x2", "treeflight_augmented1_x2", "lonetree_winter_x2", "a_rain_of_stones_x2", "eating_naked_camera2_x2",  "family_x2", "lonetree_difftex_x2"]  # 1137
+val_sequences_monkaa = ["treeflight_x2", "eating_x2", "eating_camera2_x2"] # 370
+test_sequences_monkaa = ["top_view_x2", "flower_storm_x2", "funnyworld_x2"]     # 360 frames   
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
