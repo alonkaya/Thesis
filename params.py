@@ -52,7 +52,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-SEED = [500]
+SEED = [42, 300, 500]
 LR = [1e-4]             
 
 ### Epipolar geometry ###
