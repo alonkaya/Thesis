@@ -323,12 +323,13 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
     def load_model(self, path=None):
         model_path = os.path.join(path, "model.pth")
+        backup_path = os.path.join(path, "backup_model.pth")
         if os.path.exists(model_path):
             try:
                 checkpoint = torch.load(model_path, map_location='cpu')
             except Exception as e:
-                print_and_write(f'\n#########\nusing backup:\n{e}', self.plots_path)
-                checkpoint = torch.load(os.path.join(path, "backup_model.pth"), map_location='cpu')
+                print_and_write(f'\n#########\nusing backup:\n{e}\n\n', self.plots_path)
+                checkpoint = torch.load(backup_path, map_location='cpu')
                 sys.stdout.flush()
         else:
             print_and_write(f"Model {model_path} not found", self.plots_path)
