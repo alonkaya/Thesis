@@ -80,7 +80,7 @@ if __name__ == "__main__":
                         print(f"\n###\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training\n###\n")
                         sys.stdout.flush()
 
-                elif model.start_epoch < model.num_epochs:
+                elif model.start_epoch < model.num_epochs+200: #TODO!!!
                         parameters = f"""###########################################################################################################################################################\n
 {ADDITIONS} learning rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
 batch_size: {batch_size}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo}, val_sequences: {val_sequences_stereo}, RL_TEST_NAMES: {RL_TEST_NAMES}, dataset: {dataset},
@@ -89,13 +89,13 @@ RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff:
 crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, train_size: {train_size}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED} seed: {seed}, \n\n"""
                         print_and_write(parameters, model.plots_path)
                         
-                        if PRETRAINED_PATH or os.path.exists(os.path.join(plots_path, 'model.pth')):
+                        if PRETRAINED_PATH or os.path.exists(os.path.join(plots_path, 'model.pth')) or os.path.exists(os.path.join(model.parent_model_path, 'model.pth')):
                                 print_and_write(f"##### CONTINUE TRAINING #####\n\n", model.plots_path)
                 
                         model.train_model(train_loader, val_loader, test_loader)
                    
-                        if os.path.exists(os.path.join(model.plots_path, 'backup_model.pth')):
-                                os.remove(os.path.join(model.plots_path, 'backup_model.pth'))
+                        if os.path.exists(os.path.join(model.parent_model_path, 'backup_model.pth')):
+                                os.remove(os.path.join(model.parent_model_path, 'backup_model.pth'))
                         else:
                                 print_and_write(f"###\n{model.plots_path} no backup\n###", model.plots_path)
 

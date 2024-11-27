@@ -85,14 +85,16 @@ class FMatrixRegressor(nn.Module):
                     for param in layer.parameters():
                         param.requires_grad = False
 
-        if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
-            model_path = pretrained_path if pretrained_path else plots_path
-            self.load_model(model_path)
+        self.parent_model_path = os.path.join("/mnt/sda2/Alon", self.plots_path) if COMPUTER==0 else self.plots_path
+        if pretrained_path or os.path.exists(os.path.join(self.parent_model_path, 'model.pth')): 
+            path = pretrained_path if pretrained_path else self.parent_model_path
+            self.load_model(path)
 
         else:
             if self.trained_vit != None:
                 # This is for when wanting to fine-tune an already trained vit 
                 # for example fine-tuning a vit which had been trained on the affine transfomration task, on the FMatrix task
+                self.trained_vit = os.path.join("/mnt/sda2/Alon", self.trained_vit) if COMPUTER==0 else self.trained_vit
                 checkpoint = torch.load(self.trained_vit, map_location='cpu')
                 self.model.load_state_dict(checkpoint['vit']) 
                 self.model.to(device)
@@ -277,11 +279,11 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             epoch_stats[f'{prefix}outputs'] = torch.cat((epoch_stats[f'{prefix}outputs'], output.detach()), dim=0)
 
     def save_model(self, epoch):
-        checkpoint_path = os.path.join(self.plots_path, "model.pth")
+        model_path = os.path.join(self.parent_model_path, "model.pth")
         # Backup previous checkpoint
-        if os.path.exists(checkpoint_path) and epoch%30 == 0: 
-            backup_path = os.path.join(self.plots_path, "backup_model.pth")
-            shutil.copy(checkpoint_path, backup_path)
+        if os.path.exists(model_path) and epoch%30 == 0: 
+            backup_path = os.path.join(self.parent_model_path, "backup_model.pth")
+            shutil.copy(model_path, backup_path)
         torch.save({
             'mlp': self.mlp.state_dict(),
             'optimizer': self.optimizer.state_dict(),
@@ -316,7 +318,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             "all_val_algebraic_pred" : self.all_val_algebraic_pred, 
             "all_val_RE1_pred" : self.all_val_RE1_pred, 
             "all_val_SED_pred" : self.all_val_SED_pred
-        }, checkpoint_path) 
+        }, model_path) 
 
 
     def load_model(self, path=None):
