@@ -323,6 +323,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
     def load_model(self, path=None):
         model_path = os.path.join(path, "model.pth")
+        print(model_path)
         backup_path = os.path.join(path, "backup_model.pth")
         if os.path.exists(model_path):
             try:
