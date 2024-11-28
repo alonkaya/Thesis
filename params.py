@@ -9,7 +9,7 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
-KITTI2SCENEFLOW = False
+KITTI2SCENEFLOW = True
 SCENEFLOW = True
 MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
@@ -72,7 +72,9 @@ ADDITIONS = ""
 MLP_HIDDEN_DIM = [1024, 512]
 CONV_HIDDEN_DIM = [256, 512]
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
-KITTI_MODEL_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
+KITTI_MODEL_CLIP_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
+KITTI_MODEL_RESNET_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0__seed_300"
+KITTI_MODEL_PATH = KITTI_MODEL_CLIP_PATH if MODEL == CLIP_MODEL_NAME else KITTI_MODEL_RESNET_PATH
 TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or not PRETEXT_TRAIN else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
 PRETRAINED_PATH = None # make sure you set GET_OLD_PATH !! 
 AVG_EMBEDDINGS = False
