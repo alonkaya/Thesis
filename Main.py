@@ -62,7 +62,7 @@ if __name__ == "__main__":
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
                 compress = f'avg_embeddings' if AVG_EMBEDDINGS else 'conv' if USE_CONV else 'all_embeddings'
                 seed_param = "" if seed == 42 else f"__seed_{seed}"
-                data_config = f'ratio_{train_size}__{part}' if STEREO else f'train_{train_size}'
+                data_config = f'ratio_{train_size}__{part}' if not SCENEFLOW else f'ratio_{train_size}'
 
                 plots_path = os.path.join('plots', dataset, 'Winners' if STEREO else '',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \

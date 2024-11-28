@@ -11,7 +11,7 @@
 #SBATCH --partition main		        	### specify partition name where to run a job. change only if you have a matching qos!! main: all nodes; gtx1080: 1080 gpu card nodes; rtx2080: 2080 nodes; teslap100: p100 nodes; titanrtx: titan nodes
 #SBATCH --time 7-0:0:00			            ### limit the time of job running. Make sure it is not greater than the partition time limit!! Format: D-H:MM:SS
 #SBATCH --job-name kitti2sceneflow			### name of the job
-#SBATCH --output job-kitti2sceneflow.out	### output log for running job - %J for job number
+#SBATCH --output kitti2sceneflow.out	### output log for running job - %J for job number
 #SBATCH --gpus=rtx_4090:1			    	### number of GPUs, allocating more than 1 requires IT team's permission. Example to request 3090 gpu: #SBATCH --gpus=rtx_3090:1
 
 # Note: the following 4 lines are commented out
