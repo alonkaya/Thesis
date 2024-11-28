@@ -70,9 +70,10 @@ def process_epoch_stats(file_path, epochs, training_losses, val_losses, training
 def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=False):
     sliced = ""
     # if len(y1) > 3 and (y1[0] > y1[3] + 2000 or y2[0] > y2[3] + 2000):
-    y1 = y1[30:]
-    y2 = y2[30:]
-    x = x[30:]
+    start = 1000
+    y1 = y1[start:]
+    y2 = y2[start:]
+    x = x[start:]
     sliced = " sliced"
     fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
     
@@ -101,7 +102,7 @@ def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=Fal
 
 def plot_by_output(plots_path):
     file_path = os.path.join(plots_path, "output.log")
-    save = False
+    save = True
     epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists = [], [], [], [], [], [], [], [], [], [], [], [], []  
 
     epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists = \

@@ -9,10 +9,10 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
-SCENEFLOW = False
-MODEL = RESNET_MODEL_NAME 
+SCENEFLOW = True
+MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
-COMPUTER = 0 # 0 = 250 1 = 146
+COMPUTER = 1 # 0 = /mnt/sda2, 1 = .
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -27,8 +27,8 @@ BATCH_SIZE = 8
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-SEQ_RATIOS = [0.025]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
-PART = ["tail"] 
+SEQ_RATIOS = [1]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
+PART = ["head"] 
 
 ### MONKAA ###
 train_seqeunces_monkaa =  ["treeflight_augmented0_x2", "treeflight_augmented1_x2", "lonetree_winter_x2", "a_rain_of_stones_x2", "eating_naked_camera2_x2",  "family_x2", "lonetree_difftex_x2"]  # 1137
