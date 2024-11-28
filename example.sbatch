@@ -10,7 +10,7 @@ SBATCH --partition main			### specify partition name where to run a job. change 
 SBATCH --time 7-0:0:00			### limit the time of job running. Make sure it is not greater than the partition time limit!! Format: D-H:MM:SS
 SBATCH --job-name my_job			### name of the job
 SBATCH --output job-%J.out			### output log for running job - %J for job number
-SBATCH --gpus=1				### number of GPUs, allocating more than 1 requires IT team's permission. Example to request 3090 gpu: #SBATCH --gpus=rtx_3090:1
+SBATCH --gpus=rtx_4090				### number of GPUs, allocating more than 1 requires IT team's permission. Example to request 3090 gpu: #SBATCH --gpus=rtx_3090:1
 
 # Note: the following 4 lines are commented out
 ##SBATCH --mail-user=user@post.bgu.ac.il	### user's email for sending job status messages
