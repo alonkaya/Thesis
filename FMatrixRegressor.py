@@ -9,7 +9,7 @@ from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetMode
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
-                 augmentation=AUGMENTATION, model_name=MODEL, trained_vit=TRAINED_VIT,
+                 augmentation=AUGMENTATION, model_name=MODEL, trained_vit=TRAINED_VIT, kitti2sceneflow=KITTI2SCENEFLOW,
                  frozen_layers=0, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
                  alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=0):
 
@@ -52,6 +52,7 @@ class FMatrixRegressor(nn.Module):
         self.num_epochs = num_epochs
         self.frozen_layers = frozen_layers
         self.start_epoch = 0
+        self.kitti2sceneflow = kitti2sceneflow
         self.trained_vit = trained_vit # This is for when wanting to fine-tune an already trained vit 
                                        #(for example fine-tuning a vit which had been trained on the affine transfomration task)
 
@@ -85,11 +86,14 @@ class FMatrixRegressor(nn.Module):
                     for param in layer.parameters():
                         param.requires_grad = False
 
+        ## THIS IS ONLY FOR CONTINUING TRAINING FROM A EARLY STOPPED CHECKPOINT!
         self.parent_model_path = os.path.join("/mnt/sda2/Alon", self.plots_path) if COMPUTER==0 else self.plots_path
         if pretrained_path or os.path.exists(os.path.join(self.parent_model_path, 'model.pth')): 
             path = pretrained_path if pretrained_path else self.parent_model_path
             self.load_model(path)
-
+        
+        elif self.kitti2sceneflow:
+                self.load_model(KITTI_MODEL_PATH, continue_training=False)
         else:
             if self.trained_vit != None:
                 # This is for when wanting to fine-tune an already trained vit 
@@ -321,9 +325,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         }, model_path) 
 
 
-    def load_model(self, path=None):
+    def load_model(self, path=None, continue_training=True):
         model_path = os.path.join(path, "model.pth")
-        print(model_path)
         backup_path = os.path.join(path, "backup_model.pth")
         if os.path.exists(model_path):
             try:
@@ -353,17 +356,17 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.hidden_size = checkpoint.get("hidden_size", 0)
         self.num_patches = checkpoint.get("num_patches", 0)
         self.frozen_layers = checkpoint.get("frozen_layers", self.frozen_layers)
-        self.start_epoch = checkpoint.get("epoch", 0)
-        self.all_train_loss = checkpoint.get("all_train_loss", [])
-        self.all_val_loss = checkpoint.get("all_val_loss", [])
-        self.all_train_mae = checkpoint.get("all_train_mae", [])
-        self.all_val_mae = checkpoint.get("all_val_mae", [])
-        self.all_algebraic_pred = checkpoint.get("all_algebraic_pred", [])
-        self.all_RE1_pred = checkpoint.get("all_RE1_pred", [])
-        self.all_SED_pred = checkpoint.get("all_SED_pred", [])
-        self.all_val_algebraic_pred = checkpoint.get("all_val_algebraic_pred", [])
-        self.all_val_RE1_pred = checkpoint.get("all_val_RE1_pred", [])
-        self.all_val_SED_pred = checkpoint.get("all_val_SED_pred", [])
+        self.start_epoch = checkpoint.get("epoch", 0) if continue_training else 0
+        self.all_train_loss = checkpoint.get("all_train_loss", []) if continue_training else []
+        self.all_val_loss = checkpoint.get("all_val_loss", []) if continue_training else []
+        self.all_train_mae = checkpoint.get("all_train_mae", []) if continue_training else []
+        self.all_val_mae = checkpoint.get("all_val_mae", []) if continue_training else []
+        self.all_algebraic_pred = checkpoint.get("all_algebraic_pred", []) if continue_training else []
+        self.all_RE1_pred = checkpoint.get("all_RE1_pred", []) if continue_training else []
+        self.all_SED_pred = checkpoint.get("all_SED_pred", []) if continue_training else []
+        self.all_val_algebraic_pred = checkpoint.get("all_val_algebraic_pred", []) if continue_training else []
+        self.all_val_RE1_pred = checkpoint.get("all_val_RE1_pred", []) if continue_training else []
+        self.all_val_SED_pred = checkpoint.get("all_val_SED_pred", []) if continue_training else []
 
         # Get input dimension for the MLP based on ViT configuration
         self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]

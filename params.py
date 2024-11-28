@@ -9,11 +9,12 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
-KITTI2SCENEFLOW = False
+KITTI2SCENEFLOW = True
 SCENEFLOW = True
 MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
 COMPUTER = 1 # 0=132.72.49.250 1=else
+SEQ_RATIOS = [1]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -24,14 +25,13 @@ RANDOM_CROP = True
 INIT_DATA = True 
 BATCH_SIZE = 8
 
-### STEREO ###
+### STEREO KITTI ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-SEQ_RATIOS = [1]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
 PART = ["head"] 
 
-### MONKAA ###
+### SCENEFLOW ###
 train_seqeunces_monkaa =  ["treeflight_augmented0_x2", "treeflight_augmented1_x2", "lonetree_winter_x2", "a_rain_of_stones_x2", "eating_naked_camera2_x2",  "family_x2", "lonetree_difftex_x2"]  # 1137
 val_sequences_monkaa = ["treeflight_x2", "eating_x2", "eating_camera2_x2"] # 370
 test_sequences_monkaa = ["top_view_x2", "flower_storm_x2", "funnyworld_x2"]     # 360 frames   
@@ -53,7 +53,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-SEED = [42,500]
+SEED = [42, 300, 500]
 LR = [1e-4]             
 
 ### Epipolar geometry ###
@@ -74,7 +74,7 @@ CONV_HIDDEN_DIM = [256, 512]
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 KITTI_MODEL_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
 TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or not PRETEXT_TRAIN else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
-PRETRAINED_PATH =  KITTI_MODEL_PATH if KITTI2SCENEFLOW and SCENEFLOW else None # make sure you set GET_OLD_PATH !! 
+PRETRAINED_PATH = None # make sure you set GET_OLD_PATH !! 
 AVG_EMBEDDINGS = False
 USE_CONV = True
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9

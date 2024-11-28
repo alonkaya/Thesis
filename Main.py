@@ -53,10 +53,10 @@ if __name__ == "__main__":
                         print("Invalid data ratio")
                         continue
 
-                batch_size = 4 if train_size==0.05 and not PRETEXT_TRAIN and MODEL==CLIP_MODEL_NAME else batch_size
+                batch_size = 4 if train_size==0.05 and not PRETEXT_TRAIN and MODEL==CLIP_MODEL_NAME and not SCENEFLOW else batch_size
 
                 coeff = f'ALG_sqr_{alg_coeff}__' if alg_coeff > 0 else f'RE1_{re1_coeff}__' if re1_coeff > 0 else f'SED_{sed_coeff}__' if sed_coeff > 0 else ''
-                dataset = 'Stereo' if STEREO else 'RealEstate_split' if USE_REALESTATE and REALESTATE_SPLIT else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
+                dataset = 'Kitti2Sceneflow' if KITTI2SCENEFLOW else 'Sceneflow' if SCENEFLOW else 'Stereo' if STEREO else 'RealEstate_split' if USE_REALESTATE and REALESTATE_SPLIT else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
                 scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
