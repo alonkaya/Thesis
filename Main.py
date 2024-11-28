@@ -45,7 +45,10 @@ if __name__ == "__main__":
                 if STEREO and part != "head" and part != "mid" and part != "tail":
                         raise ValueError("Invalid part")
                 
-                num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 25000 if train_size==0.015 else 40000 if train_size==0.008 else 0
+                if SCENEFLOW:
+                        num_epochs == 1000
+                else:
+                        num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 25000 if train_size==0.015 else 40000 if train_size==0.008 else 0
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
