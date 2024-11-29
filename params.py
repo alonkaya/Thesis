@@ -66,7 +66,7 @@ RE1_COEFF = [0]
 SED_COEFF = [0.5]                                                    
 L2_COEFF = 1
 HUBER_COEFF = 1                                                      
-ADDITIONS = "__fresh_MLP"                                     
+ADDITIONS = "__fresh_MLP_CONV"                                     
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
