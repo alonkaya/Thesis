@@ -9,13 +9,14 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
-KITTI2SCENEFLOW = False
+KITTI2SCENEFLOW = True
 SCENEFLOW = True
 MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
 COMPUTER = 1 # 0=132.72.49.250 1=else
 SEQ_RATIOS = [1]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
 ADDITIONS = ""                                     
+LR = [1e-4]             
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -55,7 +56,6 @@ NUM_WORKERS = 0
 SAVE_MODEL = True
 GET_OLD_PATH = False
 SEED = [42, 300, 500]
-LR = [5e-5]             
 
 ### Epipolar geometry ###
 RE1_DIST = True
