@@ -388,7 +388,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
         # Load MLP
         self.mlp = MLP(input_dim=mlp_input_shape).to(device)
-        self.mlp.load_state_dict(checkpoint['mlp'])
+        if continue_training:
+            self.mlp.load_state_dict(checkpoint['mlp']) 
         self.mlp.to(device)
 
         # Load model

@@ -11,7 +11,7 @@ STEREO = True
 PRETEXT_TRAIN = False
 KITTI2SCENEFLOW = True
 SCENEFLOW = True
-MODEL = RESNET_MODEL_NAME 
+MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
 COMPUTER = 1 # 0=132.72.49.250 1=else
 SEQ_RATIOS = [1]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
@@ -66,7 +66,7 @@ RE1_COEFF = [0]
 SED_COEFF = [0.5]                                                    
 L2_COEFF = 1
 HUBER_COEFF = 1                                                      
-ADDITIONS = ""                                     
+ADDITIONS = "__fresh_MLP"                                     
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
