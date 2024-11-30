@@ -70,7 +70,7 @@ if __name__ == "__main__":
                                         f"""BS_{batch_size}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
                 
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
-                print_and_write(f'train size: {len(train_loader.dataset)}, val size: {len(val_loader.dataset)}, test size: {len(test_loader.dataset)}', plots_path)
+                print_and_write(f'train size: {len(train_loader.dataset)}, val size: {len(val_loader.dataset)}, test size: {len(test_loader.dataset)}\n\n', plots_path)
 
                 model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
 
