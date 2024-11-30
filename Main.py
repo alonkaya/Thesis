@@ -46,7 +46,7 @@ if __name__ == "__main__":
                         raise ValueError("Invalid part")
                 
                 if SCENEFLOW:
-                        num_epochs = 12000
+                        num_epochs = 7000
                 else:
                         num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 25000 if train_size==0.015 else 40000 if train_size==0.008 else 0
                 if num_epochs == 0:
@@ -64,12 +64,13 @@ if __name__ == "__main__":
                 seed_param = "" if seed == 42 else f"__seed_{seed}"
                 data_config = f'ratio_{train_size}__{part}' if not SCENEFLOW else f'ratio_{train_size}'
 
-                plots_path = os.path.join('plots', dataset, 'Winners' if STEREO else '',
+                plots_path = os.path.join('plots', dataset, 'Winners' if STEREO and not SCENEFLOW else '',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
                                         f"""BS_{batch_size}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
                 
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
+                print_and_write(f'train size: {len(train_loader.dataset)}, val size: {len(val_loader.dataset)}, test size: {len(test_loader.dataset)}', plots_path)
 
                 model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
 

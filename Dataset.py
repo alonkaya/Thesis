@@ -102,7 +102,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
 
         pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, height=H, width=W)
         
-        return img0, img1, F, pts1, pts2, self.seq_name, f'{idx:06}.{IMAGE_TYPE}', self.sequence_path
+        return img0, img1, F, pts1, pts2, self.seq_name
     
 def get_valid_indices_stereo(sequence_path):
     valid_indices = []
@@ -157,7 +157,7 @@ def custom_collate_fn(batch):
         padded_pts1.append(NF.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(NF.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
 
-    return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names, a, b)
+    return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
 
 def get_dataloaders_RealEstate(train_num_sequences, batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
@@ -385,7 +385,7 @@ def get_dataloader_monkaa(data_ratio, batch_size, num_workers=NUM_WORKERS):
 
     monkaa_path = "SceneFlow/Monkaa_cleanpass"
     train_datasets, val_datasets, test_datasets = [], [], []
-    for i, seq_name  in enumerate(os.listdir(monkaa_path)):     
+    for seq_name  in os.listdir(monkaa_path):     
         seq_path = os.path.join(monkaa_path, seq_name) 
         left_path = os.path.join(seq_path, 'left')
         right_path = os.path.join(seq_path, 'right')         
@@ -393,7 +393,7 @@ def get_dataloader_monkaa(data_ratio, batch_size, num_workers=NUM_WORKERS):
         # Indices of 'good' image frames
         valid_indices = get_valid_indices_stereo(left_path)
         
-        if i in test_sequences_stereo:
+        if seq_name in test_sequences_stereo:
             subset = valid_indices
         else:
             length = int(len(valid_indices) * data_ratio) 
@@ -407,11 +407,11 @@ def get_dataloader_monkaa(data_ratio, batch_size, num_workers=NUM_WORKERS):
 
         dataset_stereo = Dataset_stereo(seq_path, transform, K, K, R, t, images_0, images_1, keypoints_dict, subset, seq_name=seq_name)
 
-        if i in train_seqeunces_stereo:
+        if seq_name in train_seqeunces_monkaa:
             train_datasets.append(dataset_stereo)        
-        if i in val_sequences_stereo:
+        if seq_name in val_sequences_monkaa:
             val_datasets.append(dataset_stereo)
-        if i in test_sequences_stereo:
+        if seq_name in test_sequences_monkaa:
             test_datasets.append(dataset_stereo)
 
     # Concatenate datasets
@@ -630,30 +630,39 @@ def save_keypoints_realestate():
 def remove_bad_monkaa():
     train_loader, val_loader, test_loader = get_dataloader_monkaa(data_ratio=1, batch_size=1)
     print(len(train_loader), len(val_loader), len(test_loader))
+    i=0
     for img0, img1, F, pts1, pts2, _, img_name, seq_path in train_loader:
+        pts1 = pts1.squeeze()
         right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
         left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
-        if pts1.shape[0] < 5:
+        if pts1.shape[0] < 3:
+            i+=1
             print(f'{pts1.shape[0]} points at {seq_path[0]}, {img_name[0]}')
-            # os.remove(right_img_path)
-            # os.remove(left_img_path)
+            os.remove(right_img_path)
+            os.remove(left_img_path)
 
     for img0, img1, F, pts1, pts2, _, img_name, seq_path in val_loader:
+        pts1 = pts1.squeeze()
         right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
         left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
-        if pts1.shape[0] < 5:
+        if pts1.shape[0] < 3:
+            i+=1
             print(f'{pts1.shape[0]} points at {seq_path[0]}, {img_name[0]}')
-            # os.remove(right_img_path)
-            # os.remove(left_img_path)
+            os.remove(right_img_path)
+            os.remove(left_img_path)
 
     for img0, img1, F, pts1, pts2, _, img_name, seq_path in test_loader:
+        pts1 = pts1.squeeze()
         right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
         left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
-        if pts1.shape[0] < 5:
+        if pts1.shape[0] < 3:
+            i+=1
             print(f'{pts1.shape[0]} points at {seq_path[0]}, {img_name[0]}')
-            # os.remove(right_img_path)
-            # os.remove(left_img_path)
-
+            os.remove(right_img_path)
+            os.remove(left_img_path)
+    print(i)
 if __name__ == "__main__":
     # train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.02, part="tail", batch_size=1)
     remove_bad_monkaa()
+
+    

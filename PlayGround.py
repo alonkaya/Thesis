@@ -85,40 +85,38 @@ def valid_indices_of_dataset(train_loader, idx):
 
 def vis_gt():
     train_loader, val_loader, test_loader = get_data_loaders(train_size=0.1, part='head', batch_size=1)
-    total_sed = 0
 
-    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(test_loader):
-        # pts1 = pts1[0].cpu().numpy()
-        # pts2 = pts2[0].cpu().numpy()
-        # Convert grayscale tensors to numpy arrays for matplotlib
-        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
-        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
+    for i, (img1, img2, label, pts1, pts2, seq_name, fn, _) in enumerate(test_loader):
+        print(pts1.shape, fn[0])
+        img1 = img1[0].cpu().detach()  # Shape (C, H, W)
+        img2 = img2[0].cpu().detach()  # Shape (C, H, W)
+
+        # Unnormalize the image
+        img1_np = reverse_transforms(img1, norm_mean.cpu(), norm_std.cpu(), is_scaled=True)
+        img2_np = reverse_transforms(img2, norm_mean.cpu(), norm_std.cpu(), is_scaled=True)
+
+        # Get the first set of keypoints
+        pts1_np = pts1[0].cpu().detach().numpy()  # Shape (N, 2)
+        pts2_np = pts2[0].cpu().detach().numpy()  # Shape (N, 2)
+
+        fig, axes = plt.subplots(1, 2, figsize=(12, 8))  # 1 row, 2 columns
+        # Plot the first image
+        axes[0].imshow(img1_np)
+        axes[0].scatter(pts1_np[:, 0], pts1_np[:, 1], c='red', s=10, marker='o')  # Plot keypoints on img1
+        axes[0].set_title(f"Image 1 from sequence: {seq_name[0]}")
+        axes[0].axis('off')
+
+        # Plot the second image
+        axes[1].imshow(img2_np)
+        axes[1].scatter(pts2_np[:, 0], pts2_np[:, 1], c='blue', s=10, marker='o')  # Plot keypoints on img2
+        axes[1].set_title(f"Image 2 from sequence: {seq_name[0]}")
+        axes[1].axis('off')
+
+        # Show the figure
+        plt.tight_layout()
+        plt.savefig("monkaa")
+
         
-        img0_pts = img0_np.copy()
-        img1_pts = img1_np.copy()
-        for i,point in enumerate(pts1):
-            if i == 30: break
-            if point[0] == 0 and point[1] == 0: continue
-            img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
-            
-        for i, point in enumerate(pts2):
-            if i == 30: break
-            if point[0] == 0 and point[1] == 0: continue
-            img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 2, (20, 20, 160), -1)
-
-        # Create padding (e.g., 10-pixel wide, white vertical strip)
-        padding = 255 * np.zeros((img0_pts.shape[0], 30, 3), dtype=np.uint8)  # 10-pixel wide white space
-
-        # Combine the two images with padding in between
-        combined_image = np.hstack((img0_pts, padding, img1_pts))
-
-        os.makedirs(f'gt_epilines/Sceneflow/{seq_name[0]}', exist_ok=True)
-        cv2.imwrite(f'gt_epilines/Sceneflow/{seq_name[0]}/gt_{i}.png', combined_image)
-
-        if i == 100: break
-        
-    total_sed /= i
-    print(f'SED distance: {total_sed}') 
 
 def vis_cognata():
     img0_path = "SceneFlow/Monkaa_cleanpass/flower_storm_x2/left/0000.png"
@@ -739,4 +737,4 @@ def delete_odd_files(folder_path):
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    vis_trained()
+    vis_gt()
