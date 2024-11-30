@@ -80,11 +80,11 @@ if __name__ == "__main__":
                         sys.stdout.flush()
      
                 # If the model was already trained WELL with seed 42, skip training with other seed
-                elif "seed" in model.plots_path and os.path.exists(model.plots_path.split("__seed_")[0]):
-                        print(f"\n###\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training\n###\n")
-                        sys.stdout.flush()
+                # elif "seed" in model.plots_path and os.path.exists(model.plots_path.split("__seed_")[0]):
+                #         print(f"\n###\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training\n###\n")
+                #         sys.stdout.flush()
 
-                elif model.start_epoch < model.num_epochs+200: #TODO!!!
+                elif model.start_epoch < model.num_epochs:
                         parameters = f"""###########################################################################################################################################################\n
 {ADDITIONS} learning rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
 batch_size: {batch_size}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo}, val_sequences: {val_sequences_stereo}, RL_TEST_NAMES: {RL_TEST_NAMES}, dataset: {dataset},

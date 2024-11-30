@@ -10,13 +10,13 @@ USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
 KITTI2SCENEFLOW = False
-SCENEFLOW = True
+SCENEFLOW = False
 MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
-COMPUTER = 1 # 0=132.72.49.250 1=else
-SEQ_RATIOS = [1]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
+COMPUTER = 0 # 0=132.72.49.250 1=else
+SEQ_RATIOS = [0.008]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
-LR = [5e-5]             
+LR = [1e-4]             
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -31,7 +31,7 @@ BATCH_SIZE = 8
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
-PART = ["head"] 
+PART = ["tail"] 
 
 ### SCENEFLOW ###
 train_seqeunces_monkaa =  ["treeflight_augmented0_x2", "treeflight_augmented1_x2", "lonetree_winter_x2", "a_rain_of_stones_x2", "eating_naked_camera2_x2",  "family_x2", "lonetree_difftex_x2"]  # 1035
@@ -55,7 +55,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-SEED = [42, 300, 500]
+SEED = [300, 500]
 
 ### Epipolar geometry ###
 RE1_DIST = True
