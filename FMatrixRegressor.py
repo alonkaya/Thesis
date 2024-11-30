@@ -282,6 +282,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             epoch_stats[f'{prefix}outputs'] = torch.cat((epoch_stats[f'{prefix}outputs'], output.detach()), dim=0)
 
     def save_model(self, epoch):
+        os.makedirs(self.parent_model_path, exist_ok=True)
         model_path = os.path.join(self.parent_model_path, "model.pth")
         # Backup previous checkpoint
         if os.path.exists(model_path) and epoch%30 == 0: 
