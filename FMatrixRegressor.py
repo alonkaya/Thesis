@@ -227,7 +227,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 self.num_epochs = epoch + 1
                 os.rename(self.plots_path, self.plots_path + "__bad")
                 self.plots_path = self.plots_path + "__bad"
-                self.save_model(epoch+1)
                 print_and_write("\nModel not learning, stopping training\n", self.plots_path)
                 break
 
