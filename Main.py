@@ -13,6 +13,7 @@ from params import *
 import itertools
 import argparse
 import sys
+import shutil
 
 if __name__ == "__main__":
         init_main()
@@ -102,6 +103,11 @@ crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH
                                 os.remove(os.path.join(model.parent_model_path, 'backup_model.pth'))
                         else:
                                 print_and_write(f"###\n{model.plots_path} no backup\n###", model.plots_path)
+                        
+                        if COMPUTER==0:
+                                source_model_path = os.path.join(model.plots_path, 'model.pth')
+                                dest_model_path = os.path.join(model.parent_model_path, 'model.pth')
+                                shutil.move(source_model_path, dest_model_path)
 
                 else: 
                         print(f"Model {plots_path} already trained")
