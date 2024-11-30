@@ -144,7 +144,7 @@ transform = get_transform()
 
 
 def custom_collate_fn(batch):
-    imgs1, imgs2, Fs, all_pts1, all_pts2, seq_names = zip(*batch)
+    imgs1, imgs2, Fs, all_pts1, all_pts2, seq_names, a, b = zip(*batch)
 
     max_len = max(pts1.shape[0] for pts1 in all_pts1)
 
@@ -157,7 +157,7 @@ def custom_collate_fn(batch):
         padded_pts1.append(NF.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(NF.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
 
-    return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
+    return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names, a, b)
 
 def get_dataloaders_RealEstate(train_num_sequences, batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
