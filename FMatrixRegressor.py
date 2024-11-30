@@ -382,8 +382,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         if self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
             mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
-            if continue_training:
-                self.conv.load_state_dict(checkpoint['conv'])
+            # if continue_training:
+            self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
 
         # Load MLP
