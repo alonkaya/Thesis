@@ -102,7 +102,7 @@ class Dataset_stereo(torch.utils.data.Dataset):
 
         pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, height=H, width=W)
         
-        return img0, img1, F, pts1, pts2, self.seq_name
+        return img0, img1, F, pts1, pts2, self.seq_name, f'{idx:06}.{IMAGE_TYPE}', self.sequence_path
     
 def get_valid_indices_stereo(sequence_path):
     valid_indices = []
@@ -627,37 +627,33 @@ def save_keypoints_realestate():
 
     # Function to visualize a tensor image
 
-# Unnormalize the image
-def unnormalize(img, mean, std):
-    mean = mean.detach().view(3, 1, 1)  # Reshape to match image dimensions
-    std = std.detach().view(3, 1, 1)
-    return img * std + mean
+def remove_bad_monkaa():
+    train_loader, val_loader, test_loader = get_dataloader_monkaa(data_ratio=1, batch_size=1)
+    print(len(train_loader), len(val_loader), len(test_loader))
+    for img0, img1, F, pts1, pts2, _, img_name, seq_path in train_loader:
+        right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
+        left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
+        if pts1.shape[0] < 5:
+            print(f'{pts1.shape[0]} points at {seq_path[0]}, {img_name[0]}')
+            # os.remove(right_img_path)
+            # os.remove(left_img_path)
 
+    for img0, img1, F, pts1, pts2, _, img_name, seq_path in val_loader:
+        right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
+        left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
+        if pts1.shape[0] < 5:
+            print(f'{pts1.shape[0]} points at {seq_path[0]}, {img_name[0]}')
+            # os.remove(right_img_path)
+            # os.remove(left_img_path)
 
-# Iterate over the test DataLoader
-def visualize_test_dataloader(test_loader, norm_mean, norm_std):
-    for batch_idx, (imgs1, imgs2, Fs, pts1, pts2, seq_names) in enumerate(test_loader):
-        # Get the first image (batch size is 1)
-        img = imgs1[0].cpu().detach()  # Shape (C, H, W)
-
-        # Unnormalize the image
-        # unnormalized_img = unnormalize(img, norm_mean.cpu(), norm_std.cpu())  # Shape (C, H, W)
-        # img_np = unnormalized_img.permute(1, 2, 0).numpy()  # Shape (H, W, C)
-        img_np = reverse_transforms(img, norm_mean.cpu(), norm_std.cpu(), is_scaled=True)
-
-        print(f'max value: {img_np.max()}')
-        # Clip values to [0, 1] for display
-        # img_np = img_np.clip(0, 1)
-
-        # Display the image
-        plt.imshow(img_np)
-        plt.title(f"Image from sequence: {seq_names[0]}")
-        plt.axis('off')
-        plt.show()
-
-        # Stop after displaying the first image
-        break
+    for img0, img1, F, pts1, pts2, _, img_name, seq_path in test_loader:
+        right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
+        left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
+        if pts1.shape[0] < 5:
+            print(f'{pts1.shape[0]} points at {seq_path[0]}, {img_name[0]}')
+            # os.remove(right_img_path)
+            # os.remove(left_img_path)
 
 if __name__ == "__main__":
-    train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.02, part="tail", batch_size=1)
-    visualize_test_dataloader(test_loader, norm_mean, norm_std)    
+    # train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.02, part="tail", batch_size=1)
+    remove_bad_monkaa()
