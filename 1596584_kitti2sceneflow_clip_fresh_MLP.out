@@ -1,0 +1,195 @@
+Sat 30 Nov 2024 21:20:46 IST
+
+SLURM_JOBID:		 1596584
+SLURM_JOB_NODELIST:	 ise-4090-04 
+
+
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+train size: 1035, val size: 321, test size: 347
+
+
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/huggingface_hub/file_download.py:797: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/transformers/modeling_utils.py:479: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return torch.load(checkpoint_file, map_location=map_location)
+/cs_storage/alonkay/Thesis/FMatrixRegressor.py:332: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(model_path, map_location='cpu')
+###########################################################################################################################################################
+
+__fresh_MLP learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Kitti2Sceneflow,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: head, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 1, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+algebraic_truth: 0.004168209662804237		 val_algebraic_truth: 0.008292793500714185
+RE1_truth: 2.1987023333517405e-05		 val_RE1_truth: 5.498293946247275e-05
+SED_truth: 0.00017581486071531588		 val_SED_truth: 0.00043983221417520104
+
+
+Epoch 1/7000: Training Loss: 969.9022836538461		 Val Loss: 133.447646722561
+             	Training MAE: 0.3400135338306427		 Val MAE: 0.3057119846343994
+             	Algebraic dist: 739.5946514423077		 Val Algebraic dist: 462.8386051829268
+             	RE1 dist: 6559205.907692308		 Val RE1 dist: 290248.0
+             	SED dist: 1938.9114182692308		 Val SED dist: 266.4423113567073
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 2/7000: Training Loss: 37.89138746995192		 Val Loss: 99.08225157202745
+             	Training MAE: 0.2852799594402313		 Val MAE: 0.28786495327949524
+             	Algebraic dist: 114.33203125		 Val Algebraic dist: 129.369247808689
+             	RE1 dist: 20888.915384615386		 Val RE1 dist: 23579.57774390244
+             	SED dist: 75.2866962139423		 Val SED dist: 197.6391125190549
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 3/7000: Training Loss: 37.872261868990385		 Val Loss: 92.36845584032012
+             	Training MAE: 0.2701070010662079		 Val MAE: 0.30385857820510864
+             	Algebraic dist: 83.88905498798077		 Val Algebraic dist: 117.70826981707317
+             	RE1 dist: 9844.421153846153		 Val RE1 dist: 19644.928353658535
+             	SED dist: 75.26271033653846		 Val SED dist: 184.13496808307926
+
+
+Epoch 4/7000: Training Loss: 33.492608173076924		 Val Loss: 75.53468583269817
+             	Training MAE: 0.2750389277935028		 Val MAE: 0.32504692673683167
+             	Algebraic dist: 78.30559645432692		 Val Algebraic dist: 107.24191358612805
+             	RE1 dist: 8773.774038461539		 Val RE1 dist: 16790.04268292683
+             	SED dist: 66.47815504807693		 Val SED dist: 150.3562547637195
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 5/7000: Training Loss: 28.56403057391827		 Val Loss: 89.09890077172255
+             	Training MAE: 0.2740764021873474		 Val MAE: 0.30591636896133423
+             	Algebraic dist: 66.27051532451924		 Val Algebraic dist: 131.04374285442074
+             	RE1 dist: 6487.920673076923		 Val RE1 dist: 25427.169207317074
+             	SED dist: 56.60828575721154		 Val SED dist: 177.5925352515244
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 6/7000: Training Loss: 26.353416090745192		 Val Loss: 73.39700838414635
+             	Training MAE: 0.27450379729270935		 Val MAE: 0.31779783964157104
+             	Algebraic dist: 66.41357421875		 Val Algebraic dist: 107.44728944359755
+             	RE1 dist: 6792.253365384616		 Val RE1 dist: 17226.3125
+             	SED dist: 52.175458233173075		 Val SED dist: 146.1135789824695
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 7/7000: Training Loss: 24.314058743990383		 Val Loss: 63.78671041349085
+             	Training MAE: 0.2735697627067566		 Val MAE: 0.3252156376838684
+             	Algebraic dist: 60.83221905048077		 Val Algebraic dist: 97.79432045541158
+             	RE1 dist: 6167.946634615385		 Val RE1 dist: 14107.684451219513
+             	SED dist: 48.088912259615384		 Val SED dist: 126.83786680640245
+
+
+Epoch 8/7000: Training Loss: 21.761966646634615		 Val Loss: 63.883407964939025
+             	Training MAE: 0.274141401052475		 Val MAE: 0.3287501037120819
+             	Algebraic dist: 56.79798677884615		 Val Algebraic dist: 92.19255549733232
+             	RE1 dist: 5224.496634615384		 Val RE1 dist: 11820.896341463415
+             	SED dist: 42.97914287860577		 Val SED dist: 126.9714891387195
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 9/7000: Training Loss: 23.51008112980769		 Val Loss: 55.25875928925305
+             	Training MAE: 0.27554550766944885		 Val MAE: 0.33466267585754395
+             	Algebraic dist: 59.244827974759616		 Val Algebraic dist: 88.47276938833842
+             	RE1 dist: 5835.508173076923		 Val RE1 dist: 8279.339176829268
+             	SED dist: 46.46056189903846		 Val SED dist: 109.6241425304878
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 10/7000: Training Loss: 20.49329552283654		 Val Loss: 52.75758622332317
+             	Training MAE: 0.2767051160335541		 Val MAE: 0.3309369683265686
+             	Algebraic dist: 56.07945087139423		 Val Algebraic dist: 102.35446836890245
+             	RE1 dist: 5450.841826923077		 Val RE1 dist: 14375.890243902439
+             	SED dist: 40.41761568509615		 Val SED dist: 104.6760908917683
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 11/7000: Training Loss: 18.125418795072115		 Val Loss: 53.14867568597561
+             	Training MAE: 0.2743878662586212		 Val MAE: 0.335022509098053
+             	Algebraic dist: 52.54196965144231		 Val Algebraic dist: 88.99515291539635
+             	RE1 dist: 4820.683653846154		 Val RE1 dist: 11620.322408536585
+             	SED dist: 35.690839092548075		 Val SED dist: 105.3984970464939
+
+
+Epoch 12/7000: Training Loss: 19.239952674278847		 Val Loss: 52.1216415777439
+             	Training MAE: 0.2749992609024048		 Val MAE: 0.3339642882347107
+             	Algebraic dist: 53.35472881610577		 Val Algebraic dist: 81.32699957126525
+             	RE1 dist: 4897.360576923077		 Val RE1 dist: 7940.169207317073
+             	SED dist: 37.904638671875		 Val SED dist: 103.37210604039635
+
+
