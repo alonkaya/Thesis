@@ -13,7 +13,7 @@ KITTI2SCENEFLOW = False
 SCENEFLOW = False
 MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
-COMPUTER = 0 # 0=132.72.49.250 1=else
+COMPUTER = 1 # 0=132.72.49.250 1=else
 SEQ_RATIOS = [0.008]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 LR = [1e-4]             
@@ -55,7 +55,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-SEED = [300, 500]
+SEED = [42, 300, 500]
 
 ### Epipolar geometry ###
 RE1_DIST = True
