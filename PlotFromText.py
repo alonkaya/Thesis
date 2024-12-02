@@ -70,7 +70,7 @@ def process_epoch_stats(file_path, epochs, training_losses, val_losses, training
 def plot_parameter(x, y1, y2, title, plots_path=None, x_label="Epochs", save=False):
     sliced = ""
     # if len(y1) > 3 and (y1[0] > y1[3] + 2000 or y2[0] > y2[3] + 2000):
-    start = 1000
+    start = 100
     y1 = y1[start:]
     y2 = y2[start:]
     x = x[start:]
@@ -129,7 +129,7 @@ def plot_all_folder(folder_path):
             plot_by_output(folder_path)
 
 if __name__ == "__main__":
-    root_path = "plots/Kitti2Sceneflow/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_1__frozen_0__fresh_MLP_CONV"
+    root_path = "plots/Kitti2Sceneflow/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_1__frozen_0__fresh_MLP"
 
 
     plot_by_output(root_path)

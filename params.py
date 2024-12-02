@@ -3,20 +3,23 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 # 2003501 output_0.008_orig_frozen_4_8.log
 # 2003891 output_0.008_pretext_frozen_4_8.log
 
-# nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &
+
+# nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &   ### REMEMBER TO FIRST MOVE THE MODEL FROM ORIGINAL PATH TO MNT PATH IN CASE OF COMPUTER==0 AND THE LAST RUN EXITED!!
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 
 USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
-KITTI2SCENEFLOW = False
-SCENEFLOW = False
-MODEL = RESNET_MODEL_NAME 
+KITTI2SCENEFLOW = True
+SCENEFLOW = True
+MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
 COMPUTER = 1 # 0=132.72.49.250 1=else
-SEQ_RATIOS = [0.008]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
-ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
+SEQ_RATIOS = [1]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
 LR = [1e-4]             
+FRESH_MLP = False
+FRESH_CONV = False
+ADDITIONS = "__fresh_MLP_CONV" if FRESH_CONV and FRESH_MLP else "__fresh_MLP" if FRESH_MLP else ""  ## REMEMBER TO PUT "__" !!!!!
 
 ### Dataset ###  
 RIGHTCAMVAL = False

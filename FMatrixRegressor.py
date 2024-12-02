@@ -282,7 +282,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             epoch_stats[f'{prefix}outputs'] = torch.cat((epoch_stats[f'{prefix}outputs'], output.detach()), dim=0)
 
     def save_model(self, epoch):
-        # os.makedirs(self.parent_model_path, exist_ok=True)
+        os.makedirs(self.parent_model_path, exist_ok=True)
         model_path = os.path.join(self.plots_path, "model.pth")
         # Backup previous checkpoint
         if os.path.exists(model_path) and epoch%30 == 0: 
@@ -383,14 +383,14 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         if self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
             mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
-            # if continue_training:
-            self.conv.load_state_dict(checkpoint['conv'])
+            if continue_training or not FRESH_CONV:
+                self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
 
         # Load MLP
         self.mlp = MLP(input_dim=mlp_input_shape).to(device)
-        # if continue_training:
-        self.mlp.load_state_dict(checkpoint['mlp']) 
+        if continue_training or not FRESH_MLP:
+            self.mlp.load_state_dict(checkpoint['mlp']) 
         self.mlp.to(device)
 
         # Load model

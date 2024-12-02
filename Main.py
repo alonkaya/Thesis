@@ -43,11 +43,11 @@ if __name__ == "__main__":
         param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, SEED, train_sizes, lrs, parts, frozen_layers)
         for i, (alg_coeff, re1_coeff, sed_coeff, seed, train_size, lr, part, fl) in enumerate(param_combinations):
                 set_seed(seed)
-                if STEREO and part != "head" and part != "mid" and part != "tail":
+                if STEREO and not SCENEFLOW and part != "head" and part != "mid" and part != "tail":
                         raise ValueError("Invalid part")
                 
                 if SCENEFLOW:
-                        num_epochs = 7000
+                        num_epochs = 12000
                 else:
                         num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 25000 if train_size==0.015 else 40000 if train_size==0.008 else 0
                 if num_epochs == 0:
@@ -71,7 +71,6 @@ if __name__ == "__main__":
                                         f"""BS_{batch_size}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
                 
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
-                print_and_write(f'train size: {len(train_loader.dataset)}, val size: {len(val_loader.dataset)}, test size: {len(test_loader.dataset)}\n\n', plots_path)
 
                 model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
 
@@ -94,6 +93,8 @@ RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff:
 crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, train_size: {train_size}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED} seed: {seed}, \n\n"""
                         print_and_write(parameters, model.plots_path)
                         
+                        print_and_write(f'train size: {len(train_loader.dataset)}, val size: {len(val_loader.dataset)}, test size: {len(test_loader.dataset)}\n\n', plots_path)
+
                         if PRETRAINED_PATH or os.path.exists(os.path.join(plots_path, 'model.pth')) or os.path.exists(os.path.join(model.parent_model_path, 'model.pth')):
                                 print_and_write(f"##### CONTINUE TRAINING #####\n\n", model.plots_path)
                 
