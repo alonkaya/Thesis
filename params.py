@@ -11,8 +11,8 @@ USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
 KITTI2SCENEFLOW = False
-SCENEFLOW = True
-MODEL = CLIP_MODEL_NAME 
+SCENEFLOW = False
+MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
 COMPUTER = 1 # 0=132.72.49.250 1=else
 SEQ_RATIOS = [1]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
@@ -38,8 +38,8 @@ PART = ["tail"]
 
 ### SCENEFLOW ###
 train_seqeunces_monkaa =  ["treeflight_augmented0_x2", "treeflight_augmented1_x2", "lonetree_winter_x2", "a_rain_of_stones_x2", "eating_naked_camera2_x2",  "family_x2", "lonetree_difftex_x2"]  # 1035
-val_sequences_monkaa = ["treeflight_x2", "eating_x2", "eating_camera2_x2"] # 321
-test_sequences_monkaa = ["top_view_x2", "flower_storm_x2", "funnyworld_x2"]     # 347 frames   
+val_sequences_monkaa = ["treeflight_x2", "eating_x2", "top_view_x2"] # 349
+test_sequences_monkaa = ["flower_storm_x2", "funnyworld_x2", "eating_camera2_x2"]     # 375 frames   
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
@@ -85,3 +85,5 @@ USE_CONV = True
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
 norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
 norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
+
+

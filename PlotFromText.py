@@ -129,7 +129,7 @@ def plot_all_folder(folder_path):
             plot_by_output(folder_path)
 
 if __name__ == "__main__":
-    root_path = "plots/Kitti2Sceneflow/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_1__frozen_0__fresh_MLP"
+    root_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.008__tail__frozen_0__seed_300"
 
 
     plot_by_output(root_path)
