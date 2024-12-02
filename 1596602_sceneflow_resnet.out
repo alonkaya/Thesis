@@ -1,0 +1,18 @@
+Mon 02 Dec 2024 03:02:45 IST
+
+SLURM_JOBID:		 1596602
+SLURM_JOB_NODELIST:	 ise-4090-02 
+
+
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+Traceback (most recent call last):
+  File "/cs_storage/alonkay/Thesis/Main.py", line 73, in <module>
+    train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
+  File "/cs_storage/alonkay/Thesis/Dataset.py", line 431, in get_data_loaders
+    return get_dataloader_stereo(train_size, part, batch_size)
+  File "/cs_storage/alonkay/Thesis/Dataset.py", line 332, in get_dataloader_stereo
+    poses = read_poses(poses_path)
+  File "/cs_storage/alonkay/Thesis/utils.py", line 123, in read_poses
+    with open(poses_path, 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'poses/09.txt'
