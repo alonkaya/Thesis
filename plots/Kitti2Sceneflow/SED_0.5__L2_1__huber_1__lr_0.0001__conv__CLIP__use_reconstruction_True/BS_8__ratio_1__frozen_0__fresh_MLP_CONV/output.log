@@ -42208,3 +42208,21 @@ Test Algebraic dist truth: 0.004192216491157358
 Test SED dist truth: 0.0001440020278096199
 Test RE1 dist truth: 1.7999160759658977e-05
 
+###########################################################################################################################################################
+
+__fresh_MLP_CONV learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Kitti2Sceneflow,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: tail, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 1, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+train size: 1035, val size: 321, test size: 347
+
+##### CONTINUE TRAINING #####
+
+Epoch 7032/12000: Training Loss: 0.5685627277080829		 Val Loss: 1.747184009086795
+             	Training MAE: 0.07434692978858948		 Val MAE: 0.08318427205085754
+             	Algebraic dist: 0.5043940617487981		 Val Algebraic dist: 0.6525737483326982
+             	RE1 dist: 0.24915369473970853		 Val RE1 dist: 0.6124502972858709
+             	SED dist: 1.0632540189302884		 Val SED dist: 3.416161141744474
+
