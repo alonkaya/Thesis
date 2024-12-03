@@ -16,8 +16,8 @@ MODEL = CLIP_MODEL_NAME
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
 COMPUTER = 1 # 0=132.72.49.250 1=else
 SEQ_RATIOS = [1]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
-LR = [1e-3]             
-FRESH_MLP = True
+LR = [1e-4]             
+FRESH_MLP = False
 FRESH_CONV = False
 ADDITIONS = "__fresh_MLP_CONV" if FRESH_CONV and FRESH_MLP else "__fresh_MLP" if FRESH_MLP else ""  ## REMEMBER TO PUT "__" !!!!!
 
