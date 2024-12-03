@@ -1,0 +1,1165 @@
+Tue 03 Dec 2024 14:18:57 IST
+
+SLURM_JOBID:		 1735084
+SLURM_JOB_NODELIST:	 cs-4090-02 
+
+
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/huggingface_hub/file_download.py:797: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/transformers/modeling_utils.py:479: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return torch.load(checkpoint_file, map_location=map_location)
+/cs_storage/alonkay/Thesis/FMatrixRegressor.py:332: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(model_path, map_location='cpu')
+###########################################################################################################################################################
+
+__fresh_MLP learning rate: 0.001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Kitti2Sceneflow,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: tail, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 1, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+
+train size: 1035, val size: 293, test size: 375
+
+
+##### CONTINUE TRAINING #####
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 482/16000: Training Loss: 2.7218977708082934		 Val Loss: 11.694739264410895
+             	Training MAE: 0.22152870893478394		 Val MAE: 0.2542423605918884
+             	Algebraic dist: 1.1535750169020433		 Val Algebraic dist: 0.7828498531032253
+             	RE1 dist: 1.4226462730994591		 Val RE1 dist: 1.99737548828125
+             	SED dist: 5.064417912409856		 Val SED dist: 22.862213959565032
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 483/16000: Training Loss: 1.767029043344351		 Val Loss: 9.5370813318201
+             	Training MAE: 0.2198902815580368		 Val MAE: 0.2497994601726532
+             	Algebraic dist: 0.8805620633638822		 Val Algebraic dist: 0.6730165223817568
+             	RE1 dist: 0.8683332589956431		 Val RE1 dist: 1.3160637520455025
+             	SED dist: 3.159485098031851		 Val SED dist: 18.577478357263512
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 484/16000: Training Loss: 1.6216522216796876		 Val Loss: 10.82121483055321
+             	Training MAE: 0.21950066089630127		 Val MAE: 0.2485373318195343
+             	Algebraic dist: 0.835335951585036		 Val Algebraic dist: 0.7000346312651763
+             	RE1 dist: 0.7741241455078125		 Val RE1 dist: 1.21587712055928
+             	SED dist: 2.87100830078125		 Val SED dist: 21.14550121410473
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 485/16000: Training Loss: 1.9002212524414062		 Val Loss: 10.511595030088682
+             	Training MAE: 0.21775564551353455		 Val MAE: 0.2451358586549759
+             	Algebraic dist: 0.9659524184006911		 Val Algebraic dist: 0.8057591206318623
+             	RE1 dist: 1.042606412447416		 Val RE1 dist: 1.4835963893581081
+             	SED dist: 3.431981952373798		 Val SED dist: 20.54715213260135
+
+
+Epoch 486/16000: Training Loss: 1.7368176973783054		 Val Loss: 8.863130311708193
+             	Training MAE: 0.21981190145015717		 Val MAE: 0.2501474916934967
+             	Algebraic dist: 0.8709323002741887		 Val Algebraic dist: 0.8561100830902925
+             	RE1 dist: 0.8744149428147536		 Val RE1 dist: 1.5198471481735643
+             	SED dist: 3.097984196589543		 Val SED dist: 17.22486671241554
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 487/16000: Training Loss: 1.7265008779672475		 Val Loss: 10.497325175517314
+             	Training MAE: 0.21861323714256287		 Val MAE: 0.25050172209739685
+             	Algebraic dist: 0.886261221078726		 Val Algebraic dist: 0.7323403229584565
+             	RE1 dist: 0.8458220261793871		 Val RE1 dist: 1.6612372527251373
+             	SED dist: 3.0795501708984374		 Val SED dist: 20.491649730785472
+
+
+Epoch 488/16000: Training Loss: 2.29242671086238		 Val Loss: 12.071293186497044
+             	Training MAE: 0.21776729822158813		 Val MAE: 0.2526499927043915
+             	Algebraic dist: 1.0040697537935697		 Val Algebraic dist: 1.0986793105666701
+             	RE1 dist: 1.3073697603665866		 Val RE1 dist: 1.7109228598104942
+             	SED dist: 4.216333477313702		 Val SED dist: 23.62721046241554
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 489/16000: Training Loss: 1.8896932748647837		 Val Loss: 8.87189463022593
+             	Training MAE: 0.22286581993103027		 Val MAE: 0.24888058006763458
+             	Algebraic dist: 0.8845172588641826		 Val Algebraic dist: 0.710768106821421
+             	RE1 dist: 0.853505119910607		 Val RE1 dist: 1.2080429695747994
+             	SED dist: 3.3939988356370194		 Val SED dist: 17.251250395903718
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 490/16000: Training Loss: 1.7719622098482573		 Val Loss: 10.171058448585304
+             	Training MAE: 0.2185441255569458		 Val MAE: 0.2461078017950058
+             	Algebraic dist: 0.91694823044997		 Val Algebraic dist: 0.7587730820114548
+             	RE1 dist: 0.9211486229529747		 Val RE1 dist: 1.784190203692462
+             	SED dist: 3.170806884765625		 Val SED dist: 19.86308494774071
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 491/16000: Training Loss: 1.9863396277794472		 Val Loss: 12.514215417810389
+             	Training MAE: 0.21922264993190765		 Val MAE: 0.24820300936698914
+             	Algebraic dist: 1.0214496319110578		 Val Algebraic dist: 0.8459790204022382
+             	RE1 dist: 1.1434909527118389		 Val RE1 dist: 1.414133123449377
+             	SED dist: 3.5947857196514423		 Val SED dist: 24.53948974609375
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 492/16000: Training Loss: 1.62508298433744		 Val Loss: 11.28487911739865
+             	Training MAE: 0.21845613420009613		 Val MAE: 0.24570094048976898
+             	Algebraic dist: 0.8406384981595553		 Val Algebraic dist: 0.8092694153656831
+             	RE1 dist: 0.7811074476975661		 Val RE1 dist: 1.776144079259924
+             	SED dist: 2.877837665264423		 Val SED dist: 22.095665184227197
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 493/16000: Training Loss: 1.821976764385517		 Val Loss: 11.900178651551943
+             	Training MAE: 0.21817846596240997		 Val MAE: 0.24989759922027588
+             	Algebraic dist: 0.9187431922325722		 Val Algebraic dist: 0.7944309131519215
+             	RE1 dist: 0.9710895831768329		 Val RE1 dist: 1.6359366339606207
+             	SED dist: 3.274052546574519		 Val SED dist: 23.296126082136823
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 494/16000: Training Loss: 1.6470922616811898		 Val Loss: 11.40213260135135
+             	Training MAE: 0.21785280108451843		 Val MAE: 0.24760127067565918
+             	Algebraic dist: 0.8860716012807993		 Val Algebraic dist: 0.7963723878602724
+             	RE1 dist: 0.8616831265963041		 Val RE1 dist: 1.4524701092694257
+             	SED dist: 2.924285419170673		 Val SED dist: 22.31462798247466
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 495/16000: Training Loss: 1.751394770695613		 Val Loss: 12.691221494932432
+             	Training MAE: 0.215740367770195		 Val MAE: 0.2503068149089813
+             	Algebraic dist: 0.9096773000863883		 Val Algebraic dist: 0.717076842849319
+             	RE1 dist: 0.9002677917480468		 Val RE1 dist: 0.9263351028029984
+             	SED dist: 3.1404202974759614		 Val SED dist: 24.87339164115287
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 496/16000: Training Loss: 1.8025742750901443		 Val Loss: 12.638910242029139
+             	Training MAE: 0.21807439625263214		 Val MAE: 0.24608340859413147
+             	Algebraic dist: 0.9557516831618089		 Val Algebraic dist: 0.8642037365887616
+             	RE1 dist: 0.9862337552584135		 Val RE1 dist: 1.32566245826515
+             	SED dist: 3.2342991755558894		 Val SED dist: 24.79260748785895
+
+
+Epoch 497/16000: Training Loss: 2.0197303185096156		 Val Loss: 11.173422323690879
+             	Training MAE: 0.21866920590400696		 Val MAE: 0.2440301477909088
+             	Algebraic dist: 1.0364231989933894		 Val Algebraic dist: 0.8968205838590055
+             	RE1 dist: 1.2296703632061299		 Val RE1 dist: 2.5166877540382178
+             	SED dist: 3.6696739783653847		 Val SED dist: 21.873965701541387
+
+
+Epoch 498/16000: Training Loss: 1.7684302696814904		 Val Loss: 10.240666569890204
+             	Training MAE: 0.21709656715393066		 Val MAE: 0.24731917679309845
+             	Algebraic dist: 0.8753538278432993		 Val Algebraic dist: 0.9062588665936444
+             	RE1 dist: 0.8543253971980168		 Val RE1 dist: 1.5455673836372994
+             	SED dist: 3.171284836989183		 Val SED dist: 19.99293311866554
+
+
+Epoch 499/16000: Training Loss: 1.6077853863055889		 Val Loss: 11.092321447423986
+             	Training MAE: 0.21646849811077118		 Val MAE: 0.2507667541503906
+             	Algebraic dist: 0.8444443922776442		 Val Algebraic dist: 0.7353421288567621
+             	RE1 dist: 0.7692318842961238		 Val RE1 dist: 1.2588577270507812
+             	SED dist: 2.850238506610577		 Val SED dist: 21.67500923775338
+
+
+Epoch 500/16000: Training Loss: 1.3552371685321514		 Val Loss: 10.10763302364865
+             	Training MAE: 0.21601729094982147		 Val MAE: 0.24636223912239075
+             	Algebraic dist: 0.7521075908954327		 Val Algebraic dist: 0.7878083924989443
+             	RE1 dist: 0.6212201045109675		 Val RE1 dist: 1.3858932288917336
+             	SED dist: 2.345653827373798		 Val SED dist: 19.72364765888936
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 501/16000: Training Loss: 1.8237726064828725		 Val Loss: 14.551693478146115
+             	Training MAE: 0.21697373688220978		 Val MAE: 0.25455158948898315
+             	Algebraic dist: 0.9445649953988883		 Val Algebraic dist: 0.6729577038739178
+             	RE1 dist: 0.9529340303861178		 Val RE1 dist: 0.7366226814888619
+             	SED dist: 3.281371131310096		 Val SED dist: 28.57119338576858
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 502/16000: Training Loss: 1.8739970280573919		 Val Loss: 11.058046907991976
+             	Training MAE: 0.21958959102630615		 Val MAE: 0.24953193962574005
+             	Algebraic dist: 0.8949881920447716		 Val Algebraic dist: 0.9909505070866765
+             	RE1 dist: 0.8754707336425781		 Val RE1 dist: 1.5715445441168707
+             	SED dist: 3.3734081561748797		 Val SED dist: 21.6229907886402
+
+
+Epoch 503/16000: Training Loss: 1.436725088266226		 Val Loss: 9.882524645006335
+             	Training MAE: 0.2163374423980713		 Val MAE: 0.24624072015285492
+             	Algebraic dist: 0.7752129187950721		 Val Algebraic dist: 0.7826838622222075
+             	RE1 dist: 0.6576822134164664		 Val RE1 dist: 1.3836609092918601
+             	SED dist: 2.5058452899639425		 Val SED dist: 19.28371120143581
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 504/16000: Training Loss: 1.548081265963041		 Val Loss: 9.134746654613599
+             	Training MAE: 0.21412263810634613		 Val MAE: 0.24961388111114502
+             	Algebraic dist: 0.8341054476224459		 Val Algebraic dist: 0.7145176449337521
+             	RE1 dist: 0.7665813739483173		 Val RE1 dist: 1.1648551322318412
+             	SED dist: 2.7369849571814906		 Val SED dist: 17.76679786475929
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 505/16000: Training Loss: 1.7477526151216947		 Val Loss: 10.22684128220017
+             	Training MAE: 0.21571046113967896		 Val MAE: 0.24211424589157104
+             	Algebraic dist: 0.9311185983511118		 Val Algebraic dist: 0.8015093932280669
+             	RE1 dist: 0.9611288217397836		 Val RE1 dist: 1.8264471518026817
+             	SED dist: 3.1312342717097357		 Val SED dist: 19.99037624049831
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 506/16000: Training Loss: 1.3754084660456731		 Val Loss: 10.200976397540119
+             	Training MAE: 0.21505141258239746		 Val MAE: 0.24604974687099457
+             	Algebraic dist: 0.7293096689077524		 Val Algebraic dist: 0.6976500330744563
+             	RE1 dist: 0.5874871474045974		 Val RE1 dist: 1.2133244694890202
+             	SED dist: 2.3871312068058894		 Val SED dist: 19.913983319256758
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 507/16000: Training Loss: 1.5523919912484976		 Val Loss: 12.935806686813766
+             	Training MAE: 0.21381893754005432		 Val MAE: 0.24722012877464294
+             	Algebraic dist: 0.8355667701134315		 Val Algebraic dist: 1.0185171591269004
+             	RE1 dist: 0.7617407578688401		 Val RE1 dist: 1.5870269569190774
+             	SED dist: 2.7467041015625		 Val SED dist: 25.384646853885137
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 508/16000: Training Loss: 1.6033321674053485		 Val Loss: 8.808982230521536
+             	Training MAE: 0.21368525922298431		 Val MAE: 0.24647380411624908
+             	Algebraic dist: 0.877003655066857		 Val Algebraic dist: 0.789006774489944
+             	RE1 dist: 0.8367916400615986		 Val RE1 dist: 1.4208631773252745
+             	SED dist: 2.848816152719351		 Val SED dist: 17.13393092799831
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 509/16000: Training Loss: 1.538580322265625		 Val Loss: 11.75537191854941
+             	Training MAE: 0.21580518782138824		 Val MAE: 0.24813811480998993
+             	Algebraic dist: 0.8171813377967247		 Val Algebraic dist: 0.8082445505503062
+             	RE1 dist: 0.7596689664400541		 Val RE1 dist: 1.0629718883617505
+             	SED dist: 2.715363018329327		 Val SED dist: 23.02130951752534
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 510/16000: Training Loss: 1.8405708899864783		 Val Loss: 10.596070985536318
+             	Training MAE: 0.21542923152446747		 Val MAE: 0.25073134899139404
+             	Algebraic dist: 0.9384904714731069		 Val Algebraic dist: 0.8221665459710199
+             	RE1 dist: 0.9479212247408353		 Val RE1 dist: 1.8989301114468962
+             	SED dist: 3.3197035569411057		 Val SED dist: 20.683366105363177
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 511/16000: Training Loss: 1.7413318340594952		 Val Loss: 11.682107461465371
+             	Training MAE: 0.2144087553024292		 Val MAE: 0.2492859959602356
+             	Algebraic dist: 0.9290033193734976		 Val Algebraic dist: 0.8146305084228516
+             	RE1 dist: 0.9136502192570612		 Val RE1 dist: 0.827692495810019
+             	SED dist: 3.122875037560096		 Val SED dist: 22.86673880912162
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 512/16000: Training Loss: 1.9524500920222356		 Val Loss: 12.798429746885557
+             	Training MAE: 0.21429453790187836		 Val MAE: 0.24789777398109436
+             	Algebraic dist: 0.9811589754544772		 Val Algebraic dist: 1.0403171230006862
+             	RE1 dist: 1.0432432908278244		 Val RE1 dist: 1.4462097786568306
+             	SED dist: 3.5481121356670675		 Val SED dist: 25.107242068728887
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 513/16000: Training Loss: 1.8930006760817308		 Val Loss: 9.385825492240286
+             	Training MAE: 0.21431516110897064		 Val MAE: 0.24952593445777893
+             	Algebraic dist: 0.9797232407789964		 Val Algebraic dist: 0.6201879655992663
+             	RE1 dist: 1.0465801532451924		 Val RE1 dist: 1.0859471913930532
+             	SED dist: 3.4256246713491585		 Val SED dist: 18.270844330658782
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 514/16000: Training Loss: 1.5229012122521033		 Val Loss: 11.584399249102619
+             	Training MAE: 0.21418271958827972		 Val MAE: 0.2525078356266022
+             	Algebraic dist: 0.8353689927321214		 Val Algebraic dist: 0.6610604363518793
+             	RE1 dist: 0.7535548870380108		 Val RE1 dist: 0.8023712570602829
+             	SED dist: 2.6848283034104568		 Val SED dist: 22.64573875633446
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 515/16000: Training Loss: 1.6418778639573317		 Val Loss: 10.015391581767314
+             	Training MAE: 0.2136591374874115		 Val MAE: 0.24972938001155853
+             	Algebraic dist: 0.8667577303372896		 Val Algebraic dist: 0.7334898871344488
+             	RE1 dist: 0.8143365126389723		 Val RE1 dist: 1.114415658486856
+             	SED dist: 2.927836256760817		 Val SED dist: 19.527538402660472
+
+
+Epoch 516/16000: Training Loss: 1.7236580481896033		 Val Loss: 9.165129790434966
+             	Training MAE: 0.21385067701339722		 Val MAE: 0.24697856605052948
+             	Algebraic dist: 0.9350472083458534		 Val Algebraic dist: 0.6780446026776288
+             	RE1 dist: 0.9244530310997596		 Val RE1 dist: 1.179606566558013
+             	SED dist: 3.0906759408804088		 Val SED dist: 17.833520837732262
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 517/16000: Training Loss: 1.4503365149864784		 Val Loss: 8.934564538904139
+             	Training MAE: 0.21406950056552887		 Val MAE: 0.24334165453910828
+             	Algebraic dist: 0.7874346219576323		 Val Algebraic dist: 0.8048705023688238
+             	RE1 dist: 0.6693236130934496		 Val RE1 dist: 1.6951069187473606
+             	SED dist: 2.539599374624399		 Val SED dist: 17.39661964210304
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 518/16000: Training Loss: 1.416717294546274		 Val Loss: 12.21476951805321
+             	Training MAE: 0.21434901654720306		 Val MAE: 0.23934845626354218
+             	Algebraic dist: 0.7882941025954027		 Val Algebraic dist: 0.9217401452966638
+             	RE1 dist: 0.6713253314678486		 Val RE1 dist: 1.7714476714263092
+             	SED dist: 2.4719308706430287		 Val SED dist: 23.97846283783784
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 519/16000: Training Loss: 1.543218759390024		 Val Loss: 10.90692138671875
+             	Training MAE: 0.21542103588581085		 Val MAE: 0.2515541911125183
+             	Algebraic dist: 0.8390771719125601		 Val Algebraic dist: 0.8338535411937816
+             	RE1 dist: 0.7593259958120493		 Val RE1 dist: 2.4349266258445947
+             	SED dist: 2.7219581017127403		 Val SED dist: 21.30159615181588
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 520/16000: Training Loss: 1.7792045006385215		 Val Loss: 9.840685870196369
+             	Training MAE: 0.21323749423027039		 Val MAE: 0.25204363465309143
+             	Algebraic dist: 0.9384776188777043		 Val Algebraic dist: 0.6004488661482528
+             	RE1 dist: 0.9329528221717247		 Val RE1 dist: 1.436058250633446
+             	SED dist: 3.205034696138822		 Val SED dist: 19.166112951330238
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 521/16000: Training Loss: 1.5983083871694712		 Val Loss: 9.592716526340794
+             	Training MAE: 0.21345847845077515		 Val MAE: 0.24836748838424683
+             	Algebraic dist: 0.8574698228102464		 Val Algebraic dist: 0.878313837824641
+             	RE1 dist: 0.8248932471642128		 Val RE1 dist: 1.8068754866316512
+             	SED dist: 2.8403479942908656		 Val SED dist: 18.6933032886402
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 522/16000: Training Loss: 1.5937260554387018		 Val Loss: 8.503645613386825
+             	Training MAE: 0.2129950374364853		 Val MAE: 0.2466718554496765
+             	Algebraic dist: 0.8385729276216947		 Val Algebraic dist: 0.7312091105693096
+             	RE1 dist: 0.7675635117750902		 Val RE1 dist: 1.3019367939717061
+             	SED dist: 2.829987041766827		 Val SED dist: 16.51866356102196
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 523/16000: Training Loss: 1.7104324340820312		 Val Loss: 8.08336660024282
+             	Training MAE: 0.2147928774356842		 Val MAE: 0.2437083125114441
+             	Algebraic dist: 0.9223405104417067		 Val Algebraic dist: 0.7838156932109112
+             	RE1 dist: 0.8793734623835637		 Val RE1 dist: 1.8266077814875423
+             	SED dist: 3.0598290076622594		 Val SED dist: 15.6939416833826
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 524/16000: Training Loss: 1.6255868765024037		 Val Loss: 9.539962356154984
+             	Training MAE: 0.21259203553199768		 Val MAE: 0.252615749835968
+             	Algebraic dist: 0.8600908719576322		 Val Algebraic dist: 0.6945239402152397
+             	RE1 dist: 0.8088840778057392		 Val RE1 dist: 1.5045138178644955
+             	SED dist: 2.898173640324519		 Val SED dist: 18.563573888830238
+
+
+Epoch 525/16000: Training Loss: 1.4820711576021635		 Val Loss: 11.274357976140204
+             	Training MAE: 0.21226733922958374		 Val MAE: 0.2384098470211029
+             	Algebraic dist: 0.8122165973369891		 Val Algebraic dist: 0.9367881981102196
+             	RE1 dist: 0.7025725731482872		 Val RE1 dist: 1.5557435525430214
+             	SED dist: 2.611370614858774		 Val SED dist: 22.103329220333613
+
+
+Epoch 526/16000: Training Loss: 1.8496668888972356		 Val Loss: 8.74302219700169
+             	Training MAE: 0.2160828709602356		 Val MAE: 0.2501421272754669
+             	Algebraic dist: 0.9324193514310397		 Val Algebraic dist: 0.6915362590068096
+             	RE1 dist: 0.9666327843299278		 Val RE1 dist: 0.8502261703078812
+             	SED dist: 3.3371657151442307		 Val SED dist: 16.98106590477196
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 527/16000: Training Loss: 1.965866440993089		 Val Loss: 8.56948440139358
+             	Training MAE: 0.212645024061203		 Val MAE: 0.24778324365615845
+             	Algebraic dist: 1.0127135056715746		 Val Algebraic dist: 0.6892751745275549
+             	RE1 dist: 1.0923039362980769		 Val RE1 dist: 0.9025779930320946
+             	SED dist: 3.577332481971154		 Val SED dist: 16.645458324535472
+
+
+Epoch 528/16000: Training Loss: 1.5504176213191105		 Val Loss: 8.104223302892736
+             	Training MAE: 0.21139639616012573		 Val MAE: 0.2458556741476059
+             	Algebraic dist: 0.8874392582820012		 Val Algebraic dist: 0.6912745913943729
+             	RE1 dist: 0.8238214932955228		 Val RE1 dist: 1.2277204152700063
+             	SED dist: 2.7534085787259617		 Val SED dist: 15.730330183699325
+
+
+Epoch 529/16000: Training Loss: 1.4919628436748797		 Val Loss: 9.575932683171454
+             	Training MAE: 0.21213796734809875		 Val MAE: 0.24251466989517212
+             	Algebraic dist: 0.8420945974496695		 Val Algebraic dist: 0.8036349528544658
+             	RE1 dist: 0.7525529127854568		 Val RE1 dist: 1.6693343085211676
+             	SED dist: 2.633447030874399		 Val SED dist: 18.6869457347973
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 530/16000: Training Loss: 1.9016985379732572		 Val Loss: 9.640656342377534
+             	Training MAE: 0.21305280923843384		 Val MAE: 0.2534147799015045
+             	Algebraic dist: 0.969395270714393		 Val Algebraic dist: 0.7419358330803949
+             	RE1 dist: 1.0688286414513222		 Val RE1 dist: 1.3444790195774388
+             	SED dist: 3.450693922776442		 Val SED dist: 18.75552615603885
+
+
+Epoch 531/16000: Training Loss: 1.5745371891902042		 Val Loss: 10.705908698004645
+             	Training MAE: 0.21182765066623688		 Val MAE: 0.24759159982204437
+             	Algebraic dist: 0.900097891000601		 Val Algebraic dist: 0.7341836465371622
+             	RE1 dist: 0.8954775883601263		 Val RE1 dist: 1.177977381525813
+             	SED dist: 2.8000847449669473		 Val SED dist: 20.92066749366554
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 532/16000: Training Loss: 1.500341796875		 Val Loss: 10.772159885715794
+             	Training MAE: 0.2130538821220398		 Val MAE: 0.24749575555324554
+             	Algebraic dist: 0.8140974778395432		 Val Algebraic dist: 0.7923808226714263
+             	RE1 dist: 0.7325415978064904		 Val RE1 dist: 1.9562749089421452
+             	SED dist: 2.6467240553635816		 Val SED dist: 21.055776235219593
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 533/16000: Training Loss: 1.442813462477464		 Val Loss: 9.438188707506335
+             	Training MAE: 0.20942182838916779		 Val MAE: 0.24609513580799103
+             	Algebraic dist: 0.766108644925631		 Val Algebraic dist: 0.9261637507258235
+             	RE1 dist: 0.6402254544771635		 Val RE1 dist: 1.6212535548854519
+             	SED dist: 2.539349130483774		 Val SED dist: 18.390946671769427
+
+
+Epoch 534/16000: Training Loss: 1.37147216796875		 Val Loss: 8.430764688027871
+             	Training MAE: 0.2118445485830307		 Val MAE: 0.24836008250713348
+             	Algebraic dist: 0.7671426626352164		 Val Algebraic dist: 0.6848738902323955
+             	RE1 dist: 0.6434610806978666		 Val RE1 dist: 0.9577361441947319
+             	SED dist: 2.389563457782452		 Val SED dist: 16.368640796558278
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 535/16000: Training Loss: 1.9911912184495193		 Val Loss: 9.890206826699746
+             	Training MAE: 0.21081708371639252		 Val MAE: 0.247576504945755
+             	Algebraic dist: 1.0687437791090746		 Val Algebraic dist: 0.995937966011666
+             	RE1 dist: 1.2238074669471153		 Val RE1 dist: 1.824056676916174
+             	SED dist: 3.6332251915564906		 Val SED dist: 19.290990881017738
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 536/16000: Training Loss: 1.9299903282752404		 Val Loss: 8.599214296083193
+             	Training MAE: 0.21298043429851532		 Val MAE: 0.25140315294265747
+             	Algebraic dist: 1.004032193697416		 Val Algebraic dist: 0.5324283290553737
+             	RE1 dist: 1.0877440232496995		 Val RE1 dist: 0.574187201422614
+             	SED dist: 3.507897244966947		 Val SED dist: 16.68297680004223
+
+
+Epoch 537/16000: Training Loss: 1.6439446082481972		 Val Loss: 11.312665784681165
+             	Training MAE: 0.210174560546875		 Val MAE: 0.24387167394161224
+             	Algebraic dist: 0.9006325354942909		 Val Algebraic dist: 1.1606211275667757
+             	RE1 dist: 0.9170059204101563		 Val RE1 dist: 2.17236142545133
+             	SED dist: 2.9429499699519233		 Val SED dist: 22.151730099239863
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 538/16000: Training Loss: 1.8860154371995193		 Val Loss: 9.13921459301098
+             	Training MAE: 0.21516931056976318		 Val MAE: 0.24899931252002716
+             	Algebraic dist: 0.9684701772836538		 Val Algebraic dist: 0.6521599743817303
+             	RE1 dist: 1.0227041391225962		 Val RE1 dist: 0.855266622594885
+             	SED dist: 3.4125835712139425		 Val SED dist: 17.77894551045186
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 539/16000: Training Loss: 1.3422113271859977		 Val Loss: 9.670703784839526
+             	Training MAE: 0.2100711464881897		 Val MAE: 0.24213044345378876
+             	Algebraic dist: 0.7682597820575421		 Val Algebraic dist: 0.7098215463999156
+             	RE1 dist: 0.6388725867638221		 Val RE1 dist: 0.9872639630291913
+             	SED dist: 2.337412672776442		 Val SED dist: 18.873185441300677
+
+
+Epoch 540/16000: Training Loss: 1.3231993455153246		 Val Loss: 10.506360028241131
+             	Training MAE: 0.210005521774292		 Val MAE: 0.24445302784442902
+             	Algebraic dist: 0.7783335759089544		 Val Algebraic dist: 0.790908297976932
+             	RE1 dist: 0.6449706444373497		 Val RE1 dist: 1.2497995737436656
+             	SED dist: 2.2996384840745194		 Val SED dist: 20.53907074799409
+
+
+Epoch 541/16000: Training Loss: 1.409886991060697		 Val Loss: 9.814745928790119
+             	Training MAE: 0.2104969024658203		 Val MAE: 0.2427414506673813
+             	Algebraic dist: 0.7728530883789062		 Val Algebraic dist: 1.1023828661119617
+             	RE1 dist: 0.6511265094463642		 Val RE1 dist: 1.5964840038402661
+             	SED dist: 2.471106191781851		 Val SED dist: 19.16362865551098
+
+
+Epoch 542/16000: Training Loss: 1.6645800076998196		 Val Loss: 7.412668588999155
+             	Training MAE: 0.21152403950691223		 Val MAE: 0.2476174235343933
+             	Algebraic dist: 0.9312052800105168		 Val Algebraic dist: 0.6151806083885399
+             	RE1 dist: 0.9147304241473858		 Val RE1 dist: 1.1567280743573163
+             	SED dist: 2.9797149658203126		 Val SED dist: 14.329810889991554
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 543/16000: Training Loss: 1.6166245680588942		 Val Loss: 10.159740551097974
+             	Training MAE: 0.20887143909931183		 Val MAE: 0.24800793826580048
+             	Algebraic dist: 0.9158400315504808		 Val Algebraic dist: 0.7658075384191565
+             	RE1 dist: 0.8708045372596154		 Val RE1 dist: 1.0797290286502323
+             	SED dist: 2.893396230844351		 Val SED dist: 19.82093604835304
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 544/16000: Training Loss: 1.5435776930588943		 Val Loss: 9.278463827597129
+             	Training MAE: 0.20995882153511047		 Val MAE: 0.2491196244955063
+             	Algebraic dist: 0.8635419992300181		 Val Algebraic dist: 0.6579438286858637
+             	RE1 dist: 0.7864783066969652		 Val RE1 dist: 0.8694149739033467
+             	SED dist: 2.7374417818509613		 Val SED dist: 18.053117081925677
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 545/16000: Training Loss: 1.4919712946965145		 Val Loss: 10.006514265730575
+             	Training MAE: 0.20807430148124695		 Val MAE: 0.24280986189842224
+             	Algebraic dist: 0.8578858595628005		 Val Algebraic dist: 0.7985392905570365
+             	RE1 dist: 0.8011732835036057		 Val RE1 dist: 1.2642794428644955
+             	SED dist: 2.64501225398137		 Val SED dist: 19.54631083720439
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 546/16000: Training Loss: 1.7923328106219951		 Val Loss: 11.924290837468329
+             	Training MAE: 0.21144995093345642		 Val MAE: 0.24372033774852753
+             	Algebraic dist: 0.9233793405386118		 Val Algebraic dist: 0.7464626415355785
+             	RE1 dist: 0.9114842341496394		 Val RE1 dist: 1.9051899265598606
+             	SED dist: 3.237549767127404		 Val SED dist: 23.373002335831927
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 547/16000: Training Loss: 1.3538952167217548		 Val Loss: 8.981936068148226
+             	Training MAE: 0.20761270821094513		 Val MAE: 0.247887521982193
+             	Algebraic dist: 0.7890885573167067		 Val Algebraic dist: 0.7348235362284893
+             	RE1 dist: 0.670602064866286		 Val RE1 dist: 1.2574077296901394
+             	SED dist: 2.368365948016827		 Val SED dist: 17.468591638513512
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 548/16000: Training Loss: 1.3266998291015626		 Val Loss: 10.14409740551098
+             	Training MAE: 0.20746688544750214		 Val MAE: 0.24851983785629272
+             	Algebraic dist: 0.7875296959510216		 Val Algebraic dist: 0.6655981733992293
+             	RE1 dist: 0.6435511075533353		 Val RE1 dist: 0.8631241772625897
+             	SED dist: 2.315959754356971		 Val SED dist: 19.79022051836993
+
+
+Epoch 549/16000: Training Loss: 1.4434733464167668		 Val Loss: 8.861460917704814
+             	Training MAE: 0.20791973173618317		 Val MAE: 0.24653835594654083
+             	Algebraic dist: 0.8249356783353365		 Val Algebraic dist: 0.6816899583146379
+             	RE1 dist: 0.7308548560509315		 Val RE1 dist: 1.4505065711768899
+             	SED dist: 2.5468764085036057		 Val SED dist: 17.23442943676098
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 550/16000: Training Loss: 1.5522760244516225		 Val Loss: 7.619134851404138
+             	Training MAE: 0.2074243277311325		 Val MAE: 0.23970894515514374
+             	Algebraic dist: 0.8809199993426983		 Val Algebraic dist: 0.7831163148622255
+             	RE1 dist: 0.8324388357309195		 Val RE1 dist: 1.0266360721072636
+             	SED dist: 2.765575937124399		 Val SED dist: 14.785309662690034
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 551/16000: Training Loss: 1.5619668813852163		 Val Loss: 7.465598441459037
+             	Training MAE: 0.211112841963768		 Val MAE: 0.24519109725952148
+             	Algebraic dist: 0.8765181321364183		 Val Algebraic dist: 0.642753858824034
+             	RE1 dist: 0.8076577993539663		 Val RE1 dist: 0.7197311504467113
+             	SED dist: 2.7769704965444713		 Val SED dist: 14.45469211887669
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 552/16000: Training Loss: 1.430291982797476		 Val Loss: 9.428041200380068
+             	Training MAE: 0.20788520574569702		 Val MAE: 0.249446302652359
+             	Algebraic dist: 0.8376362727238582		 Val Algebraic dist: 0.5969462523589263
+             	RE1 dist: 0.745779301570012		 Val RE1 dist: 0.8212179751009554
+             	SED dist: 2.5231764573317306		 Val SED dist: 18.34771068676098
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 553/16000: Training Loss: 1.7761852557842548		 Val Loss: 7.520746179529138
+             	Training MAE: 0.20878033339977264		 Val MAE: 0.23707301914691925
+             	Algebraic dist: 0.9696675227238581		 Val Algebraic dist: 0.7768886153762405
+             	RE1 dist: 1.001531747671274		 Val RE1 dist: 1.6501367929819468
+             	SED dist: 3.2146134596604568		 Val SED dist: 14.599739693306589
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 554/16000: Training Loss: 1.3107667189378005		 Val Loss: 9.663998165646115
+             	Training MAE: 0.2081672102212906		 Val MAE: 0.24829402565956116
+             	Algebraic dist: 0.7735436659592848		 Val Algebraic dist: 0.6305053814037426
+             	RE1 dist: 0.6251198401817909		 Val RE1 dist: 0.8137541075010557
+             	SED dist: 2.2819908728966345		 Val SED dist: 18.830896326013512
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 555/16000: Training Loss: 2.472827617938702		 Val Loss: 10.992603198902026
+             	Training MAE: 0.20916277170181274		 Val MAE: 0.2458844631910324
+             	Algebraic dist: 1.2175919752854567		 Val Algebraic dist: 0.7404788764747413
+             	RE1 dist: 1.5551533625676082		 Val RE1 dist: 0.9667446033374684
+             	SED dist: 4.601994441105769		 Val SED dist: 21.49827616923564
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 556/16000: Training Loss: 1.561563227726863		 Val Loss: 9.15289224160684
+             	Training MAE: 0.21060334146022797		 Val MAE: 0.2459530532360077
+             	Algebraic dist: 0.8837819026066707		 Val Algebraic dist: 0.7385293599721547
+             	RE1 dist: 0.8174932039701022		 Val RE1 dist: 1.4705822918866132
+             	SED dist: 2.77716064453125		 Val SED dist: 17.821515057538008
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 557/16000: Training Loss: 1.3978513277493991		 Val Loss: 10.295787089579814
+             	Training MAE: 0.20827122032642365		 Val MAE: 0.24184250831604004
+             	Algebraic dist: 0.7900596618652344		 Val Algebraic dist: 0.7835195386731947
+             	RE1 dist: 0.6731138962965745		 Val RE1 dist: 1.336229066591005
+             	SED dist: 2.451226337139423		 Val SED dist: 20.12341803473395
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 558/16000: Training Loss: 1.2785538893479567		 Val Loss: 8.121116019584036
+             	Training MAE: 0.20815205574035645		 Val MAE: 0.24465735256671906
+             	Algebraic dist: 0.7432253910945013		 Val Algebraic dist: 0.6969100333548881
+             	RE1 dist: 0.6069540170522837		 Val RE1 dist: 1.0339643117543813
+             	SED dist: 2.2168870192307693		 Val SED dist: 15.761152937605575
+
+
+Epoch 559/16000: Training Loss: 1.609573012131911		 Val Loss: 10.44621483055321
+             	Training MAE: 0.20618407428264618		 Val MAE: 0.2515465319156647
+             	Algebraic dist: 0.9037136958195613		 Val Algebraic dist: 0.6413451014338313
+             	RE1 dist: 0.8753308809720552		 Val RE1 dist: 0.7802999341810072
+             	SED dist: 2.884973379281851		 Val SED dist: 20.377669050886823
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 560/16000: Training Loss: 1.6647500845102163		 Val Loss: 10.851483319256756
+             	Training MAE: 0.2078142762184143		 Val MAE: 0.2448226362466812
+             	Algebraic dist: 0.9135343111478366		 Val Algebraic dist: 1.1959484203441724
+             	RE1 dist: 0.8689943166879507		 Val RE1 dist: 1.7053416484111064
+             	SED dist: 2.988128427358774		 Val SED dist: 21.22250118771115
+
+
+Epoch 561/16000: Training Loss: 1.8365808340219352		 Val Loss: 10.488886652766046
+             	Training MAE: 0.21136431396007538		 Val MAE: 0.24448716640472412
+             	Algebraic dist: 0.9035340529221755		 Val Algebraic dist: 0.851970724157385
+             	RE1 dist: 0.8831039428710937		 Val RE1 dist: 1.5013487532332137
+             	SED dist: 3.3267728365384617		 Val SED dist: 20.498789194467907
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 562/16000: Training Loss: 1.5054844782902643		 Val Loss: 8.833517538534629
+             	Training MAE: 0.20632752776145935		 Val MAE: 0.24580220878124237
+             	Algebraic dist: 0.8443590604341947		 Val Algebraic dist: 0.675012073001346
+             	RE1 dist: 0.774588364821214		 Val RE1 dist: 0.8219605523186762
+             	SED dist: 2.6768207256610577		 Val SED dist: 17.18495796822213
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+Epoch 563/16000: Training Loss: 1.489449721116286		 Val Loss: 8.507452062658361
+             	Training MAE: 0.2087097316980362		 Val MAE: 0.24776692688465118
+             	Algebraic dist: 0.8429164006159856		 Val Algebraic dist: 0.6978734506143106
+             	RE1 dist: 0.7738731384277344		 Val RE1 dist: 1.3701659537650444
+             	SED dist: 2.6361567570612983		 Val SED dist: 16.52186378272804
+
+
+Epoch 564/16000: Training Loss: 1.2983100304236779		 Val Loss: 8.076350031672296
+             	Training MAE: 0.20758116245269775		 Val MAE: 0.25056207180023193
+             	Algebraic dist: 0.7605499854454627		 Val Algebraic dist: 0.5541507102347709
+             	RE1 dist: 0.6270379873422476		 Val RE1 dist: 1.6670429126636401
+             	SED dist: 2.2567542442908652		 Val SED dist: 15.639828243771115
+
+
+Epoch 565/16000: Training Loss: 1.5076451228215144		 Val Loss: 9.38544361011402
+             	Training MAE: 0.20734284818172455		 Val MAE: 0.2460198700428009
+             	Algebraic dist: 0.8512005732609675		 Val Algebraic dist: 0.8577654555037215
+             	RE1 dist: 0.7765818082369291		 Val RE1 dist: 1.0578147269584037
+             	SED dist: 2.6761307936448318		 Val SED dist: 18.285552153716218
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 566/16000: Training Loss: 1.5311999981219953		 Val Loss: 7.132551038587415
+             	Training MAE: 0.20361439883708954		 Val MAE: 0.23814119398593903
+             	Algebraic dist: 0.8684841449444111		 Val Algebraic dist: 0.7947180464461043
+             	RE1 dist: 0.7906300471379206		 Val RE1 dist: 1.0403449599807326
+             	SED dist: 2.737934053861178		 Val SED dist: 13.822717615076014
+
+
+
+################
+Empty points at treeflight_augmented0_x2
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 567/16000: Training Loss: 1.6805348322941707		 Val Loss: 6.97023546373522
+             	Training MAE: 0.20685416460037231		 Val MAE: 0.2411947101354599
+             	Algebraic dist: 0.92943602341872		 Val Algebraic dist: 0.7226696529903928
+             	RE1 dist: 0.8794138981745794		 Val RE1 dist: 1.4713238896550358
+             	SED dist: 3.0266254131610575		 Val SED dist: 13.481449436497044
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 568/16000: Training Loss: 1.822043198805589		 Val Loss: 9.734941637193835
+             	Training MAE: 0.20598362386226654		 Val MAE: 0.24745318293571472
+             	Algebraic dist: 0.9898406982421875		 Val Algebraic dist: 0.7199213182603991
+             	RE1 dist: 1.0182620708759014		 Val RE1 dist: 1.344799351047825
+             	SED dist: 3.313965078500601		 Val SED dist: 18.96804397170608
+
+
+
+################
+Empty points at eating_x2
+
+
+Epoch 569/16000: Training Loss: 1.2591972937950722		 Val Loss: 10.748495565878379
+             	Training MAE: 0.20614291727542877		 Val MAE: 0.2494388371706009
+             	Algebraic dist: 0.7590865501990685		 Val Algebraic dist: 0.743745906932934
+             	RE1 dist: 0.6007637023925781		 Val RE1 dist: 1.55684909305057
+             	SED dist: 2.1829758864182693		 Val SED dist: 20.99436497043919
+
+
