@@ -17,7 +17,7 @@ FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW e
 COMPUTER = 1 # 0=132.72.49.250 1=else
 SEQ_RATIOS = [1]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
 LR = [1e-3]             
-FRESH_MLP = False
+FRESH_MLP = True
 FRESH_CONV = False
 ADDITIONS = "__fresh_MLP_CONV" if FRESH_CONV and FRESH_MLP else "__fresh_MLP" if FRESH_MLP else ""  ## REMEMBER TO PUT "__" !!!!!
 
@@ -38,7 +38,7 @@ PART = ["tail"]
 
 ### SCENEFLOW ###
 train_seqeunces_monkaa =  ["treeflight_augmented0_x2", "treeflight_augmented1_x2", "lonetree_winter_x2", "a_rain_of_stones_x2", "eating_naked_camera2_x2",  "family_x2", "lonetree_difftex_x2"]  # 1035
-val_sequences_monkaa = ["treeflight_x2", "eating_x2", "top_view_x2"] # 349
+val_sequences_monkaa = ["treeflight_x2", "eating_x2", "top_view_x2"] # 293
 test_sequences_monkaa = ["flower_storm_x2", "funnyworld_x2", "eating_camera2_x2"]     # 375 frames   
 
 ### RealEstate ###

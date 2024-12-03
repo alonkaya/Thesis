@@ -230,7 +230,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 print_and_write("\nModel not learning, stopping training\n", self.plots_path)
                 break
 
-            if SAVE_MODEL:
+            if SAVE_MODEL and epoch % (self.num_epochs//100) == 0: ## This saves the model 100 times in total
                 self.save_model(epoch+1)
             
             # If the last epochs are not decreasing in val loss, raise break_when_good flag
@@ -283,7 +283,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         os.makedirs(self.parent_model_path, exist_ok=True)
         model_path = os.path.join(self.plots_path, "model.pth")
         # Backup previous checkpoint
-        if os.path.exists(model_path) and epoch%30 == 0: 
+        if os.path.exists(model_path) and epoch % (self.num_epochs//90) == 0: 
             backup_path = os.path.join(self.plots_path, "backup_model.pth")
             shutil.copy(model_path, backup_path)
         torch.save({
