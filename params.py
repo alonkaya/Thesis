@@ -10,14 +10,14 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
-KITTI2SCENEFLOW = True
-SCENEFLOW = True
+KITTI2SCENEFLOW = False
+SCENEFLOW = False
 MODEL = CLIP_MODEL_NAME 
-FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [4]
 COMPUTER = 1 # 0=132.72.49.250 1=else
-SEQ_RATIOS = [1]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
+SEQ_RATIOS = [0.008]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
 LR = [1e-4]             
-FRESH_MLP = True
+FRESH_MLP = False
 FRESH_CONV = False
 ADDITIONS = "__fresh_MLP_CONV" if FRESH_CONV and FRESH_MLP else "__fresh_MLP" if FRESH_MLP else ""  ## REMEMBER TO PUT "__" !!!!!
 
