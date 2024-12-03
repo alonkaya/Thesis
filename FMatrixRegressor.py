@@ -244,6 +244,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 self.num_epochs = epoch + 1
                 break
         
+        self.save_model(epoch+1)
         self.test(test_loader)
 
         if COMPUTER == 1: # Only plot if not using 4090 (250)
