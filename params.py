@@ -6,7 +6,7 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 
 USE_REALESTATE = False
 STEREO = True
-PRETEXT_TRAIN = False
+PRETEXT_TRAIN = True
 KITTI2SCENEFLOW = False
 SCENEFLOW = False
 MODEL = CLIP_MODEL_NAME 
