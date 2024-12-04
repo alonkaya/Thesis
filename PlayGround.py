@@ -552,97 +552,137 @@ def check_model_file(file_path):
 
 def plot_errors():
     # # Frozen: 0
-    mean_alg_0 = [0.275666667, 0.386333333, 0.333333333, 0.463333333, 0.576666667, 0.538333333]
-    std_alg_0 = [0.0246, 0.0718, 0.0252, 0.0252, 0.0611, 0.1173]
-    mean_SED_0 = [0.28, 0.493333333, 0.4, 0.613333333, 0.84, 0.77]
-    std_SED_0 = [0.0265, 0.1447, 0.06, 0.0208, 0.1353, 0.283]
-    mean_RE1_0 = [0.079666667, 0.183333333, 0.13, 0.236666667, 0.333333333, 0.356666667]
-    std_RE1_0 = [0.0095, 0.0924, 0.02, 0.0058, 0.0603, 0.2043]
+    mean_alg_0 = [0.275666667, 0.386333333, 0.333333333, 0.463333333, 0.576666667, 0.538333333, 0.7733]
+    std_alg_0 = [0.0246, 0.0718, 0.0252, 0.0252, 0.0611, 0.1173, 0.127410099]
+    mean_SED_0 = [0.28, 0.493333333, 0.4, 0.613333333, 0.84, 0.77, 1.35]
+    std_SED_0 = [0.0265, 0.1447, 0.06, 0.0208, 0.1353, 0.283, 0.274043792]
+    mean_RE1_0 = [0.079666667, 0.183333333, 0.13, 0.236666667, 0.333333333, 0.356666667, 0.656666667]
+    std_RE1_0 = [0.0095, 0.0924, 0.02, 0.0058, 0.0603, 0.2043, 0.213853532]
 
-    mean_alg_4 = [0.26833333, 0.43, 0.34433333, 0.49666667, 0.56333333, 0.54333333]
-    std_alg_4 = [0.02466441, 0.03605551, 0.01250333, 0.09451631, 0.04932883, 0.10692677]
-    mean_SED_4 = [0.26766667, 0.59, 0.41666667, 0.70333333, 0.84, 0.78333833]
-    std_SED_4 = [0.02400694, 0.07549834, 0.04163332, 0.17156146, 0.09848858, 0.19553846]
-    mean_RE1_4 = [0.07466667, 0.21333333, 0.13333333, 0.27333333, 0.36, 0.343333]
-    std_RE1_4 = [0.00493288, 0.04041452, 0.02516611, 0.07234178, 0.05291503, 0.13796135]
+    mean_alg_4 = [0.26833333, 0.43, 0.34433333, 0.49666667, 0.56333333, 0.54333333, 0.633333333]
+    std_alg_4 = [0.02466441, 0.03605551, 0.01250333, 0.09451631, 0.04932883, 0.10692677, 0.077674535]
+    mean_SED_4 = [0.26766667, 0.59, 0.41666667, 0.70333333, 0.84, 0.78333833, 0.995666667]
+    std_SED_4 = [0.02400694, 0.07549834, 0.04163332, 0.17156146, 0.09848858, 0.19553846, 0.184868422]
+    mean_RE1_4 = [0.07466667, 0.21333333, 0.13333333, 0.27333333, 0.36, 0.343333, 0.44]
+    std_RE1_4 = [0.00493288, 0.04041452, 0.02516611, 0.07234178, 0.05291503, 0.13796135, 0.14]
 
-    mean_alg_8 = [0.251333333, 0.43, 0.373333333, 0.52, 0.556666667, 0.553333333]
-    std_alg_8 = [0.02967041, 0.01, 0.04163332, 0.06244998, 0.04725816, 0.11150486]
-    mean_SED_8 = [0.251666667, 0.576, 0.481333333, 0.733333333, 0.823333333, 0.8]
-    std_SED_8 = [0.04964205, 0.002915, 0.07710599, 0.09073772, 0.106044, 0.24576411]
-    mean_RE1_8 = [0.071333333, 0.213333333, 0.17, 0.293333333, 0.366666667, 0.35]
-    std_RE1_8 = [0.01761628, 0.02516611, 0.04358899, 0.05033223, 0.04163332, 0.17578396]
+    mean_alg_8 = [0.251333333, 0.43, 0.373333333, 0.52, 0.556666667, 0.553333333, 0.65]
+    std_alg_8 = [0.02967041, 0.01, 0.04163332, 0.06244998, 0.04725816, 0.11150486, 0.115325626]
+    mean_SED_8 = [0.251666667, 0.576, 0.481333333, 0.733333333, 0.823333333, 0.8, 1.016666667]
+    std_SED_8 = [0.04964205, 0.002915, 0.07710599, 0.09073772, 0.106044, 0.24576411, 0.270985854]
+    mean_RE1_8 = [0.071333333, 0.213333333, 0.17, 0.293333333, 0.366666667, 0.35, 0.466666667]
+    std_RE1_8 = [0.01761628, 0.02516611, 0.04358899, 0.05033223, 0.04163332, 0.17578396, 0.191398363]
 
     # PRETAINED VIT #
-    pretext_mean_alg_0 = [0.263333333, 0.390333, 0.473, 0.513333333, 0.528333333, 0.556333333]
-    pretext_std_alg_0 = [0.0321, 0.087, 0.0878, 0.0586, 0.0679, 0.1245]
-    pretext_mean_SED_0 = [0.258, 0.506, 0.665333333, 0.724666667, 0.752333333, 0.823333333]
-    pretext_std_SED_0 = [0.0365, 0.0898, 0.205, 0.0609, 0.1234, 0.2603]
-    pretext_mean_RE1_0 = [0.321, 0.179, 0.264333333, 0.313666667, 0.315666667, 0.375666667]
-    pretext_std_RE1_0 = [0.4495, 0.0347, 0.0955, 0.049, 0.0915, 0.2047]
+    pretext_mean_alg_0 = [0.263333333, 0.390333, 0.473, 0.513333333, 0.528333333, 0.556333333, 0.726666667]
+    pretext_std_alg_0 = [0.0321, 0.087, 0.0878, 0.0586, 0.0679, 0.1245, 0.092915732]
+    pretext_mean_SED_0 = [0.258, 0.506, 0.665333333, 0.724666667, 0.752333333, 0.823333333, 1.266666667]
+    pretext_std_SED_0 = [0.0365, 0.0898, 0.205, 0.0609, 0.1234, 0.2603, 0.29569128]
+    pretext_mean_RE1_0 = [0.321, 0.179, 0.264333333, 0.313666667, 0.315666667, 0.375666667, 0.616666667]
+    pretext_std_RE1_0 = [0.4495, 0.0347, 0.0955, 0.049, 0.0915, 0.2047, 0.197568554]
 
-    pretext_mean_alg_4 = [0.27433333, 0.41, 0.51333333, 0.52333333, 0.60733333, 0.54666667]
-    pretext_std_alg_4 = [0.01628906, 0.04, 0.04454586, 0.05859865, 0.03523256, 0.16010813]
-    pretext_mean_SED_4 = [0.28366667, 0.54333333, 0.74533333, 0.75333333, 0.885, 0.82666667]
-    pretext_std_SED_4 = [0.02345918, 0.11372481, 0.10929471, 0.14294521, 0.10331989, 0.35076108]
-    pretext_mean_RE1_4 = [0.08433333, 0.21, 0.297, 0.31866667, 0.39366667, 0.389]
-    pretext_std_RE1_4 = [0.00971253, 0.08717798, 0.03819686, 0.06344551, 0.04324735, 0.2606396]
+    pretext_mean_alg_4 = [0.27433333, 0.41, 0.51333333, 0.52333333, 0.60733333, 0.54666667, 0.716666667]
+    pretext_std_alg_4 = [0.01628906, 0.04, 0.04454586, 0.05859865, 0.03523256, 0.16010813, 0.115902258]
+    pretext_mean_SED_4 = [0.28366667, 0.54333333, 0.74533333, 0.75333333, 0.885, 0.82666667, 1.203333333]
+    pretext_std_SED_4 = [0.02345918, 0.11372481, 0.10929471, 0.14294521, 0.10331989, 0.35076108, 0.262741952]
+    pretext_mean_RE1_4 = [0.08433333, 0.21, 0.297, 0.31866667, 0.39366667, 0.389, 0.57]
+    pretext_std_RE1_4 = [0.00971253, 0.08717798, 0.03819686, 0.06344551, 0.04324735, 0.2606396, 0.19078784]
 
-    pretext_mean_alg_8 = [0.265666667, 0.423333333, 0.486666667, 0.566666667, 0.593333333, 0.66]
-    pretext_std_alg_8 = [0.02223361, 0.03511885, 0.03511885, 0.05507571, 0.005505, 0.08185353]
-    pretext_mean_SED_8 = [0.275, 0.557333333, 0.681666667, 0.845333333, 0.893333333, 1.07]
-    pretext_std_SED_8 = [0.031, 0.08967348, 0.10774198, 0.11360164, 0.05131601, 0.23]
-    pretext_mean_RE1_8 = [0.079666667, 0.2212, 0.266666667, 0.365333333, 0.498333333, 0.523]
-    pretext_std_RE1_8 = [0.01250333, 0.06982922, 0.05773503, 0.0080829, 0.04843897, 0.21488804]
+    pretext_mean_alg_8 = [0.265666667, 0.423333333, 0.486666667, 0.566666667, 0.593333333, 0.66, 0.683333333]
+    pretext_std_alg_8 = [0.02223361, 0.03511885, 0.03511885, 0.05507571, 0.005505, 0.08185353, 0.105039675]
+    pretext_mean_SED_8 = [0.275, 0.557333333, 0.681666667, 0.845333333, 0.893333333, 1.07, 1.12]
+    pretext_std_SED_8 = [0.031, 0.08967348, 0.10774198, 0.11360164, 0.05131601, 0.23, 0.28618176]
+    pretext_mean_RE1_8 = [0.079666667, 0.2212, 0.266666667, 0.365333333, 0.498333333, 0.523, 0.506666667]
+    pretext_std_RE1_8 = [0.01250333, 0.06982922, 0.05773503, 0.0080829, 0.04843897, 0.21488804, 0.160104133]
 
     # RESNET #
-    resnet_mean_alg_0 = [0.267, 0.410333333, 0.491333333, 0.54, 0.576666667, 0.570333333]
-    resnet_std_alg_0 = [0.131, 0.0542, 0.0776, 0.0529, 0.1159, 0.1124]
-    resnet_mean_SED_0 = [0.523333333, 0.518666667, 0.6432, 0.72, 0.783333333, 0.763666667]
-    resnet_std_SED_0 = [0.2351, 0.0924, 0.1414, 0.0721, 0.185, 0.2048]
-    resnet_mean_RE1_0 = [0.114033333, 0.222333333, 0.27, 0.33, 0.350666667, 0.371333333]
-    resnet_std_RE1_0 = [0.1106, 0.0686, 0.0755, 0.0557, 0.0853, 0.1634]
+    resnet_mean_alg_0 = [0.267, 0.410333333, 0.491333333, 0.54, 0.576666667, 0.570333333, 0.522666667]
+    resnet_std_alg_0 = [0.131, 0.0542, 0.0776, 0.0529, 0.1159, 0.1124, 0.070230573]
+    resnet_mean_SED_0 = [0.523333333, 0.518666667, 0.6432, 0.72, 0.783333333, 0.763666667, 0.6286]
+    resnet_std_SED_0 = [0.2351, 0.0924, 0.1414, 0.0721, 0.185, 0.2048, 0.052332399]
+    resnet_mean_RE1_0 = [0.114033333, 0.222333333, 0.27, 0.33, 0.350666667, 0.371333333, 0.339666667]
+    resnet_std_RE1_0 = [0.1106, 0.0686, 0.0755, 0.0557, 0.0853, 0.1634, 0.142338798]
 
 
     x_indices = range(len(mean_SED_0))  # For Frozen 0 (has an extra point)
-    xticks_labels = ['2166', '1082', '540', '405', '269', '161']  # 5 points for Frozen 0
+    xticks_labels = ['2166', '1082', '540', '405', '269', '161', '88']  # 5 points for Frozen 0
     x = np.arange(len(xticks_labels))  # x-coordinates for the groups
     width = 0.25  # Width of each bar
 
-    # plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED Frozen 0', capsize=5)
-    # plt.errorbar(x_indices, mean_SED_4, yerr=std_SED_4, marker='o', color='green', linestyle='-', label='SED Frozen 4', capsize=5)
-    # plt.errorbar(x_indices, mean_SED_8, yerr=std_SED_8, marker='o', color='orange', linestyle='-', label='SED Frozen 8', capsize=5)
-    # plt.title('SED comparison of original model with different frozen layers')
-    # plt.bar(x, mean_SED_0, width, yerr=std_SED_0, capsize=5, label='SED Frozen 0', alpha=0.8, color='blue')
-    # plt.bar(x - width, mean_SED_4, width, yerr=std_SED_4, capsize=5, label='SED Frozen 4', alpha=0.8, color='green')
-    # plt.bar(x + width, mean_SED_8, width, yerr=std_SED_8, capsize=5, label='SED Frozen 8', alpha=0.8, color='orange')
-    # plt.title('Barplot SED comparison of original model with different frozen layers')
-
-    # plt.errorbar(x_indices, pretext_mean_SED_0, yerr=pretext_std_SED_0, marker='o', color='blue', linestyle='-', label='SED Frozen 0', capsize=5)
-    # plt.errorbar(x_indices, pretext_mean_SED_4, yerr=pretext_std_SED_4, marker='o', color='green', linestyle='-', label='SED Frozen 4', capsize=5)
-    # plt.errorbar(x_indices, pretext_mean_SED_8, yerr=pretext_std_SED_8, marker='o', color='orange', linestyle='-', label='SED Frozen 8', capsize=5)
-    # plt.title('SED comparison of pretext model with different frozen layers')
-    plt.bar(x, pretext_mean_SED_0, width, yerr=pretext_std_SED_0, capsize=5, label='SED Frozen 0', alpha=0.8, color='blue')
-    plt.bar(x - width, pretext_mean_SED_4, width, yerr=pretext_std_SED_4, capsize=5, label='SED Frozen 4', alpha=0.8, color='green')
-    plt.bar(x + width, pretext_mean_SED_8, width, yerr=pretext_std_SED_8, capsize=5, label='SED Frozen 8', alpha=0.8, color='orange')
-    plt.title('Barplot SED comparison of pretext model with different frozen layers')
-
-    # plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED Original Frozen 0', capsize=5)
-    # plt.errorbar(x_indices, pretext_mean_SED_0, yerr=pretext_std_SED_0, marker='o', color='green', linestyle='-', label='SED Pretext Frozen 0', capsize=5)
-    # plt.errorbar(x_indices, resnet_mean_SED_0, yerr=resnet_std_SED_0, marker='o', color='orange', linestyle='-', label='SED ResNet', capsize=5)
-    # plt.title('SED comparison of original, pretext and resnet models')
-    # plt.bar(x, mean_SED_0, width, yerr=std_SED_0, capsize=5, label='Original model', alpha=0.8, color='blue')
-    # plt.bar(x - width, pretext_mean_SED_0, width, yerr=pretext_std_SED_0, capsize=5, label='Pretext model', alpha=0.8, color='green')
-    # plt.bar(x + width, resnet_mean_SED_0, width, yerr=resnet_std_SED_0, capsize=5, label='ResNet', alpha=0.8, color='orange')
-    # plt.title('Barplot SED comparison of original, pretext and resnet models')
-              
+    fig1=plt.figure(1)  
+    plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED Frozen 0', capsize=5)
+    plt.errorbar(x_indices, mean_SED_4, yerr=std_SED_4, marker='o', color='green', linestyle='-', label='SED Frozen 4', capsize=5)
+    plt.errorbar(x_indices, mean_SED_8, yerr=std_SED_8, marker='o', color='orange', linestyle='-', label='SED Frozen 8', capsize=5)
+    plt.title('SED comparison of original model with different frozen layers')
     plt.xlabel('Data Points')
     plt.ylabel('Mean Value ± STD')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
 
-    plt.savefig("5")
+    fig2=plt.figure(2)
+    plt.bar(x, mean_SED_0, width, yerr=std_SED_0, capsize=5, label='SED Frozen 0', alpha=0.8, color='blue')
+    plt.bar(x - width, mean_SED_4, width, yerr=std_SED_4, capsize=5, label='SED Frozen 4', alpha=0.8, color='green')
+    plt.bar(x + width, mean_SED_8, width, yerr=std_SED_8, capsize=5, label='SED Frozen 8', alpha=0.8, color='orange')
+    plt.title('Barplot SED comparison of original model with different frozen layers')
+    plt.xlabel('Data Points')
+    plt.ylabel('Mean Value ± STD')
+    plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
+    plt.legend()
+    plt.grid(True)
+
+    fig3=plt.figure(3)
+    plt.errorbar(x_indices, pretext_mean_SED_0, yerr=pretext_std_SED_0, marker='o', color='blue', linestyle='-', label='SED Frozen 0', capsize=5)
+    plt.errorbar(x_indices, pretext_mean_SED_4, yerr=pretext_std_SED_4, marker='o', color='green', linestyle='-', label='SED Frozen 4', capsize=5)
+    plt.errorbar(x_indices, pretext_mean_SED_8, yerr=pretext_std_SED_8, marker='o', color='orange', linestyle='-', label='SED Frozen 8', capsize=5)
+    plt.title('SED comparison of pretext model with different frozen layers')
+    plt.xlabel('Data Points')
+    plt.ylabel('Mean Value ± STD')
+    plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
+    plt.legend()
+    plt.grid(True)
+
+    fig4=plt.figure(4)
+    plt.bar(x, pretext_mean_SED_0, width, yerr=pretext_std_SED_0, capsize=5, label='SED Frozen 0', alpha=0.8, color='blue')
+    plt.bar(x - width, pretext_mean_SED_4, width, yerr=pretext_std_SED_4, capsize=5, label='SED Frozen 4', alpha=0.8, color='green')
+    plt.bar(x + width, pretext_mean_SED_8, width, yerr=pretext_std_SED_8, capsize=5, label='SED Frozen 8', alpha=0.8, color='orange')
+    plt.title('Barplot SED comparison of pretext model with different frozen layers')
+    plt.xlabel('Data Points')
+    plt.ylabel('Mean Value ± STD')
+    plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
+    plt.legend()
+    plt.grid(True)
+
+    fig5=plt.figure(5)
+    plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED Original Frozen 0', capsize=5)
+    plt.errorbar(x_indices, pretext_mean_SED_0, yerr=pretext_std_SED_0, marker='o', color='green', linestyle='-', label='SED Pretext Frozen 0', capsize=5)
+    plt.errorbar(x_indices, resnet_mean_SED_0, yerr=resnet_std_SED_0, marker='o', color='orange', linestyle='-', label='SED ResNet', capsize=5)
+    plt.title('SED comparison of original, pretext and resnet models')
+    plt.xlabel('Data Points')
+    plt.ylabel('Mean Value ± STD')
+    plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
+    plt.legend()
+    plt.grid(True)
+
+    fig6=plt.figure(6)
+    plt.bar(x, mean_SED_0, width, yerr=std_SED_0, capsize=5, label='Original model', alpha=0.8, color='blue')
+    plt.bar(x - width, pretext_mean_SED_0, width, yerr=pretext_std_SED_0, capsize=5, label='Pretext model', alpha=0.8, color='green')
+    plt.bar(x + width, resnet_mean_SED_0, width, yerr=resnet_std_SED_0, capsize=5, label='ResNet', alpha=0.8, color='orange')
+    plt.title('Barplot SED comparison of original, pretext and resnet models')
+    plt.xlabel('Data Points')
+    plt.ylabel('Mean Value ± STD')
+    plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
+    plt.legend()
+    plt.grid(True)
+
+    fig1.savefig('SED_orig_frozen.png')
+    fig2.savefig('SED_orig_frozen_bar.png')
+    fig3.savefig('SED_pretext_frozen.png')
+    fig4.savefig('SED_pretext_bar_frozen.png')
+    fig5.savefig('SED_models.png')
+    fig6.savefig('SED_model_bar.png')
+    # plt.show()
+
 
 def sed_distance_gt_FM():
     train_loader = get_dataloader_FM(batch_size=1)
@@ -746,4 +786,4 @@ def test_trained():
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    test_trained()
+    plot_errors()

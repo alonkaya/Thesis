@@ -208,13 +208,13 @@ class FMatrixRegressor(nn.Module):
             if epoch == 0: 
                 print_and_write(f"""algebraic_truth: {epoch_stats["algebraic_truth"]}\t\t val_algebraic_truth: {epoch_stats["val_algebraic_truth"]}
 RE1_truth: {epoch_stats["RE1_truth"]}\t\t val_RE1_truth: {epoch_stats["val_RE1_truth"]}
-SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n\n""", self.plots_path)
+SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_truth"]}\n""", self.plots_path)
 
             print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}
              \tTraining MAE: {self.all_train_mae[-1]}\t\t Val MAE: {self.all_val_mae[-1]}
              \tAlgebraic dist: {self.all_algebraic_pred[-1]}\t\t Val Algebraic dist: {self.all_val_algebraic_pred[-1]}
              \tRE1 dist: {self.all_RE1_pred[-1]}\t\t Val RE1 dist: {self.all_val_RE1_pred[-1]}
-             \tSED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n\n""", self.plots_path)
+             \tSED dist: {self.all_SED_pred[-1]}\t\t Val SED dist: {self.all_val_SED_pred[-1]}\n""", self.plots_path)
 
                 
             # Found Nan 
@@ -330,7 +330,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             try:
                 checkpoint = torch.load(model_path, map_location='cpu')
             except Exception as e:
-                print_and_write(f'\n#########\nusing backup:\n{e}\n\n', self.plots_path)
+                print_and_write(f'\n#########\nusing backup:\n{e}\n', self.plots_path)
                 checkpoint = torch.load(backup_path, map_location='cpu')
                 sys.stdout.flush()
         else:
@@ -468,5 +468,5 @@ Test RE1 dist: {re1/10}
 
 Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}
 Test SED dist truth: {epoch_stats["test_SED_truth"]}
-Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\n\n"""
+Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\n"""
         print_and_write(output, self.plots_path) if write else print(output)

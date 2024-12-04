@@ -185,7 +185,7 @@ def print_and_write(output, plots_path):
     os.makedirs(plots_path, exist_ok=True)
     output_path = os.path.join(plots_path, "output.log")
     with open(output_path, "a") as f:
-        f.write(output)
+        f.write(f'{output}\n')
         print(output)
         sys.stdout.flush()
 
