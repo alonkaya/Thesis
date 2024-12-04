@@ -49,7 +49,7 @@ if __name__ == "__main__":
                 if SCENEFLOW:
                         num_epochs = 16000
                 else:
-                        num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 25000 if train_size==0.015 else 40000 if train_size==0.008 else 0
+                        num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 25000 if train_size==0.015 else 40000 if train_size==0.008 else 70000 if train_size==0.0045 else 0
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
@@ -84,7 +84,7 @@ if __name__ == "__main__":
                         print(f"\n###\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training\n###\n")
                         sys.stdout.flush()
 
-                elif model.start_epoch < model.num_epochs+300:
+                elif model.start_epoch < model.num_epochs:
                         parameters = f"""###########################################################################################################################################################\n
 {ADDITIONS} learning rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
 batch_size: {batch_size}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo}, val_sequences: {val_sequences_stereo}, RL_TEST_NAMES: {RL_TEST_NAMES}, dataset: {dataset},
