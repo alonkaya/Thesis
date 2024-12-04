@@ -323,7 +323,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             "all_val_SED_pred" : self.all_val_SED_pred
         }, model_path) 
 
-
     def load_model(self, path=None, continue_training=True):
         model_path = os.path.join(path, "model.pth")
         backup_path = os.path.join(path, "backup_model.pth")
@@ -437,7 +436,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         except Exception as e:
             print_and_write(f"Error plotting: \n{e}", self.plots_path)
 
-    def test(self, test_loader):
+    def test(self, test_loader, write=True):
         with torch.no_grad():
             loss, mae, alg, re1, sed = 0, 0, 0, 0, 0
             for epoch in range(10):
@@ -458,8 +457,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 re1 += epoch_stats["test_RE1_pred"]
                 sed += epoch_stats["test_SED_pred"]
                 
-
-        print_and_write(f"""## TEST RESULTS: ##
+        output = f"""## TEST RESULTS: ##
 Test Loss: {loss/10}\t\t Test MAE: {mae/10}
 Test Algebraic dist: {alg/10}
 Test SED dist: {sed/10}
@@ -467,4 +465,5 @@ Test RE1 dist: {re1/10}
 
 Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}
 Test SED dist truth: {epoch_stats["test_SED_truth"]}
-Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\n\n""", self.plots_path)
+Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\n\n"""
+        print_and_write(output, self.plots_path) if write else print(output)
