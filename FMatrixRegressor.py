@@ -456,6 +456,9 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 alg += epoch_stats["test_algebraic_pred"]
                 re1 += epoch_stats["test_RE1_pred"]
                 sed += epoch_stats["test_SED_pred"]
+
+                epoch_output = f'Epoch {epoch+1}/10: Test SED dist: {epoch_stats["test_SED_pred"]}'
+                print_and_write(epoch_output, self.plots_path) if write else print(epoch_output)
                 
         output = f"""## TEST RESULTS: ##
 Test Loss: {loss/10}\t\t Test MAE: {mae/10}
