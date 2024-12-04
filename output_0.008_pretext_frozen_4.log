@@ -1,0 +1,1718 @@
+/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+/home/alonkay/conda/alon/lib/python3.9/site-packages/huggingface_hub/file_download.py:1150: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/modeling_utils.py:479: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return torch.load(checkpoint_file, map_location=map_location)
+/home/alonkay/Thesis/FMatrixRegressor.py:332: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(model_path, map_location='cpu')
+
+#########
+using backup:
+PytorchStreamReader failed reading zip archive: failed finding central directory
+
+
+/home/alonkay/Thesis/FMatrixRegressor.py:335: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(backup_path, map_location='cpu')
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: tail, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 4, trained vit: plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.008, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+
+train size: 88, val size: 34, test size: 1064
+
+
+##### CONTINUE TRAINING #####
+
+
+Epoch 28980/40000: Training Loss: 0.2065129063346169		 Val Loss: 1.1214085578918458
+             	Training MAE: 0.0657317191362381		 Val MAE: 0.06906358152627945
+             	Algebraic dist: 0.43188784339211206		 Val Algebraic dist: 0.9222476959228516
+             	RE1 dist: 0.19279423626986417		 Val RE1 dist: 1.0356674194335938
+             	SED dist: 0.3775315284729004		 Val SED dist: 2.205617332458496
+
+
+Epoch 28981/40000: Training Loss: 0.18252821402116257		 Val Loss: 1.1964445114135742
+             	Training MAE: 0.06667958199977875		 Val MAE: 0.06412134319543839
+             	Algebraic dist: 0.4056381745771928		 Val Algebraic dist: 0.9671777725219727
+             	RE1 dist: 0.18082940578460693		 Val RE1 dist: 1.121676254272461
+             	SED dist: 0.3290561762723056		 Val SED dist: 2.3575769424438477
+
+
+Epoch 28982/40000: Training Loss: 0.22019728747281161		 Val Loss: 1.445174217224121
+             	Training MAE: 0.06449677795171738		 Val MAE: 0.06662613153457642
+             	Algebraic dist: 0.44317648627541284		 Val Algebraic dist: 1.0562106132507325
+             	RE1 dist: 0.2088184573433616		 Val RE1 dist: 1.2271880149841308
+             	SED dist: 0.4053979353471236		 Val SED dist: 2.8539684295654295
+
+
+Epoch 28983/40000: Training Loss: 0.2533064538782293		 Val Loss: 1.563568687438965
+             	Training MAE: 0.067043237388134		 Val MAE: 0.06628188490867615
+             	Algebraic dist: 0.48454354026100854		 Val Algebraic dist: 1.0311006546020507
+             	RE1 dist: 0.23551013252951883		 Val RE1 dist: 1.376817512512207
+             	SED dist: 0.4704624956304377		 Val SED dist: 3.0912731170654295
+
+
+Epoch 28984/40000: Training Loss: 0.21773936531760477		 Val Loss: 1.5619543075561524
+             	Training MAE: 0.06486690044403076		 Val MAE: 0.06637373566627502
+             	Algebraic dist: 0.43356149846857245		 Val Algebraic dist: 1.0539036750793458
+             	RE1 dist: 0.21948185834017667		 Val RE1 dist: 1.3304477691650392
+             	SED dist: 0.4004437273198908		 Val SED dist: 3.0876653671264647
+
+
+Epoch 28985/40000: Training Loss: 0.20662923292680221		 Val Loss: 1.1616200447082519
+             	Training MAE: 0.0646992176771164		 Val MAE: 0.06848562508821487
+             	Algebraic dist: 0.4215123870156028		 Val Algebraic dist: 0.9059425354003906
+             	RE1 dist: 0.20180268721147018		 Val RE1 dist: 0.9455484390258789
+             	SED dist: 0.3780443451621316		 Val SED dist: 2.286289596557617
+
+
+Epoch 28986/40000: Training Loss: 0.19557476043701172		 Val Loss: 1.0263856887817382
+             	Training MAE: 0.06813853234052658		 Val MAE: 0.0674929991364479
+             	Algebraic dist: 0.40458800575949927		 Val Algebraic dist: 0.8548800468444824
+             	RE1 dist: 0.18164258653467352		 Val RE1 dist: 0.8435422897338867
+             	SED dist: 0.35428857803344727		 Val SED dist: 2.016157531738281
+
+
+Epoch 28987/40000: Training Loss: 0.2908517230640758		 Val Loss: 1.0488319396972656
+             	Training MAE: 0.06530444324016571		 Val MAE: 0.07066785544157028
+             	Algebraic dist: 0.5111944025213068		 Val Algebraic dist: 1.0377397537231445
+             	RE1 dist: 0.29043262655084784		 Val RE1 dist: 1.0664182662963868
+             	SED dist: 0.5463011915033514		 Val SED dist: 2.0592533111572267
+
+
+Epoch 28988/40000: Training Loss: 0.45938860286365857		 Val Loss: 1.4961483001708984
+             	Training MAE: 0.06642353534698486		 Val MAE: 0.06875105202198029
+             	Algebraic dist: 0.6861193396828391		 Val Algebraic dist: 1.0557524681091308
+             	RE1 dist: 0.4429707093672319		 Val RE1 dist: 1.4494171142578125
+             	SED dist: 0.8829043128273704		 Val SED dist: 2.9551815032958983
+
+
+Epoch 28989/40000: Training Loss: 0.4072654897516424		 Val Loss: 1.052309799194336
+             	Training MAE: 0.06714633852243423		 Val MAE: 0.0684693306684494
+             	Algebraic dist: 0.6702765117992054		 Val Algebraic dist: 0.8936302185058593
+             	RE1 dist: 0.42970496957952325		 Val RE1 dist: 0.847992992401123
+             	SED dist: 0.7781444896351207		 Val SED dist: 2.067292022705078
+
+
+Epoch 28990/40000: Training Loss: 0.25270002538507635		 Val Loss: 1.0830696105957032
+             	Training MAE: 0.0677538514137268		 Val MAE: 0.0651756152510643
+             	Algebraic dist: 0.47584355961192737		 Val Algebraic dist: 0.8995541572570801
+             	RE1 dist: 0.24355771324851297		 Val RE1 dist: 0.8656294822692872
+             	SED dist: 0.46911902861161664		 Val SED dist: 2.130520057678223
+
+
+Epoch 28991/40000: Training Loss: 0.21147103743119675		 Val Loss: 1.0807348251342774
+             	Training MAE: 0.06509403884410858		 Val MAE: 0.06731807440519333
+             	Algebraic dist: 0.42932306636463513		 Val Algebraic dist: 0.8914154052734375
+             	RE1 dist: 0.196324500170621		 Val RE1 dist: 0.9418491363525391
+             	SED dist: 0.387713605707342		 Val SED dist: 2.12471923828125
+
+
+Epoch 28992/40000: Training Loss: 0.270483060316606		 Val Loss: 1.0419711112976073
+             	Training MAE: 0.06835055351257324		 Val MAE: 0.06930341571569443
+             	Algebraic dist: 0.49684619903564453		 Val Algebraic dist: 0.8811844825744629
+             	RE1 dist: 0.2590328346599232		 Val RE1 dist: 0.8440231323242188
+             	SED dist: 0.5042519135908647		 Val SED dist: 2.0464557647705077
+
+
+Epoch 28993/40000: Training Loss: 0.21586082198403098		 Val Loss: 0.9902205467224121
+             	Training MAE: 0.06530832499265671		 Val MAE: 0.0666755959391594
+             	Algebraic dist: 0.43177561326460406		 Val Algebraic dist: 0.8678352355957031
+             	RE1 dist: 0.20579255710948596		 Val RE1 dist: 0.9353721618652344
+             	SED dist: 0.39648775620894		 Val SED dist: 1.9443325042724608
+
+
+Epoch 28994/40000: Training Loss: 0.2015605623071844		 Val Loss: 1.000500202178955
+             	Training MAE: 0.06500688195228577		 Val MAE: 0.06532939523458481
+             	Algebraic dist: 0.41714299808848987		 Val Algebraic dist: 0.8502389907836914
+             	RE1 dist: 0.1891875917261297		 Val RE1 dist: 0.7541382312774658
+             	SED dist: 0.36803761395541107		 Val SED dist: 1.965092658996582
+
+
+Epoch 28995/40000: Training Loss: 0.24075193838639694		 Val Loss: 1.1264684677124024
+             	Training MAE: 0.06702534854412079		 Val MAE: 0.07304782420396805
+             	Algebraic dist: 0.46705449711192737		 Val Algebraic dist: 0.8935420036315918
+             	RE1 dist: 0.21959686279296875		 Val RE1 dist: 0.9332782745361328
+             	SED dist: 0.44530595432628284		 Val SED dist: 2.2133169174194336
+
+
+Epoch 28996/40000: Training Loss: 0.27638322656804865		 Val Loss: 1.4404037475585938
+             	Training MAE: 0.06700151413679123		 Val MAE: 0.06952248513698578
+             	Algebraic dist: 0.4960599812594327		 Val Algebraic dist: 1.0778285026550294
+             	RE1 dist: 0.2705777341669256		 Val RE1 dist: 1.3085313796997071
+             	SED dist: 0.5165902484547008		 Val SED dist: 2.8433130264282225
+
+
+Epoch 28997/40000: Training Loss: 0.46082102168690076		 Val Loss: 0.8281993865966797
+             	Training MAE: 0.06868667155504227		 Val MAE: 0.06905259937047958
+             	Algebraic dist: 0.7059330506758257		 Val Algebraic dist: 0.8067407608032227
+             	RE1 dist: 0.4739414128390225		 Val RE1 dist: 0.736097764968872
+             	SED dist: 0.8843182650479403		 Val SED dist: 1.6185373306274413
+
+
+Epoch 28998/40000: Training Loss: 0.6430536616932262		 Val Loss: 1.4274295806884765
+             	Training MAE: 0.06680517643690109		 Val MAE: 0.07027719914913177
+             	Algebraic dist: 0.8389280492609198		 Val Algebraic dist: 1.1813096046447753
+             	RE1 dist: 0.6339387460188433		 Val RE1 dist: 1.6038101196289063
+             	SED dist: 1.250275265086781		 Val SED dist: 2.8168209075927733
+
+
+Epoch 28999/40000: Training Loss: 1.1655506654219194		 Val Loss: 1.40554780960083
+             	Training MAE: 0.06605473905801773		 Val MAE: 0.06736704707145691
+             	Algebraic dist: 1.2042085474187678		 Val Algebraic dist: 1.2146565437316894
+             	RE1 dist: 1.2703156904740767		 Val RE1 dist: 1.6738935470581056
+             	SED dist: 2.2950777574019		 Val SED dist: 2.774523162841797
+
+
+Epoch 29000/40000: Training Loss: 0.6285689527338202		 Val Loss: 1.7764268875122071
+             	Training MAE: 0.06565739214420319		 Val MAE: 0.06646925210952759
+             	Algebraic dist: 0.8523503216830167		 Val Algebraic dist: 1.2103542327880858
+             	RE1 dist: 0.6839696710759943		 Val RE1 dist: 1.6742141723632813
+             	SED dist: 1.2217773957685991		 Val SED dist: 3.5169742584228514
+
+
+Epoch 29001/40000: Training Loss: 0.3920129862698642		 Val Loss: 1.0017337799072266
+             	Training MAE: 0.06549343466758728		 Val MAE: 0.07289815694093704
+             	Algebraic dist: 0.6508567116477273		 Val Algebraic dist: 0.9739965438842774
+             	RE1 dist: 0.4310137141834606		 Val RE1 dist: 1.0135324478149415
+             	SED dist: 0.7487687197598544		 Val SED dist: 1.9639982223510741
+
+
+Epoch 29002/40000: Training Loss: 0.2591392126950351		 Val Loss: 1.5595037460327148
+             	Training MAE: 0.06712781637907028		 Val MAE: 0.06562625616788864
+             	Algebraic dist: 0.4974891489202326		 Val Algebraic dist: 1.0555874824523925
+             	RE1 dist: 0.2708622542294589		 Val RE1 dist: 1.2730697631835937
+             	SED dist: 0.48227093436501245		 Val SED dist: 3.0832197189331056
+
+
+Epoch 29003/40000: Training Loss: 0.3517105362632058		 Val Loss: 1.3199383735656738
+             	Training MAE: 0.06504266709089279		 Val MAE: 0.07009106874465942
+             	Algebraic dist: 0.6107851375233043		 Val Algebraic dist: 0.9944211959838867
+             	RE1 dist: 0.3775209513577548		 Val RE1 dist: 1.2004176139831544
+             	SED dist: 0.6679059808904474		 Val SED dist: 2.6019775390625
+
+
+Epoch 29004/40000: Training Loss: 0.27655872431668366		 Val Loss: 1.0907806396484374
+             	Training MAE: 0.06619769334793091		 Val MAE: 0.06720384955406189
+             	Algebraic dist: 0.5158017331903632		 Val Algebraic dist: 0.8804818153381347
+             	RE1 dist: 0.2911389957774769		 Val RE1 dist: 1.012794303894043
+             	SED dist: 0.5175092870538885		 Val SED dist: 2.1453584671020507
+
+
+Epoch 29005/40000: Training Loss: 0.32522517984563654		 Val Loss: 1.3964998245239257
+             	Training MAE: 0.06417766958475113		 Val MAE: 0.06305301189422607
+             	Algebraic dist: 0.5656989704478871		 Val Algebraic dist: 0.9680112838745117
+             	RE1 dist: 0.3329743038524281		 Val RE1 dist: 1.1649596214294433
+             	SED dist: 0.6156095157970082		 Val SED dist: 2.7580549240112306
+
+
+Epoch 29006/40000: Training Loss: 0.25846717574379663		 Val Loss: 1.4303102493286133
+             	Training MAE: 0.06789577752351761		 Val MAE: 0.06824968010187149
+             	Algebraic dist: 0.4789251847700639		 Val Algebraic dist: 1.1409990310668945
+             	RE1 dist: 0.2605149962685325		 Val RE1 dist: 1.2634323120117188
+             	SED dist: 0.4801799167286266		 Val SED dist: 2.824330711364746
+
+
+Epoch 29007/40000: Training Loss: 0.32330675558610394		 Val Loss: 1.607223129272461
+             	Training MAE: 0.06498094648122787		 Val MAE: 0.06338682025671005
+             	Algebraic dist: 0.5774772383949973		 Val Algebraic dist: 1.11138916015625
+             	RE1 dist: 0.3304398926821622		 Val RE1 dist: 1.4345582962036132
+             	SED dist: 0.6112300699407404		 Val SED dist: 3.179473876953125
+
+
+Epoch 29008/40000: Training Loss: 0.8002895008433949		 Val Loss: 2.2692609786987306
+             	Training MAE: 0.06544579565525055		 Val MAE: 0.0637839138507843
+             	Algebraic dist: 0.9549700130115856		 Val Algebraic dist: 1.315208911895752
+             	RE1 dist: 0.869751670143821		 Val RE1 dist: 1.7065065383911133
+             	SED dist: 1.5648479461669922		 Val SED dist: 4.503557968139648
+
+
+Epoch 29009/40000: Training Loss: 0.3945780233903365		 Val Loss: 1.4355207443237306
+             	Training MAE: 0.06984023004770279		 Val MAE: 0.07085844874382019
+             	Algebraic dist: 0.6454444365067915		 Val Algebraic dist: 1.2965858459472657
+             	RE1 dist: 0.4111392281272195		 Val RE1 dist: 1.4567359924316405
+             	SED dist: 0.7517929944125089		 Val SED dist: 2.8335245132446287
+
+
+Epoch 29010/40000: Training Loss: 0.28922057151794434		 Val Loss: 1.552505111694336
+             	Training MAE: 0.0657125785946846		 Val MAE: 0.06403018534183502
+             	Algebraic dist: 0.5502461086619984		 Val Algebraic dist: 1.0636082649230958
+             	RE1 dist: 0.30527218905362213		 Val RE1 dist: 1.277773380279541
+             	SED dist: 0.5427763678810813		 Val SED dist: 3.069916915893555
+
+
+Epoch 29011/40000: Training Loss: 0.22879236394708807		 Val Loss: 1.2812252044677734
+             	Training MAE: 0.06437376886606216		 Val MAE: 0.06588373333215714
+             	Algebraic dist: 0.4713583859530362		 Val Algebraic dist: 1.035103702545166
+             	RE1 dist: 0.24560484019192783		 Val RE1 dist: 1.3571260452270508
+             	SED dist: 0.42271007191051135		 Val SED dist: 2.5267541885375975
+
+
+Epoch 29012/40000: Training Loss: 0.21183191646229138		 Val Loss: 1.5366914749145508
+             	Training MAE: 0.06515087932348251		 Val MAE: 0.06861262023448944
+             	Algebraic dist: 0.4385038289156827		 Val Algebraic dist: 1.0814485549926758
+             	RE1 dist: 0.21681792085820978		 Val RE1 dist: 1.321010208129883
+             	SED dist: 0.38846323706886987		 Val SED dist: 3.0367965698242188
+
+
+Epoch 29013/40000: Training Loss: 0.27764658494429156		 Val Loss: 1.7369543075561524
+             	Training MAE: 0.06546574831008911		 Val MAE: 0.06402863562107086
+             	Algebraic dist: 0.5389135100624778		 Val Algebraic dist: 1.1334948539733887
+             	RE1 dist: 0.31078323450955475		 Val RE1 dist: 1.5944196701049804
+             	SED dist: 0.5199410698630593		 Val SED dist: 3.43878059387207
+
+
+Epoch 29014/40000: Training Loss: 0.32119315320795233		 Val Loss: 1.1983400344848634
+             	Training MAE: 0.06483710557222366		 Val MAE: 0.06612489372491837
+             	Algebraic dist: 0.5930715907703746		 Val Algebraic dist: 1.1012858390808105
+             	RE1 dist: 0.37238012660633435		 Val RE1 dist: 1.2599075317382813
+             	SED dist: 0.6071922128850763		 Val SED dist: 2.3611122131347657
+
+
+Epoch 29015/40000: Training Loss: 0.3436732725663619		 Val Loss: 2.37707633972168
+             	Training MAE: 0.06763288378715515		 Val MAE: 0.06523198634386063
+             	Algebraic dist: 0.6147169633345171		 Val Algebraic dist: 1.47854585647583
+             	RE1 dist: 0.3840874325145375		 Val RE1 dist: 2.2649814605712892
+             	SED dist: 0.6511082649230957		 Val SED dist: 4.718093490600586
+
+
+Epoch 29016/40000: Training Loss: 0.47961707548661664		 Val Loss: 1.3227651596069336
+             	Training MAE: 0.0650087296962738		 Val MAE: 0.06467654556035995
+             	Algebraic dist: 0.7345932180231268		 Val Algebraic dist: 1.0915534019470214
+             	RE1 dist: 0.5373846400867809		 Val RE1 dist: 1.3044523239135741
+             	SED dist: 0.9238615902987394		 Val SED dist: 2.6103748321533202
+
+
+Epoch 29017/40000: Training Loss: 0.515576882795854		 Val Loss: 1.6407590866088868
+             	Training MAE: 0.0651896744966507		 Val MAE: 0.06732657551765442
+             	Algebraic dist: 0.7529134750366211		 Val Algebraic dist: 1.1142611503601074
+             	RE1 dist: 0.577697060324929		 Val RE1 dist: 1.5462061882019043
+             	SED dist: 0.9959207014604048		 Val SED dist: 3.245008087158203
+
+
+Epoch 29018/40000: Training Loss: 0.3511593558571555		 Val Loss: 1.156610107421875
+             	Training MAE: 0.06575477123260498		 Val MAE: 0.06414119154214859
+             	Algebraic dist: 0.6193473555824973		 Val Algebraic dist: 0.9868887901306153
+             	RE1 dist: 0.40682554244995117		 Val RE1 dist: 0.9948686599731446
+             	SED dist: 0.6669799631292169		 Val SED dist: 2.278161811828613
+
+
+Epoch 29019/40000: Training Loss: 0.24466406215320935		 Val Loss: 1.448612594604492
+             	Training MAE: 0.06675852090120316		 Val MAE: 0.07182497531175613
+             	Algebraic dist: 0.48008099469271576		 Val Algebraic dist: 1.1152215003967285
+             	RE1 dist: 0.2391782890666615		 Val RE1 dist: 1.3607973098754882
+             	SED dist: 0.45316162976351654		 Val SED dist: 2.8587482452392576
+
+
+Epoch 29020/40000: Training Loss: 0.22135556827891956		 Val Loss: 1.4070436477661132
+             	Training MAE: 0.06705057621002197		 Val MAE: 0.06790243834257126
+             	Algebraic dist: 0.4524323723532937		 Val Algebraic dist: 1.1666451454162599
+             	RE1 dist: 0.21075227043845438		 Val RE1 dist: 1.3736270904541015
+             	SED dist: 0.40684084458784625		 Val SED dist: 2.7777509689331055
+
+
+Epoch 29021/40000: Training Loss: 0.30170622738924896		 Val Loss: 1.1887576103210449
+             	Training MAE: 0.06424453854560852		 Val MAE: 0.06476143002510071
+             	Algebraic dist: 0.5598033991726962		 Val Algebraic dist: 0.984459400177002
+             	RE1 dist: 0.3293219913135875		 Val RE1 dist: 1.0767435073852538
+             	SED dist: 0.568624886599454		 Val SED dist: 2.342584228515625
+
+
+Epoch 29022/40000: Training Loss: 0.3410217978737571		 Val Loss: 1.3018952369689942
+             	Training MAE: 0.06438513100147247		 Val MAE: 0.06391152739524841
+             	Algebraic dist: 0.6135701699690386		 Val Algebraic dist: 1.0083907127380372
+             	RE1 dist: 0.37515146082097833		 Val RE1 dist: 1.1393069267272948
+             	SED dist: 0.6473534757440741		 Val SED dist: 2.568403434753418
+
+
+Epoch 29023/40000: Training Loss: 0.27892255783081055		 Val Loss: 1.1115936279296874
+             	Training MAE: 0.06498397141695023		 Val MAE: 0.0645851269364357
+             	Algebraic dist: 0.5371935584328391		 Val Algebraic dist: 0.9902265548706055
+             	RE1 dist: 0.2951742952520197		 Val RE1 dist: 1.0780420303344727
+             	SED dist: 0.5227318243546919		 Val SED dist: 2.1879432678222654
+
+
+Epoch 29024/40000: Training Loss: 0.2452420104633678		 Val Loss: 1.3424060821533204
+             	Training MAE: 0.06564605981111526		 Val MAE: 0.06973063200712204
+             	Algebraic dist: 0.47572448036887427		 Val Algebraic dist: 0.9752943992614747
+             	RE1 dist: 0.2410566806793213		 Val RE1 dist: 1.1566207885742188
+             	SED dist: 0.455181511965665		 Val SED dist: 2.6470310211181642
+
+
+Epoch 29025/40000: Training Loss: 0.27889260378750885		 Val Loss: 0.9804505348205567
+             	Training MAE: 0.0662771612405777		 Val MAE: 0.06661204248666763
+             	Algebraic dist: 0.5186367901888761		 Val Algebraic dist: 0.9014186859130859
+             	RE1 dist: 0.2879440567710183		 Val RE1 dist: 0.9635119438171387
+             	SED dist: 0.5219130082563921		 Val SED dist: 1.924468994140625
+
+
+Epoch 29026/40000: Training Loss: 0.25387304479425604		 Val Loss: 1.2553739547729492
+             	Training MAE: 0.06649641692638397		 Val MAE: 0.06889040768146515
+             	Algebraic dist: 0.47754469784823333		 Val Algebraic dist: 1.0098259925842286
+             	RE1 dist: 0.2587550336664373		 Val RE1 dist: 1.218515682220459
+             	SED dist: 0.4718386910178445		 Val SED dist: 2.473446846008301
+
+
+Epoch 29027/40000: Training Loss: 0.3146641254425049		 Val Loss: 1.3255587577819825
+             	Training MAE: 0.0653810128569603		 Val MAE: 0.06327836215496063
+             	Algebraic dist: 0.5721509673378684		 Val Algebraic dist: 1.0678207397460937
+             	RE1 dist: 0.3250132907520641		 Val RE1 dist: 1.1846682548522949
+             	SED dist: 0.594096140428023		 Val SED dist: 2.6166217803955076
+
+
+Epoch 29028/40000: Training Loss: 0.546013658696955		 Val Loss: 1.3495515823364257
+             	Training MAE: 0.06476835906505585		 Val MAE: 0.0687018483877182
+             	Algebraic dist: 0.7233891053633257		 Val Algebraic dist: 1.0930380821228027
+             	RE1 dist: 0.6234771988608621		 Val RE1 dist: 1.2535160064697266
+             	SED dist: 1.0567638223821467		 Val SED dist: 2.661993980407715
+
+
+Epoch 29029/40000: Training Loss: 0.6435854218222878		 Val Loss: 1.5385931015014649
+             	Training MAE: 0.06783175468444824		 Val MAE: 0.06753364205360413
+             	Algebraic dist: 0.8321584354747426		 Val Algebraic dist: 1.09635009765625
+             	RE1 dist: 0.689272013577548		 Val RE1 dist: 1.2572184562683106
+             	SED dist: 1.25072565945712		 Val SED dist: 3.040728950500488
+
+
+Epoch 29030/40000: Training Loss: 0.23483917929909445		 Val Loss: 1.2896629333496095
+             	Training MAE: 0.06793645769357681		 Val MAE: 0.06498610228300095
+             	Algebraic dist: 0.4883496544577859		 Val Algebraic dist: 1.0596796035766602
+             	RE1 dist: 0.2788198861208829		 Val RE1 dist: 1.2487162590026855
+             	SED dist: 0.43350397456776013		 Val SED dist: 2.5442440032958986
+
+
+Epoch 29031/40000: Training Loss: 0.20151060277765448		 Val Loss: 0.9953738212585449
+             	Training MAE: 0.06592466682195663		 Val MAE: 0.0645388588309288
+             	Algebraic dist: 0.43669566241177643		 Val Algebraic dist: 0.8876605033874512
+             	RE1 dist: 0.20156554742292923		 Val RE1 dist: 1.0096012115478517
+             	SED dist: 0.36768423427235		 Val SED dist: 1.9551969528198243
+
+
+Epoch 29032/40000: Training Loss: 0.2144484736702659		 Val Loss: 1.5833980560302734
+             	Training MAE: 0.06643576920032501		 Val MAE: 0.06925540417432785
+             	Algebraic dist: 0.4337572617964311		 Val Algebraic dist: 1.0541140556335449
+             	RE1 dist: 0.22295123880559747		 Val RE1 dist: 1.363761806488037
+             	SED dist: 0.39304880662397906		 Val SED dist: 3.129384231567383
+
+
+Epoch 29033/40000: Training Loss: 0.2537112236022949		 Val Loss: 1.2974770545959473
+             	Training MAE: 0.0694858655333519		 Val MAE: 0.06980284303426743
+             	Algebraic dist: 0.4874184348366477		 Val Algebraic dist: 0.9821907043457031
+             	RE1 dist: 0.2693634466691451		 Val RE1 dist: 1.103184700012207
+             	SED dist: 0.4700862711126154		 Val SED dist: 2.5572864532470705
+
+
+Epoch 29034/40000: Training Loss: 0.251223239031705		 Val Loss: 1.2145198822021483
+             	Training MAE: 0.06457749009132385		 Val MAE: 0.06611950695514679
+             	Algebraic dist: 0.49353092366998846		 Val Algebraic dist: 0.9515583038330078
+             	RE1 dist: 0.25757841630415484		 Val RE1 dist: 1.0224299430847168
+             	SED dist: 0.4673683426596902		 Val SED dist: 2.393263053894043
+
+
+Epoch 29035/40000: Training Loss: 0.2374393723227761		 Val Loss: 1.4275811195373536
+             	Training MAE: 0.06433431059122086		 Val MAE: 0.06469141691923141
+             	Algebraic dist: 0.47122968326915393		 Val Algebraic dist: 0.977687931060791
+             	RE1 dist: 0.25431758707219904		 Val RE1 dist: 1.006318950653076
+             	SED dist: 0.4398588700727983		 Val SED dist: 2.819986915588379
+
+
+Epoch 29036/40000: Training Loss: 0.3145712288943204		 Val Loss: 1.3211280822753906
+             	Training MAE: 0.06651151925325394		 Val MAE: 0.07021256536245346
+             	Algebraic dist: 0.5128143050453879		 Val Algebraic dist: 0.9647005081176758
+             	RE1 dist: 0.29452061653137207		 Val RE1 dist: 1.1960933685302735
+             	SED dist: 0.5933969671075995		 Val SED dist: 2.604486846923828
+
+
+Epoch 29037/40000: Training Loss: 0.25661611557006836		 Val Loss: 1.2138566017150878
+             	Training MAE: 0.06629471480846405		 Val MAE: 0.06738364696502686
+             	Algebraic dist: 0.4797476421702992		 Val Algebraic dist: 1.0358492851257324
+             	RE1 dist: 0.25273910435763275		 Val RE1 dist: 1.0949481964111327
+             	SED dist: 0.47736007517034357		 Val SED dist: 2.3914011001586912
+
+
+Epoch 29038/40000: Training Loss: 0.21642684936523438		 Val Loss: 1.1996028900146485
+             	Training MAE: 0.06527204066514969		 Val MAE: 0.06741052865982056
+             	Algebraic dist: 0.4527375914833762		 Val Algebraic dist: 1.0183571815490722
+             	RE1 dist: 0.21745040199973367		 Val RE1 dist: 1.0301016807556151
+             	SED dist: 0.39781951904296875		 Val SED dist: 2.363134002685547
+
+
+Epoch 29039/40000: Training Loss: 0.20780916647477585		 Val Loss: 1.447648811340332
+             	Training MAE: 0.06416584551334381		 Val MAE: 0.06490832567214966
+             	Algebraic dist: 0.43118364160711115		 Val Algebraic dist: 1.0630544662475585
+             	RE1 dist: 0.2026034268465909		 Val RE1 dist: 1.3020009040832519
+             	SED dist: 0.3807686458934437		 Val SED dist: 2.859646224975586
+
+
+Epoch 29040/40000: Training Loss: 0.21081852912902832		 Val Loss: 1.0645764350891114
+             	Training MAE: 0.06447546184062958		 Val MAE: 0.06739570200443268
+             	Algebraic dist: 0.4133729934692383		 Val Algebraic dist: 0.8709383964538574
+             	RE1 dist: 0.20540031519803134		 Val RE1 dist: 0.9934990882873536
+             	SED dist: 0.38652164285833185		 Val SED dist: 2.092634582519531
+
+
+Epoch 29041/40000: Training Loss: 0.19333262877030807		 Val Loss: 0.921632957458496
+             	Training MAE: 0.06558902561664581		 Val MAE: 0.06948468834161758
+             	Algebraic dist: 0.414088942787864		 Val Algebraic dist: 0.8382808685302734
+             	RE1 dist: 0.19287449663335626		 Val RE1 dist: 0.9199747085571289
+             	SED dist: 0.35108265009793366		 Val SED dist: 1.8056343078613282
+
+
+Epoch 29042/40000: Training Loss: 0.23543234304948288		 Val Loss: 1.1332369804382325
+             	Training MAE: 0.06478311866521835		 Val MAE: 0.06728482991456985
+             	Algebraic dist: 0.45300657098943536		 Val Algebraic dist: 0.9300460815429688
+             	RE1 dist: 0.21395303986289285		 Val RE1 dist: 0.9878462791442871
+             	SED dist: 0.43547617305408826		 Val SED dist: 2.230345344543457
+
+
+Epoch 29043/40000: Training Loss: 0.23985771699385208		 Val Loss: 1.4667070388793946
+             	Training MAE: 0.06550919264554977		 Val MAE: 0.06678817421197891
+             	Algebraic dist: 0.46617624976418237		 Val Algebraic dist: 1.0101068496704102
+             	RE1 dist: 0.21959339488636365		 Val RE1 dist: 1.1158273696899415
+             	SED dist: 0.4443701830777255		 Val SED dist: 2.897203826904297
+
+
+Epoch 29044/40000: Training Loss: 0.2556321837685325		 Val Loss: 1.1855656623840332
+             	Training MAE: 0.06769667565822601		 Val MAE: 0.06784416735172272
+             	Algebraic dist: 0.4922050562771884		 Val Algebraic dist: 0.8947649955749511
+             	RE1 dist: 0.2598103393207897		 Val RE1 dist: 0.9815117835998535
+             	SED dist: 0.47494346445257013		 Val SED dist: 2.3343313217163084
+
+
+Epoch 29045/40000: Training Loss: 0.18871940266002307		 Val Loss: 1.0805084228515625
+             	Training MAE: 0.06521047651767731		 Val MAE: 0.06456456333398819
+             	Algebraic dist: 0.4000574892217463		 Val Algebraic dist: 0.8429392814636231
+             	RE1 dist: 0.17549403147263962		 Val RE1 dist: 0.9282540321350098
+             	SED dist: 0.34191406856883655		 Val SED dist: 2.1256343841552736
+
+
+Epoch 29046/40000: Training Loss: 0.17404627799987793		 Val Loss: 0.9479757308959961
+             	Training MAE: 0.06454267352819443		 Val MAE: 0.06664393097162247
+             	Algebraic dist: 0.38137583299116656		 Val Algebraic dist: 0.8409342765808105
+             	RE1 dist: 0.16100780530409378		 Val RE1 dist: 0.7988468170166015
+             	SED dist: 0.3128667744723233		 Val SED dist: 1.8595712661743165
+
+
+Epoch 29047/40000: Training Loss: 0.16863654960285535		 Val Loss: 0.8267964363098145
+             	Training MAE: 0.06635860353708267		 Val MAE: 0.06862768530845642
+             	Algebraic dist: 0.3776581504128196		 Val Algebraic dist: 0.8146784782409668
+             	RE1 dist: 0.16071290319616144		 Val RE1 dist: 0.7516792297363282
+             	SED dist: 0.3012030341408469		 Val SED dist: 1.6162364959716797
+
+
+Epoch 29048/40000: Training Loss: 0.19484040953896262		 Val Loss: 0.9195568084716796
+             	Training MAE: 0.06524905562400818		 Val MAE: 0.0640467032790184
+             	Algebraic dist: 0.40503701296719635		 Val Algebraic dist: 0.8653552055358886
+             	RE1 dist: 0.18123296174136075		 Val RE1 dist: 0.8402029037475586
+             	SED dist: 0.3543884754180908		 Val SED dist: 1.8037250518798829
+
+
+Epoch 29049/40000: Training Loss: 0.24693385037508878		 Val Loss: 1.141455841064453
+             	Training MAE: 0.065281443297863		 Val MAE: 0.06694156676530838
+             	Algebraic dist: 0.46998578851873224		 Val Algebraic dist: 0.9672818183898926
+             	RE1 dist: 0.22091503576798874		 Val RE1 dist: 1.0415122985839844
+             	SED dist: 0.45844572240656073		 Val SED dist: 2.246358108520508
+
+
+Epoch 29050/40000: Training Loss: 0.30110318010503595		 Val Loss: 1.647000503540039
+             	Training MAE: 0.06767071783542633		 Val MAE: 0.0656110867857933
+             	Algebraic dist: 0.5345992608503862		 Val Algebraic dist: 1.17960205078125
+             	RE1 dist: 0.3001688610423695		 Val RE1 dist: 1.315219783782959
+             	SED dist: 0.5655184659090909		 Val SED dist: 3.2576507568359374
+
+
+Epoch 29051/40000: Training Loss: 0.2642907879569314		 Val Loss: 1.0250110626220703
+             	Training MAE: 0.06572940200567245		 Val MAE: 0.06945687532424927
+             	Algebraic dist: 0.47935602881691675		 Val Algebraic dist: 0.8055350303649902
+             	RE1 dist: 0.25743324106389825		 Val RE1 dist: 0.827204704284668
+             	SED dist: 0.4927711920304732		 Val SED dist: 2.0122438430786134
+
+
+Epoch 29052/40000: Training Loss: 0.540687084197998		 Val Loss: 0.9566249847412109
+             	Training MAE: 0.06475550681352615		 Val MAE: 0.06465894728899002
+             	Algebraic dist: 0.7206586057489569		 Val Algebraic dist: 0.8921076774597168
+             	RE1 dist: 0.498565673828125		 Val RE1 dist: 0.9271677017211915
+             	SED dist: 1.0460893457586116		 Val SED dist: 1.8772592544555664
+
+
+Epoch 29053/40000: Training Loss: 0.497828180139715		 Val Loss: 1.357973289489746
+             	Training MAE: 0.06897851824760437		 Val MAE: 0.07998209446668625
+             	Algebraic dist: 0.6922486478632147		 Val Algebraic dist: 1.1807838439941407
+             	RE1 dist: 0.47455154765735974		 Val RE1 dist: 1.111748504638672
+             	SED dist: 0.958369255065918		 Val SED dist: 2.6707244873046876
+
+
+Epoch 29054/40000: Training Loss: 0.44850427454168146		 Val Loss: 1.3411499977111816
+             	Training MAE: 0.07081387937068939		 Val MAE: 0.06542351841926575
+             	Algebraic dist: 0.7027033892544833		 Val Algebraic dist: 1.029676914215088
+             	RE1 dist: 0.4683216701854359		 Val RE1 dist: 1.3159003257751465
+             	SED dist: 0.8585954145951704		 Val SED dist: 2.646177291870117
+
+
+Epoch 29055/40000: Training Loss: 0.46976518630981445		 Val Loss: 1.475691795349121
+             	Training MAE: 0.0661916732788086		 Val MAE: 0.07352547347545624
+             	Algebraic dist: 0.7096189585599032		 Val Algebraic dist: 1.0580358505249023
+             	RE1 dist: 0.4734547354958274		 Val RE1 dist: 1.2721050262451172
+             	SED dist: 0.9034129056063566		 Val SED dist: 2.9114789962768555
+
+
+Epoch 29056/40000: Training Loss: 0.27363408695567737		 Val Loss: 1.2325647354125977
+             	Training MAE: 0.07048004865646362		 Val MAE: 0.06583317369222641
+             	Algebraic dist: 0.5014679215171121		 Val Algebraic dist: 1.0229866981506348
+             	RE1 dist: 0.28717381303960626		 Val RE1 dist: 1.084907627105713
+             	SED dist: 0.5092464793812145		 Val SED dist: 2.429213523864746
+
+
+Epoch 29057/40000: Training Loss: 0.4766157323663885		 Val Loss: 1.5486086845397948
+             	Training MAE: 0.06517626345157623		 Val MAE: 0.06424222141504288
+             	Algebraic dist: 0.7344649054787376		 Val Algebraic dist: 1.06778564453125
+             	RE1 dist: 0.5306635336442427		 Val RE1 dist: 1.4008103370666505
+             	SED dist: 0.9177526994185015		 Val SED dist: 3.0619037628173826
+
+
+Epoch 29058/40000: Training Loss: 0.29117152907631616		 Val Loss: 1.6709033966064453
+             	Training MAE: 0.06430848687887192		 Val MAE: 0.06455470621585846
+             	Algebraic dist: 0.5343665643171831		 Val Algebraic dist: 1.0561185836791993
+             	RE1 dist: 0.28902782093394885		 Val RE1 dist: 1.2654994964599608
+             	SED dist: 0.5473080548373136		 Val SED dist: 3.3057510375976564
+
+
+Epoch 29059/40000: Training Loss: 0.23175670883872293		 Val Loss: 0.8683423042297364
+             	Training MAE: 0.06507452577352524		 Val MAE: 0.06689058244228363
+             	Algebraic dist: 0.46370848742398346		 Val Algebraic dist: 0.8563798904418946
+             	RE1 dist: 0.24524168534712357		 Val RE1 dist: 0.8438046455383301
+             	SED dist: 0.4279551939530806		 Val SED dist: 1.7001840591430664
+
+
+Epoch 29060/40000: Training Loss: 0.26828536120328034		 Val Loss: 1.3225637435913087
+             	Training MAE: 0.06583273410797119		 Val MAE: 0.06553097814321518
+             	Algebraic dist: 0.5076709227128462		 Val Algebraic dist: 1.06994571685791
+             	RE1 dist: 0.27922151305458764		 Val RE1 dist: 1.2413329124450683
+             	SED dist: 0.5010465275157582		 Val SED dist: 2.6090335845947266
+
+
+Epoch 29061/40000: Training Loss: 0.3389267921447754		 Val Loss: 1.1655028343200684
+             	Training MAE: 0.06485354900360107		 Val MAE: 0.06612936407327652
+             	Algebraic dist: 0.5883541107177734		 Val Algebraic dist: 0.9407193183898925
+             	RE1 dist: 0.35735839063471014		 Val RE1 dist: 0.9785640716552735
+             	SED dist: 0.6425857543945312		 Val SED dist: 2.294356918334961
+
+
+Epoch 29062/40000: Training Loss: 0.28227637030861596		 Val Loss: 1.3403186798095703
+             	Training MAE: 0.0664699524641037		 Val MAE: 0.07084616273641586
+             	Algebraic dist: 0.517568978396329		 Val Algebraic dist: 1.1402913093566895
+             	RE1 dist: 0.2763296907598322		 Val RE1 dist: 1.190528392791748
+             	SED dist: 0.528544469313188		 Val SED dist: 2.6423873901367188
+
+
+Epoch 29063/40000: Training Loss: 0.30585471066561615		 Val Loss: 1.4834745407104493
+             	Training MAE: 0.06694617122411728		 Val MAE: 0.06430763006210327
+             	Algebraic dist: 0.5454804680564187		 Val Algebraic dist: 1.0231006622314454
+             	RE1 dist: 0.32185632532293146		 Val RE1 dist: 1.2421741485595703
+             	SED dist: 0.5756299712441184		 Val SED dist: 2.9313896179199217
+
+
+Epoch 29064/40000: Training Loss: 0.27990911223671655		 Val Loss: 1.097550868988037
+             	Training MAE: 0.06537681818008423		 Val MAE: 0.06435888260602951
+             	Algebraic dist: 0.5144921216097745		 Val Algebraic dist: 0.9429828643798828
+             	RE1 dist: 0.2975455197420987		 Val RE1 dist: 1.0225688934326171
+             	SED dist: 0.5242735255848278		 Val SED dist: 2.1594444274902345
+
+
+Epoch 29065/40000: Training Loss: 0.31805331056768243		 Val Loss: 0.9836268424987793
+             	Training MAE: 0.06592797487974167		 Val MAE: 0.07151637971401215
+             	Algebraic dist: 0.5790496305985884		 Val Algebraic dist: 0.8796894073486328
+             	RE1 dist: 0.32598675381053577		 Val RE1 dist: 0.9789209365844727
+             	SED dist: 0.6005062623457476		 Val SED dist: 1.9283481597900392
+
+
+Epoch 29066/40000: Training Loss: 0.38999271392822266		 Val Loss: 2.069778823852539
+             	Training MAE: 0.06822051107883453		 Val MAE: 0.06653155386447906
+             	Algebraic dist: 0.6130235845392401		 Val Algebraic dist: 1.3250363349914551
+             	RE1 dist: 0.3896670774980025		 Val RE1 dist: 2.002707672119141
+             	SED dist: 0.7432283054698597		 Val SED dist: 4.103443908691406
+
+
+Epoch 29067/40000: Training Loss: 0.45256653699007904		 Val Loss: 1.293624496459961
+             	Training MAE: 0.06898890435695648		 Val MAE: 0.07067518681287766
+             	Algebraic dist: 0.6984286308288574		 Val Algebraic dist: 0.9534107208251953
+             	RE1 dist: 0.4768340370871804		 Val RE1 dist: 1.038319969177246
+             	SED dist: 0.868101033297452		 Val SED dist: 2.548491859436035
+
+
+Epoch 29068/40000: Training Loss: 0.35726057399402966		 Val Loss: 1.330838108062744
+             	Training MAE: 0.06775128096342087		 Val MAE: 0.06753793358802795
+             	Algebraic dist: 0.6018002249977805		 Val Algebraic dist: 1.0974332809448242
+             	RE1 dist: 0.38115189292214136		 Val RE1 dist: 1.1008481979370117
+             	SED dist: 0.6782625805247914		 Val SED dist: 2.6254669189453126
+
+
+Epoch 29069/40000: Training Loss: 0.3447660099376332		 Val Loss: 2.4020221710205076
+             	Training MAE: 0.06593488156795502		 Val MAE: 0.06524470448493958
+             	Algebraic dist: 0.5864176750183105		 Val Algebraic dist: 1.3618023872375489
+             	RE1 dist: 0.3399927399375222		 Val RE1 dist: 1.9417673110961915
+             	SED dist: 0.6537199453874067		 Val SED dist: 4.767890167236328
+
+
+Epoch 29070/40000: Training Loss: 0.2710368199781938		 Val Loss: 1.624356460571289
+             	Training MAE: 0.06527061015367508		 Val MAE: 0.06597691029310226
+             	Algebraic dist: 0.5005765394731001		 Val Algebraic dist: 1.1147308349609375
+             	RE1 dist: 0.26377894661643286		 Val RE1 dist: 1.1936632156372071
+             	SED dist: 0.5068830143321644		 Val SED dist: 3.2132888793945313
+
+
+Epoch 29071/40000: Training Loss: 0.2885979305614125		 Val Loss: 1.2109053611755372
+             	Training MAE: 0.06510848551988602		 Val MAE: 0.0653279721736908
+             	Algebraic dist: 0.5170798735185103		 Val Algebraic dist: 1.0722423553466798
+             	RE1 dist: 0.2813592824068936		 Val RE1 dist: 1.1023366928100586
+             	SED dist: 0.542210578918457		 Val SED dist: 2.386668395996094
+
+
+Epoch 29072/40000: Training Loss: 0.27381480823863635		 Val Loss: 1.1822801589965821
+             	Training MAE: 0.06647661328315735		 Val MAE: 0.06973942369222641
+             	Algebraic dist: 0.532521291212602		 Val Algebraic dist: 0.9383730888366699
+             	RE1 dist: 0.27343411879106		 Val RE1 dist: 1.0560338973999024
+             	SED dist: 0.511970346624201		 Val SED dist: 2.3269363403320313
+
+
+Epoch 29073/40000: Training Loss: 0.2636178190057928		 Val Loss: 0.997784423828125
+             	Training MAE: 0.06473928689956665		 Val MAE: 0.06620949506759644
+             	Algebraic dist: 0.5142017711292614		 Val Algebraic dist: 0.8972870826721191
+             	RE1 dist: 0.2839353518052535		 Val RE1 dist: 0.916654396057129
+             	SED dist: 0.4921477491205389		 Val SED dist: 1.9591447830200195
+
+
+Epoch 29074/40000: Training Loss: 0.3602459864182906		 Val Loss: 2.0000301361083985
+             	Training MAE: 0.06579646468162537		 Val MAE: 0.06877455115318298
+             	Algebraic dist: 0.6256019852378152		 Val Algebraic dist: 1.1999547004699707
+             	RE1 dist: 0.3750867410139604		 Val RE1 dist: 1.714288330078125
+             	SED dist: 0.6849262931130149		 Val SED dist: 3.963206100463867
+
+
+Epoch 29075/40000: Training Loss: 0.32049757784063165		 Val Loss: 1.413001251220703
+             	Training MAE: 0.06853359937667847		 Val MAE: 0.06515902280807495
+             	Algebraic dist: 0.5588475574146617		 Val Algebraic dist: 1.0415496826171875
+             	RE1 dist: 0.3293582526120273		 Val RE1 dist: 1.2357184410095214
+             	SED dist: 0.604178862138228		 Val SED dist: 2.7904983520507813
+
+
+Epoch 29076/40000: Training Loss: 0.23679698597301135		 Val Loss: 0.976352310180664
+             	Training MAE: 0.06458738446235657		 Val MAE: 0.06386690586805344
+             	Algebraic dist: 0.4596248973499645		 Val Algebraic dist: 0.882269287109375
+             	RE1 dist: 0.23663837259465997		 Val RE1 dist: 0.9466127395629883
+             	SED dist: 0.43876977400346234		 Val SED dist: 1.917569351196289
+
+
+Epoch 29077/40000: Training Loss: 0.19993498108603738		 Val Loss: 1.0482427597045898
+             	Training MAE: 0.06386539340019226		 Val MAE: 0.06566566973924637
+             	Algebraic dist: 0.42810665477405896		 Val Algebraic dist: 0.8734759330749512
+             	RE1 dist: 0.20917955311861905		 Val RE1 dist: 0.9197292327880859
+             	SED dist: 0.3650034991177646		 Val SED dist: 2.0605987548828124
+
+
+Epoch 29078/40000: Training Loss: 0.2076074860312722		 Val Loss: 1.108839988708496
+             	Training MAE: 0.06532871723175049		 Val MAE: 0.06691890209913254
+             	Algebraic dist: 0.43443072925914417		 Val Algebraic dist: 0.9056533813476563
+             	RE1 dist: 0.22002783688631924		 Val RE1 dist: 0.9210564613342285
+             	SED dist: 0.37967673214999115		 Val SED dist: 2.1812583923339846
+
+
+Epoch 29079/40000: Training Loss: 0.2631951028650457		 Val Loss: 1.223322868347168
+             	Training MAE: 0.06770554184913635		 Val MAE: 0.07178205996751785
+             	Algebraic dist: 0.4934564070268111		 Val Algebraic dist: 1.003114604949951
+             	RE1 dist: 0.25723188573663885		 Val RE1 dist: 1.0838170051574707
+             	SED dist: 0.4896887865933505		 Val SED dist: 2.407421875
+
+
+Epoch 29080/40000: Training Loss: 0.2518503665924072		 Val Loss: 1.318952465057373
+             	Training MAE: 0.06786412745714188		 Val MAE: 0.06825249642133713
+             	Algebraic dist: 0.4951151501048695		 Val Algebraic dist: 0.9840756416320801
+             	RE1 dist: 0.24661176854913885		 Val RE1 dist: 1.2226827621459961
+             	SED dist: 0.46684733304110443		 Val SED dist: 2.600986671447754
+
+
+Epoch 29081/40000: Training Loss: 0.2689736106178977		 Val Loss: 1.6231464385986327
+             	Training MAE: 0.06563811004161835		 Val MAE: 0.06565257161855698
+             	Algebraic dist: 0.49360483342950995		 Val Algebraic dist: 1.1026251792907715
+             	RE1 dist: 0.27546514164317737		 Val RE1 dist: 1.2826173782348633
+             	SED dist: 0.5022740797563032		 Val SED dist: 3.2103004455566406
+
+
+Epoch 29082/40000: Training Loss: 0.22769290750676935		 Val Loss: 0.9180047988891602
+             	Training MAE: 0.0673457682132721		 Val MAE: 0.07018834352493286
+             	Algebraic dist: 0.46008729934692383		 Val Algebraic dist: 0.857846450805664
+             	RE1 dist: 0.21462462165138937		 Val RE1 dist: 0.8268523216247559
+             	SED dist: 0.41895146803422406		 Val SED dist: 1.7980615615844726
+
+
+Epoch 29083/40000: Training Loss: 0.28121289339932526		 Val Loss: 1.0067703247070312
+             	Training MAE: 0.06559504568576813		 Val MAE: 0.06841807812452316
+             	Algebraic dist: 0.5165905952453613		 Val Algebraic dist: 0.9274886131286622
+             	RE1 dist: 0.28206554326144134		 Val RE1 dist: 1.0485379219055175
+             	SED dist: 0.5267413312738592		 Val SED dist: 1.9761343002319336
+
+
+Epoch 29084/40000: Training Loss: 0.29568702524358575		 Val Loss: 1.0949440956115724
+             	Training MAE: 0.06764967739582062		 Val MAE: 0.06900309026241302
+             	Algebraic dist: 0.5291826074773615		 Val Algebraic dist: 0.9195828437805176
+             	RE1 dist: 0.28535511276938696		 Val RE1 dist: 0.986050796508789
+             	SED dist: 0.5548901557922363		 Val SED dist: 2.152664566040039
+
+
+Epoch 29085/40000: Training Loss: 0.1711317842656916		 Val Loss: 1.0657732009887695
+             	Training MAE: 0.06522112339735031		 Val MAE: 0.06703208386898041
+             	Algebraic dist: 0.3778317191384055		 Val Algebraic dist: 0.869970703125
+             	RE1 dist: 0.15891968120228162		 Val RE1 dist: 0.8770136833190918
+             	SED dist: 0.30683439428156073		 Val SED dist: 2.0952457427978515
+
+
+Epoch 29086/40000: Training Loss: 0.20614192702553488		 Val Loss: 1.2178366661071778
+             	Training MAE: 0.06476090103387833		 Val MAE: 0.066340871155262
+             	Algebraic dist: 0.4261238791725852		 Val Algebraic dist: 0.9571161270141602
+             	RE1 dist: 0.18814006718722256		 Val RE1 dist: 1.1003074645996094
+             	SED dist: 0.3771980892528187		 Val SED dist: 2.3996408462524412
+
+
+Epoch 29087/40000: Training Loss: 0.20290816913951526		 Val Loss: 1.7342390060424804
+             	Training MAE: 0.06567344069480896		 Val MAE: 0.06478502601385117
+             	Algebraic dist: 0.4156818823380904		 Val Algebraic dist: 1.1037282943725586
+             	RE1 dist: 0.19171818819912997		 Val RE1 dist: 1.2764694213867187
+             	SED dist: 0.37022859399968927		 Val SED dist: 3.432627868652344
+
+
+Epoch 29088/40000: Training Loss: 0.2018031423742121		 Val Loss: 1.1922382354736327
+             	Training MAE: 0.0653730034828186		 Val MAE: 0.0707990750670433
+             	Algebraic dist: 0.42122996937144885		 Val Algebraic dist: 0.9030580520629883
+             	RE1 dist: 0.18095716563138095		 Val RE1 dist: 0.9848681449890136
+             	SED dist: 0.3679912740534002		 Val SED dist: 2.345993423461914
+
+
+Epoch 29089/40000: Training Loss: 0.1742968884381381		 Val Loss: 1.0731968879699707
+             	Training MAE: 0.06620809435844421		 Val MAE: 0.06531205028295517
+             	Algebraic dist: 0.3769798278808594		 Val Algebraic dist: 0.8471063613891602
+             	RE1 dist: 0.16688695820895108		 Val RE1 dist: 0.9203680992126465
+             	SED dist: 0.3126527179371227		 Val SED dist: 2.1103445053100587
+
+
+Epoch 29090/40000: Training Loss: 0.2994341633536599		 Val Loss: 1.0911222457885743
+             	Training MAE: 0.0651688501238823		 Val MAE: 0.06834585964679718
+             	Algebraic dist: 0.5260523449290883		 Val Algebraic dist: 0.9250992774963379
+             	RE1 dist: 0.27343635125593707		 Val RE1 dist: 0.952723217010498
+             	SED dist: 0.5633104497736151		 Val SED dist: 2.144901657104492
+
+
+Epoch 29091/40000: Training Loss: 0.27296991781754926		 Val Loss: 1.193138885498047
+             	Training MAE: 0.06996023654937744		 Val MAE: 0.06625466048717499
+             	Algebraic dist: 0.5031755620783026		 Val Algebraic dist: 0.8811110496520996
+             	RE1 dist: 0.2675575559789484		 Val RE1 dist: 0.9351290702819824
+             	SED dist: 0.5080839937383478		 Val SED dist: 2.350114440917969
+
+
+Epoch 29092/40000: Training Loss: 0.26938473094593396		 Val Loss: 1.0004075050354004
+             	Training MAE: 0.06455175578594208		 Val MAE: 0.06772138178348541
+             	Algebraic dist: 0.496852614662864		 Val Algebraic dist: 0.9442998886108398
+             	RE1 dist: 0.2689483165740967		 Val RE1 dist: 0.9930800437927246
+             	SED dist: 0.5036377906799316		 Val SED dist: 1.9642240524291992
+
+
+Epoch 29093/40000: Training Loss: 0.2058833729137074		 Val Loss: 0.8986101150512695
+             	Training MAE: 0.0651731863617897		 Val MAE: 0.06829806417226791
+             	Algebraic dist: 0.42901125821200287		 Val Algebraic dist: 0.8421751976013183
+             	RE1 dist: 0.19886153394525702		 Val RE1 dist: 0.8737451553344726
+             	SED dist: 0.37647451053966174		 Val SED dist: 1.7601638793945313
+
+
+Epoch 29094/40000: Training Loss: 0.25578615882179956		 Val Loss: 1.2319979667663574
+             	Training MAE: 0.065743587911129		 Val MAE: 0.0670921579003334
+             	Algebraic dist: 0.47792430357499555		 Val Algebraic dist: 0.8857182502746582
+             	RE1 dist: 0.23951309377496893		 Val RE1 dist: 0.8923358917236328
+             	SED dist: 0.47598752108487213		 Val SED dist: 2.4276586532592774
+
+
+Epoch 29095/40000: Training Loss: 0.27167801423506305		 Val Loss: 1.2532337188720704
+             	Training MAE: 0.06841790676116943		 Val MAE: 0.06644194573163986
+             	Algebraic dist: 0.4953407807783647		 Val Algebraic dist: 0.9411972999572754
+             	RE1 dist: 0.26258724386041815		 Val RE1 dist: 1.0394651412963867
+             	SED dist: 0.5061334263194691		 Val SED dist: 2.470384216308594
+
+
+Epoch 29096/40000: Training Loss: 0.43465857072310016		 Val Loss: 0.9379039764404297
+             	Training MAE: 0.06541334837675095		 Val MAE: 0.06778442114591599
+             	Algebraic dist: 0.6660597107627175		 Val Algebraic dist: 0.8422605514526367
+             	RE1 dist: 0.44547219709916547		 Val RE1 dist: 0.8610587120056152
+             	SED dist: 0.8337886116721414		 Val SED dist: 1.8392684936523438
+
+
+Epoch 29097/40000: Training Loss: 0.9241826317527078		 Val Loss: 1.493299388885498
+             	Training MAE: 0.06674686819314957		 Val MAE: 0.06413672119379044
+             	Algebraic dist: 0.9705807078968395		 Val Algebraic dist: 1.063362216949463
+             	RE1 dist: 0.8666552630337802		 Val RE1 dist: 1.2756983757019043
+             	SED dist: 1.8120418895374646		 Val SED dist: 2.9509662628173827
+
+
+Epoch 29098/40000: Training Loss: 1.3719735579057173		 Val Loss: 2.97425537109375
+             	Training MAE: 0.07310504466295242		 Val MAE: 0.08644416928291321
+             	Algebraic dist: 1.2876400514082476		 Val Algebraic dist: 1.5916787147521974
+             	RE1 dist: 1.467922037298029		 Val RE1 dist: 3.0058059692382812
+             	SED dist: 2.7030825181440874		 Val SED dist: 5.893945693969727
+
+
+Epoch 29099/40000: Training Loss: 0.4996166229248047		 Val Loss: 1.3260981559753418
+             	Training MAE: 0.07421635836362839		 Val MAE: 0.06448958814144135
+             	Algebraic dist: 0.6965670585632324		 Val Algebraic dist: 1.027888011932373
+             	RE1 dist: 0.5274578007784757		 Val RE1 dist: 1.1860368728637696
+             	SED dist: 0.957517450506037		 Val SED dist: 2.61680908203125
+
+
+Epoch 29100/40000: Training Loss: 0.2348297726024281		 Val Loss: 1.426381778717041
+             	Training MAE: 0.06537073105573654		 Val MAE: 0.06441669166088104
+             	Algebraic dist: 0.4896027391607111		 Val Algebraic dist: 1.138907527923584
+             	RE1 dist: 0.26107746904546564		 Val RE1 dist: 1.312640380859375
+             	SED dist: 0.43407136743718927		 Val SED dist: 2.817599868774414
+
+
+Epoch 29101/40000: Training Loss: 0.28335792368108575		 Val Loss: 1.730095100402832
+             	Training MAE: 0.0681917667388916		 Val MAE: 0.07118802517652512
+             	Algebraic dist: 0.5362124876542524		 Val Algebraic dist: 1.175467300415039
+             	RE1 dist: 0.29137286272915924		 Val RE1 dist: 1.9062267303466798
+             	SED dist: 0.5296343456615101		 Val SED dist: 3.421695327758789
+
+
+Epoch 29102/40000: Training Loss: 0.23151178793473678		 Val Loss: 1.3539825439453126
+             	Training MAE: 0.0681401863694191		 Val MAE: 0.06567679345607758
+             	Algebraic dist: 0.47187376022338867		 Val Algebraic dist: 1.031949806213379
+             	RE1 dist: 0.2645064050501043		 Val RE1 dist: 1.2677839279174805
+             	SED dist: 0.42636134407737036		 Val SED dist: 2.672064208984375
+
+
+Epoch 29103/40000: Training Loss: 0.2301205721768466		 Val Loss: 1.1287670135498047
+             	Training MAE: 0.06497130542993546		 Val MAE: 0.06674979627132416
+             	Algebraic dist: 0.4629457647150213		 Val Algebraic dist: 0.973853588104248
+             	RE1 dist: 0.2404606125571511		 Val RE1 dist: 1.056562614440918
+             	SED dist: 0.4253096580505371		 Val SED dist: 2.221384048461914
+
+
+Epoch 29104/40000: Training Loss: 0.284187988801436		 Val Loss: 1.4530136108398437
+             	Training MAE: 0.06506208330392838		 Val MAE: 0.06491669267416
+             	Algebraic dist: 0.5330384427850897		 Val Algebraic dist: 1.0632209777832031
+             	RE1 dist: 0.296656305139715		 Val RE1 dist: 1.3353874206542968
+             	SED dist: 0.5330426909706809		 Val SED dist: 2.8702505111694334
+
+
+Epoch 29105/40000: Training Loss: 0.23287465355613016		 Val Loss: 1.0196123123168945
+             	Training MAE: 0.06526974588632584		 Val MAE: 0.06820551306009293
+             	Algebraic dist: 0.46368642286820844		 Val Algebraic dist: 0.9050415992736817
+             	RE1 dist: 0.2358231544494629		 Val RE1 dist: 1.1196586608886718
+             	SED dist: 0.4304517832669345		 Val SED dist: 2.0019508361816407
+
+
+Epoch 29106/40000: Training Loss: 0.2585898962887851		 Val Loss: 1.4293378829956054
+             	Training MAE: 0.067168690264225		 Val MAE: 0.06588737666606903
+             	Algebraic dist: 0.4956577474420721		 Val Algebraic dist: 1.0406816482543946
+             	RE1 dist: 0.27327879992398346		 Val RE1 dist: 1.3380634307861328
+             	SED dist: 0.4813694520430131		 Val SED dist: 2.8229467391967775
+
+
+Epoch 29107/40000: Training Loss: 0.18707591837102716		 Val Loss: 1.1667129516601562
+             	Training MAE: 0.06576511263847351		 Val MAE: 0.06613949686288834
+             	Algebraic dist: 0.4004924080588601		 Val Algebraic dist: 0.9256137847900391
+             	RE1 dist: 0.1895636428486217		 Val RE1 dist: 1.0281655311584472
+             	SED dist: 0.33866565877741034		 Val SED dist: 2.29708309173584
+
+
+Epoch 29108/40000: Training Loss: 0.19669723510742188		 Val Loss: 1.0120252609252929
+             	Training MAE: 0.0639878362417221		 Val MAE: 0.0645601898431778
+             	Algebraic dist: 0.4066275249827992		 Val Algebraic dist: 0.9358854293823242
+             	RE1 dist: 0.19754112850536		 Val RE1 dist: 0.9927290916442871
+             	SED dist: 0.35840907963839447		 Val SED dist: 1.9889005661010741
+
+
+Epoch 29109/40000: Training Loss: 0.20958037809892135		 Val Loss: 1.0860702514648437
+             	Training MAE: 0.06464909762144089		 Val MAE: 0.06740440428256989
+             	Algebraic dist: 0.4444911696694114		 Val Algebraic dist: 1.010982131958008
+             	RE1 dist: 0.2148929942737926		 Val RE1 dist: 1.107778263092041
+             	SED dist: 0.3840214555913752		 Val SED dist: 2.1358049392700194
+
+
+Epoch 29110/40000: Training Loss: 0.30536931211298163		 Val Loss: 0.965081787109375
+             	Training MAE: 0.06605608016252518		 Val MAE: 0.0714329406619072
+             	Algebraic dist: 0.5689639178189364		 Val Algebraic dist: 0.8999845504760742
+             	RE1 dist: 0.3213347521695224		 Val RE1 dist: 0.9107776641845703
+             	SED dist: 0.5749606219204989		 Val SED dist: 1.8914876937866212
+
+
+Epoch 29111/40000: Training Loss: 0.3233707601373846		 Val Loss: 1.778492546081543
+             	Training MAE: 0.06704304367303848		 Val MAE: 0.06398794054985046
+             	Algebraic dist: 0.573927489194003		 Val Algebraic dist: 1.1951537132263184
+             	RE1 dist: 0.3429833542216908		 Val RE1 dist: 1.5819002151489259
+             	SED dist: 0.6105470657348633		 Val SED dist: 3.5216251373291017
+
+
+Epoch 29112/40000: Training Loss: 0.32398798248984595		 Val Loss: 1.0819003105163574
+             	Training MAE: 0.0658152773976326		 Val MAE: 0.06967483460903168
+             	Algebraic dist: 0.5736573392694647		 Val Algebraic dist: 1.0335719108581543
+             	RE1 dist: 0.33638197725469415		 Val RE1 dist: 1.131576156616211
+             	SED dist: 0.6121585152365945		 Val SED dist: 2.12624568939209
+
+
+Epoch 29113/40000: Training Loss: 0.5009396292946555		 Val Loss: 1.043522834777832
+             	Training MAE: 0.06831088662147522		 Val MAE: 0.07521170377731323
+             	Algebraic dist: 0.7405139749700372		 Val Algebraic dist: 0.9246253967285156
+             	RE1 dist: 0.5493845506147905		 Val RE1 dist: 0.9786722183227539
+             	SED dist: 0.9651125994595614		 Val SED dist: 2.0452381134033204
+
+
+Epoch 29114/40000: Training Loss: 0.3925819830460982		 Val Loss: 1.552334976196289
+             	Training MAE: 0.06894249469041824		 Val MAE: 0.06600866466760635
+             	Algebraic dist: 0.6400998288934882		 Val Algebraic dist: 1.0502476692199707
+             	RE1 dist: 0.4372800046747381		 Val RE1 dist: 1.386343765258789
+             	SED dist: 0.7478503313931552		 Val SED dist: 3.0687419891357424
+
+
+Epoch 29115/40000: Training Loss: 0.6378753835504706		 Val Loss: 1.9357110977172851
+             	Training MAE: 0.06535118818283081		 Val MAE: 0.06377223879098892
+             	Algebraic dist: 0.8674864335493608		 Val Algebraic dist: 1.302290439605713
+             	RE1 dist: 0.686978513544256		 Val RE1 dist: 1.6599712371826172
+             	SED dist: 1.2402589971368962		 Val SED dist: 3.836264419555664
+
+
+Epoch 29116/40000: Training Loss: 0.9067629900845614		 Val Loss: 1.0362970352172851
+             	Training MAE: 0.07100709527730942		 Val MAE: 0.0716225728392601
+             	Algebraic dist: 1.0480235706676135		 Val Algebraic dist: 0.9124188423156738
+             	RE1 dist: 1.016740452159535		 Val RE1 dist: 1.0065977096557617
+             	SED dist: 1.7749401439319958		 Val SED dist: 2.034223175048828
+
+
+Epoch 29117/40000: Training Loss: 0.42141064730557526		 Val Loss: 1.1993735313415528
+             	Training MAE: 0.06557068973779678		 Val MAE: 0.06441530585289001
+             	Algebraic dist: 0.6919295571067117		 Val Algebraic dist: 1.0889059066772462
+             	RE1 dist: 0.49013423919677734		 Val RE1 dist: 1.3130081176757813
+             	SED dist: 0.8075108094648882		 Val SED dist: 2.363475036621094
+
+
+Epoch 29118/40000: Training Loss: 0.43713504617864435		 Val Loss: 1.3283079147338868
+             	Training MAE: 0.06487665325403214		 Val MAE: 0.06511697918176651
+             	Algebraic dist: 0.6956895914944735		 Val Algebraic dist: 1.0440134048461913
+             	RE1 dist: 0.4846187071366744		 Val RE1 dist: 1.2670344352722167
+             	SED dist: 0.8389083688909357		 Val SED dist: 2.620649719238281
+
+
+Epoch 29119/40000: Training Loss: 0.32511195269497956		 Val Loss: 1.2066705703735352
+             	Training MAE: 0.06727880239486694		 Val MAE: 0.07159645110368729
+             	Algebraic dist: 0.5924356200478293		 Val Algebraic dist: 0.9710750579833984
+             	RE1 dist: 0.3621681170030074		 Val RE1 dist: 1.0805082321166992
+             	SED dist: 0.6139210787686434		 Val SED dist: 2.3742584228515624
+
+
+Epoch 29120/40000: Training Loss: 0.36720050464976917		 Val Loss: 1.3171483039855958
+             	Training MAE: 0.06693807989358902		 Val MAE: 0.06871483474969864
+             	Algebraic dist: 0.6261388605291193		 Val Algebraic dist: 1.119969654083252
+             	RE1 dist: 0.3944642760536887		 Val RE1 dist: 1.436273956298828
+             	SED dist: 0.6984573277560148		 Val SED dist: 2.5972469329833983
+
+
+Epoch 29121/40000: Training Loss: 0.35943740064447577		 Val Loss: 1.5359457015991211
+             	Training MAE: 0.06779488921165466		 Val MAE: 0.06558943539857864
+             	Algebraic dist: 0.6152662797407671		 Val Algebraic dist: 1.0586603164672852
+             	RE1 dist: 0.4232775081287731		 Val RE1 dist: 1.1902463912963868
+             	SED dist: 0.682521169835871		 Val SED dist: 3.036111259460449
+
+
+Epoch 29122/40000: Training Loss: 0.2607813531702215		 Val Loss: 1.195344829559326
+             	Training MAE: 0.06616739183664322		 Val MAE: 0.06421177089214325
+             	Algebraic dist: 0.51970421184193		 Val Algebraic dist: 1.1047956466674804
+             	RE1 dist: 0.2920111092654141		 Val RE1 dist: 1.3377740859985352
+             	SED dist: 0.48557879708030005		 Val SED dist: 2.3551206588745117
+
+
+Epoch 29123/40000: Training Loss: 0.3098231445659291		 Val Loss: 1.5986473083496093
+             	Training MAE: 0.06590761989355087		 Val MAE: 0.06624794006347656
+             	Algebraic dist: 0.5593750260092996		 Val Algebraic dist: 1.1063480377197266
+             	RE1 dist: 0.3370899720625444		 Val RE1 dist: 1.58343563079834
+             	SED dist: 0.5840612324801359		 Val SED dist: 3.1614879608154296
+
+
+Epoch 29124/40000: Training Loss: 0.27289594303477893		 Val Loss: 1.1702235221862793
+             	Training MAE: 0.0701792910695076		 Val MAE: 0.06875734776258469
+             	Algebraic dist: 0.5165706981312145		 Val Algebraic dist: 1.0185991287231446
+             	RE1 dist: 0.2745593244379217		 Val RE1 dist: 1.1938653945922852
+             	SED dist: 0.5082954493435946		 Val SED dist: 2.3033863067626954
+
+
+Epoch 29125/40000: Training Loss: 0.2744716297496449		 Val Loss: 1.3552495956420898
+             	Training MAE: 0.0662933886051178		 Val MAE: 0.06616094708442688
+             	Algebraic dist: 0.5317300883206454		 Val Algebraic dist: 1.0231290817260743
+             	RE1 dist: 0.29857431758533826		 Val RE1 dist: 1.2758451461791993
+             	SED dist: 0.5133274685252797		 Val SED dist: 2.674320602416992
+
+
+Epoch 29126/40000: Training Loss: 0.31786647709933197		 Val Loss: 1.075699234008789
+             	Training MAE: 0.06610402464866638		 Val MAE: 0.06753727048635483
+             	Algebraic dist: 0.5644222606312145		 Val Algebraic dist: 0.957084846496582
+             	RE1 dist: 0.3542648228732022		 Val RE1 dist: 1.0464754104614258
+             	SED dist: 0.5998848134821112		 Val SED dist: 2.1148540496826174
+
+
+Epoch 29127/40000: Training Loss: 0.2935792099345814		 Val Loss: 2.065115547180176
+             	Training MAE: 0.06655468791723251		 Val MAE: 0.06540024280548096
+             	Algebraic dist: 0.5436790206215598		 Val Algebraic dist: 1.209585952758789
+             	RE1 dist: 0.3159111629832875		 Val RE1 dist: 1.7687801361083983
+             	SED dist: 0.5512211973016913		 Val SED dist: 4.0948234558105465
+
+
+Epoch 29128/40000: Training Loss: 0.48917055130004883		 Val Loss: 1.2699651718139648
+             	Training MAE: 0.06678815931081772		 Val MAE: 0.06611185520887375
+             	Algebraic dist: 0.7352067773992365		 Val Algebraic dist: 1.135829544067383
+             	RE1 dist: 0.5600293766368519		 Val RE1 dist: 1.2645405769348144
+             	SED dist: 0.942642558704723		 Val SED dist: 2.503574180603027
+
+
+Epoch 29129/40000: Training Loss: 0.29477867213162506		 Val Loss: 1.2624961853027343
+             	Training MAE: 0.06765671074390411		 Val MAE: 0.0669189840555191
+             	Algebraic dist: 0.5388259454206987		 Val Algebraic dist: 0.9954954147338867
+             	RE1 dist: 0.31398701667785645		 Val RE1 dist: 1.1738226890563965
+             	SED dist: 0.5534279563210227		 Val SED dist: 2.488766670227051
+
+
+Epoch 29130/40000: Training Loss: 0.21322690356861462		 Val Loss: 1.4129287719726562
+             	Training MAE: 0.06774649769067764		 Val MAE: 0.06989584863185883
+             	Algebraic dist: 0.4451348998329856		 Val Algebraic dist: 1.0460855484008789
+             	RE1 dist: 0.22310579906810413		 Val RE1 dist: 1.1280673027038575
+             	SED dist: 0.3901017362421209		 Val SED dist: 2.788235092163086
+
+
+Epoch 29131/40000: Training Loss: 0.24827610362659802		 Val Loss: 1.0929604530334474
+             	Training MAE: 0.06877580285072327		 Val MAE: 0.07101072371006012
+             	Algebraic dist: 0.4887086261402477		 Val Algebraic dist: 0.9547444343566894
+             	RE1 dist: 0.2539081790230491		 Val RE1 dist: 1.0414846420288086
+             	SED dist: 0.45944326574152167		 Val SED dist: 2.1475265502929686
+
+
+Epoch 29132/40000: Training Loss: 0.2780914740128951		 Val Loss: 1.4543073654174805
+             	Training MAE: 0.06839565932750702		 Val MAE: 0.06951303780078888
+             	Algebraic dist: 0.5380043549971147		 Val Algebraic dist: 1.08158540725708
+             	RE1 dist: 0.3055691719055176		 Val RE1 dist: 1.6961658477783204
+             	SED dist: 0.5193832137367942		 Val SED dist: 2.87127742767334
+
+
+Epoch 29133/40000: Training Loss: 0.3324533159082586		 Val Loss: 1.4893707275390624
+             	Training MAE: 0.06496834754943848		 Val MAE: 0.06464315950870514
+             	Algebraic dist: 0.5847990296103738		 Val Algebraic dist: 1.0031970024108887
+             	RE1 dist: 0.3950431563637473		 Val RE1 dist: 1.134127140045166
+             	SED dist: 0.6295421773737128		 Val SED dist: 2.943397331237793
+
+
+Epoch 29134/40000: Training Loss: 0.4654894308610396		 Val Loss: 1.326594352722168
+             	Training MAE: 0.06573700159788132		 Val MAE: 0.06905122101306915
+             	Algebraic dist: 0.7134927836331454		 Val Algebraic dist: 0.9958930015563965
+             	RE1 dist: 0.508601188659668		 Val RE1 dist: 1.2149419784545898
+             	SED dist: 0.8954227620905096		 Val SED dist: 2.615999221801758
+
+
+Epoch 29135/40000: Training Loss: 0.31062176010825415		 Val Loss: 1.3487459182739259
+             	Training MAE: 0.06755539774894714		 Val MAE: 0.06484955549240112
+             	Algebraic dist: 0.5669715621254661		 Val Algebraic dist: 1.0288429260253906
+             	RE1 dist: 0.3239262971011075		 Val RE1 dist: 1.2131229400634767
+             	SED dist: 0.5850586891174316		 Val SED dist: 2.6617464065551757
+
+
+Epoch 29136/40000: Training Loss: 0.2217653664675626		 Val Loss: 1.1272010803222656
+             	Training MAE: 0.0646093562245369		 Val MAE: 0.06629671156406403
+             	Algebraic dist: 0.46651818535544654		 Val Algebraic dist: 0.9444064140319824
+             	RE1 dist: 0.22687203233892267		 Val RE1 dist: 1.0437234878540038
+             	SED dist: 0.40855893221768463		 Val SED dist: 2.218454360961914
+
+
+Epoch 29137/40000: Training Loss: 0.19894736463373358		 Val Loss: 1.2271604537963867
+             	Training MAE: 0.06500449031591415		 Val MAE: 0.06693342328071594
+             	Algebraic dist: 0.42197418212890625		 Val Algebraic dist: 0.9665354728698731
+             	RE1 dist: 0.19796083190224387		 Val RE1 dist: 1.125045394897461
+             	SED dist: 0.3627677614038641		 Val SED dist: 2.4179594039916994
+
+
+Epoch 29138/40000: Training Loss: 0.21909845959056506		 Val Loss: 1.2987788200378418
+             	Training MAE: 0.06592118740081787		 Val MAE: 0.06810159981250763
+             	Algebraic dist: 0.4429739171808416		 Val Algebraic dist: 1.0030648231506347
+             	RE1 dist: 0.22018202868374911		 Val RE1 dist: 1.154176616668701
+             	SED dist: 0.40275794809514825		 Val SED dist: 2.5608543395996093
+
+
+Epoch 29139/40000: Training Loss: 0.19718506119467996		 Val Loss: 1.2164377212524413
+             	Training MAE: 0.06793607771396637		 Val MAE: 0.06755857914686203
+             	Algebraic dist: 0.41703224182128906		 Val Algebraic dist: 0.9830574035644531
+             	RE1 dist: 0.2026075233112682		 Val RE1 dist: 1.1490915298461915
+             	SED dist: 0.3579735972664573		 Val SED dist: 2.3965713500976564
+
+
+Epoch 29140/40000: Training Loss: 0.26215362548828125		 Val Loss: 1.2290178298950196
+             	Training MAE: 0.06535280495882034		 Val MAE: 0.06477168947458267
+             	Algebraic dist: 0.5004614049738104		 Val Algebraic dist: 0.956486701965332
+             	RE1 dist: 0.264411752874201		 Val RE1 dist: 0.937318229675293
+             	SED dist: 0.4889604395086115		 Val SED dist: 2.4220657348632812
+
+
+Epoch 29141/40000: Training Loss: 0.19974730231545187		 Val Loss: 1.1359609603881835
+             	Training MAE: 0.06698175519704819		 Val MAE: 0.06986892223358154
+             	Algebraic dist: 0.4229220043529164		 Val Algebraic dist: 0.9222192764282227
+             	RE1 dist: 0.2011807615106756		 Val RE1 dist: 1.0658191680908202
+             	SED dist: 0.36325773325833405		 Val SED dist: 2.2339199066162108
+
+
+Epoch 29142/40000: Training Loss: 0.18397573991255325		 Val Loss: 1.3526039123535156
+             	Training MAE: 0.0669788122177124		 Val MAE: 0.06626362353563309
+             	Algebraic dist: 0.3969892155040394		 Val Algebraic dist: 0.9877101898193359
+             	RE1 dist: 0.1743150841106068		 Val RE1 dist: 1.2167532920837403
+             	SED dist: 0.3320282589305531		 Val SED dist: 2.669331741333008
+
+
+Epoch 29143/40000: Training Loss: 0.21348374540155585		 Val Loss: 1.05413875579834
+             	Training MAE: 0.06506304442882538		 Val MAE: 0.06646247208118439
+             	Algebraic dist: 0.44170574708418414		 Val Algebraic dist: 0.9422100067138672
+             	RE1 dist: 0.21831993623213333		 Val RE1 dist: 0.9806806564331054
+             	SED dist: 0.3917014815590598		 Val SED dist: 2.0725770950317384
+
+
+Epoch 29144/40000: Training Loss: 0.2926663268696178		 Val Loss: 1.6880094528198242
+             	Training MAE: 0.06468605250120163		 Val MAE: 0.064999520778656
+             	Algebraic dist: 0.5322359258478339		 Val Algebraic dist: 1.1423870086669923
+             	RE1 dist: 0.31535608118230646		 Val RE1 dist: 1.5534399032592774
+             	SED dist: 0.5501381267200817		 Val SED dist: 3.340476226806641
+
+
+Epoch 29145/40000: Training Loss: 0.48192834854125977		 Val Loss: 1.040496253967285
+             	Training MAE: 0.06549696624279022		 Val MAE: 0.06496552377939224
+             	Algebraic dist: 0.715530742298473		 Val Algebraic dist: 0.8949754714965821
+             	RE1 dist: 0.5125502239574086		 Val RE1 dist: 0.9577705383300781
+             	SED dist: 0.928421367298473		 Val SED dist: 2.045188140869141
+
+
+Epoch 29146/40000: Training Loss: 0.43163637681440875		 Val Loss: 0.9985153198242187
+             	Training MAE: 0.06540531665086746		 Val MAE: 0.0642603188753128
+             	Algebraic dist: 0.6698365644975142		 Val Algebraic dist: 0.9383550643920898
+             	RE1 dist: 0.4498885761607777		 Val RE1 dist: 0.9746170043945312
+             	SED dist: 0.827806992964311		 Val SED dist: 1.961336326599121
+
+
+Epoch 29147/40000: Training Loss: 0.36986489729447797		 Val Loss: 1.3635489463806152
+             	Training MAE: 0.06511427462100983		 Val MAE: 0.0669245794415474
+             	Algebraic dist: 0.6300030621615323		 Val Algebraic dist: 1.0011610031127929
+             	RE1 dist: 0.3825407895174893		 Val RE1 dist: 1.2345863342285157
+             	SED dist: 0.7046179337935015		 Val SED dist: 2.690618133544922
+
+
+Epoch 29148/40000: Training Loss: 0.2372222596948797		 Val Loss: 0.9829823493957519
+             	Training MAE: 0.06569446623325348		 Val MAE: 0.06909335404634476
+             	Algebraic dist: 0.4600264375860041		 Val Algebraic dist: 0.8706877708435059
+             	RE1 dist: 0.23674704811789773		 Val RE1 dist: 0.8422229766845704
+             	SED dist: 0.438796650279652		 Val SED dist: 1.9285757064819335
+
+
+Epoch 29149/40000: Training Loss: 0.17799820683219217		 Val Loss: 1.0426273345947266
+             	Training MAE: 0.0673728957772255		 Val MAE: 0.06606284528970718
+             	Algebraic dist: 0.3936987356706099		 Val Algebraic dist: 0.8640318870544433
+             	RE1 dist: 0.1675873019478538		 Val RE1 dist: 0.9121964454650879
+             	SED dist: 0.3197840994054621		 Val SED dist: 2.0491540908813475
+
+
+Epoch 29150/40000: Training Loss: 0.1905591921372847		 Val Loss: 1.2180758476257325
+             	Training MAE: 0.06448934227228165		 Val MAE: 0.06725191324949265
+             	Algebraic dist: 0.4033651351928711		 Val Algebraic dist: 0.945765209197998
+             	RE1 dist: 0.18724031881852585		 Val RE1 dist: 1.197516632080078
+             	SED dist: 0.34593640674244275		 Val SED dist: 2.399415397644043
+
+
+Epoch 29151/40000: Training Loss: 0.20357270674272018		 Val Loss: 1.1124279022216796
+             	Training MAE: 0.0647810772061348		 Val MAE: 0.06607846170663834
+             	Algebraic dist: 0.4301675016229803		 Val Algebraic dist: 0.9018445014953613
+             	RE1 dist: 0.18827611749822443		 Val RE1 dist: 0.9288527488708496
+             	SED dist: 0.3720305616205389		 Val SED dist: 2.1890865325927735
+
+
+Epoch 29152/40000: Training Loss: 0.23804001374678177		 Val Loss: 0.8794416427612305
+             	Training MAE: 0.06477697193622589		 Val MAE: 0.0664495900273323
+             	Algebraic dist: 0.471828894181685		 Val Algebraic dist: 0.8381035804748536
+             	RE1 dist: 0.24269684878262607		 Val RE1 dist: 0.8101770401000976
+             	SED dist: 0.4409941759976474		 Val SED dist: 1.7224952697753906
+
+
+Epoch 29153/40000: Training Loss: 0.3799141537059437		 Val Loss: 1.0829492568969727
+             	Training MAE: 0.06479023396968842		 Val MAE: 0.0639665499329567
+             	Algebraic dist: 0.6314225196838379		 Val Algebraic dist: 0.9549673080444336
+             	RE1 dist: 0.3796936815435236		 Val RE1 dist: 0.8454219818115234
+             	SED dist: 0.7245928157459606		 Val SED dist: 2.130725860595703
+
+
+Epoch 29154/40000: Training Loss: 0.34226515076377173		 Val Loss: 1.0793270111083983
+             	Training MAE: 0.0661349892616272		 Val MAE: 0.07497552782297134
+             	Algebraic dist: 0.5879370082508434		 Val Algebraic dist: 1.0104547500610352
+             	RE1 dist: 0.33155159516768024		 Val RE1 dist: 1.0954821586608887
+             	SED dist: 0.6487956047058105		 Val SED dist: 2.117460250854492
+
+
+Epoch 29155/40000: Training Loss: 0.2735414071516557		 Val Loss: 1.4124014854431153
+             	Training MAE: 0.06965846568346024		 Val MAE: 0.06677412986755371
+             	Algebraic dist: 0.5195725614374335		 Val Algebraic dist: 1.050731372833252
+             	RE1 dist: 0.28197841210798785		 Val RE1 dist: 1.3507626533508301
+             	SED dist: 0.509554386138916		 Val SED dist: 2.788661766052246
+
+
+Epoch 29156/40000: Training Loss: 0.24034300717440518		 Val Loss: 1.2695281982421875
+             	Training MAE: 0.06548050791025162		 Val MAE: 0.06557638198137283
+             	Algebraic dist: 0.4653763771057129		 Val Algebraic dist: 0.9799648284912109
+             	RE1 dist: 0.22243150797757236		 Val RE1 dist: 1.0087699890136719
+             	SED dist: 0.44508201425725763		 Val SED dist: 2.5036865234375
+
+
+Epoch 29157/40000: Training Loss: 0.24716444448991257		 Val Loss: 1.214121150970459
+             	Training MAE: 0.06455713510513306		 Val MAE: 0.06444588303565979
+             	Algebraic dist: 0.47817876122214575		 Val Algebraic dist: 0.958506965637207
+             	RE1 dist: 0.239802902395075		 Val RE1 dist: 1.1719865798950195
+             	SED dist: 0.45933506705544214		 Val SED dist: 2.3925201416015627
+
+
+Epoch 29158/40000: Training Loss: 0.41649566997181287		 Val Loss: 1.528805637359619
+             	Training MAE: 0.06718648970127106		 Val MAE: 0.07049715518951416
+             	Algebraic dist: 0.6774434176358309		 Val Algebraic dist: 1.07357177734375
+             	RE1 dist: 0.4571445638483221		 Val RE1 dist: 1.3455962181091308
+             	SED dist: 0.7965328910134055		 Val SED dist: 3.019273567199707
+
+
+Epoch 29159/40000: Training Loss: 0.293015718460083		 Val Loss: 1.1407634735107421
+             	Training MAE: 0.07079226523637772		 Val MAE: 0.07173513621091843
+             	Algebraic dist: 0.5325010906566273		 Val Algebraic dist: 0.889460563659668
+             	RE1 dist: 0.2991520274769176		 Val RE1 dist: 0.9721319198608398
+             	SED dist: 0.5482274835759943		 Val SED dist: 2.242517852783203
+
+
+Epoch 29160/40000: Training Loss: 0.22762073170055042		 Val Loss: 1.1110971450805665
+             	Training MAE: 0.06706821918487549		 Val MAE: 0.06422192603349686
+             	Algebraic dist: 0.45156457207419654		 Val Algebraic dist: 0.9419845581054688
+             	RE1 dist: 0.22088423642245206		 Val RE1 dist: 1.0338943481445313
+             	SED dist: 0.41879770972511987		 Val SED dist: 2.1867706298828127
+
+
+Epoch 29161/40000: Training Loss: 0.23216754739934747		 Val Loss: 1.039717197418213
+             	Training MAE: 0.06446799635887146		 Val MAE: 0.06718140840530396
+             	Algebraic dist: 0.46865120801058685		 Val Algebraic dist: 0.8849139213562012
+             	RE1 dist: 0.21818635680458762		 Val RE1 dist: 0.916965389251709
+             	SED dist: 0.42928322878750885		 Val SED dist: 2.042742919921875
+
+
+Epoch 29162/40000: Training Loss: 0.33803781596097077		 Val Loss: 1.1017704010009766
+             	Training MAE: 0.06744638085365295		 Val MAE: 0.06530052423477173
+             	Algebraic dist: 0.591090895912864		 Val Algebraic dist: 0.8800867080688477
+             	RE1 dist: 0.36034859310496936		 Val RE1 dist: 0.890595817565918
+             	SED dist: 0.6398083946921609		 Val SED dist: 2.167986297607422
+
+
+Epoch 29163/40000: Training Loss: 0.25280189514160156		 Val Loss: 1.141050148010254
+             	Training MAE: 0.0668877586722374		 Val MAE: 0.06754522770643234
+             	Algebraic dist: 0.4853387745943936		 Val Algebraic dist: 0.8975193977355957
+             	RE1 dist: 0.23789587887850674		 Val RE1 dist: 0.9737086296081543
+             	SED dist: 0.46958945014260034		 Val SED dist: 2.245737838745117
+
+
+Epoch 29164/40000: Training Loss: 0.24272381175648083		 Val Loss: 0.8878155708312988
+             	Training MAE: 0.06555721163749695		 Val MAE: 0.06873210519552231
+             	Algebraic dist: 0.47260765595869586		 Val Algebraic dist: 0.8793634414672852
+             	RE1 dist: 0.24790740013122559		 Val RE1 dist: 0.8819122314453125
+             	SED dist: 0.4498231627724387		 Val SED dist: 1.7386077880859374
+
+
+Epoch 29165/40000: Training Loss: 0.22491953589699484		 Val Loss: 0.8740219116210938
+             	Training MAE: 0.06603256613016129		 Val MAE: 0.06901542842388153
+             	Algebraic dist: 0.44605662605979224		 Val Algebraic dist: 0.8846325874328613
+             	RE1 dist: 0.21749992804093796		 Val RE1 dist: 0.8630582809448242
+             	SED dist: 0.4141702218489213		 Val SED dist: 1.7109790802001954
+
+
+Epoch 29166/40000: Training Loss: 0.4244705113497647		 Val Loss: 1.1486213684082032
+             	Training MAE: 0.06630825996398926		 Val MAE: 0.0663709044456482
+             	Algebraic dist: 0.6621330868114125		 Val Algebraic dist: 1.0145230293273926
+             	RE1 dist: 0.421304009177468		 Val RE1 dist: 1.2050070762634277
+             	SED dist: 0.8131314190951261		 Val SED dist: 2.260682487487793
+
+
+Epoch 29167/40000: Training Loss: 0.4528329155661843		 Val Loss: 1.171816349029541
+             	Training MAE: 0.06635602563619614		 Val MAE: 0.06503933668136597
+             	Algebraic dist: 0.676851749420166		 Val Algebraic dist: 0.9895546913146973
+             	RE1 dist: 0.48986989801580255		 Val RE1 dist: 1.0616951942443849
+             	SED dist: 0.8696144277399237		 Val SED dist: 2.3076427459716795
+
+
+Epoch 29168/40000: Training Loss: 0.27746436812660913		 Val Loss: 1.049261474609375
+             	Training MAE: 0.06523440778255463		 Val MAE: 0.06663286685943604
+             	Algebraic dist: 0.5115334337407892		 Val Algebraic dist: 0.9586283683776855
+             	RE1 dist: 0.2678848179903897		 Val RE1 dist: 0.9759907722473145
+             	SED dist: 0.51964317668568		 Val SED dist: 2.0627923965454102
+
+
+Epoch 29169/40000: Training Loss: 0.22201434048739346		 Val Loss: 1.231306266784668
+             	Training MAE: 0.06519642472267151		 Val MAE: 0.06607142090797424
+             	Algebraic dist: 0.4393556768243963		 Val Algebraic dist: 0.9538850784301758
+             	RE1 dist: 0.21142777529629794		 Val RE1 dist: 1.093331527709961
+             	SED dist: 0.4085956486788663		 Val SED dist: 2.4267578125
+
+
+Epoch 29170/40000: Training Loss: 0.18071450970389627		 Val Loss: 1.1756032943725585
+             	Training MAE: 0.06731832027435303		 Val MAE: 0.06856338679790497
+             	Algebraic dist: 0.38739577206698333		 Val Algebraic dist: 0.8967355728149414
+             	RE1 dist: 0.1675528179515492		 Val RE1 dist: 0.959925651550293
+             	SED dist: 0.3250757564197887		 Val SED dist: 2.3139461517333983
+
+
+Epoch 29171/40000: Training Loss: 0.20212192968888718		 Val Loss: 0.9597109794616699
+             	Training MAE: 0.06608934700489044		 Val MAE: 0.06662394106388092
+             	Algebraic dist: 0.4188365069302646		 Val Algebraic dist: 0.8137510299682618
+             	RE1 dist: 0.18786085735667835		 Val RE1 dist: 0.7794074058532715
+             	SED dist: 0.36838821931318805		 Val SED dist: 1.8832609176635742
+
+
+Epoch 29172/40000: Training Loss: 0.22989524494517932		 Val Loss: 1.196207332611084
+             	Training MAE: 0.06623931229114532		 Val MAE: 0.06844323873519897
+             	Algebraic dist: 0.4499055255543102		 Val Algebraic dist: 0.9370912551879883
+             	RE1 dist: 0.21113087914206766		 Val RE1 dist: 1.1244690895080567
+             	SED dist: 0.4239196343855424		 Val SED dist: 2.355448341369629
+
+
+Epoch 29173/40000: Training Loss: 0.2775030569596724		 Val Loss: 1.2880990982055665
+             	Training MAE: 0.06581424176692963		 Val MAE: 0.06526503711938858
+             	Algebraic dist: 0.5123763951388273		 Val Algebraic dist: 0.9292855262756348
+             	RE1 dist: 0.2577929280020974		 Val RE1 dist: 1.000770378112793
+             	SED dist: 0.5194284265691583		 Val SED dist: 2.5404834747314453
+
+
+Epoch 29174/40000: Training Loss: 0.21868835796009412		 Val Loss: 1.2827858924865723
+             	Training MAE: 0.0637996718287468		 Val MAE: 0.06791679561138153
+             	Algebraic dist: 0.44448692148382013		 Val Algebraic dist: 1.0222402572631837
+             	RE1 dist: 0.20441696860573508		 Val RE1 dist: 1.0998518943786622
+             	SED dist: 0.4025425910949707		 Val SED dist: 2.529150390625
+
+
+Epoch 29175/40000: Training Loss: 0.3384990258650346		 Val Loss: 1.0896942138671875
+             	Training MAE: 0.064582958817482		 Val MAE: 0.06606696546077728
+             	Algebraic dist: 0.5647760304537687		 Val Algebraic dist: 0.937560749053955
+             	RE1 dist: 0.3228613029826771		 Val RE1 dist: 0.8659793853759765
+             	SED dist: 0.6418755704706366		 Val SED dist: 2.1437923431396486
+
+
+Epoch 29176/40000: Training Loss: 0.370900804346258		 Val Loss: 1.2588335037231446
+             	Training MAE: 0.06825318932533264		 Val MAE: 0.06896906346082687
+             	Algebraic dist: 0.6063933805985884		 Val Algebraic dist: 1.021477508544922
+             	RE1 dist: 0.34465542706576263		 Val RE1 dist: 1.2105786323547363
+             	SED dist: 0.7048429142345082		 Val SED dist: 2.4807754516601563
+
+
+Epoch 29177/40000: Training Loss: 0.28597296367992053		 Val Loss: 1.1730005264282226
+             	Training MAE: 0.06670434772968292		 Val MAE: 0.06828506290912628
+             	Algebraic dist: 0.5128955407576128		 Val Algebraic dist: 0.8845649719238281
+             	RE1 dist: 0.2801810828122226		 Val RE1 dist: 0.8668328285217285
+             	SED dist: 0.5359174554998224		 Val SED dist: 2.308549690246582
+
+
+Epoch 29178/40000: Training Loss: 0.19384245439009232		 Val Loss: 1.5379144668579101
+             	Training MAE: 0.06740552932024002		 Val MAE: 0.072085902094841
+             	Algebraic dist: 0.415637883273038		 Val Algebraic dist: 0.9649782180786133
+             	RE1 dist: 0.18819004839116876		 Val RE1 dist: 1.1373188018798828
+             	SED dist: 0.3511554544622248		 Val SED dist: 3.0362337112426756
+
+
+Epoch 29179/40000: Training Loss: 0.2717756141315807		 Val Loss: 1.2806878089904785
+             	Training MAE: 0.06855154782533646		 Val MAE: 0.07013341039419174
+             	Algebraic dist: 0.4976442076943137		 Val Algebraic dist: 0.9457853317260743
+             	RE1 dist: 0.256516695022583		 Val RE1 dist: 1.0710692405700684
+             	SED dist: 0.5064314061945135		 Val SED dist: 2.5234048843383787
+
+
+Epoch 29180/40000: Training Loss: 0.19300954992120917		 Val Loss: 1.0312240600585938
+             	Training MAE: 0.065529003739357		 Val MAE: 0.06674652546644211
+             	Algebraic dist: 0.39536185698075726		 Val Algebraic dist: 0.844331932067871
+             	RE1 dist: 0.1776731772856279		 Val RE1 dist: 0.7609657764434814
+             	SED dist: 0.35051441192626953		 Val SED dist: 2.0262779235839843
+
+
+Epoch 29181/40000: Training Loss: 0.19058166850696912		 Val Loss: 0.9437358856201172
+             	Training MAE: 0.06478915363550186		 Val MAE: 0.06358004361391068
+             	Algebraic dist: 0.4063426364551891		 Val Algebraic dist: 0.8411576271057128
+             	RE1 dist: 0.18764142556623978		 Val RE1 dist: 0.7672053813934326
+             	SED dist: 0.3461126414212314		 Val SED dist: 1.852198028564453
+
+
+Epoch 29182/40000: Training Loss: 0.2010716524991122		 Val Loss: 1.0585368156433106
+             	Training MAE: 0.0652330294251442		 Val MAE: 0.06851257383823395
+             	Algebraic dist: 0.4278607801957564		 Val Algebraic dist: 0.8754755973815918
+             	RE1 dist: 0.18289754607460715		 Val RE1 dist: 0.899073314666748
+             	SED dist: 0.3668268377130682		 Val SED dist: 2.0797557830810547
+
+
+Epoch 29183/40000: Training Loss: 0.23016834259033203		 Val Loss: 1.236004638671875
+             	Training MAE: 0.06539686769247055		 Val MAE: 0.06670187413692474
+             	Algebraic dist: 0.4387079152193936		 Val Algebraic dist: 0.9403393745422364
+             	RE1 dist: 0.20988397164778275		 Val RE1 dist: 1.1303326606750488
+             	SED dist: 0.4247830997813832		 Val SED dist: 2.4359209060668947
+
+
+Epoch 29184/40000: Training Loss: 0.32807738130742853		 Val Loss: 1.6128219604492187
+             	Training MAE: 0.06942689418792725		 Val MAE: 0.067409947514534
+             	Algebraic dist: 0.5571261752735485		 Val Algebraic dist: 1.0252535820007325
+             	RE1 dist: 0.3335518403486772		 Val RE1 dist: 1.2265118598937987
+             	SED dist: 0.6187533465298739		 Val SED dist: 3.1893232345581053
+
+
+Epoch 29185/40000: Training Loss: 0.3993313962763006		 Val Loss: 1.7441091537475586
+             	Training MAE: 0.06587342172861099		 Val MAE: 0.067263662815094
+             	Algebraic dist: 0.6363430456681685		 Val Algebraic dist: 1.114609718322754
+             	RE1 dist: 0.3766628178683194		 Val RE1 dist: 1.5085376739501952
+             	SED dist: 0.7629365921020508		 Val SED dist: 3.451802062988281
+
+
+Epoch 29186/40000: Training Loss: 0.43749150362881745		 Val Loss: 1.1706594467163085
+             	Training MAE: 0.06572805345058441		 Val MAE: 0.0652833804488182
+             	Algebraic dist: 0.6571755842729048		 Val Algebraic dist: 0.9685949325561524
+             	RE1 dist: 0.38937876441261987		 Val RE1 dist: 0.8805624961853027
+             	SED dist: 0.8389185125177557		 Val SED dist: 2.3050163269042967
+
+
+Epoch 29187/40000: Training Loss: 0.29887793280861596		 Val Loss: 1.1308496475219727
+             	Training MAE: 0.06797590851783752		 Val MAE: 0.06904245167970657
+             	Algebraic dist: 0.5291746312921698		 Val Algebraic dist: 0.8983705520629883
+             	RE1 dist: 0.2950105233625932		 Val RE1 dist: 0.8911837577819824
+             	SED dist: 0.5608875968239524		 Val SED dist: 2.2244232177734373
+
+
+Epoch 29188/40000: Training Loss: 0.4184348366477273		 Val Loss: 1.9153169631958007
+             	Training MAE: 0.06952203065156937		 Val MAE: 0.07091955840587616
+             	Algebraic dist: 0.6351185711947355		 Val Algebraic dist: 1.321417236328125
+             	RE1 dist: 0.4373061006719416		 Val RE1 dist: 1.7318675994873047
+             	SED dist: 0.7994492270729758		 Val SED dist: 3.792410659790039
+
+
+Epoch 29189/40000: Training Loss: 0.5814719633622603		 Val Loss: 1.0403332710266113
+             	Training MAE: 0.06824842840433121		 Val MAE: 0.06626839190721512
+             	Algebraic dist: 0.8048562136563387		 Val Algebraic dist: 0.9366228103637695
+             	RE1 dist: 0.6566570455377753		 Val RE1 dist: 0.9165996551513672
+             	SED dist: 1.1262884140014648		 Val SED dist: 2.0441635131835936
+
+
+Epoch 29190/40000: Training Loss: 0.20863472331653943		 Val Loss: 1.158742332458496
+             	Training MAE: 0.06521452963352203		 Val MAE: 0.06746602058410645
+             	Algebraic dist: 0.41636679389260034		 Val Algebraic dist: 0.9014409065246582
+             	RE1 dist: 0.19331841035322708		 Val RE1 dist: 0.9858180999755859
+             	SED dist: 0.3815828670154918		 Val SED dist: 2.2810693740844727
+
+
+Epoch 29191/40000: Training Loss: 0.2072493163022128		 Val Loss: 1.5786017417907714
+             	Training MAE: 0.06645992398262024		 Val MAE: 0.06621424108743668
+             	Algebraic dist: 0.43396841395985		 Val Algebraic dist: 1.0749076843261718
+             	RE1 dist: 0.19091118465770374		 Val RE1 dist: 1.3027786254882812
+             	SED dist: 0.3787167722528631		 Val SED dist: 3.1212543487548827
+
+
+Epoch 29192/40000: Training Loss: 0.3050342256372625		 Val Loss: 1.2312467575073243
+             	Training MAE: 0.0661955326795578		 Val MAE: 0.06787671148777008
+             	Algebraic dist: 0.5435536991466176		 Val Algebraic dist: 0.9468027114868164
+             	RE1 dist: 0.3139027248729359		 Val RE1 dist: 1.1019965171813966
+             	SED dist: 0.5740613503889604		 Val SED dist: 2.4256893157958985
+
+
+Epoch 29193/40000: Training Loss: 0.5610711791298606		 Val Loss: 1.533205795288086
+             	Training MAE: 0.06536684930324554		 Val MAE: 0.06528215110301971
+             	Algebraic dist: 0.7729141928932883		 Val Algebraic dist: 0.9708669662475586
+             	RE1 dist: 0.5847660411487926		 Val RE1 dist: 1.07875394821167
+             	SED dist: 1.0865541804920544		 Val SED dist: 3.030615234375
+
+
+Epoch 29194/40000: Training Loss: 0.38293933868408203		 Val Loss: 0.9906709671020508
+             	Training MAE: 0.0693921372294426		 Val MAE: 0.07678454369306564
+             	Algebraic dist: 0.6249061931263317		 Val Algebraic dist: 0.8608826637268067
+             	RE1 dist: 0.3730473951859908		 Val RE1 dist: 0.9675441741943359
+             	SED dist: 0.7285790009932085		 Val SED dist: 1.93836669921875
+
+
+Epoch 29195/40000: Training Loss: 0.28381987051530316		 Val Loss: 1.1787253379821778
+             	Training MAE: 0.06880839169025421		 Val MAE: 0.06400743126869202
+             	Algebraic dist: 0.49899318001487036		 Val Algebraic dist: 1.0218694686889649
+             	RE1 dist: 0.2686725529757413		 Val RE1 dist: 1.0757362365722656
+             	SED dist: 0.5302442203868519		 Val SED dist: 2.3215335845947265
+
+
+Epoch 29196/40000: Training Loss: 0.24674864248795944		 Val Loss: 1.0764979362487792
+             	Training MAE: 0.06487206369638443		 Val MAE: 0.06838514655828476
+             	Algebraic dist: 0.4866750023581765		 Val Algebraic dist: 0.8777903556823731
+             	RE1 dist: 0.24231206287037244		 Val RE1 dist: 0.8546412467956543
+             	SED dist: 0.4581575393676758		 Val SED dist: 2.115793800354004
+
+
+Epoch 29197/40000: Training Loss: 0.2734748666936701		 Val Loss: 1.349700355529785
+             	Training MAE: 0.06574460864067078		 Val MAE: 0.06519250571727753
+             	Algebraic dist: 0.52163011377508		 Val Algebraic dist: 0.9723057746887207
+             	RE1 dist: 0.26870187846097077		 Val RE1 dist: 1.0153353691101075
+             	SED dist: 0.5111703439192339		 Val SED dist: 2.6635986328125
+
+
+Epoch 29198/40000: Training Loss: 0.23611983385953036		 Val Loss: 1.0190655708312988
+             	Training MAE: 0.06493578851222992		 Val MAE: 0.06589236110448837
+             	Algebraic dist: 0.4683680967851119		 Val Algebraic dist: 0.8337928771972656
+             	RE1 dist: 0.22916386344216086		 Val RE1 dist: 0.7696314811706543
+             	SED dist: 0.43693525140935724		 Val SED dist: 2.002505302429199
+
+
+Epoch 29199/40000: Training Loss: 0.2545510638843883		 Val Loss: 1.1181019783020019
+             	Training MAE: 0.06450987607240677		 Val MAE: 0.0643480122089386
+             	Algebraic dist: 0.48622114008123224		 Val Algebraic dist: 1.0136935234069824
+             	RE1 dist: 0.25183083794333716		 Val RE1 dist: 1.0187107086181642
+             	SED dist: 0.4740326621315696		 Val SED dist: 2.2007877349853517
+
+
+Epoch 29200/40000: Training Loss: 0.3286322030154141		 Val Loss: 1.2949257850646974
+             	Training MAE: 0.06665914505720139		 Val MAE: 0.07162719964981079
+             	Algebraic dist: 0.5603183833035555		 Val Algebraic dist: 0.9755749702453613
+             	RE1 dist: 0.32182290337302466		 Val RE1 dist: 1.1453933715820312
+             	SED dist: 0.6207934292879972		 Val SED dist: 2.5508821487426756
+
+
+Epoch 29201/40000: Training Loss: 0.23172053423794833		 Val Loss: 1.479534912109375
+             	Training MAE: 0.0670376867055893		 Val MAE: 0.06448516249656677
+             	Algebraic dist: 0.47554393248124555		 Val Algebraic dist: 1.0380579948425293
+             	RE1 dist: 0.22501095858487216		 Val RE1 dist: 1.201042079925537
+             	SED dist: 0.42711444334550336		 Val SED dist: 2.9240066528320314
+
+
+Epoch 29202/40000: Training Loss: 0.24711927500638095		 Val Loss: 1.2789484024047852
+             	Training MAE: 0.06481388956308365		 Val MAE: 0.06567400693893433
+             	Algebraic dist: 0.47052964297207917		 Val Algebraic dist: 0.9547407150268554
+             	RE1 dist: 0.22932078621604227		 Val RE1 dist: 1.074784755706787
+             	SED dist: 0.4590360901572488		 Val SED dist: 2.5221614837646484
+
+
+Epoch 29203/40000: Training Loss: 0.18970088525251907		 Val Loss: 1.1084280014038086
+             	Training MAE: 0.06583491712808609		 Val MAE: 0.06531746685504913
+             	Algebraic dist: 0.40217130834406073		 Val Algebraic dist: 0.900278377532959
+             	RE1 dist: 0.18829725005409934		 Val RE1 dist: 0.9177776336669922
+             	SED dist: 0.34379883245988324		 Val SED dist: 2.18158016204834
+
+
+Epoch 29204/40000: Training Loss: 0.20788301121104846		 Val Loss: 1.0406808853149414
+             	Training MAE: 0.06433311849832535		 Val MAE: 0.06468356400728226
+             	Algebraic dist: 0.43180483037775214		 Val Algebraic dist: 0.8794341087341309
+             	RE1 dist: 0.20235896110534668		 Val RE1 dist: 0.8966405868530274
+             	SED dist: 0.38058827140114526		 Val SED dist: 2.046133804321289
+
+
+Epoch 29205/40000: Training Loss: 0.178324970332059		 Val Loss: 1.1130464553833008
+             	Training MAE: 0.06504607200622559		 Val MAE: 0.06941615790128708
+             	Algebraic dist: 0.3856432654640891		 Val Algebraic dist: 0.8941930770874024
+             	RE1 dist: 0.16782617568969727		 Val RE1 dist: 1.1034149169921874
+             	SED dist: 0.32102103666825726		 Val SED dist: 2.1884666442871095
+
+
+Epoch 29206/40000: Training Loss: 0.2508101896806197		 Val Loss: 1.9707592010498047
+             	Training MAE: 0.06865229457616806		 Val MAE: 0.06484577059745789
+             	Algebraic dist: 0.48102894696322357		 Val Algebraic dist: 1.163144874572754
+             	RE1 dist: 0.2507076480171897		 Val RE1 dist: 1.4448545455932618
+             	SED dist: 0.46462995355779474		 Val SED dist: 3.906023406982422
+
+
+Epoch 29207/40000: Training Loss: 0.2895678390156139		 Val Loss: 1.0767393112182617
+             	Training MAE: 0.06412730365991592		 Val MAE: 0.0654747411608696
+             	Algebraic dist: 0.5314729863947089		 Val Algebraic dist: 0.8791667938232421
+             	RE1 dist: 0.2871822877363725		 Val RE1 dist: 0.8730020523071289
+             	SED dist: 0.54400972886519		 Val SED dist: 2.1182226181030273
+
+
+Epoch 29208/40000: Training Loss: 0.18356626684015448		 Val Loss: 1.1089381217956542
+             	Training MAE: 0.06394939869642258		 Val MAE: 0.06681051105260849
+             	Algebraic dist: 0.40106864409013226		 Val Algebraic dist: 0.8635796546936035
+             	RE1 dist: 0.17676777189428156		 Val RE1 dist: 0.9660231590270996
+             	SED dist: 0.33231158690019086		 Val SED dist: 2.1815153121948243
+
+
+Epoch 29209/40000: Training Loss: 0.24116784876043146		 Val Loss: 1.3556448936462402
+             	Training MAE: 0.06575499475002289		 Val MAE: 0.06601408123970032
+             	Algebraic dist: 0.46002457358620386		 Val Algebraic dist: 1.003866958618164
+             	RE1 dist: 0.22572734139182352		 Val RE1 dist: 1.0020430564880372
+             	SED dist: 0.4466503316705877		 Val SED dist: 2.6749156951904296
+
+
+Epoch 29210/40000: Training Loss: 0.40399971875277435		 Val Loss: 0.9584039688110352
+             	Training MAE: 0.06483789533376694		 Val MAE: 0.0680609717965126
+             	Algebraic dist: 0.6320623051036488		 Val Algebraic dist: 0.9110363960266114
+             	RE1 dist: 0.37888279828158294		 Val RE1 dist: 0.820667839050293
+             	SED dist: 0.7726166465065696		 Val SED dist: 1.8798233032226563
+
+
+Epoch 29211/40000: Training Loss: 0.7202029228210449		 Val Loss: 1.3761930465698242
+             	Training MAE: 0.06658369302749634		 Val MAE: 0.0659240335226059
+             	Algebraic dist: 0.8780847896229137		 Val Algebraic dist: 1.0598587036132812
+             	RE1 dist: 0.727770285172896		 Val RE1 dist: 1.141400146484375
+             	SED dist: 1.4043039842085405		 Val SED dist: 2.71667423248291
+
+
+Epoch 29212/40000: Training Loss: 0.33108514005487616		 Val Loss: 1.372168731689453
+             	Training MAE: 0.0656491294503212		 Val MAE: 0.06515710800886154
+             	Algebraic dist: 0.5582922588695179		 Val Algebraic dist: 0.9317559242248535
+             	RE1 dist: 0.3186110799962824		 Val RE1 dist: 1.0446135520935058
+             	SED dist: 0.6263405192982067		 Val SED dist: 2.7083234786987305
+
+
+Epoch 29213/40000: Training Loss: 0.27630404992537066		 Val Loss: 1.3404977798461915
+             	Training MAE: 0.06594883650541306		 Val MAE: 0.06765218824148178
+             	Algebraic dist: 0.5240964456038042		 Val Algebraic dist: 0.9708909034729004
+             	RE1 dist: 0.29637172005393286		 Val RE1 dist: 0.966015625
+             	SED dist: 0.5169304500926625		 Val SED dist: 2.644779586791992
+
+
+Epoch 29214/40000: Training Loss: 0.2350951758298007		 Val Loss: 0.9855350494384766
+             	Training MAE: 0.0713934525847435		 Val MAE: 0.07091574370861053
+             	Algebraic dist: 0.4664443622935902		 Val Algebraic dist: 0.8105772018432618
+             	RE1 dist: 0.22467054020274768		 Val RE1 dist: 0.8567880630493164
+             	SED dist: 0.4319568547335538		 Val SED dist: 1.9329147338867188
+
+
+Epoch 29215/40000: Training Loss: 0.3170992244373668		 Val Loss: 1.325760269165039
+             	Training MAE: 0.06548267602920532		 Val MAE: 0.06716709583997726
+             	Algebraic dist: 0.5516936995766379		 Val Algebraic dist: 1.0178271293640138
+             	RE1 dist: 0.3230280009183017		 Val RE1 dist: 1.4050537109375
+             	SED dist: 0.5983826463872736		 Val SED dist: 2.614874267578125
+
+
+Epoch 29216/40000: Training Loss: 0.5609604228626598		 Val Loss: 1.3618548393249512
+             	Training MAE: 0.06514628976583481		 Val MAE: 0.06634477525949478
+             	Algebraic dist: 0.7941992499611594		 Val Algebraic dist: 1.095649528503418
+             	RE1 dist: 0.5993971391157671		 Val RE1 dist: 1.3732331275939942
+             	SED dist: 1.0866455598310991		 Val SED dist: 2.687372589111328
+
+
+Epoch 29217/40000: Training Loss: 0.44295445355502044		 Val Loss: 0.9396136283874512
+             	Training MAE: 0.06793718785047531		 Val MAE: 0.06734086573123932
+             	Algebraic dist: 0.6987585587935015		 Val Algebraic dist: 0.9244657516479492
+             	RE1 dist: 0.48833227157592773		 Val RE1 dist: 0.9344709396362305
+             	SED dist: 0.8491424213756215		 Val SED dist: 1.842533493041992
+
+
+Epoch 29218/40000: Training Loss: 0.49613129008900037		 Val Loss: 1.3899555206298828
+             	Training MAE: 0.06544587016105652		 Val MAE: 0.06503073126077652
+             	Algebraic dist: 0.729520017450506		 Val Algebraic dist: 0.9769270896911622
+             	RE1 dist: 0.5084401043978605		 Val RE1 dist: 1.140143871307373
+             	SED dist: 0.9567920511419122		 Val SED dist: 2.744206428527832
+
+
+Epoch 29219/40000: Training Loss: 0.6276223442771218		 Val Loss: 1.1096892356872559
+             	Training MAE: 0.06559845060110092		 Val MAE: 0.06687071174383163
+             	Algebraic dist: 0.8617975061590021		 Val Algebraic dist: 0.9523237228393555
+             	RE1 dist: 0.6812781854109331		 Val RE1 dist: 1.064566421508789
+             	SED dist: 1.2197074890136719		 Val SED dist: 2.1833911895751954
+
+
+Epoch 29220/40000: Training Loss: 0.5037522749467329		 Val Loss: 1.1197270393371581
+             	Training MAE: 0.06591460108757019		 Val MAE: 0.06705442070960999
+             	Algebraic dist: 0.7733445601029829		 Val Algebraic dist: 0.9925581932067871
+             	RE1 dist: 0.6108325611461293		 Val RE1 dist: 1.1421364784240722
+             	SED dist: 0.972054048018022		 Val SED dist: 2.202766990661621
+
+
