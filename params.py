@@ -1,8 +1,5 @@
 import torch
 device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32"
-# 2003501 output_0.008_orig_frozen_4_8.log
-# 2003891 output_0.008_pretext_frozen_4_8.log
-
 
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &   ### REMEMBER TO FIRST MOVE THE MODEL FROM ORIGINAL PATH TO MNT PATH IN CASE OF COMPUTER==0 AND THE LAST RUN EXITED!!
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
@@ -13,7 +10,7 @@ PRETEXT_TRAIN = True
 KITTI2SCENEFLOW = False
 SCENEFLOW = False
 MODEL = CLIP_MODEL_NAME 
-FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [4]
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [8]
 COMPUTER = 1 # 0=132.72.49.250 1=else
 SEQ_RATIOS = [0.008]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
 LR = [1e-4]             
