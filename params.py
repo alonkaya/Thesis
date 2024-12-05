@@ -15,7 +15,7 @@ COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SEQ_RATIOS = [150]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 LR = [1e-4]             
 KITTI2SCENEFLOW = True
-FRESH_MLP = False
+FRESH_MLP = True
 FRESH_CONV = False
 ADDITIONS = "__fresh_MLP_CONV" if FRESH_CONV and FRESH_MLP else "__fresh_MLP" if FRESH_MLP else ""  ## REMEMBER TO PUT "__" !!!!!
 
