@@ -360,18 +360,12 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
         if i in test_sequences_stereo:
             test_datasets.append(dataset_stereo)
 
-    # Concatenate datasets
-    concat_train_dataset = ConcatDataset(train_datasets)
-    concat_val_dataset = ConcatDataset(val_datasets)
-    concat_test_dataset = ConcatDataset(test_datasets)
-
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, collate_fn=custom_collate_fn)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
-    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
-    
+    train_loader = DataLoader(ConcatDataset(train_datasets), batch_size=batch_size, shuffle=True, num_workers=num_workers, collate_fn=custom_collate_fn)
+    val_loader = DataLoader(ConcatDataset(val_datasets), batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
+    test_loader = DataLoader(ConcatDataset(test_datasets), batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
+     
     return train_loader, val_loader, test_loader
-
 
 def get_dataloader_monkaa(data_ratio, batch_size, num_workers=NUM_WORKERS): 
     R = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32).to(device)
@@ -414,22 +408,71 @@ def get_dataloader_monkaa(data_ratio, batch_size, num_workers=NUM_WORKERS):
         if seq_name in test_sequences_monkaa:
             test_datasets.append(dataset_stereo)
 
-    # Concatenate datasets
-    concat_train_dataset = ConcatDataset(train_datasets)
-    concat_val_dataset = ConcatDataset(val_datasets)
-    concat_test_dataset = ConcatDataset(test_datasets)
+    # Create a DataLoader
+    train_loader = DataLoader(ConcatDataset(train_datasets), batch_size=batch_size, shuffle=True, num_workers=num_workers, collate_fn=custom_collate_fn)
+    val_loader = DataLoader(ConcatDataset(val_datasets), batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
+    test_loader = DataLoader(ConcatDataset(test_datasets), batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
+      
+    return train_loader, val_loader, test_loader
+
+def get_dataloader_flying(train_size, batch_size, num_workers=NUM_WORKERS): 
+    R = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32).to(device)
+    t = torch.tensor([1, 0, 0], dtype=torch.float32).to(device)
+    K = torch.tensor([[105, 0,    479.5],
+                      [0,   1050, 269.5],
+                      [0,   0,    1]], dtype=torch.float32).to(device)
+    original_image_size = torch.tensor([960, 540]).to(device)
+    resized = torch.tensor([RESIZE, RESIZE]).to(device)
+    K = adjust_k_resize(K, original_image_size, resized)
+
+    flying_path_train = "SceneFlow/FlyingThings_cleanpass_webp/TRAIN/A"
+    flying_path_val = "SceneFlow/FlyingThings_cleanpass_webp/TEST/A"
+    flying_path_test = "SceneFlow/FlyingThings_cleanpass_webp/TEST/B"
+    train_datasets, val_datasets, test_datasets = [], [], []
+    for path, length in zip([flying_path_train, flying_path_val, flying_path_test], [train_size, max(train_size//4, 50), test_sequences_flying]):
+        for i, seq_name in enumerate(os.listdir(flying_path_train)): 
+            if i==length: break
+
+            seq_path = os.path.join(path, seq_name) 
+            left_path = os.path.join(seq_path, 'left')
+            right_path = os.path.join(seq_path, 'right')         
+
+            # Indices of 'good' image frames
+            valid_indices = get_valid_indices_stereo(left_path)
+
+            images_0 = {idx: torchvision.io.read_image(os.path.join(left_path, f'{idx:04}.{IMAGE_TYPE}')).to(device) for idx in valid_indices} if INIT_DATA else None    
+            images_1 = {idx: torchvision.io.read_image(os.path.join(right_path, f'{idx:04}.{IMAGE_TYPE}')).to(device) for idx in valid_indices} if INIT_DATA else None
+
+            keypoints_dict = load_keypoints(os.path.join(seq_path, 'keypoints.txt'))
+
+            dataset_stereo = Dataset_stereo(seq_path, transform, K, K, R, t, images_0, images_1, keypoints_dict, valid_indices, seq_name=seq_name)
+
+            if "TRAIN" in path:
+                train_datasets.append(dataset_stereo)    
+                print(f'Added {seq_name} to train') 
+
+            elif "TEST/A" in path:
+                print(f'Added {seq_name} to val')
+                val_datasets.append(dataset_stereo)
+
+            else:
+                print(f'Added {seq_name} to test')
+                test_datasets.append(dataset_stereo)
+
 
     # Create a DataLoader
-    train_loader = DataLoader(concat_train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, collate_fn=custom_collate_fn)
-    val_loader = DataLoader(concat_val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
-    test_loader = DataLoader(concat_test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
+    train_loader = DataLoader(ConcatDataset(train_datasets), batch_size=batch_size, shuffle=True, num_workers=num_workers, collate_fn=custom_collate_fn)
+    val_loader = DataLoader(ConcatDataset(val_datasets), batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
+    test_loader = DataLoader(ConcatDataset(test_datasets), batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=custom_collate_fn)
     
     return train_loader, val_loader, test_loader
 
 def get_data_loaders(train_size=None, part=None, batch_size=BATCH_SIZE):
     if STEREO and not SCENEFLOW:
         return get_dataloader_stereo(train_size, part, batch_size)
-    if SCENEFLOW:
+    if SCENEFLOW and FLYING:
+        return get_dataloader_flying(train_size, batch_size)
+    elif SCENEFLOW:
         return get_dataloader_monkaa(train_size, batch_size)
     elif USE_REALESTATE:
         if REALESTATE_SPLIT:
@@ -544,6 +587,42 @@ def save_keypoints_monkaa():
         with open(filepath, 'a') as f:
             line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
             f.write(line)
+
+def save_keypoints_flying():
+    F_flying = torch.tensor([[ 0,     0,        0],
+                             [ 0,     0,       -9.5238e-04],
+                             [ 0,     9.5238e-04,     0]]).to(device)
+    
+    flying_path_train = "SceneFlow/FlyingThings_cleanpass_webp/TRAIN/A"
+    flying_path_val = "SceneFlow/FlyingThings_cleanpass_webp/TEST/A"
+    flying_path_test = "SceneFlow/FlyingThings_cleanpass_webp/TEST/B"
+    for path, length in zip([flying_path_train, flying_path_val, flying_path_test], [train_sequences_flying, train_sequences_flying//4, test_sequences_flying]):
+        for i, seq_name in enumerate(os.listdir(path)): 
+            seq_path = os.path.join(path, seq_name) 
+            left_path = os.path.join(seq_path, 'left')
+            right_path = os.path.join(seq_path, 'right')
+
+            # Indices of 'good' image frames
+            valid_indices = get_valid_indices_stereo(left_path)
+
+            for idx in valid_indices:
+                img0 = torchvision.io.read_image(os.path.join(left_path, f'{idx:04}.{IMAGE_TYPE}')) # shape (channels, height, width)
+                img1 = torchvision.io.read_image(os.path.join(right_path, f'{idx:04}.{IMAGE_TYPE}')) # shape (channels, height, width)
+                
+                img0 = TF.rgb_to_grayscale(img0, num_output_channels=1)
+                img1 = TF.rgb_to_grayscale(img1, num_output_channels=1)
+                
+                # Normalize F-Matrix
+                F = norm_layer(F_flying.view(-1, 9)).view(3,3)
+
+                epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False, threshold=0.3)
+                if epi.pts1.shape[0] < 5:
+                    print(f'{epi.pts1.shape[0]} points at {seq_name}, {idx}')
+
+                filepath = os.path.join(seq_path, f'keypoints.txt')
+                with open(filepath, 'a') as f:
+                    line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
+                    f.write(line)
 
 def save_keypoints_realestate():
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
@@ -663,6 +742,6 @@ def remove_bad_monkaa():
     print(i)
 if __name__ == "__main__":
     # train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.02, part="tail", batch_size=1)
-    remove_bad_monkaa()
+    save_keypoints_flying()
 
     

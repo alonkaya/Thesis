@@ -28,17 +28,6 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.layers(x)
 
-class GroupedConvolution(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, groups):
-        super(GroupedConvolution, self).__init__()
-        self.grouped_conv = nn.Conv2d(in_channels=in_channels,
-                                      out_channels=out_channels,
-                                      kernel_size=kernel_size,
-                                      groups=groups).to(device)
-    
-    def forward(self, x):
-        return self.grouped_conv(x)
-
 class ConvNet(nn.Module):
     def __init__(self, input_dim, batch_size, hidden_dims=CONV_HIDDEN_DIM):
         super(ConvNet, self).__init__()

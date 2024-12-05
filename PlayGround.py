@@ -675,12 +675,13 @@ def plot_errors():
     plt.legend()
     plt.grid(True)
 
-    fig1.savefig('SED_orig_frozen.png')
-    fig2.savefig('SED_orig_frozen_bar.png')
-    fig3.savefig('SED_pretext_frozen.png')
-    fig4.savefig('SED_pretext_bar_frozen.png')
-    fig5.savefig('SED_models.png')
-    fig6.savefig('SED_model_bar.png')
+    os.makedirs('results', exist_ok=True)
+    fig1.savefig('results/SED_orig_frozen.png')
+    fig2.savefig('results/SED_orig_frozen_bar.png')
+    fig3.savefig('results/SED_pretext_frozen.png')
+    fig4.savefig('results/SED_pretext_bar_frozen.png')
+    fig5.savefig('results/SED_models.png')
+    fig6.savefig('results/SED_model_bar.png')
     # plt.show()
 
 

@@ -49,12 +49,13 @@ if __name__ == "__main__":
                 if SCENEFLOW:
                         num_epochs = 16000
                 else:
-                        num_epochs = 2000 if train_size==0.3 else 3000 if train_size==0.2 else 4000 if train_size==0.1 else 8000 if train_size==0.05 else 10000 if train_size==0.0375 else 14000 if train_size==0.025 else 25000 if train_size==0.015 else 40000 if train_size==0.008 else 70000 if train_size==0.004 else 0
+                        num_epochs = 2000 if train_size==0.3 else 4500 if train_size==0.2 else 7000 if train_size==0.1 else 10000 if train_size==0.05 else 15000 if train_size==0.0375 else 24000 if train_size==0.025 else 37000 if train_size==0.015 else 50000 if train_size==0.008 else 70000 if train_size==0.004 else 0
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
-
-                batch_size = 4 if train_size==0.05 and not PRETEXT_TRAIN and MODEL==CLIP_MODEL_NAME and not SCENEFLOW else batch_size
+                
+                if (not PRETEXT_TRAIN and MODEL==CLIP_MODEL_NAME and not SCENEFLOW) and (train_size==0.05 or (train_size==0.025 and part=="head" and fl==0)):
+                        batch_size = 4 
 
                 coeff = f'ALG_sqr_{alg_coeff}__' if alg_coeff > 0 else f'RE1_{re1_coeff}__' if re1_coeff > 0 else f'SED_{sed_coeff}__' if sed_coeff > 0 else ''
                 dataset = 'Kitti2Sceneflow' if KITTI2SCENEFLOW else 'Sceneflow' if SCENEFLOW else 'Stereo' if STEREO else 'RealEstate_split' if USE_REALESTATE and REALESTATE_SPLIT else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
@@ -70,6 +71,11 @@ if __name__ == "__main__":
                                         "Trained_vit" if TRAINED_VIT else "", \
                                         f"""BS_{batch_size}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
                 
+                ## TODO ###################################################################################
+                if not os.path.exists(os.path.join(plots_path, "model.pth")):
+                        continue
+                ## TODO ###################################################################################
+
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
 
                 model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
