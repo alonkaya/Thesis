@@ -714,37 +714,38 @@ def save_keypoints_realestate():
     # Function to visualize a tensor image
 
 def remove_images_with_low_keypoints():
-    train_loader, val_loader, test_loader = get_dataloader_flying(train_size=580, batch_size=1)
+    train_loader, val_loader, test_loader = get_dataloader_flying(train_size=600, batch_size=1)
     print(len(train_loader), len(val_loader), len(test_loader))
     i=0
-    for _, _, _, pts1, _, _, img_name, seq_path in train_loader:
-        if pts1[0] is None or pts1[0].shape[0] < 10:
-            right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
-            left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
-            print(f'remove {left_img_path}')
-            os.remove(right_img_path)
-            os.remove(left_img_path)
-            i+=1
+    for i in range(20):
+        for _, _, _, pts1, _, _, img_name, seq_path in train_loader:
+            if pts1[0] is None or pts1[0].shape[0] < 8:
+                right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
+                left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
+                print(f'remove {left_img_path}')
+                os.remove(right_img_path)
+                os.remove(left_img_path)
+                i+=1
 
-    for img0, img1, F, pts1, pts2, _, img_name, seq_path in val_loader:
-        if pts1[0] is None or pts1[0].shape[0] < 10:
-            right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
-            left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
-            print(f'remove {left_img_path}')
-            os.remove(right_img_path)
-            os.remove(left_img_path)
-            i+=1
+        for img0, img1, F, pts1, pts2, _, img_name, seq_path in val_loader:
+            if pts1[0] is None or pts1[0].shape[0] < 8:
+                right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
+                left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
+                print(f'remove {left_img_path}')
+                os.remove(right_img_path)
+                os.remove(left_img_path)
+                i+=1
 
-    for img0, img1, F, pts1, pts2, _, img_name, seq_path in test_loader:
-        if pts1[0] is None or pts1[0].shape[0] < 10:
-            right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
-            left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
-            print(f'remove {left_img_path}')
-            os.remove(right_img_path)
-            os.remove(left_img_path)
-            i+=1
+        for img0, img1, F, pts1, pts2, _, img_name, seq_path in test_loader:
+            if pts1[0] is None or pts1[0].shape[0] < 8:
+                right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
+                left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
+                print(f'remove {left_img_path}')
+                os.remove(right_img_path)
+                os.remove(left_img_path)
+                i+=1
 
-    print(i)
+        print(i)
 
 if __name__ == "__main__":
     # train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.02, part="tail", batch_size=1)
