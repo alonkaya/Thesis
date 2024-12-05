@@ -73,6 +73,7 @@ if __name__ == "__main__":
                 
                 ## TODO ###################################################################################
                 if not os.path.exists(os.path.join(plots_path, "model.pth")):
+                        print(f'no model for {plots_path}')
                         continue
                 ## TODO ###################################################################################
 
