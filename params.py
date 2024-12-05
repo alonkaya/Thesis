@@ -12,7 +12,7 @@ FLYING = True
 MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
 COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SEQ_RATIOS = [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
+SEQ_RATIOS = [150]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 LR = [1e-4]             
 KITTI2SCENEFLOW = False
 FRESH_MLP = False
