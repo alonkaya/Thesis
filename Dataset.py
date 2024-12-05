@@ -725,7 +725,6 @@ def remove_images_with_low_keypoints():
                 print(f'remove {left_img_path}')
                 os.remove(right_img_path)
                 os.remove(left_img_path)
-                i+=1
 
         for img0, img1, F, pts1, pts2, _, img_name, seq_path in val_loader:
             if pts1[0] is None or pts1[0].shape[0] < 8:
@@ -734,7 +733,6 @@ def remove_images_with_low_keypoints():
                 print(f'remove {left_img_path}')
                 os.remove(right_img_path)
                 os.remove(left_img_path)
-                i+=1
 
         for img0, img1, F, pts1, pts2, _, img_name, seq_path in test_loader:
             if pts1[0] is None or pts1[0].shape[0] < 8:
@@ -743,7 +741,6 @@ def remove_images_with_low_keypoints():
                 print(f'remove {left_img_path}')
                 os.remove(right_img_path)
                 os.remove(left_img_path)
-                i+=1
 
         print(i)
 
