@@ -1,0 +1,107 @@
+nohup: ignoring input
+/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/huggingface_hub/file_download.py:1150: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/modeling_utils.py:479: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return torch.load(checkpoint_file, map_location=map_location)
+/home/aviran/Alon/Thesis/FMatrixRegressor.py:331: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(model_path, map_location='cpu')
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: mid, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 4, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.2, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+train size: 2170, val size: 738, test size: 1064
+
+##### CONTINUE TRAINING #####
+
+Epoch 3118/4500: Training Loss: 0.28371533225564394		 Val Loss: 0.676279047484039
+             	Training MAE: 0.06363479048013687		 Val MAE: 0.057392824441194534
+             	Algebraic dist: 0.38036007039687214		 Val Algebraic dist: 0.6899105605258736
+             	RE1 dist: 0.14749005261589498		 Val RE1 dist: 0.38297706521967406
+             	SED dist: 0.5336417590870577		 Val SED dist: 1.3215877573977235
+
+
+################
+Empty points at 03
+
+
+Epoch 3119/4500: Training Loss: 0.2248237273272346		 Val Loss: 0.2722699770363428
+             	Training MAE: 0.06247763708233833		 Val MAE: 0.06113617867231369
+             	Algebraic dist: 0.3320761287913603		 Val Algebraic dist: 0.33444617896951656
+             	RE1 dist: 0.11761810499079087		 Val RE1 dist: 0.15518214112968856
+             	SED dist: 0.41645243588615866		 Val SED dist: 0.5119181397140667
+
+Epoch 3120/4500: Training Loss: 0.2148292064666748		 Val Loss: 1.3336041358209425
+             	Training MAE: 0.06183674558997154		 Val MAE: 0.06249770149588585
+             	Algebraic dist: 0.3240884612588322		 Val Algebraic dist: 0.962726798108829
+             	RE1 dist: 0.10768559399773092		 Val RE1 dist: 0.8009082425025201
+             	SED dist: 0.39670444937313304		 Val SED dist: 2.634299821751092
+
+Epoch 3121/4500: Training Loss: 0.1827965483945959		 Val Loss: 1.2871749221637685
+             	Training MAE: 0.061151064932346344		 Val MAE: 0.0655900165438652
+             	Algebraic dist: 0.30223846435546875		 Val Algebraic dist: 0.9219541652228243
+             	RE1 dist: 0.09258416820974912		 Val RE1 dist: 0.7494588872437836
+             	SED dist: 0.33296335444730873		 Val SED dist: 2.5403365268502185
+
+
+################
+Empty points at 03
+
+
+Epoch 3122/4500: Training Loss: 0.19256427708794088		 Val Loss: 0.2576050501997753
+             	Training MAE: 0.06273030489683151		 Val MAE: 0.06229225546121597
+             	Algebraic dist: 0.3126999069662655		 Val Algebraic dist: 0.32764849098779825
+             	RE1 dist: 0.09508674284991096		 Val RE1 dist: 0.14150176509734122
+             	SED dist: 0.35174885918112364		 Val SED dist: 0.48236182428175406
+
+
+################
+Empty points at 03
+
+
+Epoch 3123/4500: Training Loss: 0.24317048577701345		 Val Loss: 0.2803278071905977
+             	Training MAE: 0.06274465471506119		 Val MAE: 0.05857132375240326
+             	Algebraic dist: 0.33834420933442955		 Val Algebraic dist: 0.37112689274613575
+             	RE1 dist: 0.12371105306288775		 Val RE1 dist: 0.1574433131884503
+             	SED dist: 0.45283903795130115		 Val SED dist: 0.5285394319923975
+
+Epoch 3124/4500: Training Loss: 0.27588998570161705		 Val Loss: 0.2888322440526819
+             	Training MAE: 0.062091875821352005		 Val MAE: 0.05829240381717682
+             	Algebraic dist: 0.39026810141170726		 Val Algebraic dist: 0.3484748102003528
+             	RE1 dist: 0.1478113006143009		 Val RE1 dist: 0.1709334978493311
+             	SED dist: 0.5187616348266602		 Val SED dist: 0.5458712834183888
+
+Epoch 3125/4500: Training Loss: 0.16805221052730784		 Val Loss: 0.25564747471963206
+             	Training MAE: 0.06147749722003937		 Val MAE: 0.059267982840538025
+             	Algebraic dist: 0.28934703153722424		 Val Algebraic dist: 0.324374516805013
+             	RE1 dist: 0.08309367123772116		 Val RE1 dist: 0.14478850621049122
+             	SED dist: 0.3033938968882841		 Val SED dist: 0.4792258560016591
+
+Fatal Python error: Illegal instruction
+
+Thread 0x000074333fe00640 (most recent call first):
+<no Python frame>
+
+Current thread 0x00007434c8b78740 (most recent call first):
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/models/clip/modeling_clip.py", line 392 in forward
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1562 in _call_impl
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1553 in _wrapped_call_impl
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/models/clip/modeling_clip.py", line 656 in forward
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1562 in _call_impl
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1553 in _wrapped_call_impl
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/models/clip/modeling_clip.py", line 886 in forward
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1562 in _call_impl
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1553 in _wrapped_call_impl
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/transformers/models/clip/modeling_clip.py", line 958 in forward
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1562 in _call_impl
+  File "/home/aviran/miniconda3/envs/alon_env/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1553 in _wrapped_call_impl
+  File "/home/aviran/Alon/Thesis/FMatrixRegressor.py", line 137 in FeatureExtractor
+  File "/home/aviran/Alon/Thesis/FMatrixRegressor.py", line 166 in forward
+  File "/home/aviran/Alon/Thesis/FMatrixRegressor.py", line 259 in dataloader_step
+  File "/home/aviran/Alon/Thesis/FMatrixRegressor.py", line 191 in train_model
+  File "/home/aviran/Alon/Thesis/Main.py", line 107 in <module>
