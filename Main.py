@@ -74,9 +74,9 @@ if __name__ == "__main__":
                                         f"""BS_{batch_size}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
                 
                 ## TODO ###################################################################################
-                # if not os.path.exists(os.path.join(plots_path, "model.pth")):
-                #         print(f'no model for {plots_path}')
-                #         continue
+                if not os.path.exists(os.path.join(plots_path, "model.pth")):
+                        print(f'no model for {plots_path}')
+                        continue
                 ## TODO ###################################################################################
 
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
