@@ -7,15 +7,15 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
-KITTI2SCENEFLOW = False
-SCENEFLOW = False
-FLYING = False
+SCENEFLOW = True
+FLYING = True
 MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or SCENEFLOW else [0,4,8]
-COMPUTER = 1 # 0=132.72.49.250 1=else
-SEQ_RATIOS = [0.015]     # 3251, 2166, 1082, 540, 405, 269, 161                                                    
+COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SEQ_RATIOS = [0.025] if not SCENEFLOW else [150] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 LR = [1e-4]             
-FRESH_MLP = False
+KITTI2SCENEFLOW = True
+FRESH_MLP = True
 FRESH_CONV = False
 ADDITIONS = "__fresh_MLP_CONV" if FRESH_CONV and FRESH_MLP else "__fresh_MLP" if FRESH_MLP else ""  ## REMEMBER TO PUT "__" !!!!!
 
@@ -38,9 +38,10 @@ PART = ["head", "mid", "tail"]
 train_seqeunces_monkaa =  ["treeflight_augmented0_x2", "treeflight_augmented1_x2", "lonetree_winter_x2", "a_rain_of_stones_x2", "eating_naked_camera2_x2",  "family_x2", "lonetree_difftex_x2"]  # 1035
 val_sequences_monkaa = ["treeflight_x2", "eating_x2", "top_view_x2"] # 293
 test_sequences_monkaa = ["flower_storm_x2", "funnyworld_x2", "eating_camera2_x2"]     # 375 frames   
+
 ### SCENEFLOW FLYING ###
-train_sequences_flying = 500
-test_sequences_flying = 150
+train_sequences_flying = 150
+test_sequences_flying = 100 
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704
@@ -55,7 +56,7 @@ SCHED = None
 USE_RECONSTRUCTION_LAYER = True
 NORM = True
 TRAIN_FROM_SCRATCH = False
-IMAGE_TYPE = "jpg" if USE_REALESTATE else 'webp' if FLYING else "png"
+IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False

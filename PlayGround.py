@@ -8,6 +8,7 @@ from FMatrixRegressor import FMatrixRegressor
 from Dataset import get_data_loaders
 from params import *
 
+import time
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -40,26 +41,6 @@ def show_images(first_image, second_image):
     plt.show()
 
 
-def move_bad_images():
-    # change dataset returns 6 params instead of 4. comment unnecessary lines in visualize
-    train_loader, val_loader = get_data_loaders(batch_size=1)
-    try:
-        for i, (img1, img2, label, idx, sequence_path) in enumerate(val_loader):
-            sequence_path = os.path.split(sequence_path[0])[0]
-            epipolar_geo = EpipolarGeometry(img1[0], img2[0], F=label[0])
-            epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
-    except Exception as e:
-        valid_indices_of_dataset(val_loader, idx)
-        print(e)
-    try:
-        for i, (img1, img2, label, idx, sequence_path) in enumerate(train_loader):
-            sequence_path = os.path.split(sequence_path[0])[0]
-            epipolar_geo = EpipolarGeometry(img1[0], img2[0], F=label[0])
-            epipolar_geo.visualize(idx=idx.item(), sequence_path=sequence_path, move_bad_images=True)
-    except Exception as e:
-        valid_indices_of_dataset(train_loader, idx)
-        print(e)
-
 def valid_indices_of_dataset(train_loader, idx):
     # Check if the DataLoader's dataset is a ConcatDataset
     if isinstance(train_loader.dataset, torch.utils.data.ConcatDataset):
@@ -84,10 +65,10 @@ def valid_indices_of_dataset(train_loader, idx):
         print("Dataset not found for the current batch")
 
 def vis_gt():
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.1, part='head', batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=1, part='head', batch_size=1)
 
-    for i, (img1, img2, label, pts1, pts2, seq_name, fn, _) in enumerate(test_loader):
-        print(pts1.shape, fn[0])
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
+        print(pts1[0].shape)
         img1 = img1[0].cpu().detach()  # Shape (C, H, W)
         img2 = img2[0].cpu().detach()  # Shape (C, H, W)
 
@@ -114,8 +95,11 @@ def vis_gt():
 
         # Show the figure
         plt.tight_layout()
-        plt.savefig("monkaa")
+        plt.savefig("Flying2")
+        # time.sleep(2)
+        break
 
+        # if i==10: break
         
 
 def vis_cognata():
@@ -496,19 +480,6 @@ def update_epochs(file_path, increment):
         file.writelines(updated_lines)
 
 
-def extend_runs(batch_size, lr, lr_decay, weight_decay, L2_coeff, huber_coeff, data_ratio):
-    train_loader, val_loader, test_loader = get_data_loaders(data_ratio, batch_size)
-    with open('runs.txt', 'r') as f:
-        for pretrained_path in f:
-            pretrained_path = pretrained_path.strip()
-            if not os.path.exists(pretrained_path):
-                    print("problema with path: " + pretrained_path)
-                    continue
-            model = FMatrixRegressor(lr=lr, lr_decay=lr_decay, wd=weight_decay, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, pretrained_path=pretrained_path).to(device)
-            print_and_write(f"##### CONTINUE TRAINING #####\n\n", model.plots_path)
-            model.train_model(train_loader, val_loader, test_loader)
-
-            torch.cuda.empty_cache()
 def move():
     # Define the source directory containing your files
     source_directory = "plots\\Stereo\\Winners"
@@ -787,4 +758,4 @@ def test_trained():
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    plot_errors()
+    vis_gt()

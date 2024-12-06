@@ -46,7 +46,9 @@ if __name__ == "__main__":
                 if STEREO and not SCENEFLOW and part != "head" and part != "mid" and part != "tail":
                         raise ValueError("Invalid part")
                 
-                if SCENEFLOW:
+                if SCENEFLOW and FLYING:
+                        num_epochs = 8000
+                elif SCENEFLOW:
                         num_epochs = 16000
                 else:
                         num_epochs = 2000 if train_size==0.3 else 4500 if train_size==0.2 else 7000 if train_size==0.1 else 10000 if train_size==0.05 else 15000 if train_size==0.0375 else 24000 if train_size==0.025 else 37000 if train_size==0.015 else 50000 if train_size==0.008 else 70000 if train_size==0.004 else 0
@@ -58,7 +60,7 @@ if __name__ == "__main__":
                         batch_size = 4 
 
                 coeff = f'ALG_sqr_{alg_coeff}__' if alg_coeff > 0 else f'RE1_{re1_coeff}__' if re1_coeff > 0 else f'SED_{sed_coeff}__' if sed_coeff > 0 else ''
-                dataset = 'Kitti2Sceneflow' if KITTI2SCENEFLOW else 'Sceneflow' if SCENEFLOW else 'Stereo' if STEREO else 'RealEstate_split' if USE_REALESTATE and REALESTATE_SPLIT else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
+                dataset = 'Kitti2Flying' if KITTI2SCENEFLOW and FLYING and SCENEFLOW else 'Flying' if FLYING and SCENEFLOW else 'Kitti2Monkaa' if KITTI2SCENEFLOW and SCENEFLOW else 'Monkaa' if SCENEFLOW else 'Stereo' if STEREO else 'RealEstate_split' if USE_REALESTATE and REALESTATE_SPLIT else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
                 scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
                 model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
@@ -72,9 +74,9 @@ if __name__ == "__main__":
                                         f"""BS_{batch_size}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
                 
                 ## TODO ###################################################################################
-                if not os.path.exists(os.path.join(plots_path, "model.pth")):
-                        print(f'no model for {plots_path}')
-                        continue
+                # if not os.path.exists(os.path.join(plots_path, "model.pth")):
+                #         print(f'no model for {plots_path}')
+                #         continue
                 ## TODO ###################################################################################
 
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)

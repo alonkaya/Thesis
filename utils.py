@@ -308,9 +308,10 @@ def adjust_points(keypoints_dict, idx, top_crop, left_crop, height, width):
     pts1 *= scale
     pts2 *= scale
 
+    edge_safety = 8 if SCENEFLOW else 1
     # Filter and adjust keypoints for the cropped image
-    mask = (pts1[:, 0] >= left_crop+1) & (pts1[:, 0] < left_crop + CROP-1) & (pts1[:, 1] >= top_crop+1) & (pts1[:, 1] < top_crop + CROP-1) & \
-           (pts2[:, 0] >= left_crop+1) & (pts2[:, 0] < left_crop + CROP-1) & (pts2[:, 1] >= top_crop+1) & (pts2[:, 1] < top_crop + CROP-1) # shape [num_keypoints]
+    mask = (pts1[:, 0] >= left_crop+edge_safety) & (pts1[:, 0] < left_crop + CROP-edge_safety) & (pts1[:, 1] >= top_crop+edge_safety) & (pts1[:, 1] < top_crop + CROP-edge_safety) & \
+           (pts2[:, 0] >= left_crop+edge_safety) & (pts2[:, 0] < left_crop + CROP-edge_safety) & (pts2[:, 1] >= top_crop+edge_safety) & (pts2[:, 1] < top_crop + CROP-edge_safety) # shape [num_keypoints]
     pts1 = pts1[mask] 
     pts2 = pts2[mask]
     
