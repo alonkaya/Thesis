@@ -9,13 +9,13 @@
 #SBATCH --partition main		        	### specify partition name where to run a job. change only if you have a matching qos!! main: all nodes; gtx1080: 1080 gpu card nodes; rtx2080: 2080 nodes; teslap100: p100 nodes; titanrtx: titan nodes
 #SBATCH --time 7-0:0:00			            ### limit the time of job running. Make sure it is not greater than the partition time limit!! Format: D-H:MM:SS
 #SBATCH --job-name kitti2flying_resnet_fix_blur_fresh_MLP   		### name of the job
-#SBATCH --output %J_kitti2flying_resnet_fix_blur.out	### output log for running job - %J for job number
+#SBATCH --output %J_kitti2flying_resnet_fix_blur_fresh_MLP.out	### output log for running job - %J for job number
 #SBATCH --gpus=rtx_4090:1			    	### number of GPUs, allocating more than 1 requires IT team's permission. Example to request 3090 gpu: #SBATCH --gpus=rtx_3090:1
 
 # Note: the following 4 lines are commented out
 ##SBATCH --mail-user=alonkay@post.bgu.ac.il	### user's email for sending job status messages
 ##SBATCH --mail-type=ALL			### conditions for sending the email. ALL,BEGIN,END,FAIL, REQUEU, NONE
-##SBATCH --mem=15				### ammount of RAM memory, allocating more than 60G requires IT team's permission
+##SBATCH --mem=16				### ammount of RAM memory, allocating more than 60G requires IT team's permission
 
 ################  Following lines will be executed by a compute node    #######################
 
