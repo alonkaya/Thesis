@@ -10,7 +10,7 @@
 #SBATCH --time 7-0:0:00			            ### limit the time of job running. Make sure it is not greater than the partition time limit!! Format: D-H:MM:SS
 #SBATCH --job-name kitti2flying_resnet_fix_blur_fresh_MLP   		### name of the job
 #SBATCH --output %J_kitti2flying_resnet_fix_blur_fresh_MLP.out	### output log for running job - %J for job number
-#SBATCH --gpus=rtx_4090:1			    	### number of GPUs, allocating more than 1 requires IT team's permission. Example to request 3090 gpu: #SBATCH --gpus=rtx_3090:1
+#SBATCH --gpus=rtx_3090:1			    	### number of GPUs, allocating more than 1 requires IT team's permission. Example to request 3090 gpu: #SBATCH --gpus=rtx_3090:1
 
 # Note: the following 4 lines are commented out
 ##SBATCH --mail-user=alonkay@post.bgu.ac.il	### user's email for sending job status messages
