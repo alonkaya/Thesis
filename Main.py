@@ -51,7 +51,7 @@ if __name__ == "__main__":
                 elif SCENEFLOW:
                         num_epochs = 16000
                 else:
-                        num_epochs = 2000 if train_size==0.3 else 4500 if train_size==0.2 else 7000 if train_size==0.1 else 10000 if train_size==0.05 else 15000 if train_size==0.0375 else 24000 if train_size==0.025 else 37000 if train_size==0.015 else 50000 if train_size==0.008 else 70000 if train_size==0.004 else 0
+                        num_epochs = 2000 if train_size==0.3 else 4500 if train_size==0.2 else 7000 if train_size==0.1 else 14000 if train_size==0.05 else 18000 if train_size==0.0375 else 24000 if train_size==0.025 else 40000 if train_size==0.015 else 65000 if train_size==0.008 else 80000 if train_size==0.004 else 0
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
@@ -107,7 +107,7 @@ crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH
                         
                         print_and_write(f'train size: {len(train_loader.dataset)}, val size: {len(val_loader.dataset)}, test size: {len(test_loader.dataset)}\n', plots_path)
 
-                        if PRETRAINED_PATH or os.path.exists(os.path.join(plots_path, 'model.pth')) or os.path.exists(os.path.join(model.parent_model_path, 'model.pth')):
+                        if PRETRAINED_PATH or os.path.exists(os.path.join(plots_path, 'model.pth')) or (os.path.exists(model.parent_model_path) and os.path.exists(os.path.join(model.parent_model_path, 'model.pth'))):
                                 print_and_write(f"##### CONTINUE TRAINING #####\n", model.plots_path)
                 
                         model.train_model(train_loader, val_loader, test_loader)
@@ -118,6 +118,7 @@ crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH
                                 print_and_write(f"###\n{model.plots_path} no backup\n###", model.plots_path)
                         
                         if COMPUTER==0:
+                                os.makedirs(model.parent_model_path, exist_ok=True)
                                 source_model_path = os.path.join(model.plots_path, 'model.pth')
                                 dest_model_path = os.path.join(model.parent_model_path, 'model.pth')
                                 shutil.move(source_model_path, dest_model_path)
