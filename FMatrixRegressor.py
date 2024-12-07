@@ -248,7 +248,10 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.test(test_loader)
 
         if COMPUTER == 1: # Only plot if not using 4090 (250)
-            self.plot_all()
+            try:
+                self.plot_all()
+            except Exception as e:
+                print_and_write(f"Plotting failed: {e}", self.plots_path)
         
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
@@ -325,7 +328,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
     def load_model(self, path=None, continue_training=True):
         model_path = os.path.join(path, "model.pth")
-        backup_path = os.path.join(path, "backup_model.pth")
+        backup_path = os.path.join(self.plots_path, "backup_model.pth")
         if os.path.exists(model_path):
             try:
                 checkpoint = torch.load(model_path, map_location='cpu')
