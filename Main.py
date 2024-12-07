@@ -47,7 +47,7 @@ if __name__ == "__main__":
                         raise ValueError("Invalid part")
                 
                 if SCENEFLOW and FLYING:
-                        num_epochs = 10000
+                        num_epochs = 8000
                 elif SCENEFLOW:
                         num_epochs = 16000
                 else:
