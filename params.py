@@ -7,17 +7,16 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.
 USE_REALESTATE = False
 STEREO = True
 PRETEXT_TRAIN = False
-SCENEFLOW = False
-FLYING = False
-MODEL = CLIP_MODEL_NAME 
+SCENEFLOW = True
+FLYING = True
+MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0,4,8]
-COMPUTER = 0 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SEQ_RATIOS = [0.025] if not SCENEFLOW else [150] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 LR = [1e-4]             
-KITTI2SCENEFLOW = False
-FRESH_MLP = False
-FRESH_CONV = False
-ADDITIONS = "__fresh_MLP_CONV" if FRESH_CONV and FRESH_MLP else "__fresh_MLP" if FRESH_MLP else ""  ## REMEMBER TO PUT "__" !!!!!
+KITTI2SCENEFLOW = True
+FRESH_MLP = True
+ADDITIONS = "__fresh_MLP" if FRESH_MLP else ""  ## REMEMBER TO PUT "__" !!!!!
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -63,8 +62,6 @@ GET_OLD_PATH = False
 SEED = [42, 300, 500]
 
 ### Epipolar geometry ###
-RE1_DIST = True
-SED_DIST = True
 EPIPOLAR_THRESHOLD = 0.3 
 SED_TRIM_THRESHOLD = 0.01 if STEREO or SCENEFLOW else 0.02
 ALG_COEFF = [0]

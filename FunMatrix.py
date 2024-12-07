@@ -163,8 +163,8 @@ def update_distances(img1, img2, F, pts1, pts2):
     epipolar_geo = EpipolarGeometry(img1, img2, F, pts1, pts2)
 
     algebraic_dist = epipolar_geo.get_mean_algebraic_distance()
-    RE1_dist = epipolar_geo.get_RE1_distance() if RE1_DIST else RE1_dist
-    SED_dist = epipolar_geo.get_mean_SED_distance() if SED_DIST else SED_dist
+    RE1_dist = epipolar_geo.get_RE1_distance()
+    SED_dist = epipolar_geo.get_mean_SED_distance()
     return algebraic_dist, RE1_dist, SED_dist
 
 def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, data_type, epoch=0):
