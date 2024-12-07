@@ -95,7 +95,7 @@ def vis_gt():
 
         # Show the figure
         plt.tight_layout()
-        plt.savefig("Flying2")
+        plt.savefig("Flying")
         # time.sleep(2)
         break
 

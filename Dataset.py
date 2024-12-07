@@ -137,8 +137,12 @@ def get_transform():
         ])
     transforms.append(v2.Grayscale(num_output_channels=3))
     if AUGMENTATION:
-        transforms.append(v2.ColorJitter(brightness=0.3, contrast=0.3))
-        transforms.append(v2.GaussianBlur(kernel_size=3, sigma=(0.1, 0.35)))
+        if FIX_BLUR:
+            transforms.append(v2.GaussianBlur(kernel_size=FIXED_KERNEL_SIZE, sigma=FIXED_SIGMA))
+        else:
+            transforms.append(v2.ColorJitter(brightness=0.3, contrast=0.3))
+            transforms.append(v2.GaussianBlur(kernel_size=3, sigma=(0.1, 0.35)))
+        
     transforms.append(v2.ToDtype(torch.float32, scale=True)) # Converts to torch.float32 and scales [0,255] -> [0,1]
     transforms.append(v2.Normalize(mean=norm_mean.to(device), std=norm_std.to(device))),  # Normalize each channel
     

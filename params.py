@@ -9,14 +9,16 @@ STEREO = True
 PRETEXT_TRAIN = False
 SCENEFLOW = True
 FLYING = True
-MODEL = RESNET_MODEL_NAME 
+MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0,4,8]
 COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SEQ_RATIOS = [0.025] if not SCENEFLOW else [150] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
-LR = [1e-4]             
-KITTI2SCENEFLOW = True
-FRESH_MLP = True
+KITTI2SCENEFLOW = False
+FRESH_MLP = False
+FIX_BLUR = True
+ONLY_CONTINUE = False
 ADDITIONS = "__fresh_MLP" if FRESH_MLP else ""  ## REMEMBER TO PUT "__" !!!!!
+ADDITIONS += "__fixed_blur" if FIX_BLUR else ""
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -24,8 +26,10 @@ CROP = 224
 RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
-INIT_DATA = True 
+INIT_DATA = False 
 BATCH_SIZE = 8
+FIXED_KERNEL_SIZE = 5  
+FIXED_SIGMA = 0.6      
 
 ### STEREO KITTI ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images 
@@ -60,6 +64,7 @@ NUM_WORKERS = 0
 SAVE_MODEL = True
 GET_OLD_PATH = False
 SEED = [42, 300, 500]
+LR = [1e-4]             
 
 ### Epipolar geometry ###
 EPIPOLAR_THRESHOLD = 0.3 
