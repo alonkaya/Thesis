@@ -102,7 +102,10 @@ class Dataset_stereo(torch.utils.data.Dataset):
 
         pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, height=H, width=W)
         
-        return img0, img1, F, pts1, pts2, self.seq_name
+        if SCENEFLOW:
+            return img0, img1, F, pts1[:100], pts2[:100], self.seq_name
+        else:
+            return img0, img1, F, pts1, pts2, self.seq_name
     
 def get_valid_indices_stereo(sequence_path):
     valid_indices = []
@@ -144,8 +147,8 @@ transform = get_transform()
 
 
 def custom_collate_fn(batch):
-    imgs1, imgs2, Fs, all_pts1, all_pts2, seq_names = zip(*batch)
-
+    imgs1, imgs2, Fs, all_pts1, all_pts2, seq_names= zip(*batch)
+    
     max_len = max(pts1.shape[0] for pts1 in all_pts1)
 
     padded_pts1 = []
@@ -425,17 +428,20 @@ def get_dataloader_flying(train_size, batch_size, num_workers=NUM_WORKERS):
     resized = torch.tensor([RESIZE, RESIZE]).to(device)
     K = adjust_k_resize(K, original_image_size, resized)
 
-    flying_path_train = "SceneFlow/FlyingThings_cleanpass_webp/TRAIN/A"
-    flying_path_val = "SceneFlow/FlyingThings_cleanpass_webp/TEST/A"
-    flying_path_test = "SceneFlow/FlyingThings_cleanpass_webp/TEST/B"
+    flying_path_train = "SceneFlow/Flying_cleanpass/TRAIN/A"
+    flying_path_val = "SceneFlow/Flying_cleanpass/TEST/A"
+    flying_path_test = "SceneFlow/Flying_cleanpass/TEST/B"
     train_datasets, val_datasets, test_datasets = [], [], []
-    for path, length in zip([flying_path_train, flying_path_val, flying_path_test], [train_size, max(train_size//4, 50), test_sequences_flying]):
+    for path, length in zip([flying_path_train, flying_path_val, flying_path_test], [train_size, max(train_size//4, 5), test_sequences_flying]):
         for i, seq_name in enumerate(os.listdir(flying_path_train)): 
             if i==length: break
 
             seq_path = os.path.join(path, seq_name) 
             left_path = os.path.join(seq_path, 'left')
-            right_path = os.path.join(seq_path, 'right')         
+            right_path = os.path.join(seq_path, 'right')  
+            if not os.path.exists(seq_path): 
+                length += 1
+                continue
 
             # Indices of 'good' image frames
             valid_indices = get_valid_indices_stereo(left_path)
@@ -449,14 +455,9 @@ def get_dataloader_flying(train_size, batch_size, num_workers=NUM_WORKERS):
 
             if "TRAIN" in path:
                 train_datasets.append(dataset_stereo)    
-                print(f'Added {seq_name} to train') 
-
             elif "TEST/A" in path:
-                print(f'Added {seq_name} to val')
                 val_datasets.append(dataset_stereo)
-
             else:
-                print(f'Added {seq_name} to test')
                 test_datasets.append(dataset_stereo)
 
 
@@ -593,10 +594,10 @@ def save_keypoints_flying():
                              [ 0,     0,       -9.5238e-04],
                              [ 0,     9.5238e-04,     0]]).to(device)
     
-    flying_path_train = "SceneFlow/FlyingThings_cleanpass_webp/TRAIN/A"
-    flying_path_val = "SceneFlow/FlyingThings_cleanpass_webp/TEST/A"
-    flying_path_test = "SceneFlow/FlyingThings_cleanpass_webp/TEST/B"
-    for path, length in zip([flying_path_train, flying_path_val, flying_path_test], [train_sequences_flying, train_sequences_flying//4, test_sequences_flying]):
+    flying_path_train = "SceneFlow/Flying_cleanpass/TRAIN/A"
+    flying_path_val = "SceneFlow/Flying_cleanpass/TEST/A"
+    flying_path_test = "SceneFlow/Flying_cleanpass/TEST/B"
+    for path, length in zip([flying_path_val, flying_path_test], [train_sequences_flying//4, test_sequences_flying]):
         for i, seq_name in enumerate(os.listdir(path)): 
             seq_path = os.path.join(path, seq_name) 
             left_path = os.path.join(seq_path, 'left')
@@ -604,7 +605,9 @@ def save_keypoints_flying():
 
             # Indices of 'good' image frames
             valid_indices = get_valid_indices_stereo(left_path)
-
+            filepath = os.path.join(seq_path, f'keypoints.txt')
+            if os.path.exists(filepath):
+                continue
             for idx in valid_indices:
                 img0 = torchvision.io.read_image(os.path.join(left_path, f'{idx:04}.{IMAGE_TYPE}')) # shape (channels, height, width)
                 img1 = torchvision.io.read_image(os.path.join(right_path, f'{idx:04}.{IMAGE_TYPE}')) # shape (channels, height, width)
@@ -615,11 +618,15 @@ def save_keypoints_flying():
                 # Normalize F-Matrix
                 F = norm_layer(F_flying.view(-1, 9)).view(3,3)
 
-                epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False, threshold=0.3)
+                try:
+                    epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False, threshold=0.3)
+                except Exception as e:
+                    print(f"Error at {seq_name}, {idx}: {e}")
+                    continue
                 if epi.pts1.shape[0] < 5:
                     print(f'{epi.pts1.shape[0]} points at {seq_name}, {idx}')
 
-                filepath = os.path.join(seq_path, f'keypoints.txt')
+
                 with open(filepath, 'a') as f:
                     line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
                     f.write(line)
@@ -706,42 +713,39 @@ def save_keypoints_realestate():
 
     # Function to visualize a tensor image
 
-def remove_bad_monkaa():
-    train_loader, val_loader, test_loader = get_dataloader_monkaa(data_ratio=1, batch_size=1)
+def remove_images_with_low_keypoints():
+    train_loader, val_loader, test_loader = get_dataloader_flying(train_size=600, batch_size=1)
     print(len(train_loader), len(val_loader), len(test_loader))
     i=0
-    for img0, img1, F, pts1, pts2, _, img_name, seq_path in train_loader:
-        pts1 = pts1.squeeze()
-        right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
-        left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
-        if pts1.shape[0] < 3:
-            i+=1
-            print(f'{pts1.shape[0]} points at {seq_path[0]}, {img_name[0]}')
-            os.remove(right_img_path)
-            os.remove(left_img_path)
+    for i in range(20):
+        for _, _, _, pts1, _, _, img_name, seq_path in train_loader:
+            if pts1[0] is None or pts1[0].shape[0] < 8:
+                right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
+                left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
+                print(f'remove {left_img_path}')
+                os.remove(right_img_path)
+                os.remove(left_img_path)
 
-    for img0, img1, F, pts1, pts2, _, img_name, seq_path in val_loader:
-        pts1 = pts1.squeeze()
-        right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
-        left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
-        if pts1.shape[0] < 3:
-            i+=1
-            print(f'{pts1.shape[0]} points at {seq_path[0]}, {img_name[0]}')
-            os.remove(right_img_path)
-            os.remove(left_img_path)
+        for img0, img1, F, pts1, pts2, _, img_name, seq_path in val_loader:
+            if pts1[0] is None or pts1[0].shape[0] < 8:
+                right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
+                left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
+                print(f'remove {left_img_path}')
+                os.remove(right_img_path)
+                os.remove(left_img_path)
 
-    for img0, img1, F, pts1, pts2, _, img_name, seq_path in test_loader:
-        pts1 = pts1.squeeze()
-        right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
-        left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
-        if pts1.shape[0] < 3:
-            i+=1
-            print(f'{pts1.shape[0]} points at {seq_path[0]}, {img_name[0]}')
-            os.remove(right_img_path)
-            os.remove(left_img_path)
-    print(i)
+        for img0, img1, F, pts1, pts2, _, img_name, seq_path in test_loader:
+            if pts1[0] is None or pts1[0].shape[0] < 8:
+                right_img_path = os.path.join(seq_path[0], 'right', img_name[0])
+                left_img_path = os.path.join(seq_path[0], 'left', img_name[0])
+                print(f'remove {left_img_path}')
+                os.remove(right_img_path)
+                os.remove(left_img_path)
+
+        print(i)
+
 if __name__ == "__main__":
     # train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.02, part="tail", batch_size=1)
-    save_keypoints_flying()
+    remove_images_with_low_keypoints()
 
     

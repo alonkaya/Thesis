@@ -230,7 +230,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 print_and_write("\nModel not learning, stopping training\n", self.plots_path)
                 break
 
-            if SAVE_MODEL and epoch % (self.num_epochs//100) == 0: ## This saves the model 100 times in total
+            if SAVE_MODEL: ## This saves the model 100 times in total
                 self.save_model(epoch+1)
             
             # If the last epochs are not decreasing in val loss, raise break_when_good flag
@@ -248,7 +248,10 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.test(test_loader)
 
         if COMPUTER == 1: # Only plot if not using 4090 (250)
-            self.plot_all()
+            try:
+                self.plot_all()
+            except Exception as e:
+                print_and_write(f"Plotting failed: {e}", self.plots_path)
         
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
@@ -281,51 +284,51 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             epoch_stats[f'{prefix}outputs'] = torch.cat((epoch_stats[f'{prefix}outputs'], output.detach()), dim=0)
 
     def save_model(self, epoch):
-        os.makedirs(self.parent_model_path, exist_ok=True)
         model_path = os.path.join(self.plots_path, "model.pth")
         # Backup previous checkpoint
         if os.path.exists(model_path) and epoch % (self.num_epochs//90) == 0: 
             backup_path = os.path.join(self.plots_path, "backup_model.pth")
             shutil.copy(model_path, backup_path)
-        torch.save({
-            'mlp': self.mlp.state_dict(),
-            'optimizer': self.optimizer.state_dict(),
-            'vit': self.model.state_dict() ,
-            'conv': self.conv.state_dict() if self.use_conv else '',
-            "scheduler" : None if self.scheduler==None else self.scheduler.state_dict(),
-            "L2_coeff" : self.L2_coeff,
-            "huber_coeff" : self.huber_coeff,
-            "batch_size" : self.batch_size,
-            "lr" : self.lr,
-            "self.min_lr" : self.min_lr,
-            "average_embeddings" : self.average_embeddings,
-            "model_name" : self.model_name,
-            "augmentation" : self.augmentation,
-            "use_reconstruction" : self.use_reconstruction,
-            "re1_coeff" : self.re1_coeff,
-            "alg_coeff" : self.alg_coeff,
-            "sed_coeff" : self.sed_coeff,
-            "plots_path" : self.plots_path,
-            "use_conv" : self.use_conv,
-            "hidden_size" : self.hidden_size,
-            "num_patches" : self.num_patches,
-            'epoch' : epoch,
-            "frozen_layers" : self.frozen_layers,
-            "all_train_loss" : self.all_train_loss, 
-            "all_val_loss" : self.all_val_loss, 
-            "all_train_mae" : self.all_train_mae, 
-            "all_val_mae" : self.all_val_mae, 
-            "all_algebraic_pred" : self.all_algebraic_pred, 
-            "all_RE1_pred" : self.all_RE1_pred, 
-            "all_SED_pred" : self.all_SED_pred, 
-            "all_val_algebraic_pred" : self.all_val_algebraic_pred, 
-            "all_val_RE1_pred" : self.all_val_RE1_pred, 
-            "all_val_SED_pred" : self.all_val_SED_pred
-        }, model_path) 
+        if epoch % (self.num_epochs//100) == 0:
+            torch.save({
+                'mlp': self.mlp.state_dict(),
+                'optimizer': self.optimizer.state_dict(),
+                'vit': self.model.state_dict() ,
+                'conv': self.conv.state_dict() if self.use_conv else '',
+                "scheduler" : None if self.scheduler==None else self.scheduler.state_dict(),
+                "L2_coeff" : self.L2_coeff,
+                "huber_coeff" : self.huber_coeff,
+                "batch_size" : self.batch_size,
+                "lr" : self.lr,
+                "self.min_lr" : self.min_lr,
+                "average_embeddings" : self.average_embeddings,
+                "model_name" : self.model_name,
+                "augmentation" : self.augmentation,
+                "use_reconstruction" : self.use_reconstruction,
+                "re1_coeff" : self.re1_coeff,
+                "alg_coeff" : self.alg_coeff,
+                "sed_coeff" : self.sed_coeff,
+                "plots_path" : self.plots_path,
+                "use_conv" : self.use_conv,
+                "hidden_size" : self.hidden_size,
+                "num_patches" : self.num_patches,
+                'epoch' : epoch,
+                "frozen_layers" : self.frozen_layers,
+                "all_train_loss" : self.all_train_loss, 
+                "all_val_loss" : self.all_val_loss, 
+                "all_train_mae" : self.all_train_mae, 
+                "all_val_mae" : self.all_val_mae, 
+                "all_algebraic_pred" : self.all_algebraic_pred, 
+                "all_RE1_pred" : self.all_RE1_pred, 
+                "all_SED_pred" : self.all_SED_pred, 
+                "all_val_algebraic_pred" : self.all_val_algebraic_pred, 
+                "all_val_RE1_pred" : self.all_val_RE1_pred, 
+                "all_val_SED_pred" : self.all_val_SED_pred
+            }, model_path) 
 
     def load_model(self, path=None, continue_training=True):
         model_path = os.path.join(path, "model.pth")
-        backup_path = os.path.join(path, "backup_model.pth")
+        backup_path = os.path.join(self.plots_path, "backup_model.pth")
         if os.path.exists(model_path):
             try:
                 checkpoint = torch.load(model_path, map_location='cpu')

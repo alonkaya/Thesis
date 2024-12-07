@@ -68,8 +68,11 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
     y1 = y1[start:]
     y2 = y2[start:]
     x = list(x[start:])
-    fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
-    
+    try:
+        fig, axs = plt.subplots(1, 2, figsize=(18, 7))  # 1 row, 2 columns
+    except Exception as e:
+        print(f'Error when creating plot: {e}')
+        return
     for ax, y_scale in zip(axs, ['linear', 'log']):
         ax.plot(x, y1, color='steelblue', label="Train")
         if y2 and len(y2)>0: ax.plot(x, y2, color='salmon', label="Test") 
@@ -86,16 +89,21 @@ def plot(x, y1, y2, title, plots_path, x_label="Epochs", show=False, save=True):
         ax.grid(True)
         ax.legend()
 
-    if save:
-        os.makedirs(plots_path, exist_ok=True)
-        plt.savefig(f"""{plots_path}/{title}.png""")  # Specify the filename and extension
-
+    try:
+        if save:
+            os.makedirs(plots_path, exist_ok=True)
+            plt.savefig(f"""{plots_path}/{title}.png""")  # Specify the filename and extension
+    except Exception as e:
+        print(f'Error when saving plot: {e}')
+        
     if show:
         plt.show()
-    
-    plt.clf()
-    plt.close('all')
 
+    try:
+        plt.clf()
+        plt.close('all')
+    except Exception as e:
+        print(f'Error when closing plot: {e}')
 
 def read_camera_intrinsic(path_to_intrinsic):
      with open(path_to_intrinsic, 'r') as f:
@@ -308,9 +316,10 @@ def adjust_points(keypoints_dict, idx, top_crop, left_crop, height, width):
     pts1 *= scale
     pts2 *= scale
 
+    edge_safety = 8 if SCENEFLOW else 1
     # Filter and adjust keypoints for the cropped image
-    mask = (pts1[:, 0] >= left_crop+1) & (pts1[:, 0] < left_crop + CROP-1) & (pts1[:, 1] >= top_crop+1) & (pts1[:, 1] < top_crop + CROP-1) & \
-           (pts2[:, 0] >= left_crop+1) & (pts2[:, 0] < left_crop + CROP-1) & (pts2[:, 1] >= top_crop+1) & (pts2[:, 1] < top_crop + CROP-1) # shape [num_keypoints]
+    mask = (pts1[:, 0] >= left_crop+edge_safety) & (pts1[:, 0] < left_crop + CROP-edge_safety) & (pts1[:, 1] >= top_crop+edge_safety) & (pts1[:, 1] < top_crop + CROP-edge_safety) & \
+           (pts2[:, 0] >= left_crop+edge_safety) & (pts2[:, 0] < left_crop + CROP-edge_safety) & (pts2[:, 1] >= top_crop+edge_safety) & (pts2[:, 1] < top_crop + CROP-edge_safety) # shape [num_keypoints]
     pts1 = pts1[mask] 
     pts2 = pts2[mask]
     
