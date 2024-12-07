@@ -2,7 +2,6 @@ import shutil
 from params import *
 from utils import *
 from FunMatrix import *
-from DeepFNoCors.deepF_nocors import FeatureExtractorDeepF
 import torch.optim as optim
 from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetModel
 
