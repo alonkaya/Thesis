@@ -1,6 +1,6 @@
 import sys
 from params import *
-from PlotFromText import *
+#from PlotFromText import *
 import matplotlib.pyplot as plt
 import torch.nn as nn
 import os
@@ -279,21 +279,21 @@ def send_to_device(epoch_stats):
             epoch_stats[key] = value.to(device)    
 
 def avg_results(output_path):
-    epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists = process_epoch_stats(output_path)
-    epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists =  \
-    epochs[-10:], training_losses[-10:], val_losses[-10:], training_maes[-10:], val_maes[-10:], alg_dists[-10:], val_alg_dists[-10:], re1_dists[-10:], val_re1_dists[-10:], sed_dists[-10:], val_sed_dists[-10:], alg_sqr_dists[-10:], val_alg_sqr_dists[-10:]
-    print("Training loss: ", sum(training_losses)/len(training_losses))
-    print("Validation loss: ", sum(val_losses)/len(val_losses))
-    print("Training MAE: ", sum(training_maes)/len(training_maes))
-    print("Validation MAE: ", sum(val_maes)/len(val_maes))
-    print("Training Alg dist: ", sum(alg_dists)/len(alg_dists))
-    print("Validation Alg dist: ", sum(val_alg_dists)/len(val_alg_dists))
-    print("Training RE1 dist: ", sum(re1_dists)/len(re1_dists))
-    print("Validation RE1 dist: ", sum(val_re1_dists)/len(val_re1_dists))
-    print("Training SED dist: ", sum(sed_dists)/len(sed_dists))
-    print("Validation SED dist: ", sum(val_sed_dists)/len(val_sed_dists))
-    print("Training Alg sqr dist: ", sum(alg_sqr_dists)/len(alg_sqr_dists))
-    print("Validation Alg sqr dist: ", sum(val_alg_sqr_dists)/len(val_alg_sqr_dists))
+     epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists = process_epoch_stats(output_path)
+     epochs, training_losses, val_losses, training_maes, val_maes, alg_dists, val_alg_dists, re1_dists, val_re1_dists, sed_dists, val_sed_dists, alg_sqr_dists, val_alg_sqr_dists =  \
+     epochs[-10:], training_losses[-10:], val_losses[-10:], training_maes[-10:], val_maes[-10:], alg_dists[-10:], val_alg_dists[-10:], re1_dists[-10:], val_re1_dists[-10:], sed_dists[-10:], val_sed_dists[-10:], alg_sqr_dists[-10:], val_alg_sqr_dists[-10:]
+     print("Training loss: ", sum(training_losses)/len(training_losses))
+     print("Validation loss: ", sum(val_losses)/len(val_losses))
+     print("Training MAE: ", sum(training_maes)/len(training_maes))
+     print("Validation MAE: ", sum(val_maes)/len(val_maes))
+     print("Training Alg dist: ", sum(alg_dists)/len(alg_dists))
+     print("Validation Alg dist: ", sum(val_alg_dists)/len(val_alg_dists))
+     print("Training RE1 dist: ", sum(re1_dists)/len(re1_dists))
+     print("Validation RE1 dist: ", sum(val_re1_dists)/len(val_re1_dists))
+     print("Training SED dist: ", sum(sed_dists)/len(sed_dists))
+     print("Validation SED dist: ", sum(val_sed_dists)/len(val_sed_dists))
+     print("Training Alg sqr dist: ", sum(alg_sqr_dists)/len(alg_sqr_dists))
+     print("Validation Alg sqr dist: ", sum(val_alg_sqr_dists)/len(val_alg_sqr_dists))
 
 
 
