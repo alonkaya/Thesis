@@ -6,7 +6,7 @@ STEREO = True
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 
 PRETEXT_TRAIN = False
-SCENEFLOW = True
+SCENEFLOW = False
 FLYING = False
 MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0,4,8]
