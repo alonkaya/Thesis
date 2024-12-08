@@ -1,0 +1,155 @@
+nohup: ignoring input
+/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+/home/alonkay/conda/alon/lib/python3.9/site-packages/huggingface_hub/file_download.py:1150: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/modeling_utils.py:479: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return torch.load(checkpoint_file, map_location=map_location)
+/home/alonkay/Thesis/FMatrixRegressor.py:333: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(model_path, map_location='cpu')
+no model for plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0
+Model plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_4 already trained
+Model plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_8 already trained
+Model plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__head__frozen_0 already trained
+Model plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__head__frozen_4 already trained
+Model plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__head__frozen_8 already trained
+Model plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_4__ratio_0.05__head__frozen_0 already trained
+Model plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_4__ratio_0.05__head__frozen_4 already trained
+
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 4, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: head, get_old_path: False,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 8, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.05, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+train size: 540, val size: 183, test size: 1064
+
+##### CONTINUE TRAINING #####
+
+Epoch 12321/14000: Training Loss: 0.18298977039478442		 Val Loss: 0.1903838696687118
+             	Training MAE: 0.05895805358886719		 Val MAE: 0.056969985365867615
+             	Algebraic dist: 0.3061705130117911		 Val Algebraic dist: 0.32766568142434827
+             	RE1 dist: 0.09096502374719691		 Val RE1 dist: 0.11658806386201279
+             	SED dist: 0.3351602059823495		 Val SED dist: 0.3505205071490744
+
+Epoch 12322/14000: Training Loss: 0.16283238728841146		 Val Loss: 0.240819557853367
+             	Training MAE: 0.0587429516017437		 Val MAE: 0.056545596569776535
+             	Algebraic dist: 0.28881878323025173		 Val Algebraic dist: 0.38930706355882727
+             	RE1 dist: 0.08312736087375217		 Val RE1 dist: 0.14864812726559845
+             	SED dist: 0.2949093288845486		 Val SED dist: 0.45165845622187073
+
+Epoch 12323/14000: Training Loss: 0.1647106029369213		 Val Loss: 0.22092551770417587
+             	Training MAE: 0.05936324596405029		 Val MAE: 0.05736072361469269
+             	Algebraic dist: 0.2808973524305556		 Val Algebraic dist: 0.36615910737410834
+             	RE1 dist: 0.08010553430627894		 Val RE1 dist: 0.13402173830115277
+             	SED dist: 0.2984851978443287		 Val SED dist: 0.41140954390816065
+
+Epoch 12324/14000: Training Loss: 0.12572138750994646		 Val Loss: 0.2121083218118419
+             	Training MAE: 0.05827854573726654		 Val MAE: 0.06107820197939873
+             	Algebraic dist: 0.24221643518518518		 Val Algebraic dist: 0.3477324610171111
+             	RE1 dist: 0.05826872013233326		 Val RE1 dist: 0.12495348764502484
+             	SED dist: 0.22084542733651621		 Val SED dist: 0.39296013375987177
+
+Epoch 12325/14000: Training Loss: 0.12353858947753907		 Val Loss: 0.185219785441523
+             	Training MAE: 0.05875157564878464		 Val MAE: 0.05761287733912468
+             	Algebraic dist: 0.23961014924225985		 Val Algebraic dist: 0.3287109084751295
+             	RE1 dist: 0.0590690259580259		 Val RE1 dist: 0.11033001153365425
+             	SED dist: 0.2163198541711878		 Val SED dist: 0.3400908138441003
+
+Epoch 12326/14000: Training Loss: 0.2873469317400897		 Val Loss: 0.44710826873779297
+             	Training MAE: 0.059177037328481674		 Val MAE: 0.06149402633309364
+             	Algebraic dist: 0.37042103520146125		 Val Algebraic dist: 0.5389617836993673
+             	RE1 dist: 0.1563320866337529		 Val RE1 dist: 0.3539111510567043
+             	SED dist: 0.5439084653501157		 Val SED dist: 0.8628773067308508
+
+Epoch 12327/14000: Training Loss: 0.1336663564046224		 Val Loss: 0.19804419641909393
+             	Training MAE: 0.059375375509262085		 Val MAE: 0.05665361136198044
+             	Algebraic dist: 0.2533111572265625		 Val Algebraic dist: 0.33152571968410327
+             	RE1 dist: 0.06658891042073568		 Val RE1 dist: 0.12412323122439177
+             	SED dist: 0.2364702860514323		 Val SED dist: 0.3660962892615277
+
+Epoch 12328/14000: Training Loss: 0.12235850581416377		 Val Loss: 0.19146902664847995
+             	Training MAE: 0.05880724638700485		 Val MAE: 0.05685669556260109
+             	Algebraic dist: 0.2360528592710142		 Val Algebraic dist: 0.3236800069394319
+             	RE1 dist: 0.0584128944962113		 Val RE1 dist: 0.11210786777993907
+             	SED dist: 0.21393109074345343		 Val SED dist: 0.3527850275454314
+
+Epoch 12329/14000: Training Loss: 0.4229974252206308		 Val Loss: 0.25348171980484674
+             	Training MAE: 0.06081169843673706		 Val MAE: 0.059917695820331573
+             	Algebraic dist: 0.47855218957971646		 Val Algebraic dist: 0.4083258587381114
+             	RE1 dist: 0.23386781480577257		 Val RE1 dist: 0.16243307486824368
+             	SED dist: 0.8145187377929688		 Val SED dist: 0.4760694918425187
+
+Epoch 12330/14000: Training Loss: 0.13610981128833913		 Val Loss: 0.31657011612601904
+             	Training MAE: 0.05892680585384369		 Val MAE: 0.05795507878065109
+             	Algebraic dist: 0.26224198517975983		 Val Algebraic dist: 0.4539345036382261
+             	RE1 dist: 0.07053921310989945		 Val RE1 dist: 0.21900400908096976
+             	SED dist: 0.24150082623517072		 Val SED dist: 0.6026485691899839
+
+Epoch 12331/14000: Training Loss: 0.14318367286964698		 Val Loss: 0.22185124521670135
+             	Training MAE: 0.05890478566288948		 Val MAE: 0.05751930549740791
+             	Algebraic dist: 0.26323654739945024		 Val Algebraic dist: 0.36871097398840863
+             	RE1 dist: 0.07129199416549117		 Val RE1 dist: 0.13403260189553964
+             	SED dist: 0.2554967244466146		 Val SED dist: 0.41331270466680115
+
+Epoch 12332/14000: Training Loss: 0.13157812047887732		 Val Loss: 0.19503319781759512
+             	Training MAE: 0.05810957029461861		 Val MAE: 0.05770694836974144
+             	Algebraic dist: 0.25073465417932583		 Val Algebraic dist: 0.3313226492508598
+             	RE1 dist: 0.06278793193675854		 Val RE1 dist: 0.11870341715605362
+             	SED dist: 0.23258214879918981		 Val SED dist: 0.359759869782821
+
+Epoch 12333/14000: Training Loss: 0.11098804473876953		 Val Loss: 0.2246084627897843
+             	Training MAE: 0.05867714062333107		 Val MAE: 0.05699976533651352
+             	Algebraic dist: 0.2235333901864511		 Val Algebraic dist: 0.3621563704117485
+             	RE1 dist: 0.051394731027108655		 Val RE1 dist: 0.12980407217274542
+             	SED dist: 0.19116277341489438		 Val SED dist: 0.419172535771909
+
+Epoch 12334/14000: Training Loss: 0.12131689566153067		 Val Loss: 0.18028960020645804
+             	Training MAE: 0.05846479907631874		 Val MAE: 0.05698072537779808
+             	Algebraic dist: 0.24156776710792824		 Val Algebraic dist: 0.315853968910549
+             	RE1 dist: 0.0558995282208478		 Val RE1 dist: 0.10293705567069676
+             	SED dist: 0.2118974897596571		 Val SED dist: 0.3302850930587105
+
+Epoch 12335/14000: Training Loss: 0.16393477828414352		 Val Loss: 0.1971174945002017
+             	Training MAE: 0.05907749757170677		 Val MAE: 0.056838106364011765
+             	Algebraic dist: 0.2781595583315249		 Val Algebraic dist: 0.3307666778564453
+             	RE1 dist: 0.08079535872847945		 Val RE1 dist: 0.1132269112960152
+             	SED dist: 0.29687457614474827		 Val SED dist: 0.36405982141909393
+
+Epoch 12336/14000: Training Loss: 0.12610258879484953		 Val Loss: 0.20202696841696036
+             	Training MAE: 0.05850796774029732		 Val MAE: 0.057641685009002686
+             	Algebraic dist: 0.24357633237485532		 Val Algebraic dist: 0.3275889313739279
+             	RE1 dist: 0.060354282237865306		 Val RE1 dist: 0.11759617017663043
+             	SED dist: 0.22146054020634404		 Val SED dist: 0.3738485004590905
+
+Fatal Python error: Illegal instruction
+
+Thread 0x000074654d6006c0 (most recent call first):
+<no Python frame>
+
+Current thread 0x00007466f9276580 (most recent call first):
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/linear.py", line 117 in forward
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1562 in _call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1553 in _wrapped_call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/models/clip/modeling_clip.py", line 337 in forward
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1562 in _call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1553 in _wrapped_call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/models/clip/modeling_clip.py", line 386 in forward
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1562 in _call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1553 in _wrapped_call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/models/clip/modeling_clip.py", line 656 in forward
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1562 in _call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1553 in _wrapped_call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/models/clip/modeling_clip.py", line 886 in forward
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1562 in _call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1553 in _wrapped_call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/models/clip/modeling_clip.py", line 958 in forward
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1562 in _call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1553 in _wrapped_call_impl
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 137 in FeatureExtractor
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 165 in forward
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 261 in dataloader_step
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 190 in train_model
+  File "/home/alonkay/Thesis/Main.py", line 112 in <module>
