@@ -5,12 +5,12 @@
 ### To ignore, just add another # - like so: ##SBATCH
 ################################################################################################
 
-#SBATCH --constraint=rtx_6000               ### Available values:  cpu, gpu, cpu128, cpu256, gtx_1080, rtx_2080, rtx_3090, rtx_4090, rtx_6000, titan_rtx, tesla_p100 
+#SBATCH --constraint=4090               ### Available values:  cpu, gpu, cpu128, cpu256, gtx_1080, rtx_2080, rtx_3090, rtx_4090, rtx_6000, titan_rtx, tesla_p100 
 #SBATCH --partition main		        	### specify partition name where to run a job. change only if you have a matching qos!! main: all nodes; gtx1080: 1080 gpu card nodes; rtx2080: 2080 nodes; teslap100: p100 nodes; titanrtx: titan nodes
 #SBATCH --time 7-0:0:00			            ### limit the time of job running. Make sure it is not greater than the partition time limit!! Format: D-H:MM:SS
-#SBATCH --job-name kitti2flying_clip_fix_blur_fresh_MLP   		### name of the job
-#SBATCH --output %J_kitti2flying_clip_fix_blur_fresh_MLP.out	### output log for running job - %J for job number
-#SBATCH --gpus=rtx_6000:1			    	### number of GPUs, allocating more than 1 requires IT team's permission. Example to request 3090 gpu: #SBATCH --gpus=rtx_3090:1
+#SBATCH --job-name kitti2flying_clip_9   		### name of the job
+#SBATCH --output %J_kitti2flying_clip_9.out	### output log for running job - %J for job number
+#SBATCH --gpus=4090:1			    	### number of GPUs, allocating more than 1 requires IT team's permission. Example to request 3090 gpu: #SBATCH --gpus=rtx_3090:1
 
 # Note: the following 4 lines are commented out
 ##SBATCH --mail-user=alonkay@post.bgu.ac.il	### user's email for sending job status messages
