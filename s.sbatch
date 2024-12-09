@@ -8,8 +8,8 @@
 #SBATCH --constraint=rtx_4090               ### Available values:  cpu, gpu, cpu128, cpu256, gtx_1080, rtx_2080, rtx_3090, rtx_4090, rtx_6000, titan_rtx, tesla_p100 
 #SBATCH --partition main		        	### specify partition name where to run a job. change only if you have a matching qos!! main: all nodes; gtx1080: 1080 gpu card nodes; rtx2080: 2080 nodes; teslap100: p100 nodes; titanrtx: titan nodes
 #SBATCH --time 7-0:0:00			            ### limit the time of job running. Make sure it is not greater than the partition time limit!! Format: D-H:MM:SS
-#SBATCH --job-name flying_clip_9   		### name of the job
-#SBATCH --output %J_flying_clip_9.out	### output log for running job - %J for job number
+#SBATCH --job-name flying_resnet_9   		### name of the job
+#SBATCH --output %J_flying_resnet_9.out	### output log for running job - %J for job number
 #SBATCH --gpus=rtx_4090:1			    	### number of GPUs, allocating more than 1 requires IT team's permission. Example to request 3090 gpu: #SBATCH --gpus=rtx_3090:1
 
 # Note: the following 4 lines are commented out
