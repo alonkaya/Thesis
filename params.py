@@ -11,7 +11,7 @@ FLYING = False
 MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0,4,8]
 COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SEQ_RATIOS = [0.025] if not SCENEFLOW else [150] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
+SEQ_RATIOS = [0.015] if not SCENEFLOW else [150] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 KITTI2SCENEFLOW = False
 FRESH_MLP = False
 FIX_BLUR = False
@@ -88,5 +88,6 @@ USE_CONV = True
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
 norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
 norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
+
 
 
