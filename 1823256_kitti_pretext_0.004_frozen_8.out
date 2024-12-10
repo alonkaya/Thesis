@@ -1,0 +1,20 @@
+Tue 10 Dec 2024 10:26:30 IST
+
+SLURM_JOBID:		 1823256
+SLURM_JOB_NODELIST:	 cs-4090-02 
+
+
+Traceback (most recent call last):
+  File "/cs_storage/alonkay/Thesis/Main.py", line 9, in <module>
+    from Dataset import get_data_loaders
+  File "/cs_storage/alonkay/Thesis/Dataset.py", line 2, in <module>
+    from FunMatrix import *
+  File "/cs_storage/alonkay/Thesis/FunMatrix.py", line 1, in <module>
+    from params import *
+  File "/cs_storage/alonkay/Thesis/params.py", line 89, in <module>
+    norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
+RuntimeError: CUDA error: out of memory
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
