@@ -5,7 +5,7 @@ STEREO = True
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &   ### REMEMBER TO FIRST MOVE THE MODEL FROM ORIGINAL PATH TO MNT PATH IN CASE OF COMPUTER==0 AND THE LAST RUN EXITED!!
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 
-PRETEXT_TRAIN = False
+PRETEXT_TRAIN = True
 SCENEFLOW = False
 FLYING = False
 MODEL = CLIP_MODEL_NAME 
