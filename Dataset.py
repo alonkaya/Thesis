@@ -590,7 +590,7 @@ def save_keypoints_monkaa():
             line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
             f.write(line)
 
-def save_keypoints_flying():
+def save_keypoints_flying(train_sequences_flying):
     F_flying = torch.tensor([[ 0,     0,        0],
                              [ 0,     0,       -9.5238e-04],
                              [ 0,     9.5238e-04,     0]]).to(device)
