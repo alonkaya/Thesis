@@ -1,0 +1,57 @@
+
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: head, get_old_path: False, computer: 1,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 4, trained vit: plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.004, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42, 
+
+train size: 47, val size: 25, test size: 1064
+
+algebraic_truth: 0.017142081012328465		 val_algebraic_truth: 0.017008498311042786
+RE1_truth: 0.00019520851007352272		 val_RE1_truth: 0.00019574329780880362
+SED_truth: 0.001561677549034357		 val_SED_truth: 0.0015659458003938198
+
+Epoch 1/80000: Training Loss: 10352.180989583334		 Val Loss: 2380.850341796875
+             	Training MAE: 0.36260128021240234		 Val MAE: 0.4041549861431122
+             	Algebraic dist: 9968.833984375		 Val Algebraic dist: 2675.73193359375
+             	RE1 dist: 110742314.66666667		 Val RE1 dist: 8406726.0
+             	SED dist: 20703.66015625		 Val SED dist: 4760.76953125
+
+Epoch 2/80000: Training Loss: 752.6170247395834		 Val Loss: 466.51080322265625
+             	Training MAE: 0.38311100006103516		 Val MAE: 0.3703679144382477
+             	Algebraic dist: 918.3563639322916		 Val Algebraic dist: 597.3361206054688
+             	RE1 dist: 1358751.9166666667		 Val RE1 dist: 341794.8125
+             	SED dist: 1504.2501627604167		 Val SED dist: 932.0186157226562
+
+Epoch 3/80000: Training Loss: 458.0016682942708		 Val Loss: 44.70282745361328
+             	Training MAE: 0.3632502555847168		 Val MAE: 0.3646405041217804
+             	Algebraic dist: 582.0745442708334		 Val Algebraic dist: 163.9447479248047
+             	RE1 dist: 260590.83333333334		 Val RE1 dist: 20904.248046875
+             	SED dist: 914.994384765625		 Val SED dist: 88.39762878417969
+
+Epoch 4/80000: Training Loss: 60.58870951334635		 Val Loss: 100.54512786865234
+             	Training MAE: 0.3629181385040283		 Val MAE: 0.3671565055847168
+             	Algebraic dist: 263.893310546875		 Val Algebraic dist: 414.9615173339844
+             	RE1 dist: 90057.53125		 Val RE1 dist: 198235.34375
+             	SED dist: 120.1666259765625		 Val SED dist: 200.08370971679688
+
+Epoch 5/80000: Training Loss: 54.27901713053385		 Val Loss: 7.119062423706055
+             	Training MAE: 0.36491432785987854		 Val MAE: 0.36398860812187195
+             	Algebraic dist: 263.1053059895833		 Val Algebraic dist: 89.9101333618164
+             	RE1 dist: 91729.63541666667		 Val RE1 dist: 9435.7265625
+             	SED dist: 107.55318196614583		 Val SED dist: 13.23937702178955
+
+Epoch 6/80000: Training Loss: 18.08376693725586		 Val Loss: 17.54510498046875
+             	Training MAE: 0.3621172606945038		 Val MAE: 0.36316272616386414
+             	Algebraic dist: 138.9403076171875		 Val Algebraic dist: 134.1925048828125
+             	RE1 dist: 18370.033854166668		 Val RE1 dist: 13159.0830078125
+             	SED dist: 35.1737314860026		 Val SED dist: 34.10036849975586
+
+Epoch 7/80000: Training Loss: 11.743081410725912		 Val Loss: 10.913166046142578
+             	Training MAE: 0.3636017143726349		 Val MAE: 0.36632922291755676
+             	Algebraic dist: 106.77183024088542		 Val Algebraic dist: 106.3842544555664
+             	RE1 dist: 12420.092447916666		 Val RE1 dist: 21636.13671875
+             	SED dist: 22.499318440755207		 Val SED dist: 20.841445922851562
+
