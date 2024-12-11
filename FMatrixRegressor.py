@@ -222,12 +222,12 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 break
             
             # BAD PLOTS
-            if STEREO and epoch == int(self.num_epochs * 2/5) and not_learning(self.all_val_RE1_pred, self.plots_path):
-                self.num_epochs = epoch + 1
-                os.rename(self.plots_path, self.plots_path + "__bad")
-                self.plots_path = self.plots_path + "__bad"
-                print_and_write("\nModel not learning, stopping training\n", self.plots_path)
-                break
+            # if STEREO and epoch == int(self.num_epochs * 2/5) and not_learning(self.all_val_RE1_pred, self.plots_path):
+            #     self.num_epochs = epoch + 1
+            #     os.rename(self.plots_path, self.plots_path + "__bad")
+            #     self.plots_path = self.plots_path + "__bad"
+            #     print_and_write("\nModel not learning, stopping training\n", self.plots_path)
+            #     break
 
             if SAVE_MODEL: ## This saves the model 100 times in total
                 self.save_model(epoch+1)
@@ -388,8 +388,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
         # Load MLP
         self.mlp = MLP(input_dim=mlp_input_shape).to(device)
-        if continue_training or not FRESH_MLP:
-            self.mlp.load_state_dict(checkpoint['mlp']) 
+        self.mlp.load_state_dict(checkpoint['mlp']) 
         self.mlp.to(device)
 
         # Load model
