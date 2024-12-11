@@ -4,6 +4,7 @@ USE_REALESTATE = False
 STEREO = True
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &   ### REMEMBER TO FIRST MOVE THE MODEL FROM ORIGINAL PATH TO MNT PATH IN CASE OF COMPUTER==0 AND THE LAST RUN EXITED!!
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
+
 # 4168282 output_clip_orig_frozen_8_tail.log
 # 4168172 output_clip_orig_frozen_4_tail.log
 # 4167851 output_clip_orig_frozen_0_tail.log

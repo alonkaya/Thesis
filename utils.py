@@ -173,9 +173,10 @@ def not_decreasing(val_loss, num_epochs, plots_path):
         print_and_write("### Not decreasing ###\n", plots_path)
         return True
     
-def ready_to_break(val_loss):
-    min_100 = min(val_loss[-100:-1])
-    if val_loss[-1] < min_100:
+def ready_to_break(val_loss, num_epochs):
+    length = num_epochs//30
+    min_length = min(val_loss[-length:-1])
+    if val_loss[-1] < min_length:
         return True
 
 def print_and_write(output, plots_path):
