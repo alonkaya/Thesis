@@ -9,12 +9,12 @@ PRETEXT_TRAIN = False
 SCENEFLOW = False
 FLYING = False
 MODEL = CLIP_MODEL_NAME 
-FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [6] if FLYING else [8]
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [6] if FLYING else [0]
 COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SEQ_RATIOS = [0.2,0.1,0.008,0.004] if not SCENEFLOW else [9] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
+SEQ_RATIOS = [0.004,0.008,0.1,0.2] if not SCENEFLOW else [9] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = True
-PART = ["mid"] 
+PART = ["tail"] 
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 
 ### Dataset ###  
