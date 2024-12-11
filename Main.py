@@ -93,9 +93,9 @@ if __name__ == "__main__":
                         sys.stdout.flush()
      
                 # If the model was already trained WELL with seed 42, skip training with other seed
-                elif "seed" in model.plots_path and os.path.exists(model.plots_path.split("__seed_")[0]):
-                        print(f"\n###\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training\n###\n")
-                        sys.stdout.flush()
+                # elif "seed" in model.plots_path and os.path.exists(model.plots_path.split("__seed_")[0]):
+                #         print(f"\n###\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training\n###\n")
+                #         sys.stdout.flush()
 
                 elif model.start_epoch < model.num_epochs:
                         parameters = f"""\n###########################################################################################################################################################\n

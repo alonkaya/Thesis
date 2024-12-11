@@ -6,14 +6,14 @@ STEREO = True
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 
 PRETEXT_TRAIN = False
-SCENEFLOW = False
-FLYING = False
+SCENEFLOW = True
+FLYING = True
 MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [6] if FLYING else [8]
-COMPUTER = 0 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SEQ_RATIOS = [0.025] if not SCENEFLOW else [150] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
+COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SEQ_RATIOS = [0.025] if not SCENEFLOW else [9] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 KITTI2SCENEFLOW = False
-ONLY_CONTINUE = True
+ONLY_CONTINUE = False
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 
 ### Dataset ###  
@@ -58,7 +58,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-SEED = [42, 300, 500]
+SEED = [300, 500]
 LR = [1e-4]             
 
 ### Epipolar geometry ###

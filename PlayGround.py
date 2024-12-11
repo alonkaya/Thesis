@@ -609,7 +609,7 @@ def plot_errors():
 
 
     x_indices = range(len(mean_SED_0))  # For Frozen 0 (has an extra point)
-    xticks_labels = ['2166', '1082', '540', '405', '269', '161', '88']  # 5 points for Frozen 0
+    xticks_labels = ['2166', '1082', '540', '405', '269', '161', '88', '47']  # 5 points for Frozen 0
     x = np.arange(len(xticks_labels))  # x-coordinates for the groups
     width = 0.25  # Width of each bar
 
