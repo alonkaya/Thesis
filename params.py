@@ -9,15 +9,15 @@ STEREO = True
 # 4168172 output_clip_orig_frozen_4_tail.log
 # 4167851 output_clip_orig_frozen_0_tail.log
 
-PRETEXT_TRAIN = False
+PRETEXT_TRAIN = True
 SCENEFLOW = False
 FLYING = False
 MODEL = CLIP_MODEL_NAME 
-FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [6] if FLYING else [0,4,8]
-COMPUTER = 0 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SEQ_RATIOS = [0.004,0.008,0.1,0.2] if not SCENEFLOW else [9] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
+FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [6] if FLYING else [8]
+COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SEQ_RATIOS = [0.004] if not SCENEFLOW else [9] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 KITTI2SCENEFLOW = False
-ONLY_CONTINUE = True
+ONLY_CONTINUE = False
 PART = ["mid", "tail"] 
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 
