@@ -783,7 +783,7 @@ def test_trained():
     pretrained_model = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_4/"
 
     model = FMatrixRegressor(lr=LR[0], batch_size=1, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
-    print(model.start_epoch)
+
     model.test(test_loader=test_loader, write=False)
 
 if __name__ == "__main__":
