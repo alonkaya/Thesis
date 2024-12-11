@@ -576,35 +576,35 @@ def plot_errors():
 #     resnet_std_RE1_0 = [0.1106, 0.0686, 0.0755, 0.0557, 0.0853, 0.1634, 0.142338798]
 
     # For Frozen 0
-    mean_alg_0 = [0.24, 0.33, 0.27, 0.31, 0.27, 0.47, 0.49]
-    mean_SED_0 = [0.23, 0.42, 0.28, 0.378, 0.3, 0.66, 0.73]
-    mean_RE1_0 = [0.06, 0.14, 0.08, 0.12, 0.089, 0.26, 0.26]
+    mean_alg_0 = [0.24, 0.33, 0.27, 0.31, 0.27, 0.47, 0.49,0.672]
+    mean_SED_0 = [0.23, 0.42, 0.28, 0.378, 0.3, 0.66, 0.73,0.99]
+    mean_RE1_0 = [0.06, 0.14, 0.08, 0.12, 0.089, 0.26, 0.26,0.53]
     # For Frozen 4
-    mean_alg_4 = [0.21, 0.34, 0.27, 0.29, 0.34, 0.45, 0.5]
-    mean_SED_4 = [0.198, 0.38, 0.28, 0.33, 0.41, 0.62, 0.76]
-    mean_RE1_4 = [0.05, 0.11, 0.08, 0.1, 0.13, 0.24, 0.28]
+    mean_alg_4 = [0.21, 0.34, 0.27, 0.29, 0.34, 0.45, 0.5,0.73]
+    mean_SED_4 = [0.198, 0.38, 0.28, 0.33, 0.41, 0.62, 0.76,1.19]
+    mean_RE1_4 = [0.05, 0.11, 0.08, 0.1, 0.13, 0.24, 0.28,0.63]
     # For Frozen 8
-    mean_alg_8 = [0.24, 0.29, 0.29, 0.3, 0.38, 0.42, 0.55]
-    mean_SED_8 = [0.24, 0.34, 0.33, 0.36, 0.48, 0.58, 0.86]
-    mean_RE1_8 = [0.06, 0.11, 0.1, 0.12, 0.17, 0.21, 0.35]
+    mean_alg_8 = [0.24, 0.29, 0.29, 0.3, 0.38, 0.42, 0.55,0.63]
+    mean_SED_8 = [0.24, 0.34, 0.33, 0.36, 0.48, 0.58, 0.86,1.04]
+    mean_RE1_8 = [0.06, 0.11, 0.1, 0.12, 0.17, 0.21, 0.35, 0.519]
 
     # For Frozen 0
-    pretext_mean_alg_0 = [0.23, 0.3, 0.33, 0.31, 0.39, 0.43, 0.54]
-    pretext_mean_SED_0 = [0.2, 0.35, 0.39, 0.377, 0.51, 0.6, 0.9]
-    pretext_mean_RE1_0 = [0.05, 0.11, 0.13, 0.12, 0.17, 0.22, 0.33]
+    pretext_mean_alg_0 = [0.23, 0.3, 0.33, 0.31, 0.39, 0.43, 0.54,0.71]
+    pretext_mean_SED_0 = [0.2, 0.35, 0.39, 0.377, 0.51, 0.6, 0.9,1.13]
+    pretext_mean_RE1_0 = [0.05, 0.11, 0.13, 0.12, 0.17, 0.22, 0.33,0.59]
     # For Frozen 4
-    pretext_mean_alg_4 = [0.22, 0.29, 0.33, 0.33, 0.37, 0.43, 0.5]
-    pretext_mean_SED_4 = [0.22, 0.33, 0.4, 0.41, 0.48, 0.6, 0.77]
-    pretext_mean_RE1_4 = [0.06, 0.1, 0.14, 0.14, 0.17, 0.224, 0.296]
+    pretext_mean_alg_4 = [0.22, 0.29, 0.33, 0.33, 0.37, 0.43, 0.5,0.84]
+    pretext_mean_SED_4 = [0.22, 0.33, 0.4, 0.41, 0.48, 0.6, 0.77,1.56]
+    pretext_mean_RE1_4 = [0.06, 0.1, 0.14, 0.14, 0.17, 0.224, 0.296,0.866]
     # For Frozen 8
-    pretext_mean_alg_8 = [0.23, 0.3, 0.33, 0.33, 0.62, 0.49, 0.55]
-    pretext_mean_SED_8 = [0.21, 0.37, 0.41, 0.41, 0.95, 0.68, 0.83]
-    pretext_mean_RE1_8 = [0.059, 0.12, 0.147, 0.12, 0.43, 0.279, 0.31]
+    pretext_mean_alg_8 = [0.23,0.3,0.33,0.32,0.376,0.49,0.55,0.668]
+    pretext_mean_SED_8 = [0.21,0.37,0.41,0.391,0.46,0.68,0.83,1.08]
+    pretext_mean_RE1_8 = [0.059,0.12,0.147,0.13,0.14,0.279,0.31,0.55]
 
     # For Frozen 0 with the "pretext__resnet_" prefix
-    resnet_mean_alg_0 = [0.32, 0.39, 0.34, 0.35, 0.4, 0.58]
-    resnet_mean_SED_0 = [0.34, 0.4936, 0.384, 0.422, 0.49, 0.8157]
-    resnet_mean_RE1_0 = [0.11, 0.2, 0.142, 0.15, 0.2, 0.422]
+    resnet_mean_alg_0 = [0.32, 0.39, 0.34, 0.35, 0.4, 0,0.626,0.67]
+    resnet_mean_SED_0 = [0.34, 0.4936, 0.384, 0.422, 0,0.49, 0.988,0.946]
+    resnet_mean_RE1_0 = [0.11, 0.2, 0.142, 0.15, 0.2, 0,0.385,0.517]
 
 
 
@@ -680,11 +680,11 @@ def plot_errors():
     # plt.grid(True)
 
     os.makedirs('results', exist_ok=True)
-    fig1.savefig('results/SED_orig_frozen2.png')
+    fig1.savefig('results/SED_orig_frozen.png')
     # fig2.savefig('results/SED_orig_frozen_bar.png')
-    fig3.savefig('results/SED_pretext_frozen2.png')
+    fig3.savefig('results/SED_pretext_frozen.png')
     # fig4.savefig('results/SED_pretext_bar_frozen.png')
-    fig5.savefig('results/SED_models2.png')
+    fig5.savefig('results/SED_models.png')
     # fig6.savefig('results/SED_model_bar.png')
     # plt.show()
 

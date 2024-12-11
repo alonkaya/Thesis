@@ -112,17 +112,17 @@ crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH
                                 print_and_write(f"##### CONTINUE TRAINING #####\n", model.plots_path)
                 
                         model.train_model(train_loader, val_loader, test_loader)
-                   
-                        if os.path.exists(os.path.join(model.plots_path, 'backup_model.pth')):
-                                os.remove(os.path.join(model.plots_path, 'backup_model.pth'))
-                        else:
-                                print_and_write(f"###\n{model.plots_path} no backup\n###", model.plots_path)
-                        
+
                         if COMPUTER==0:
                                 os.makedirs(model.parent_model_path, exist_ok=True)
                                 source_model_path = os.path.join(model.plots_path, 'model.pth')
                                 dest_model_path = os.path.join(model.parent_model_path, 'model.pth')
                                 shutil.move(source_model_path, dest_model_path)
+
+                        if os.path.exists(os.path.join(model.plots_path, 'backup_model.pth')):
+                                os.remove(os.path.join(model.plots_path, 'backup_model.pth'))
+                        else:
+                                print_and_write(f"\n{model.plots_path} no backup to delete after job done\n", model.plots_path)
 
                 else: 
                         print(f"Model {plots_path} already trained")
