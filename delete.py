@@ -16,8 +16,6 @@ for subfolder_name in os.listdir(main_folder_path):
         if os.path.exists(model_path):
             # os.remove(model_path)
             print(f"Deleted: {model_path}")
-        else:
-            print(f"No model.pth file found in: {subfolder_path}")
             
         if os.path.exists(backup_path):
             # os.remove(backup_path)
