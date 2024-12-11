@@ -174,7 +174,7 @@ def not_decreasing(val_loss, num_epochs, plots_path):
         return True
     
 def ready_to_break(val_loss, num_epochs):
-    length = num_epochs//30
+    length = num_epochs//40
     min_length = min(val_loss[-length:-1])
     if val_loss[-1] < min_length:
         return True
