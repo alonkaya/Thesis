@@ -27,8 +27,8 @@ if __name__ == "__main__":
                 which = "angle" if  SHIFT_RANGE==0 else "shift" if ANGLE_RANGE==0 else "angle_shift"
                 embeddings = 'all' if len(embeddings_to_use)==3 else 'original_rotated' if len(embeddings_to_use)==2 \
                                     else 'rotated' if embeddings_to_use[0] == "rotated_embeddings" else 'mul'
-                
-                plots_path = os.path.join('plots', 'Affine', f'BS_{bs}__lr_{lr}__train_size_{train_length}__{model}__alpha_{alpha}__{regress}__{embeddings}__frozen_{FROZEN_LAYERS}{ADDITIONS}')
+                frozen = 'all' if FREEZE_PRETRAINED_MODEL else FROZEN_LAYERS
+                plots_path = os.path.join('plots', 'Affine', f'BS_{bs}__lr_{lr}__train_size_{train_length}__{model}__alpha_{alpha}__{regress}__{embeddings}__frozen_{frozen}{ADDITIONS}')
    
                 train_loader, val_loader, test_loader = get_dataloaders(batch_size=bs, train_length=train_length, val_length=val_length, test_length=test_length, plots_path=plots_path)
 

@@ -5,7 +5,8 @@ from transformers import CLIPVisionModel, CLIPVisionConfig, ResNetModel
 
 
 class AffineRegressor(nn.Module):
-    def __init__(self, lr, batch_size, alpha, embedding_to_use=None, cls=None, avg_embeddings=AVG_EMBEDDINGS, frozen_layers=FROZEN_LAYERS, model_name=MODEL, plots_path=None, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
+    def __init__(self, lr, batch_size, alpha, embedding_to_use=None, cls=None, avg_embeddings=AVG_EMBEDDINGS, frozen_layers=FROZEN_LAYERS, \
+                 model_name=MODEL, plots_path=None, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS):
 
         """
         Args:
@@ -64,8 +65,13 @@ class AffineRegressor(nn.Module):
         # Freeze frozen_layers bottom layers
         for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
             if layer_idx < self.frozen_layers:  
+                print(f'layer_idx: {layer_idx}')
                 for param in layer.parameters():
                     param.requires_grad = False
+        
+        if FREEZE_PRETRAINED_MODEL:
+            for param in self.model.parameters():
+                param.requires_grad = False
 
         if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
             model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
