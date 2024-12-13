@@ -6,7 +6,7 @@ STEREO = True
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 
 
-PRETEXT_TRAIN = True
+PRETEXT_TRAIN = False
 SCENEFLOW = False
 FLYING = False
 MODEL = RESNET_MODEL_NAME 
