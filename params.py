@@ -5,17 +5,16 @@ STEREO = True
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &   ### REMEMBER TO FIRST MOVE THE MODEL FROM ORIGINAL PATH TO MNT PATH IN CASE OF COMPUTER==0 AND THE LAST RUN EXITED!!
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 
-
 PRETEXT_TRAIN = False
 SCENEFLOW = False
 FLYING = False
 MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [6] if FLYING else [0,4,8]
 COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SEQ_RATIOS = [0.025] if not SCENEFLOW else [9] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
+SEQ_RATIOS = [0.0404,0.008,0.1,0.2] if not SCENEFLOW else [9] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 KITTI2SCENEFLOW = False
-ONLY_CONTINUE = False
-PART = ["mid"] 
+ONLY_CONTINUE = True
+PART = ["tail"] 
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 
 ### Dataset ###  
