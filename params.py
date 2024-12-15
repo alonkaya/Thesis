@@ -5,7 +5,7 @@ STEREO = True
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &   ### REMEMBER TO FIRST MOVE THE MODEL FROM ORIGINAL PATH TO MNT PATH IN CASE OF COMPUTER==0 AND THE LAST RUN EXITED!!
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 
-PRETEXT_TRAIN = False
+PRETEXT_TRAIN = True
 SCENEFLOW = False
 FLYING = False
 MODEL = CLIP_MODEL_NAME 
@@ -15,7 +15,7 @@ MID_SIZES = True
 SEQ_RATIOS = [0.015,0.025,0.0375,0.05] if MID_SIZES else [0.004,0.008,0.1,0.2] if not SCENEFLOW else [9] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = True
-PART = ["tail"] 
+PART = ["mid"] 
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 
 ### Dataset ###  
