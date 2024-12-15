@@ -15,7 +15,7 @@ MID_SIZES = True
 SEQ_RATIOS = [0.015,0.025,0.0375,0.05] if MID_SIZES else [0.004,0.008,0.1,0.2] if not SCENEFLOW else [9] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = True
-PART = ["mid"] 
+PART = ["tail"] 
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 
 ### Dataset ###  
