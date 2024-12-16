@@ -9,7 +9,7 @@ STEREO = True
 PRETEXT_TRAIN = False
 SCENEFLOW = True
 FLYING = True
-MODEL = CLIP_MODEL_NAME 
+MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0,4,8]
 COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 MID_SIZES = True
