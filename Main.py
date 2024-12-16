@@ -51,7 +51,7 @@ if __name__ == "__main__":
                 else:
                         num_epochs = 2000 if train_size==0.3 else 4500 if train_size==0.2 else 7000 if train_size==0.1 else \
                                      14000 if train_size==0.05 else 18000 if train_size==0.0375 else 24000 if train_size==0.025 else \
-                                     40000 if train_size==0.015 else 65000 if train_size==0.008 else 80000 if train_size==0.004 else 0
+                                     40000 if train_size==0.015 else 65000 if train_size==0.008 else 100000 if train_size==0.004 else 0
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
