@@ -86,7 +86,8 @@ if __name__ == "__main__":
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
 
                 model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
-
+                if plots_path=="plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.0375__mid__frozen_0__seed_300":
+                        continue
                 # If the model was bad trained, skip it
                 if os.path.exists((f'{model.plots_path}__bad')):
                         print(f"\n###\n{model.plots_path}\nAlready trained and got bad results\n###\n")   
