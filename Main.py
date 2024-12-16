@@ -88,12 +88,12 @@ if __name__ == "__main__":
                 model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
 
                 # If the model was bad trained, skip it
-                if os.path.exists((f'{model.plots_path}__bad')):
-                        print(f"\n###\n{model.plots_path}\nAlready trained and got bad results\n###\n")   
-                        sys.stdout.flush()
+                # if os.path.exists((f'{model.plots_path}__bad')):
+                #         print(f"\n###\n{model.plots_path}\nAlready trained and got bad results\n###\n")   
+                #         sys.stdout.flush()
      
                 # If the model was already trained WELL with seed 42, skip training with other seed
-                elif "seed" in model.plots_path and os.path.exists(model.plots_path.split("__seed_")[0]):
+                if "seed" in model.plots_path and os.path.exists(model.plots_path.split("__seed_")[0]):
                         print(f"\n###\n{model.plots_path}\nSeed 42 already well trained, no need for other seed training\n###\n")
                         sys.stdout.flush()
 
