@@ -8,7 +8,7 @@ STEREO = True
 
 # output_flying_resnet_9_146_frozen_0.log
 
-PRETEXT_TRAIN = False
+PRETEXT_TRAIN = True
 SCENEFLOW = False
 FLYING = False
 MODEL = CLIP_MODEL_NAME 
