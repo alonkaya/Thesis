@@ -48,8 +48,6 @@ if __name__ == "__main__":
                 
                 if SCENEFLOW and FLYING:
                         num_epochs = 8000 if train_size==150 else 65000 if train_size==9 else 0
-                elif SCENEFLOW:
-                        num_epochs = 16000
                 else:
                         num_epochs = 2000 if train_size==0.3 else 4500 if train_size==0.2 else 7000 if train_size==0.1 else \
                                      14000 if train_size==0.05 else 18000 if train_size==0.0375 else 24000 if train_size==0.025 else \
@@ -71,7 +69,6 @@ if __name__ == "__main__":
                 compress = f'avg_embeddings' if AVG_EMBEDDINGS else 'conv' if USE_CONV else 'all_embeddings'
                 seed_param = "" if seed == 42 else f"__seed_{seed}"
                 data_config = f'ratio_{train_size}__{part}' if not SCENEFLOW else f'ratio_{train_size}'
-
                 plots_path = os.path.join('plots', dataset, 'Winners' if STEREO and not SCENEFLOW else '',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
@@ -86,8 +83,7 @@ if __name__ == "__main__":
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
 
                 model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
-                if plots_path=="plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.0375__mid__frozen_0__seed_300":
-                        continue
+
                 # If the model was bad trained, skip it
                 if os.path.exists((f'{model.plots_path}__bad')):
                         print(f"\n###\n{model.plots_path}\nAlready trained and got bad results\n###\n")   
