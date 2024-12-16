@@ -433,7 +433,7 @@ def get_dataloader_flying(train_size, batch_size, num_workers=NUM_WORKERS):
     flying_path_val = "SceneFlow/Flying_cleanpass/TEST/A"
     flying_path_test = "SceneFlow/Flying_cleanpass/TEST/B"
     train_datasets, val_datasets, test_datasets = [], [], []
-    for path, length in zip([flying_path_train, flying_path_val, flying_path_test], [train_size, max(train_size//4, 5), test_sequences_flying]):
+    for path, length in zip([flying_path_train, flying_path_val, flying_path_test], [train_size, max(train_size//4, 20), test_sequences_flying]):
         for i, seq_name in enumerate(os.listdir(flying_path_train)): 
             if i==length: break
 

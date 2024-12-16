@@ -48,8 +48,6 @@ if __name__ == "__main__":
                 
                 if SCENEFLOW and FLYING:
                         num_epochs = 8000 if train_size==150 else 65000 if train_size==9 else 0
-                elif SCENEFLOW:
-                        num_epochs = 16000
                 else:
                         num_epochs = 2000 if train_size==0.3 else 4500 if train_size==0.2 else 7000 if train_size==0.1 else \
                                      14000 if train_size==0.05 else 18000 if train_size==0.0375 else 24000 if train_size==0.025 else \
@@ -71,7 +69,6 @@ if __name__ == "__main__":
                 compress = f'avg_embeddings' if AVG_EMBEDDINGS else 'conv' if USE_CONV else 'all_embeddings'
                 seed_param = "" if seed == 42 else f"__seed_{seed}"
                 data_config = f'ratio_{train_size}__{part}' if not SCENEFLOW else f'ratio_{train_size}'
-
                 plots_path = os.path.join('plots', dataset, 'Winners' if STEREO and not SCENEFLOW else '',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
@@ -117,7 +114,10 @@ crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH
                                 os.makedirs(model.parent_model_path, exist_ok=True)
                                 source_model_path = os.path.join(model.plots_path, 'model.pth')
                                 dest_model_path = os.path.join(model.parent_model_path, 'model.pth')
-                                shutil.move(source_model_path, dest_model_path)
+                                try:
+                                        shutil.move(source_model_path, dest_model_path)
+                                except Exception as e:
+                                        print(f"########\nError moving model to mnt from {source_model_path}\n{e}")
 
                         if os.path.exists(os.path.join(model.plots_path, 'backup_model.pth')):
                                 os.remove(os.path.join(model.plots_path, 'backup_model.pth'))
