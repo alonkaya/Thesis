@@ -80,7 +80,7 @@ if __name__ == "__main__":
                 if ONLY_CONTINUE:
                         model_path = os.path.join("/mnt/sda2/Alon", plots_path, "model.pth") if COMPUTER==0 else os.path.join(plots_path, "model.pth")
                         if not os.path.exists(model_path):
-                                print(f'no model for {plots_path}')
+                                print(f'no model for {model_path}')
                                 continue
 
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
