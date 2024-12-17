@@ -78,9 +78,7 @@ class FMatrixRegressor(nn.Module):
         else:
             # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
-        print("\nfrozen layers:")
-        print(len(self.model.vision_model.encoder.layers))
-        print()
+            
         # Freeze frozen_layers layers
         if self.resnet == False:
             for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
