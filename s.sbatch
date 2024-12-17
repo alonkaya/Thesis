@@ -15,7 +15,7 @@
 # Note: the following 4 lines are commented out
 ##SBATCH --mail-user=alonkay@post.bgu.ac.il	### user's email for sending job status messages
 ##SBATCH --mail-type=ALL			### conditions for sending the email. ALL,BEGIN,END,FAIL, REQUEU, NONE
-##SBATCH --mem=12				### ammount of RAM memory, allocating more than 60G requires IT team's permission
+##SBATCH --mem=15				### ammount of RAM memory, allocating more than 60G requires IT team's permission
 
 ################  Following lines will be executed by a compute node    #######################
 
