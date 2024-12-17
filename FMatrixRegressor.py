@@ -9,7 +9,7 @@ from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetMode
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
                  augmentation=AUGMENTATION, model_name=MODEL, trained_vit=TRAINED_VIT, kitti2sceneflow=KITTI2SCENEFLOW,
-                 frozen_layers=0, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
+                 frozen_layers=0, frozen_high_layers=0, use_reconstruction=USE_RECONSTRUCTION_LAYER, pretrained_path=None, 
                  alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=0):
 
         """
@@ -50,6 +50,7 @@ class FMatrixRegressor(nn.Module):
         self.use_conv = use_conv
         self.num_epochs = num_epochs
         self.frozen_layers = frozen_layers
+        self.frozen_high_layers = frozen_high_layers
         self.start_epoch = 0
         self.kitti2sceneflow = kitti2sceneflow
         self.trained_vit = trained_vit # This is for when wanting to fine-tune an already trained vit 
@@ -77,11 +78,16 @@ class FMatrixRegressor(nn.Module):
         else:
             # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
-    
-        # Freeze frozen_layers bottom layers
+        print("\nfrozen layers:")
+        print(len(self.model.vision_model.encoder.layers))
+        print()
+        # Freeze frozen_layers layers
         if self.resnet == False:
             for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
                 if layer_idx < self.frozen_layers:  
+                    for param in layer.parameters():
+                        param.requires_grad = False
+                elif layer_idx >= len(self.model.vision_model.encoder.layers) - self.frozen_high_layers:
                     for param in layer.parameters():
                         param.requires_grad = False
 
@@ -319,6 +325,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 "num_patches" : self.num_patches,
                 'epoch' : epoch,
                 "frozen_layers" : self.frozen_layers,
+                "frozen_high_layers" : self.frozen_high_layers,
                 "all_train_loss" : self.all_train_loss, 
                 "all_val_loss" : self.all_val_loss, 
                 "all_train_mae" : self.all_train_mae, 
@@ -362,6 +369,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.hidden_size = checkpoint.get("hidden_size", 0)
         self.num_patches = checkpoint.get("num_patches", 0)
         self.frozen_layers = checkpoint.get("frozen_layers", self.frozen_layers)
+        self.frozen_high_layers = checkpoint.get("frozen_high_layers", 0)
         self.start_epoch = checkpoint.get("epoch", 0) if continue_training else 0
         self.all_train_loss = checkpoint.get("all_train_loss", []) if continue_training else []
         self.all_val_loss = checkpoint.get("all_val_loss", []) if continue_training else []
