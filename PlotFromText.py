@@ -128,8 +128,8 @@ def plot_all_folder(folder_path):
             plot_by_output(folder_path)
 
 if __name__ == "__main__":
-    root_path = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_9__frozen_0__146"
-    save = False
+    root_path = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_9__frozen_0__146"
+    save = True
 
     plot_by_output(root_path, save)
 
