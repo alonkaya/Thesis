@@ -6,11 +6,10 @@ STEREO = True
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 # find . -type f -name "model.pth"
 
-# output_flying_resnet_9_146_frozen_0.log
 
 PRETEXT_TRAIN = False
 SCENEFLOW = False
-FLYING = RESNET_MODEL_NAME
+FLYING = False
 MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0,4,8]
 FROZEN_HIGH_LAYERS = 0
