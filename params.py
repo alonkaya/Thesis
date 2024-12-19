@@ -8,8 +8,8 @@ STEREO = True
 # 482848 output_orig_mid_sizes_146.log
 
 PRETEXT_TRAIN = False
-SCENEFLOW = False
-FLYING = False
+SCENEFLOW = True
+FLYING = True
 MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0,4,8]
 FROZEN_HIGH_LAYERS = 0
@@ -17,7 +17,7 @@ COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 MID_SIZES = False
 SEQ_RATIOS = [0.015,0.025,0.0375,0.05] if MID_SIZES and not SCENEFLOW else [0.004,0.008,0.1,0.2] if not SCENEFLOW else [9] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 KITTI2SCENEFLOW = False
-ONLY_CONTINUE = True
+ONLY_CONTINUE = False
 PART = ["head", "mid", "tail"] 
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 
@@ -60,7 +60,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-SEED = [42, 300, 500]
+SEED = [300]
 LR = [1e-4]             
 
 ### Epipolar geometry ###
