@@ -462,7 +462,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 send_to_device(epoch_stats)
     
                 batch_SED_preds = self.dataloader_step(test_loader, 0, epoch_stats, data_type="test")
-                sorted_seds, _ = torch.sort(batch_SED_preds)
+                sorted_seds = sorted(batch_SED_preds)
                 trimmed_seds = sorted_seds[:int(len(sorted_seds) * 0.95)]
 
                 divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
