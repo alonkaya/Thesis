@@ -485,7 +485,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 plt.title('Histogram of batch SED predictions')
                 plt.xlabel('SED Prediction')
                 plt.ylabel('Frequency')
-                plt.savefig('sed_trim_pts')
+                file_name = 'kitti_clip_sed_trim_pts' if TRIM_PTS else 'kitti_clip_sed' 
+                plt.savefig(file_name)
 
                 # Plot histogram
                 plt.figure(figsize=(10, 5))
@@ -493,7 +494,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 plt.title('Histogram of batch SED predictions')
                 plt.xlabel('SED Prediction')
                 plt.ylabel('Frequency')
-                plt.savefig('sed_imgs_trimmed_trim_pts')
+                file_name = 'kitti_clip_sed_imgs_trimmed_trim_pts' if TRIM_PTS else 'kitti_clip_sed_imgs_trimmed'
+                plt.savefig(file_name)
                 
         output = f"""\n\n## TEST RESULTS: ##
 Test Loss: {loss/10}\t\t Test MAE: {mae/10}
