@@ -264,6 +264,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
+        batch_SED_preds = []  
         for img1, img2, label, pts1, pts2, _ in dataloader:
             img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
@@ -276,6 +277,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             # Update epoch statistics
             batch_SED_pred = update_epoch_stats(
                 epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type, epoch)
+            batch_SED_preds.append(batch_SED_pred.detatch().cpu().item())  # Store the prediction
             
             # Compute loss
             loss = self.L2_coeff*self.L2_loss(output, label) + self.huber_coeff*self.huber_loss(output, label) + \
@@ -291,6 +293,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             # Extend lists with batch statistics
             epoch_stats[f'{prefix}labels'] = torch.cat((epoch_stats[f'{prefix}labels'], label.detach()), dim=0)
             epoch_stats[f'{prefix}outputs'] = torch.cat((epoch_stats[f'{prefix}outputs'], output.detach()), dim=0)
+
+            return batch_SED_preds
 
     def save_model(self, epoch, definetly=False):
         model_path = os.path.join(self.plots_path, "model.pth")
@@ -451,13 +455,13 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
     def test(self, test_loader, write=True):
         with torch.no_grad():
             loss, mae, alg, re1, sed = 0, 0, 0, 0, 0
-            for epoch in range(10):
+            for epoch in range(1):
                 epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0), 
                                 "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0), 
                                 "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
                 send_to_device(epoch_stats)
     
-                self.dataloader_step(test_loader, 0, epoch_stats, data_type="test")
+                batch_SED_preds = self.dataloader_step(test_loader, 0, epoch_stats, data_type="test")
 
                 divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
 
@@ -469,6 +473,16 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 re1 += epoch_stats["test_RE1_pred"]
                 sed += epoch_stats["test_SED_pred"]
 
+                # Define your bins
+                bins = np.arange(0, 20.4, 0.4).tolist() + [float('inf')]
+
+                # Plot histogram
+                plt.figure(figsize=(10, 5))
+                plt.hist(batch_SED_preds, bins=bins, edgecolor='black')
+                plt.title('Histogram of batch SED predictions')
+                plt.xlabel('SED Prediction')
+                plt.ylabel('Frequency')
+                plt.savefig('batch_SED_preds')
                 
         output = f"""\n\n## TEST RESULTS: ##
 Test Loss: {loss/10}\t\t Test MAE: {mae/10}

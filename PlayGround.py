@@ -778,13 +778,13 @@ def delete_odd_files(folder_path):
 def test_trained():
     " Only need to change the data type in params i.e SCENEFLOW, KITTI.. "
 
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.008, part='head', batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=1, part='head', batch_size=1)
 
-    pretrained_model = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.0375__mid__frozen_0__seed_300/"
+    pretrained_model = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_150__frozen_0"
 
     model = FMatrixRegressor(lr=LR[0], batch_size=1, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
-    print(model.start_epoch)
-    # model.test(test_loader=test_loader, write=False)
+    # print(model.start_epoch)
+    model.test(test_loader=test_loader, write=False)
 
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"

@@ -10,7 +10,7 @@ STEREO = True
 PRETEXT_TRAIN = False
 SCENEFLOW = True
 FLYING = True
-MODEL = RESNET_MODEL_NAME 
+MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0,4,8]
 FROZEN_HIGH_LAYERS = 0
 COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -20,7 +20,7 @@ KITTI2SCENEFLOW = False
 ONLY_CONTINUE = False
 PART = ["head", "mid", "tail"] 
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
-SEED = [300]
+SEED = [42]
 
 ### Dataset ###  
 RIGHTCAMVAL = False
