@@ -20,7 +20,7 @@ KITTI2SCENEFLOW = False
 ONLY_CONTINUE = False
 PART = ["head", "mid", "tail"] 
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
-SEED = [42]
+SEED = [300]
 
 ### Dataset ###  
 RIGHTCAMVAL = False
