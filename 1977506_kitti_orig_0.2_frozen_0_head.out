@@ -1,0 +1,41 @@
+Thu 19 Dec 2024 12:09:52 IST
+
+SLURM_JOBID:		 1977506
+SLURM_JOB_NODELIST:	 cs-4090-05 
+
+
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/huggingface_hub/file_download.py:797: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/transformers/modeling_utils.py:479: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return torch.load(checkpoint_file, map_location=map_location)
+/cs_storage/alonkay/Thesis/FMatrixRegressor.py:343: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(model_path, map_location='cpu')
+/cs_storage/alonkay/Thesis/FMatrixRegressor.py:346: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(backup_path, map_location='cpu')
+Traceback (most recent call last):
+  File "/cs_storage/alonkay/Thesis/FMatrixRegressor.py", line 343, in load_model
+    checkpoint = torch.load(model_path, map_location='cpu')
+  File "/home/alonkay/.local/lib/python3.9/site-packages/torch/serialization.py", line 1326, in load
+    with _open_zipfile_reader(opened_file) as opened_zipfile:
+  File "/home/alonkay/.local/lib/python3.9/site-packages/torch/serialization.py", line 671, in __init__
+    super().__init__(torch._C.PyTorchFileReader(name_or_buffer))
+RuntimeError: PytorchStreamReader failed reading zip archive: unsupported multidisk archive
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/cs_storage/alonkay/Thesis/Main.py", line 88, in <module>
+    model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, \
+  File "/cs_storage/alonkay/Thesis/FMatrixRegressor.py", line 96, in __init__
+    self.load_model(path)
+  File "/cs_storage/alonkay/Thesis/FMatrixRegressor.py", line 346, in load_model
+    checkpoint = torch.load(backup_path, map_location='cpu')
+  File "/home/alonkay/.local/lib/python3.9/site-packages/torch/serialization.py", line 1319, in load
+    with _open_file_like(f, "rb") as opened_file:
+  File "/home/alonkay/.local/lib/python3.9/site-packages/torch/serialization.py", line 659, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+  File "/home/alonkay/.local/lib/python3.9/site-packages/torch/serialization.py", line 640, in __init__
+    super().__init__(open(name, mode))
+FileNotFoundError: [Errno 2] No such file or directory: 'plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0/backup_model.pth'
