@@ -21,7 +21,7 @@ ONLY_CONTINUE = False
 PART = ["head", "mid", "tail"] 
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 SEED = [42]
-TRIM_PTS = True
+TRIM_PTS = False
 
 ### Dataset ###  
 RIGHTCAMVAL = False
