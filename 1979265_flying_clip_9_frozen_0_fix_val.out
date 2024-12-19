@@ -976,3 +976,125 @@ Test RE1 dist truth: 2.388959011632549e-05
 
 plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_9__frozen_0 no backup to delete after job done
 
+
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Flying,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: mid, get_old_path: False, computer: 1,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 9, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42
+
+train size: 90, val size: 196, test size: 968
+
+##### CONTINUE TRAINING #####
+
+Epoch 66157/65000: Training Loss: 0.21628642082214355		 Val Loss: 1.495673828125
+             	Training MAE: 0.0737503170967102		 Val MAE: 0.06422173231840134
+             	Algebraic dist: 0.2718423803647359		 Val Algebraic dist: 0.575689811706543
+             	RE1 dist: 0.0826648473739624		 Val RE1 dist: 0.6816435241699219
+             	SED dist: 0.3642655611038208		 Val SED dist: 2.9457147216796873
+
+Epoch 66158/65000: Training Loss: 0.23547120889027914		 Val Loss: 1.7654652404785156
+             	Training MAE: 0.07512542605400085		 Val MAE: 0.05560583621263504
+             	Algebraic dist: 0.2800709009170532		 Val Algebraic dist: 0.657264404296875
+             	RE1 dist: 0.0893208384513855		 Val RE1 dist: 0.8222474670410156
+             	SED dist: 0.4007147153218587		 Val SED dist: 3.5009829711914064
+
+Epoch 66159/65000: Training Loss: 0.2638305028279622		 Val Loss: 1.7862364196777343
+             	Training MAE: 0.07227670401334763		 Val MAE: 0.0555579699575901
+             	Algebraic dist: 0.32828569412231445		 Val Algebraic dist: 0.6954544067382813
+             	RE1 dist: 0.10914482673009236		 Val RE1 dist: 0.8242752075195312
+             	SED dist: 0.4637554883956909		 Val SED dist: 3.5426654052734374
+
+Epoch 66160/65000: Training Loss: 0.19740372896194458		 Val Loss: 1.6405947875976563
+             	Training MAE: 0.07453121244907379		 Val MAE: 0.07485868781805038
+             	Algebraic dist: 0.24672335386276245		 Val Algebraic dist: 0.5731467437744141
+             	RE1 dist: 0.07133500277996063		 Val RE1 dist: 0.7485887908935547
+             	SED dist: 0.3296593427658081		 Val SED dist: 3.2317276000976562
+
+Epoch 66161/65000: Training Loss: 0.17581671476364136		 Val Loss: 1.7082337951660156
+             	Training MAE: 0.0735618993639946		 Val MAE: 0.06468065083026886
+             	Algebraic dist: 0.22717378536860147		 Val Algebraic dist: 0.5926581573486328
+             	RE1 dist: 0.06075671315193176		 Val RE1 dist: 0.7470697784423828
+             	SED dist: 0.2856682538986206		 Val SED dist: 3.373293762207031
+
+Epoch 66162/65000: Training Loss: 0.22193002700805664		 Val Loss: 1.6375253295898438
+             	Training MAE: 0.07419302314519882		 Val MAE: 0.059135884046554565
+             	Algebraic dist: 0.2684923013051351		 Val Algebraic dist: 0.5780452728271485
+             	RE1 dist: 0.07883147398630778		 Val RE1 dist: 0.7470514678955078
+             	SED dist: 0.36279698212941486		 Val SED dist: 3.2376718139648437
+
+Epoch 66163/65000: Training Loss: 0.19255624214808145		 Val Loss: 1.4996966552734374
+             	Training MAE: 0.07118260115385056		 Val MAE: 0.05697586387395859
+             	Algebraic dist: 0.24949949979782104		 Val Algebraic dist: 0.5714395904541015
+             	RE1 dist: 0.06922862927118938		 Val RE1 dist: 0.6564185333251953
+             	SED dist: 0.31757821639378864		 Val SED dist: 2.967512512207031
+
+Epoch 66164/65000: Training Loss: 0.16732307275136313		 Val Loss: 1.463350830078125
+             	Training MAE: 0.07367090880870819		 Val MAE: 0.05901341140270233
+             	Algebraic dist: 0.21715803941090903		 Val Algebraic dist: 0.5800088882446289
+             	RE1 dist: 0.057551066080729164		 Val RE1 dist: 0.6676660919189453
+             	SED dist: 0.26558180650075275		 Val SED dist: 2.8904464721679686
+
+
+
+## TEST RESULTS: ##
+Test Loss: 2.0257327245286674		 Test MAE: 0.057804982736706735
+Test Algebraic dist: 0.6732432341772663
+Test SED dist: 4.0163220366170584
+Test RE1 dist: 0.9179343357559079
+
+Test Algebraic dist truth: 0.0050145653653735954
+Test SED dist truth: 0.00019486100713083567
+Test RE1 dist truth: 2.436314647909531e-05
+
+
+plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_9__frozen_0 no backup to delete after job done
+
+
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Flying,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: tail, get_old_path: False, computer: 1,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 9, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42
+
+train size: 90, val size: 196, test size: 968
+
+##### CONTINUE TRAINING #####
+
+Epoch 66165/65000: Training Loss: 0.23699361085891724		 Val Loss: 1.5935870361328126
+             	Training MAE: 0.07168318331241608		 Val MAE: 0.06522790342569351
+             	Algebraic dist: 0.2922244071960449		 Val Algebraic dist: 0.683193359375
+             	RE1 dist: 0.09085109829902649		 Val RE1 dist: 0.7072438812255859
+             	SED dist: 0.41065017382303876		 Val SED dist: 3.1464974975585935
+
+Epoch 66166/65000: Training Loss: 0.2730787992477417		 Val Loss: 1.8780606079101563
+             	Training MAE: 0.07226795703172684		 Val MAE: 0.061737898737192154
+             	Algebraic dist: 0.31584441661834717		 Val Algebraic dist: 0.6881163024902344
+             	RE1 dist: 0.10945689678192139		 Val RE1 dist: 0.8229082489013672
+             	SED dist: 0.4820173184076945		 Val SED dist: 3.713760986328125
+
+Epoch 66167/65000: Training Loss: 0.29442425568898517		 Val Loss: 1.4001846313476562
+             	Training MAE: 0.0728524848818779		 Val MAE: 0.07036988437175751
+             	Algebraic dist: 0.3608889579772949		 Val Algebraic dist: 0.5791752243041992
+             	RE1 dist: 0.1238245964050293		 Val RE1 dist: 0.5757733535766602
+             	SED dist: 0.5220162471135458		 Val SED dist: 2.752519226074219
+
+
+
+## TEST RESULTS: ##
+Test Loss: 1.7440698292629773		 Test MAE: 0.07148637846112252
+Test Algebraic dist: 0.6563841638486249
+Test SED dist: 3.4380150913206995
+Test RE1 dist: 0.7529448958467846
+
+Test Algebraic dist truth: 0.00500632711678497
+Test SED dist truth: 0.00019370499721243361
+Test RE1 dist truth: 2.4216823002769928e-05
+
+
+plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_9__frozen_0 no backup to delete after job done
+
