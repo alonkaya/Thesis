@@ -306,6 +306,7 @@ class EpipolarGeometry:
 
     def get_mean_SED_distance(self):
         sed = self.get_SED_distance()   # shape (batch_size, n)
+        print(sed.shape)
         for frame in sed:
             sorted_tensor, indices = torch.sort(sed)
             print(f'{sorted_tensor}\n\n')
