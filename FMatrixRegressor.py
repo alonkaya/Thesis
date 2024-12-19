@@ -277,7 +277,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             # Update epoch statistics
             batch_SED_pred = update_epoch_stats(
                 epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type, epoch)
-            batch_SED_preds.append(batch_SED_pred.detatch().cpu().item())  # Store the prediction
+            batch_SED_preds.append(batch_SED_pred.detach().cpu().item())  # Store the prediction
             
             # Compute loss
             loss = self.L2_coeff*self.L2_loss(output, label) + self.huber_coeff*self.huber_loss(output, label) + \
