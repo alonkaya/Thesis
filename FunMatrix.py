@@ -266,10 +266,10 @@ class EpipolarGeometry:
         Input: errors of shape (batch_size * n)
         Output: average error of shape (1)
         """
-        if FLYING:
-            sorted_errors, _ = torch.sort(errors)
-            cutoff_index = int(len(sorted_errors) * 0.95)
-            errors = sorted_errors[:cutoff_index]
+        # if FLYING:
+        #     sorted_errors, _ = torch.sort(errors)
+        #     cutoff_index = int(len(sorted_errors) * 0.95)
+        #     errors = sorted_errors[:cutoff_index]
 
         # Sum all valid errors
         sum_errors = torch.sum(errors)
