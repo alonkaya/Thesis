@@ -1,0 +1,33 @@
+Thu 19 Dec 2024 18:28:59 IST
+
+SLURM_JOBID:		 1986661
+SLURM_JOB_NODELIST:	 cs-6000-01 
+
+
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/huggingface_hub/file_download.py:797: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+/home/alonkay/.conda/envs/alon_env/lib/python3.9/site-packages/transformers/modeling_utils.py:479: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return torch.load(checkpoint_file, map_location=map_location)
+/cs_storage/alonkay/Thesis/FMatrixRegressor.py:347: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(model_path, map_location='cpu')
+torch.Size([1, 100])
+Traceback (most recent call last):
+  File "/cs_storage/alonkay/Thesis/PlayGround.py", line 792, in <module>
+    test_trained()
+  File "/cs_storage/alonkay/Thesis/PlayGround.py", line 787, in test_trained
+    model.test(test_loader=test_loader, write=False)
+  File "/cs_storage/alonkay/Thesis/FMatrixRegressor.py", line 464, in test
+    batch_SED_preds = self.dataloader_step(test_loader, 0, epoch_stats, data_type="test")
+  File "/cs_storage/alonkay/Thesis/FMatrixRegressor.py", line 278, in dataloader_step
+    batch_SED_pred = update_epoch_stats(
+  File "/cs_storage/alonkay/Thesis/FunMatrix.py", line 173, in update_epoch_stats
+    algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2,p=True)
+  File "/cs_storage/alonkay/Thesis/FunMatrix.py", line 167, in update_distances
+    SED_dist = epipolar_geo.get_mean_SED_distance(p)
+  File "/cs_storage/alonkay/Thesis/FunMatrix.py", line 313, in get_mean_SED_distance
+    print(f'{sorted_tensor:.5f}\n\n')
+  File "/home/alonkay/.local/lib/python3.9/site-packages/torch/_tensor.py", line 1053, in __format__
+    return object.__format__(self, format_spec)
+TypeError: unsupported format string passed to Tensor.__format__
