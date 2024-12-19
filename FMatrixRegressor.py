@@ -462,6 +462,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 send_to_device(epoch_stats)
     
                 batch_SED_preds = self.dataloader_step(test_loader, 0, epoch_stats, data_type="test")
+                sorted_seds, _ = torch.sort(batch_SED_preds)
+                trimmed_seds = sorted_seds[:int(len(sorted_seds) * 0.95)]
 
                 divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
 
@@ -475,7 +477,6 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
                 # Define your bins
                 bins = np.arange(0, 20.4, 0.4).tolist() + [float('inf')]
-
                 # Plot histogram
                 plt.figure(figsize=(10, 5))
                 plt.hist(batch_SED_preds, bins=bins, edgecolor='black')
@@ -483,6 +484,14 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 plt.xlabel('SED Prediction')
                 plt.ylabel('Frequency')
                 plt.savefig('batch_SED_preds')
+
+                # Plot histogram
+                plt.figure(figsize=(10, 5))
+                plt.hist(trimmed_seds, bins=bins, edgecolor='black')
+                plt.title('Histogram of batch SED predictions')
+                plt.xlabel('SED Prediction')
+                plt.ylabel('Frequency')
+                plt.savefig('batch_SED_preds_trimmed')
                 
         output = f"""\n\n## TEST RESULTS: ##
 Test Loss: {loss/10}\t\t Test MAE: {mae/10}
