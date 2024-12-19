@@ -483,7 +483,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 plt.figure(figsize=(10, 5))
                 plt.hist(batch_SED_preds, bins=bins, edgecolor='black')
                 plt.title('Histogram of batch SED predictions')
-                plt.xlabel('SED Prediction_no_trim_pts')
+                plt.xlabel('SED Prediction')
                 plt.ylabel('Frequency')
                 plt.savefig('sed')
 
@@ -493,7 +493,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 plt.title('Histogram of batch SED predictions')
                 plt.xlabel('SED Prediction')
                 plt.ylabel('Frequency')
-                plt.savefig('sed_imgs_trimmed_no_trim_pts')
+                plt.savefig('sed_imgs_trimmed')
                 
         output = f"""\n\n## TEST RESULTS: ##
 Test Loss: {loss/10}\t\t Test MAE: {mae/10}
