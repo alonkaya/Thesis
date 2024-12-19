@@ -19,7 +19,7 @@ SEQ_RATIOS = [0.015,0.025,0.0375,0.05] if MID_SIZES and not SCENEFLOW else [0.00
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = False
 PART = ["head", "mid", "tail"] 
-ADDITIONS = "__2"  ## REMEMBER TO PUT "__" !!!!!
+ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 SEED = [42]
 
 ### Dataset ###  
