@@ -253,7 +253,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 self.num_epochs = epoch + 1
                 break
         
-        self.save_model(epoch+1)
+        self.save_model(epoch+1, definetly=True)
         self.test(test_loader)
 
         if COMPUTER == 1: # Only plot if not using 4090 (250)
@@ -292,13 +292,13 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             epoch_stats[f'{prefix}labels'] = torch.cat((epoch_stats[f'{prefix}labels'], label.detach()), dim=0)
             epoch_stats[f'{prefix}outputs'] = torch.cat((epoch_stats[f'{prefix}outputs'], output.detach()), dim=0)
 
-    def save_model(self, epoch):
+    def save_model(self, epoch, definetly=False):
         model_path = os.path.join(self.plots_path, "model.pth")
         # Backup previous checkpoint
         if os.path.exists(model_path) and epoch % (self.num_epochs//90) == 0: 
             backup_path = os.path.join(self.plots_path, "backup_model.pth")
             shutil.copy(model_path, backup_path)
-        if epoch % (self.num_epochs//100) == 0:
+        if definetly or epoch % (self.num_epochs//100) == 0:
             torch.save({
                 'mlp': self.mlp.state_dict(),
                 'optimizer': self.optimizer.state_dict(),
