@@ -464,6 +464,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 batch_SED_preds = self.dataloader_step(test_loader, 0, epoch_stats, data_type="test")
                 sorted_seds = sorted(batch_SED_preds)
                 trimmed_seds = sorted_seds[:int(len(sorted_seds) * 0.95)]
+                print(f"mean trimmed seds: {np.mean(trimmed_seds)}")
+                print(f"mean seds: {np.mean(sorted_seds)}")
 
                 divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
 
@@ -483,7 +485,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 plt.title('Histogram of batch SED predictions')
                 plt.xlabel('SED Prediction')
                 plt.ylabel('Frequency')
-                plt.savefig('batch_SED_preds')
+                plt.savefig('sed')
 
                 # Plot histogram
                 plt.figure(figsize=(10, 5))
@@ -491,7 +493,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 plt.title('Histogram of batch SED predictions')
                 plt.xlabel('SED Prediction')
                 plt.ylabel('Frequency')
-                plt.savefig('batch_SED_preds_trimmed')
+                plt.savefig('sed_imgs_trimmed')
                 
         output = f"""\n\n## TEST RESULTS: ##
 Test Loss: {loss/10}\t\t Test MAE: {mae/10}

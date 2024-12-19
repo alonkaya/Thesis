@@ -159,18 +159,18 @@ def last_sing_value(output):
     return last_sv_sq
 
 
-def update_distances(img1, img2, F, pts1, pts2):
+def update_distances(img1, img2, F, pts1, pts2,p=False):
     epipolar_geo = EpipolarGeometry(img1, img2, F, pts1, pts2)
 
     algebraic_dist = epipolar_geo.get_mean_algebraic_distance()
     RE1_dist = epipolar_geo.get_RE1_distance()
-    SED_dist = epipolar_geo.get_mean_SED_distance()
+    SED_dist = epipolar_geo.get_mean_SED_distance(p)
     return algebraic_dist, RE1_dist, SED_dist
 
 def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, data_type, epoch=0):
     prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
 
-    algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2)
+    algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2,p=True)
 
     stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred.detach())
     stats[f"{prefix}RE1_pred"] = stats[f"{prefix}RE1_pred"] + (RE1_dist_pred.detach())
@@ -266,12 +266,10 @@ class EpipolarGeometry:
         Input: errors of shape (batch_size * n)
         Output: average error of shape (1)
         """
-        print(errors.shape)
         if FLYING:
             sorted_errors, _ = torch.sort(errors)
             cutoff_index = int(len(sorted_errors) * 0.95)
             errors = sorted_errors[:cutoff_index]
-
 
         # Sum all valid errors
         sum_errors = torch.sum(errors)
@@ -311,8 +309,12 @@ class EpipolarGeometry:
 
         return self.average_batch(RE1.view(-1))
 
-    def get_mean_SED_distance(self):
+    def get_mean_SED_distance(self,p):
         sed = self.get_SED_distance()   # shape (batch_size, n)
+        if p:
+            for frame in sed:
+                sorted_tensor, indices = torch.sort(sed)
+                print(f'{sorted_tensor}\n\n')
         return self.average_batch(sed.view(-1)) # shape (1)
 
     def get_SED_distance(self, show_histogram=False, plots_path=None):
