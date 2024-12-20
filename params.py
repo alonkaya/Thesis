@@ -8,10 +8,10 @@ STEREO = True
 
 # 482848 output_orig_mid_sizes_146.log
 
-PRETEXT_TRAIN = True
+PRETEXT_TRAIN = False
 SCENEFLOW = False
 FLYING = False
-MODEL = CLIP_MODEL_NAME 
+MODEL = RESNET_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0,4,8]
 FROZEN_HIGH_LAYERS = 0
 COMPUTER = 0 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
