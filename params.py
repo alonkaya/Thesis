@@ -8,7 +8,7 @@ STEREO = True
 
 # 482848 output_orig_mid_sizes_146.log
 
-PRETEXT_TRAIN = False
+PRETEXT_TRAIN = True
 SCENEFLOW = False
 FLYING = False
 MODEL = CLIP_MODEL_NAME 
