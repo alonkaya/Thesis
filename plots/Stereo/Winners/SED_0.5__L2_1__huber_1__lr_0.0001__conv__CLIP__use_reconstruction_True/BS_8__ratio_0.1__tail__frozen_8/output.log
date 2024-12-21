@@ -43075,3 +43075,37 @@ Test Algebraic dist truth: 0.017715210305120712
 Test SED dist truth: 0.0017231458559968417
 Test RE1 dist truth: 0.00021539320398990372
 
+
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: tail, get_old_path: False, computer: 1,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 8, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.1, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42
+
+train size: 1082, val size: 367, test size: 1064
+
+##### CONTINUE TRAINING #####
+
+Epoch 7141/7000: Training Loss: 0.15065295556012323		 Val Loss: 0.2808462225872537
+             	Training MAE: 0.061869554221630096		 Val MAE: 0.06033044308423996
+             	Algebraic dist: 0.2609540434444652		 Val Algebraic dist: 0.35130724699600885
+             	RE1 dist: 0.06871002561905805		 Val RE1 dist: 0.1395745381065037
+             	SED dist: 0.2678418439977309		 Val SED dist: 0.5288918536642323
+
+
+
+## TEST RESULTS: ##
+Test Loss: 0.12927771116557873		 Test MAE: 0.060595708340406416
+Test Algebraic dist: 0.2412442185824975
+Test SED dist: 0.22561943799929512
+Test RE1 dist: 0.058832834717026314
+
+Test Algebraic dist truth: 0.017725822620822073
+Test SED dist truth: 0.0017259523160475538
+Test RE1 dist truth: 0.00021574441763691436
+
+
+plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__tail__frozen_8 no backup to delete after job done
+

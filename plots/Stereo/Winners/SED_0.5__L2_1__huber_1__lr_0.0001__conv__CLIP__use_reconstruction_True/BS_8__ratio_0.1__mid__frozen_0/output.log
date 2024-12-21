@@ -42291,3 +42291,37 @@ Test RE1 dist truth: 0.00021512568333095178
 ###
 plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__mid__frozen_0 no backup
 ###
+
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch32, augmentation: True, random crop: True, part: mid, get_old_path: False, computer: 1,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.1, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42
+
+train size: 1082, val size: 367, test size: 1064
+
+##### CONTINUE TRAINING #####
+
+Epoch 7033/7000: Training Loss: 0.14630615009981043		 Val Loss: 0.25836915555207624
+             	Training MAE: 0.0641527995467186		 Val MAE: 0.0627492144703865
+             	Algebraic dist: 0.27511223624734316		 Val Algebraic dist: 0.3473490632098654
+             	RE1 dist: 0.07431483268737793		 Val RE1 dist: 0.1316362256589143
+             	SED dist: 0.2567305845372817		 Val SED dist: 0.48091166952381964
+
+
+
+## TEST RESULTS: ##
+Test Loss: 0.183891841343471		 Test MAE: 0.06249636970460415
+Test Algebraic dist: 0.3201902862778284
+Test SED dist: 0.33221271773029987
+Test RE1 dist: 0.09799496213296302
+
+Test Algebraic dist truth: 0.017699895944810452
+Test SED dist truth: 0.0017211234435102994
+Test RE1 dist truth: 0.0002151502058246082
+
+
+plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.1__mid__frozen_0 no backup to delete after job done
+
