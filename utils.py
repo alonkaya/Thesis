@@ -1,7 +1,6 @@
 import sys
 from params import *
 from PlotFromText import *
-import matplotlib.pyplot as plt
 import torch.nn as nn
 import os
 import math
@@ -10,7 +9,9 @@ import warnings
 import os
 import faulthandler
 import traceback
-
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 class MLP(nn.Module):
     def __init__(self, input_dim, mlp_hidden_sizes=MLP_HIDDEN_DIM, num_output=NUM_OUTPUT):

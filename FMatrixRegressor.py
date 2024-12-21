@@ -256,11 +256,11 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.save_model(epoch+1, definetly=True)
         self.test(test_loader)
 
-        if COMPUTER == 1: # Only plot if not using 4090 (250)
-            try:
-                self.plot_all()
-            except Exception as e:
-                print_and_write(f"Plotting failed: {e}", self.plots_path)
+        # if COMPUTER == 1: # Only plot if not using 4090 (250)
+        try:
+            self.plot_all()
+        except Exception as e:
+            print_and_write(f"Plotting failed: {e}", self.plots_path)
         
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
@@ -277,7 +277,9 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             # Update epoch statistics
             batch_SED_pred = update_epoch_stats(
                 epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type, epoch)
-            # batch_SED_preds.append(batch_SED_pred.detach().cpu().item())  # Store the prediction
+            
+            #################
+            batch_SED_preds.append(batch_SED_pred.detach().cpu().item())  # TODO!!!
             
             # Compute loss
             loss = self.L2_coeff*self.L2_loss(output, label) + self.huber_coeff*self.huber_loss(output, label) + \
@@ -475,9 +477,16 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
 #################################################################################################################
                 # sorted_seds = sorted(batch_SED_preds)
-                # trimmed_seds = sorted_seds[:int(len(sorted_seds) * 0.95)]
-                # print(f"mean trimmed seds: {np.mean(trimmed_seds)}")
-                # print(f"mean seds: {np.mean(sorted_seds)}")
+
+                batch_SED_preds = np.array(batch_SED_preds)
+                sorted_indices = np.argsort(batch_SED_preds)
+                sorted_seds = batch_SED_preds[sorted_indices]
+
+                trimmed_seds = sorted_seds[:int(len(sorted_seds) * 0.95)]
+
+                print(f'Indices of last 10%: {sorted_indices[int(len(sorted_indices) * 0.9):]}')
+                print(f"mean trimmed seds: {np.mean(trimmed_seds)}")
+                print(f"mean seds: {np.mean(sorted_seds)}")
 
                 # # Define your bins
                 # bins = np.arange(0, 20.4, 0.4).tolist() + [float('inf')]
