@@ -39,6 +39,7 @@ if __name__ == "__main__":
         parts = PART if not SCENEFLOW else [None]
         train_sizes = SEQ_RATIOS if STEREO else RL_TRAIN_NUM
 
+        gtg = False
         # Iterate over each combination
         param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, SEED, train_sizes, lrs, parts, frozen_layers)
         for i, (alg_coeff, re1_coeff, sed_coeff, seed, train_size, lr, part, fl) in enumerate(param_combinations):
@@ -82,6 +83,12 @@ if __name__ == "__main__":
                         if not os.path.exists(model_path):
                                 print(f'no model for {model_path}')
                                 continue
+                
+                if plots_path=="plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/Trained_vit/BS_8__ratio_0.015__mid__frozen_0/output.log"
+                        gtg = True
+                        continue
+                if not gtg:
+                        continue
 
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
 

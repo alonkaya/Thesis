@@ -510,3 +510,4 @@ Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}
 Test SED dist truth: {epoch_stats["test_SED_truth"]}
 Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\n"""
         print_and_write(output, self.plots_path) if write else print(output)
+        print(f'{self.plots_path}\n')
