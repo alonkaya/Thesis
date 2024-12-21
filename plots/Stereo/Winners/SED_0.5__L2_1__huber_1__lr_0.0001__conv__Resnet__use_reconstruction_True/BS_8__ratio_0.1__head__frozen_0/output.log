@@ -30573,3 +30573,47 @@ Test Algebraic dist truth: 0.017685771884774805
 Test SED dist truth: 0.0017194751285968867
 Test RE1 dist truth: 0.00021494651927535697
 
+
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: microsoft/resnet-152, augmentation: True, random crop: True, part: head, get_old_path: False, computer: 1,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: None,
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.1, norm_mean: tensor([0.5000, 0.5000, 0.5000], device='cuda:0'), norm_std: tensor([0.5000, 0.5000, 0.5000], device='cuda:0'), sched: None seed: 42
+
+train size: 1082, val size: 367, test size: 1064
+
+##### CONTINUE TRAINING #####
+
+Epoch 4896/7000: Training Loss: 0.1828012606676887		 Val Loss: 0.27904415130615234
+             	Training MAE: 0.06405216455459595		 Val MAE: 0.06783818453550339
+             	Algebraic dist: 0.33920568578383503		 Val Algebraic dist: 0.4281830165697181
+             	RE1 dist: 0.11344463684979607		 Val RE1 dist: 0.1957838431648586
+             	SED dist: 0.33059925191542683		 Val SED dist: 0.5223407745361328
+
+### Not decreasing ###
+
+Epoch 4897/7000: Training Loss: 0.15192329182344325		 Val Loss: 0.25908466007398523
+             	Training MAE: 0.0647779330611229		 Val MAE: 0.06025180220603943
+             	Algebraic dist: 0.29846816904404583		 Val Algebraic dist: 0.40783575306768005
+             	RE1 dist: 0.0924000249189489		 Val RE1 dist: 0.183636706808339
+             	SED dist: 0.2685743219712201		 Val SED dist: 0.484777367633322
+
+### Not decreasing ###
+
+
+
+## TEST RESULTS: ##
+Test Loss: 0.2427202396823051		 Test MAE: 0.060696037486195564
+Test Algebraic dist: 0.37557418077511895
+Test SED dist: 0.4519734375458911
+Test RE1 dist: 0.187680779363876
+
+Test Algebraic dist truth: 0.017703784139532792
+Test SED dist truth: 0.0017229216663460982
+Test RE1 dist truth: 0.00021538657969550083
+
+
+plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.1__head__frozen_0 no backup to delete after job done
+
