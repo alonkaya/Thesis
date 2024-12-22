@@ -792,5 +792,5 @@ import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-    for i in range(5):
+    for i in range(1):
         test_trained()

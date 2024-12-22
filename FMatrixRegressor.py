@@ -279,7 +279,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type, epoch)
             
             #################
-            batch_SED_preds[left_path] = batch_SED_pred.detach().cpu().item()  # TODO!!!
+            batch_SED_preds[left_path[0]] = batch_SED_pred.detach().cpu().item()  # TODO!!!
             #################
             
             # Compute loss
@@ -458,7 +458,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
     def test(self, test_loader, write=True):
         with torch.no_grad():
             loss, mae, alg, re1, sed = 0, 0, 0, 0, 0
-            for epoch in range(10):
+            for epoch in range(1):
                 epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0), 
                                 "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0), 
                                 "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
@@ -481,9 +481,11 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 
                 sorted_seds = sorted(batch_SED_preds.items(), key=lambda item: item[1])
 
-                trimmed_seds = sorted_seds[:int(len(sorted_seds) * 0.95)]
+                for s in sorted_seds[-int(len(sorted_seds) * 0.09):]:
+                    print(f'{s}\n')
 
-                print(f'{s}\n' for s in sorted_seds[-int(len(sorted_seds) * 0.09):])  
+                # trimmed_seds = sorted_seds[:int(len(sorted_seds) * 0.95)]
+
                 # print(f"mean trimmed seds: {np.mean(trimmed_seds)}")
                 # print(f"mean seds: {np.mean(sorted_seds)}\n")
 
