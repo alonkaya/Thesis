@@ -21,6 +21,7 @@ PART = ["tail"]
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 SEED = [42, 300, 500]
 TRIM_PTS = False
+test_sequences_flying = 200 
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -42,7 +43,6 @@ val_sequences_monkaa = ["treeflight_x2", "eating_x2", "top_view_x2"] # 293
 test_sequences_monkaa = ["flower_storm_x2", "funnyworld_x2", "eating_camera2_x2"]     # 375 frames   
 
 ### SCENEFLOW FLYING ###
-test_sequences_flying = 100 
 
 ### RealEstate ###
 RL_TEST_NAMES = ["fe2fadf89a84e92a", "f01e8b6f8e10fdd9", "f1ee9dc6135e5307", "a41df4fa06fd391b", "bc0ebb7482f14795", "9bdd34e784c04e3a", "98ebee1c36ecec55"]  # val 656, test 704

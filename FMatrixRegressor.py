@@ -458,7 +458,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
     def test(self, test_loader, write=True):
         with torch.no_grad():
             loss, mae, alg, re1, sed = 0, 0, 0, 0, 0
-            for epoch in range(6):
+            for epoch in range(2):
                 epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0), 
                                 "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0), 
                                 "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
@@ -481,7 +481,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 
                 sorted_seds = sorted(batch_SED_preds.items(), key=lambda item: item[1])
 
-                for s in sorted_seds[-int(len(sorted_seds) * 0.09):]:
+                for s in sorted_seds[-int(len(sorted_seds) * 0.1):]:
                     print(f'{s}')
                 print("next epoch\n\n")
 
