@@ -103,8 +103,8 @@ class Dataset_stereo(torch.utils.data.Dataset):
         pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, height=H, width=W)
         
         if SCENEFLOW:
-            left_path = os.path.join(self.sequence_path, 'left', f'{idx:04}.{IMAGE_TYPE}')
-            return img0, img1, F, pts1[:100], pts2[:100], self.seq_name, left_path
+            # left_path = os.path.join(self.sequence_path, 'left', f'{idx:04}.{IMAGE_TYPE}')
+            return img0, img1, F, pts1[:100], pts2[:100], self.seq_name
         else:
             return img0, img1, F, pts1, pts2, self.seq_name
     
@@ -149,7 +149,7 @@ transform = get_transform()
 
 
 def custom_collate_fn(batch):
-    imgs1, imgs2, Fs, all_pts1, all_pts2, seq_names, left_path = zip(*batch)
+    imgs1, imgs2, Fs, all_pts1, all_pts2, seq_names= zip(*batch)
     
     max_len = max(pts1.shape[0] for pts1 in all_pts1)
 
@@ -162,7 +162,7 @@ def custom_collate_fn(batch):
         padded_pts1.append(NF.pad(pts1, (0, 0, 0, pad_len), 'constant', 0))
         padded_pts2.append(NF.pad(pts2, (0, 0, 0, pad_len), 'constant', 0))  
 
-    return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names, left_path)
+    return (torch.stack(imgs1), torch.stack(imgs2), torch.stack(Fs), torch.stack(padded_pts1), torch.stack(padded_pts2), seq_names)
 
 def get_dataloaders_RealEstate(train_num_sequences, batch_size):
     RealEstate_paths = ['RealEstate10K/train_images', 'RealEstate10K/val_images']
@@ -434,14 +434,17 @@ def get_dataloader_flying(train_size, batch_size, num_workers=NUM_WORKERS):
     flying_path_val = "SceneFlow/Flying_cleanpass/TEST/A"
     flying_path_test = "SceneFlow/Flying_cleanpass/TEST/B"
     train_datasets, val_datasets, test_datasets = [], [], []
-    for path, length in zip([flying_path_train, flying_path_val, flying_path_test], [train_size, max(train_size//4, 20), test_sequences_flying]):
-        for i, seq_name in enumerate(os.listdir(flying_path_train)): 
+    for path, length in zip([flying_path_train, flying_path_val, flying_path_test], [train_size, max(train_size//4, 20), 100000]):
+        for i, seq_name in enumerate(os.listdir(path)): 
             if i==length: break
 
             seq_path = os.path.join(path, seq_name) 
             left_path = os.path.join(seq_path, 'left')
             right_path = os.path.join(seq_path, 'right')  
+            
+            ##### TODO: erase
             if not os.path.exists(seq_path): 
+                print("This should be!!!\n\n\n\n\n")
                 length += 1
                 continue
 
@@ -599,7 +602,7 @@ def save_keypoints_flying(train_sequences_flying):
     flying_path_train = "SceneFlow/Flying_cleanpass/TRAIN/A"
     flying_path_val = "SceneFlow/Flying_cleanpass/TEST/A"
     flying_path_test = "SceneFlow/Flying_cleanpass/TEST/B"
-    for path, length in zip([flying_path_val, flying_path_test], [train_sequences_flying//4, test_sequences_flying]):
+    for path, length in zip([flying_path_val, flying_path_test], [train_sequences_flying//4, 10000]):
         for i, seq_name in enumerate(os.listdir(path)): 
             seq_path = os.path.join(path, seq_name) 
             left_path = os.path.join(seq_path, 'left')

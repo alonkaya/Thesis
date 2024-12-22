@@ -264,7 +264,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
-        batch_SED_preds = {}  
+        batch_SED_preds = [] 
         for img1, img2, label, pts1, pts2, _, left_path in dataloader:
             img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
@@ -277,10 +277,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             # Update epoch statistics
             batch_SED_pred = update_epoch_stats(
                 epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type, epoch)
-            
             #################
-            batch_SED_preds[left_path[0]] = batch_SED_pred.detach().cpu().item()  # TODO!!!
-            #################
+            batch_SED_preds.append(batch_SED_pred.detach())  # TODO!!!
             
             # Compute loss
             loss = self.L2_coeff*self.L2_loss(output, label) + self.huber_coeff*self.huber_loss(output, label) + \
@@ -457,8 +455,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
     def test(self, test_loader, write=True):
         with torch.no_grad():
-            loss, mae, alg, re1, sed = 0, 0, 0, 0, 0
-            for epoch in range(2):
+            loss, mae, alg, re1, sed, trimmed_seds = 0, 0, 0, 0, 0, 0
+            for epoch in range(10):
                 epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0), 
                                 "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0), 
                                 "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
@@ -477,18 +475,15 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 sed += epoch_stats["test_SED_pred"]
 
 #################################################################################################################
-                # sorted_seds = sorted(batch_SED_preds)
-                
-                sorted_seds = sorted(batch_SED_preds.items(), key=lambda item: item[1])
+                sorted_seds = sorted(batch_SED_preds, key=lambda x: x.cpu().item())
 
-                for s in sorted_seds[-int(len(sorted_seds) * 0.1):]:
-                    print(f'{s}')
-                print("next epoch\n\n")
+                # for s in sorted_seds[-int(len(sorted_seds) * 0.1):]:
+                #     print(f'{s}')
+                # print("next epoch\n\n")
 
-                # trimmed_seds = sorted_seds[:int(len(sorted_seds) * 0.95)]
-
-                # print(f"mean trimmed seds: {np.mean(trimmed_seds)}")
-                # print(f"mean seds: {np.mean(sorted_seds)}\n")
+                trimmed_sed = sorted_seds[:int(len(sorted_seds) * 0.95)]
+                trimmed_seds += np.mean(trimmed_sed)
+                print(f"Epoch trimmed seds: {np.mean(trimmed_sed)}")
 
                 # # Define your bins
                 # bins = np.arange(0, 20.4, 0.4).tolist() + [float('inf')]
@@ -511,14 +506,16 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 # plt.savefig(file_name)
 #################################################################################################################
                  
-#         output = f"""\n\n## TEST RESULTS: ##
-# Test Loss: {loss/10}\t\t Test MAE: {mae/10}
-# Test Algebraic dist: {alg/10}
-# Test SED dist: {sed/10}
-# Test RE1 dist: {re1/10}
+        output = f"""\n\n## TEST RESULTS: ##
+Test Loss: {loss/10}\t\t Test MAE: {mae/10}
+Test Algebraic dist: {alg/10}
+Test SED dist: {sed/10}
+Test RE1 dist: {re1/10}
 
-# Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}
-# Test SED dist truth: {epoch_stats["test_SED_truth"]}
-# Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\n"""
-#         print_and_write(output, self.plots_path) if write else print(output)
-#         print(f'{self.plots_path}\n')
+Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}
+Test SED dist truth: {epoch_stats["test_SED_truth"]}
+Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}
+
+Mean Trimmed seds: {trimmed_seds/10}\n"""
+        print_and_write(output, self.plots_path) if write else print(output)
+        print(f'{self.plots_path}\n')
