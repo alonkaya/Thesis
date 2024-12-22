@@ -7,9 +7,9 @@ STEREO = True
 # find . -type f -name "model.pth"
 
 
-PRETEXT_TRAIN = True
-SCENEFLOW = False
-FLYING = False
+PRETEXT_TRAIN = False
+SCENEFLOW = True
+FLYING = True
 MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [8]
 FROZEN_HIGH_LAYERS = 0
