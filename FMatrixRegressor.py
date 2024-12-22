@@ -483,6 +483,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
                 for s in sorted_seds[-int(len(sorted_seds) * 0.09):]:
                     print(f'{s}')
+                print("next epoch\n\n")
 
                 # trimmed_seds = sorted_seds[:int(len(sorted_seds) * 0.95)]
 
