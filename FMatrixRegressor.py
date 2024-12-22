@@ -264,8 +264,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
-        batch_SED_preds = []  
-        for img1, img2, label, pts1, pts2, _ in dataloader:
+        batch_SED_preds = {}  
+        for img1, img2, label, pts1, pts2, _, left_path in dataloader:
             img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
 
             # Forward pass
@@ -279,9 +279,9 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type, epoch)
             
             #################
-            # batch_SED_preds.append(batch_SED_pred.detach().cpu().item())  # TODO!!!
+            batch_SED_preds[left_path] = batch_SED_pred.detach().cpu().item()  # TODO!!!
             #################
-
+            
             # Compute loss
             loss = self.L2_coeff*self.L2_loss(output, label) + self.huber_coeff*self.huber_loss(output, label) + \
                     self.sed_coeff*batch_SED_pred
@@ -478,16 +478,14 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
 #################################################################################################################
                 # sorted_seds = sorted(batch_SED_preds)
+                
+                sorted_seds = sorted(batch_SED_preds.items(), key=lambda item: item[1])
 
-                # batch_SED_preds = np.array(batch_SED_preds)
-                # sorted_indices = np.argsort(batch_SED_preds)
-                # sorted_seds = batch_SED_preds[sorted_indices]
+                trimmed_seds = sorted_seds[:int(len(sorted_seds) * 0.95)]
 
-                # trimmed_seds = sorted_seds[:int(len(sorted_seds) * 0.95)]
-
-                # print(f'Indices of last 10%: {sorted_indices[int(len(sorted_indices) * 0.9):]}')
-                # print(f"mean trimmed seds: {np.mean(trimmed_seds)}")
-                # print(f"mean seds: {np.mean(sorted_seds)}")
+                print(f'{s}\n' for s in sorted_seds[-int(len(sorted_seds) * 0.09):])  
+                print(f"mean trimmed seds: {np.mean(trimmed_seds)}")
+                print(f"mean seds: {np.mean(sorted_seds)}")
 
                 # # Define your bins
                 # bins = np.arange(0, 20.4, 0.4).tolist() + [float('inf')]
@@ -509,7 +507,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 # file_name = 'kitti_clip_sed_imgs_trimmed_trim_pts' if TRIM_PTS else 'kitti_clip_sed_imgs_trimmed'
                 # plt.savefig(file_name)
 #################################################################################################################
-                 
+#                 
         output = f"""\n\n## TEST RESULTS: ##
 Test Loss: {loss/10}\t\t Test MAE: {mae/10}
 Test Algebraic dist: {alg/10}
