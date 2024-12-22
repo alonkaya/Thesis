@@ -783,7 +783,7 @@ def test_trained():
 
     model = FMatrixRegressor(lr=LR[0], batch_size=1, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
     # print(model.start_epoch)
-    model.test(test_loader=test_loader, write=False)
+    model.test(test_loader=train_loader, write=False)
 
 
 import matplotlib
@@ -792,5 +792,5 @@ import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-    for i in range(5):
-        test_trained()
+    # for i in range(5):
+    test_trained()
