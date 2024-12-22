@@ -17,7 +17,7 @@ COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SEQ_RATIOS = [0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2] if not SCENEFLOW else [150] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = True
-PART = ["head"] 
+PART = ["mid"] 
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 SEED = [42, 300, 500]
 TRIM_PTS = False
