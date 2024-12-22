@@ -43,13 +43,12 @@ if __name__ == "__main__":
         # Iterate over each combination
         param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, SEED, train_sizes, lrs, parts, frozen_layers)
         for i, (alg_coeff, re1_coeff, sed_coeff, seed, train_size, lr, part, fl) in enumerate(param_combinations):
-                print("sdfg")
                 set_seed(seed)
                 if STEREO and not SCENEFLOW and part != "head" and part != "mid" and part != "tail":
                         raise ValueError("Invalid part")
                 
                 if SCENEFLOW and FLYING:
-                        num_epochs = 8000 if train_size==150 else 45000 if train_size==9 else 0
+                        num_epochs = 8000 if train_size==160 else 45000 if train_size==9 else 0
                 else:
                         num_epochs = 2000 if train_size==0.3 else 4500 if train_size==0.2 else 7000 if train_size==0.1 else \
                                      14000 if train_size==0.05 else 18000 if train_size==0.0375 else 24000 if train_size==0.025 else \
@@ -84,12 +83,6 @@ if __name__ == "__main__":
                         if not os.path.exists(model_path):
                                 print(f'no model for {model_path}')
                                 continue
-                
-                if plots_path=="plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/Trained_vit/BS_8__ratio_0.015__tail__frozen_8":
-                        gtg = True
-                        continue
-                if not gtg:
-                        continue
 
                 train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
 
