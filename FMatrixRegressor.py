@@ -485,7 +485,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
                 print(f'{s}\n' for s in sorted_seds[-int(len(sorted_seds) * 0.09):])  
                 print(f"mean trimmed seds: {np.mean(trimmed_seds)}")
-                print(f"mean seds: {np.mean(sorted_seds)}")
+                print(f"mean seds: {np.mean(sorted_seds)}\n")
 
                 # # Define your bins
                 # bins = np.arange(0, 20.4, 0.4).tolist() + [float('inf')]
@@ -507,15 +507,15 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 # file_name = 'kitti_clip_sed_imgs_trimmed_trim_pts' if TRIM_PTS else 'kitti_clip_sed_imgs_trimmed'
                 # plt.savefig(file_name)
 #################################################################################################################
-#                 
-        output = f"""\n\n## TEST RESULTS: ##
-Test Loss: {loss/10}\t\t Test MAE: {mae/10}
-Test Algebraic dist: {alg/10}
-Test SED dist: {sed/10}
-Test RE1 dist: {re1/10}
+                 
+#         output = f"""\n\n## TEST RESULTS: ##
+# Test Loss: {loss/10}\t\t Test MAE: {mae/10}
+# Test Algebraic dist: {alg/10}
+# Test SED dist: {sed/10}
+# Test RE1 dist: {re1/10}
 
-Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}
-Test SED dist truth: {epoch_stats["test_SED_truth"]}
-Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\n"""
-        print_and_write(output, self.plots_path) if write else print(output)
-        print(f'{self.plots_path}\n')
+# Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}
+# Test SED dist truth: {epoch_stats["test_SED_truth"]}
+# Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}\n"""
+#         print_and_write(output, self.plots_path) if write else print(output)
+#         print(f'{self.plots_path}\n')
