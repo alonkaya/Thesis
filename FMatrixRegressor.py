@@ -484,8 +484,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 trimmed_seds = sorted_seds[:int(len(sorted_seds) * 0.95)]
 
                 print(f'{s}\n' for s in sorted_seds[-int(len(sorted_seds) * 0.09):])  
-                print(f"mean trimmed seds: {np.mean(trimmed_seds)}")
-                print(f"mean seds: {np.mean(sorted_seds)}\n")
+                # print(f"mean trimmed seds: {np.mean(trimmed_seds)}")
+                # print(f"mean seds: {np.mean(sorted_seds)}\n")
 
                 # # Define your bins
                 # bins = np.arange(0, 20.4, 0.4).tolist() + [float('inf')]
