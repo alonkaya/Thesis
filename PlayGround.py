@@ -523,12 +523,12 @@ def check_model_file(file_path):
     
 def plot_errors():
     # Frozen: 0
-    mean_alg_0 = [0.236, 0.3033, 0.25867, 0.3233, 0.36, 0.3933, 0.4667, 0.6267]
-    mean_SED_0 = [0.216667, 0.353333, 0.272333, 0.38, 0.45, 0.506667, 0.67, 1.06]
+    mean_alg_0 = [0.22, 0.3033, 0.25867, 0.3233, 0.36, 0.3933, 0.4667, 0.6267]
+    mean_SED_0 = [0.199666667, 0.353333, 0.272333, 0.38, 0.45, 0.506667, 0.67, 1.06]
     mean_RE1_0 = [0.055, 0.106667, 0.073333, 0.116667, 0.146667, 0.173333, 0.226667, 0.486667]
-    std_alg_0 = [0.010392, 0.025166, 0.025007, 0.015275, 0.078102, 0.070946, 0.025166, 0.141892]
+    std_alg_0 = [0.011547005, 0.025166, 0.025007, 0.015275, 0.078102, 0.070946, 0.025166, 0.141892]
     std_SED_0 = [0.011547, 0.058595, 0.037233, 0.01, 0.130767, 0.138684, 0.06, 0.288444]
-    std_RE1_0 = [0.005, 0.028868, 0.011547, 0.005774, 0.049329, 0.077675, 0.030551, 0.225906]
+    std_RE1_0 = [0, 0.028868, 0.011547, 0.005774, 0.049329, 0.077675, 0.030551, 0.225906]
 
     mean_alg_4 = [0.216667, 0.303333, 0.248667, 0.306667, 0.366667, 0.373333, 0.446667, 0.57]
     mean_SED_4 = [0.195667, 0.326667, 0.253333, 0.36, 0.456667, 0.476667, 0.626667, 0.92]
@@ -746,13 +746,13 @@ def delete_odd_files(folder_path):
 def test_trained():
     " Only need to change the data type in params i.e SCENEFLOW, KITTI.. "
 
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=10000, part='head', batch_size=1)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.004, part='head', batch_size=1)
 
-    pretrained_model = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_150__frozen_0"
+    pretrained_model = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
 
     model = FMatrixRegressor(lr=LR[0], batch_size=1, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
-    # print(model.start_epoch)
-    model.test(test_loader=test_loader, write=False)
+    print(model.start_epoch)
+    # model.test(test_loader=test_loader, write=False)
 
 
 import matplotlib
@@ -762,4 +762,4 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
     # for i in range(5):
-    plot_errors()
+    test_trained()
