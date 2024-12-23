@@ -18,7 +18,7 @@ SEQ_RATIOS = [0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2] if not SCENEFL
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = False
 PART = ["tail"] 
-ADDITIONS = "__2"  ## REMEMBER TO PUT "__" !!!!!
+ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 SEED = [42, 300, 500]
 TRIM_PTS = False
 
