@@ -517,6 +517,7 @@ Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}
 Test SED dist truth: {epoch_stats["test_SED_truth"]}
 Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}
 
-Mean Trimmed seds: {trimmed_seds/10}\n"""
+Mean Trimmed seds: {trimmed_seds/10}
+
+{self.plots_path}\n"""
         print_and_write(output, self.plots_path) if write else print(output)
-        print(f'{self.plots_path}\n')
