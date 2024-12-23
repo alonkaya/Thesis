@@ -39,7 +39,6 @@ if __name__ == "__main__":
         parts = PART if not SCENEFLOW else [None]
         train_sizes = SEQ_RATIOS if STEREO else RL_TRAIN_NUM
         
-        gtg = False
         # Iterate over each combination
         param_combinations = itertools.product(ALG_COEFF, RE1_COEFF, SED_COEFF, SEED, train_sizes, lrs, parts, frozen_layers)
         for i, (alg_coeff, re1_coeff, sed_coeff, seed, train_size, lr, part, fl) in enumerate(param_combinations):
