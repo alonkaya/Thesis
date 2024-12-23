@@ -27,7 +27,7 @@ echo -e "SLURM_JOB_NODELIST:\t" $SLURM_JOB_NODELIST "\n\n"
 ### Start your code below ####
 module load anaconda				### load anaconda module (must be present when working with conda environments)
 source activate alon_env				### activate a conda environment, replace my_env with your conda environment
-python Main.py			### run my_code.py python file and send my_arg1 argument to it
+python PlayGround.py			### run my_code.py python file and send my_arg1 argument to it
 
 
 ####################################### FOR ME #########################################################
