@@ -481,6 +481,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 #     print(f'{s}')
                 # print("next epoch\n\n")
 
+                trimmed_sed = [x.cpu().numpy() for x in trimmed_sed]
                 trimmed_sed = sorted_seds[:int(len(sorted_seds) * 0.95)]
                 trimmed_seds += np.mean(trimmed_sed)
                 print(f"Epoch trimmed seds: {np.mean(trimmed_sed)}")
