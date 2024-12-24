@@ -1,0 +1,58 @@
+nohup: ignoring input
+/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+/home/alonkay/conda/alon/lib/python3.9/site-packages/huggingface_hub/file_download.py:1150: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+/home/alonkay/Thesis/FMatrixRegressor.py:348: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(model_path, map_location='cpu')
+
+
+## TEST RESULTS: ##
+Test Loss: 0.874153335373123		 Test MAE: 0.05460499860346317
+Test Algebraic dist: 0.5742532011750457
+Test SED dist: 1.7200285279905643
+Test RE1 dist: 0.4390173379476969
+
+Test Algebraic dist truth: 0.004665250127965754
+Test SED dist truth: 0.00017294418308642004
+Test RE1 dist truth: 2.162206718432052e-05
+
+Mean Trimmed seds: 1.516301202774048
+
+None
+
+plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0__seed_300
+
+
+## TEST RESULTS: ##
+Test Loss: 2.5544275060876624		 Test MAE: 0.3683149963617325
+Test Algebraic dist: 0.2642525363278079
+Test SED dist: 4.021180546748174
+Test RE1 dist: 0.09116369903861704
+
+Test Algebraic dist truth: 0.004648154045080209
+Test SED dist truth: 0.0001717268235304139
+Test RE1 dist truth: 2.146816612886531e-05
+
+Mean Trimmed seds: 3.3961689710617065
+
+None
+
+plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0__seed_500
+
+
+## TEST RESULTS: ##
+Test Loss: 1.4864831701501626		 Test MAE: 0.07428467720746994
+Test Algebraic dist: 0.8424983235148641
+Test SED dist: 2.933011894721489
+Test RE1 dist: 0.9221023460487267
+
+Test Algebraic dist truth: 0.004656471215285264
+Test SED dist truth: 0.00017130826055616527
+Test RE1 dist truth: 2.1417097599765697e-05
+
+Mean Trimmed seds: 2.559246802330017
+
+None
+
+plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__tail__frozen_0__seed_500
