@@ -743,14 +743,11 @@ def delete_odd_files(folder_path):
             except OSError as e:    
                 print(f"Error deleting {left_file_path}: {e}")
 
-def test_trained(p):
+def test_trained(pretrained_model):
     " Only need to change the data type in params i.e SCENEFLOW, KITTI.. "
     batch_size=8
 
     train_loader, val_loader, test_loader = get_data_loaders(train_size=0.004, part='head', batch_size=batch_size)
-
-
-    pretrained_model = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
 
     model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
 
@@ -760,9 +757,9 @@ def test_trained(p):
 import matplotlib
 matplotlib.use('Agg') # If want to show images then disable this
 import matplotlib.pyplot as plt
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 if __name__ == "__main__":
-    os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
     clips = ["plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
     "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_4",
     "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_8",
@@ -773,6 +770,6 @@ if __name__ == "__main__":
     "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0__seed_500",
     "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__tail__frozen_0__seed_500"]
 
-    for p in resnets:
+    for p in clips:
         test_trained(p)
 
