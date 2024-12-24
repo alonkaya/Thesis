@@ -770,6 +770,6 @@ if __name__ == "__main__":
     "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0__seed_500",
     "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__tail__frozen_0__seed_500"]
 
-    for p in clips:
+    for p in resnets:
         test_trained(p)
 
