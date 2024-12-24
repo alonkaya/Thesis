@@ -743,7 +743,7 @@ def delete_odd_files(folder_path):
             except OSError as e:    
                 print(f"Error deleting {left_file_path}: {e}")
 
-def test_trained():
+def test_trained(p):
     " Only need to change the data type in params i.e SCENEFLOW, KITTI.. "
     batch_size=8
 
@@ -763,5 +763,16 @@ import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-    # for i in range(5):
-    test_trained()
+    clips = ["plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
+    "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_4",
+    "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_8",
+    "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__tail__frozen_0",
+    "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__tail__frozen_8"]
+
+    resnets = ["plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0__seed_300",
+    "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0__seed_500",
+    "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__tail__frozen_0__seed_500"]
+
+    for p in clips:
+        test_trained(p)
+
