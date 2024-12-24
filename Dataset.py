@@ -443,7 +443,6 @@ def get_dataloader_flying(train_size, batch_size, num_workers=NUM_WORKERS):
             right_path = os.path.join(seq_path, 'right')  
             
             if not os.path.exists(left_path): 
-                print("Path does not exist: ", left_path)
                 continue
 
             # Indices of 'good' image frames
