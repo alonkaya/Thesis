@@ -1,5 +1,5 @@
 import torch
-device, RESNET_MODEL_NAME, CLIP_MODEL_NAME = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32"
+device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16 = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32", "openai/clip-vit-base-patch16"
 USE_REALESTATE = False
 STEREO = True
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &   ### REMEMBER TO FIRST MOVE THE MODEL FROM ORIGINAL PATH TO MNT PATH IN CASE OF COMPUTER==0 AND THE LAST RUN EXITED!!
@@ -10,14 +10,14 @@ STEREO = True
 PRETEXT_TRAIN = False
 SCENEFLOW = False
 FLYING = False
-MODEL = RESNET_MODEL_NAME 
+MODEL = CLIP_MODEL_NAME_16 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [8]
 FROZEN_HIGH_LAYERS = 0
 COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SEQ_RATIOS = [0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2] if not SCENEFLOW else [9] if FLYING else [1]     # 2166, 1082, 540, 405, 269, 161, 88, 47                                                 
+SEQ_RATIOS = [0.004] if not SCENEFLOW else [9] if FLYING else [1]     # [0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]                                               
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = False
-PART = ["tail"] 
+PART = ["head", "mid", "tail"] 
 ADDITIONS = ""  ## REMEMBER TO PUT "__" !!!!!
 SEED = [42, 300, 500]
 TRIM_PTS = False
@@ -75,14 +75,14 @@ CONV_HIDDEN_DIM = [256, 512]
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 KITTI_MODEL_CLIP_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
 KITTI_MODEL_RESNET_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0__seed_300"
-KITTI_MODEL_PATH = KITTI_MODEL_CLIP_PATH if MODEL == CLIP_MODEL_NAME else KITTI_MODEL_RESNET_PATH
+KITTI_MODEL_PATH = KITTI_MODEL_CLIP_PATH if MODEL==CLIP_MODEL_NAME or MODEL==CLIP_MODEL_NAME_16 else KITTI_MODEL_RESNET_PATH
 TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or not PRETEXT_TRAIN else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
 PRETRAINED_PATH = None # make sure you set GET_OLD_PATH !! 
 AVG_EMBEDDINGS = False
 USE_CONV = True
 NUM_OUTPUT = 8 if USE_RECONSTRUCTION_LAYER else 9
-norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
-norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME else torch.tensor([0.5, 0.5, 0.5]).to(device)
+norm_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device) if MODEL == CLIP_MODEL_NAME or MODEL==CLIP_MODEL_NAME_16 else torch.tensor([0.5, 0.5, 0.5]).to(device)
+norm_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device) if MODEL == CLIP_MODEL_NAME or MODEL==CLIP_MODEL_NAME_16 else torch.tensor([0.5, 0.5, 0.5]).to(device)
 
 
 
