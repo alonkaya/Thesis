@@ -14,7 +14,7 @@ MODEL = CLIP_MODEL_NAME_16
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [8]
 FROZEN_HIGH_LAYERS = 0
 COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SEQ_RATIOS = [0.004] if not SCENEFLOW else [9] if FLYING else [1]     # [0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]                                               
+SEQ_RATIOS = [0.2] if not SCENEFLOW else [9] if FLYING else [1]     # [0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]                                               
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = False
 PART = ["head", "mid", "tail"] 
