@@ -758,7 +758,7 @@ def test_trained():
     model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
     print(model.start_epoch)
     model.test(test_loader=test_loader, write=False)
-
+    print(pretrained_model)
 
 import matplotlib
 matplotlib.use('Agg') # If want to show images then disable this
