@@ -8,19 +8,20 @@ STEREO = True
 
 
 PRETEXT_TRAIN = False
-SCENEFLOW = False
-FLYING = False
-MODEL = RESNET_MODEL_NAME 
+SCENEFLOW = True
+FLYING = True
+MODEL = CLIP_MODEL_NAME 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0]
 FROZEN_HIGH_LAYERS = 0
 COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SEQ_RATIOS = [0.004] if not SCENEFLOW else [9] if FLYING else [1]     # [0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]                                               
-KITTI2SCENEFLOW = False
+KITTI2SCENEFLOW = True
 ONLY_CONTINUE = False
 PART = ["head"] 
 ADDITIONS = "__Max"  ## REMEMBER TO PUT "__" !!!!!
 SEED = [42, 300, 500]
 TRIM_PTS = False
+MAX_POOL_SIZE = 3
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -72,7 +73,6 @@ HUBER_COEFF = 1
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
 CONV_HIDDEN_DIM = [256, 512]
-MAX_POOL_SIZE = 4
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 KITTI_MODEL_CLIP_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
 KITTI_MODEL_RESNET_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0__seed_300"
