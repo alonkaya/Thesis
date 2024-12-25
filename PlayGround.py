@@ -764,7 +764,7 @@ import matplotlib.pyplot as plt
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 if __name__ == "__main__":
-    p = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_170__frozen_0"
+    p = "plots/Kitti2Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_170__frozen_0"
 
-    plot_errors()
+    test_trained(p)
 
