@@ -120,7 +120,7 @@ class FMatrixRegressor(nn.Module):
                 mlp_input_shape //= (self.num_patches**2)     
             if self.use_conv:
                 self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
-                mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
+                mlp_input_shape = 2 * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2 
 
             # Initialize MLP
             self.mlp = MLP(input_dim=mlp_input_shape).to(device)
@@ -399,7 +399,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             mlp_input_shape //= (self.num_patches**2)     
         if self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
-            mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
+            mlp_input_shape = 2 * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2
             self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
 
