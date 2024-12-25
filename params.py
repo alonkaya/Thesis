@@ -6,22 +6,21 @@ STEREO = True
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 # find . -type f -name "model.pth"
 
-
 PRETEXT_TRAIN = False
-SCENEFLOW = True
-FLYING = True
-MODEL = CLIP_MODEL_NAME 
+SCENEFLOW = False
+FLYING = False
+MODEL = CLIP_MODEL_NAME_16 
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0]
 FROZEN_HIGH_LAYERS = 0
 COMPUTER = 1 # 0=132.72.49.250 1=else  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SEQ_RATIOS = [0.004] if not SCENEFLOW else [9] if FLYING else [1]     # [0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]                                               
-KITTI2SCENEFLOW = True
+KITTI2SCENEFLOW = False
 ONLY_CONTINUE = False
 PART = ["head"] 
-ADDITIONS = "__Max"  ## REMEMBER TO PUT "__" !!!!!
 SEED = [42, 300, 500]
 TRIM_PTS = False
-MAX_POOL_SIZE = 3
+MAX_POOL_SIZE = 3 if not MODEL==CLIP_MODEL_NAME_16 else 7 ######################################################################
+ADDITIONS = "__Max" if MAX_POOL_SIZE==4 else "" ## REMEMBER TO PUT "__" !!!!!
 
 ### Dataset ###  
 RIGHTCAMVAL = False
