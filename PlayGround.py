@@ -625,14 +625,15 @@ def plot_errors():
     plt.legend()
     plt.grid(True)
 
-    fig5=plt.figure(5)
-    plt.errorbar(x_indices, mean_alg_0, yerr=std_alg_0, marker='o', color='blue', linestyle='--', label='SED Original Frozen 0', capsize=1, linewidth=1, markersize=1)
-    plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED Original Frozen 0', capsize=1, linewidth=1, markersize=4)
-    plt.errorbar(x_indices, mean_RE1_0, yerr=std_RE1_0, marker='o', color='blue', linestyle=':', label='SED Original Frozen 0', capsize=1, linewidth=1, markersize=4)
+    # capsize is the width of the error bars, linewidth is the width of the line, markersize is the size of the points
+    fig5=plt.figure(5, figsize=(11, 6))
+    plt.errorbar(x_indices, mean_alg_0, yerr=std_alg_0, marker='o', color='green', linestyle='-', label='ALG clip', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED clip', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, mean_RE1_0, yerr=std_RE1_0, marker='o', color='orange', linestyle='-', label='RE1 clip', capsize=4, linewidth=1, markersize=2)
     # plt.errorbar(x_indices, pretext_mean_SED_0, yerr=pretext_std_SED_0, marker='o', color='green', linestyle='-', label='SED Pretext Frozen 0', capsize=5)
-    plt.errorbar(x_indices, resnet_mean_alg_0, yerr=resnet_std_alg_0, marker='o', color='orange', linestyle='--', label='SED ResNet', capsize=1, linewidth=1, markersize=4)
-    plt.errorbar(x_indices, resnet_mean_SED_0, yerr=resnet_std_SED_0, marker='o', color='orange', linestyle='-', label='SED ResNet', capsize=1, linewidth=1, markersize=4)
-    plt.errorbar(x_indices, resnet_mean_RE1_0, yerr=resnet_std_RE1_0, marker='o', color='orange', linestyle=':', label='SED ResNet', capsize=1, linewidth=1, markersize=4)
+    plt.errorbar(x_indices, resnet_mean_alg_0, yerr=resnet_std_alg_0, marker='o', color='green', linestyle='--', label='ALG ResNet', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, resnet_mean_SED_0, yerr=resnet_std_SED_0, marker='o', color='blue', linestyle='--', label='SED ResNet', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, resnet_mean_RE1_0, yerr=resnet_std_RE1_0, marker='o', color='orange', linestyle='--', label='RE1 ResNet', capsize=4, linewidth=1, markersize=2)
     plt.title('SED comparison of original, pretext and resnet models')
     plt.xlabel('Data Points')
     plt.ylabel('Mean Value ± STD')
@@ -766,5 +767,5 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 if __name__ == "__main__":
     p = "plots/Kitti2Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_170__frozen_0"
 
-    test_trained(p)
+    plot_errors()
 
