@@ -581,51 +581,29 @@ def plot_errors():
     x = np.arange(len(xticks_labels))  # x-coordinates for the groups
     width = 0.25  # Width of each bar
 
-    fig1=plt.figure(1)  
-    plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED Frozen 0', capsize=5)
-    plt.errorbar(x_indices, mean_SED_4, yerr=std_SED_4 , marker='o', color='green', linestyle='-', label='SED Frozen 4', capsize=5)
-    plt.errorbar(x_indices, mean_SED_8, yerr=std_SED_8, marker='o', color='orange', linestyle='-', label='SED Frozen 8', capsize=5)
-    plt.title('SED comparison of original model with different frozen layers')
-    plt.xlabel('Data Points')
+    fig1=plt.figure(1, figsize=(11, 6))
+    plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED 0 frozen layers', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_SED_4, yerr=std_SED_4 , marker='o', color='green', linestyle='-', label='SED 4 frozen layers', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_SED_8, yerr=std_SED_8, marker='o', color='orange', linestyle='-', label='SED 8 frozen layers', capsize=4, linewidth=1, markersize=2) 
+    plt.title('SED comparison of ViT model freezing bottom layers')
+    plt.xlabel('Number of training samples')
     plt.ylabel('Mean Value ± STD')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
 
-    fig2=plt.figure(2)
-    plt.bar(x, mean_SED_0, width, yerr=std_SED_0, capsize=5, label='SED Frozen 0', alpha=0.8, color='blue')
-    plt.bar(x - width, mean_SED_4, width, yerr=std_SED_4, capsize=5, label='SED Frozen 4', alpha=0.8, color='green')
-    plt.bar(x + width, mean_SED_8, width, yerr=std_SED_8, capsize=5, label='SED Frozen 8', alpha=0.8, color='orange')
-    plt.title('Barplot SED comparison of original model with different frozen layers')
-    plt.xlabel('Data Points')
-    plt.ylabel('Mean Value ± STD')
-    plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
-    plt.legend()
-    plt.grid(True)
-
-    fig3=plt.figure(3)
+    fig3=plt.figure(3, figsize=(11, 6))
     plt.errorbar(x_indices, pretext_mean_SED_0, yerr=pretext_std_SED_0, marker='o', color='blue', linestyle='-', label='SED Frozen 0', capsize=5)
     plt.errorbar(x_indices, pretext_mean_SED_4, yerr=pretext_std_SED_4, marker='o', color='green', linestyle='-', label='SED Frozen 4', capsize=5)
     plt.errorbar(x_indices, pretext_mean_SED_8, yerr=pretext_std_SED_8, marker='o', color='orange', linestyle='-', label='SED Frozen 8', capsize=5)
     plt.title('SED comparison of pretext model with different frozen layers')
-    plt.xlabel('Data Points')
+    plt.xlabel('Number of training samples')
     plt.ylabel('Mean Value ± STD')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
 
-    fig4=plt.figure(4)
-    plt.bar(x, pretext_mean_SED_0, width, yerr=pretext_std_SED_0, capsize=5, label='SED Frozen 0', alpha=0.8, color='blue')
-    plt.bar(x - width, pretext_mean_SED_4, width, yerr=pretext_std_SED_4, capsize=5, label='SED Frozen 4', alpha=0.8, color='green')
-    plt.bar(x + width, pretext_mean_SED_8, width, yerr=pretext_std_SED_8, capsize=5, label='SED Frozen 8', alpha=0.8, color='orange')
-    plt.title('Barplot SED comparison of pretext model with different frozen layers')
-    plt.xlabel('Data Points')
-    plt.ylabel('Mean Value ± STD')
-    plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
-    plt.legend()
-    plt.grid(True)
-
-    # capsize is the width of the error bars, linewidth is the width of the line, markersize is the size of the points
+    "Comparing ViT frozen 0 with ResNet"
     fig5=plt.figure(5, figsize=(11, 6))
     plt.errorbar(x_indices, mean_alg_0, yerr=std_alg_0, marker='o', color='green', linestyle='-', label='ALG clip', capsize=4, linewidth=1, markersize=2) 
     plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED clip', capsize=4, linewidth=1, markersize=2)
@@ -634,31 +612,52 @@ def plot_errors():
     plt.errorbar(x_indices, resnet_mean_alg_0, yerr=resnet_std_alg_0, marker='o', color='green', linestyle='--', label='ALG ResNet', capsize=4, linewidth=1, markersize=2)
     plt.errorbar(x_indices, resnet_mean_SED_0, yerr=resnet_std_SED_0, marker='o', color='blue', linestyle='--', label='SED ResNet', capsize=4, linewidth=1, markersize=2)
     plt.errorbar(x_indices, resnet_mean_RE1_0, yerr=resnet_std_RE1_0, marker='o', color='orange', linestyle='--', label='RE1 ResNet', capsize=4, linewidth=1, markersize=2)
-    plt.title('SED comparison of original, pretext and resnet models')
-    plt.xlabel('Data Points')
+    plt.title('Comparison of fine tuned ViT and ResNet models on estimating F-Matrix')
+    plt.xlabel('Number of training samples')
     plt.ylabel('Mean Value ± STD')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
 
-    fig6=plt.figure(6)
-    plt.bar(x, mean_SED_0, width, yerr=std_SED_0, capsize=5, label='Original model', alpha=0.8, color='blue')
-    plt.bar(x - width, pretext_mean_SED_0, width, yerr=pretext_std_SED_0, capsize=5, label='Pretext model', alpha=0.8, color='green')
-    plt.bar(x + width, resnet_mean_SED_0, width, yerr=resnet_std_SED_0, capsize=5, label='ResNet', alpha=0.8, color='orange')
-    plt.title('Barplot SED comparison of original, pretext and resnet models')
-    plt.xlabel('Data Points')
-    plt.ylabel('Mean Value ± STD')
-    plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
-    plt.legend()
-    plt.grid(True)
+    # fig2=plt.figure(2)
+    # plt.bar(x, mean_SED_0, width, yerr=std_SED_0, capsize=5, label='SED Frozen 0', alpha=0.8, color='blue')
+    # plt.bar(x - width, mean_SED_4, width, yerr=std_SED_4, capsize=5, label='SED Frozen 4', alpha=0.8, color='green')
+    # plt.bar(x + width, mean_SED_8, width, yerr=std_SED_8, capsize=5, label='SED Frozen 8', alpha=0.8, color='orange')
+    # plt.title('Barplot SED comparison of original model with different frozen layers')
+    # plt.xlabel('Number of training samples')
+    # plt.ylabel('Mean Value ± STD')
+    # plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
+    # plt.legend()
+    # plt.grid(True)
+    # fig4=plt.figure(4)
+    # plt.bar(x, pretext_mean_SED_0, width, yerr=pretext_std_SED_0, capsize=5, label='SED Frozen 0', alpha=0.8, color='blue')
+    # plt.bar(x - width, pretext_mean_SED_4, width, yerr=pretext_std_SED_4, capsize=5, label='SED Frozen 4', alpha=0.8, color='green')
+    # plt.bar(x + width, pretext_mean_SED_8, width, yerr=pretext_std_SED_8, capsize=5, label='SED Frozen 8', alpha=0.8, color='orange')
+    # plt.title('Barplot SED comparison of pretext model with different frozen layers')
+    # plt.xlabel('Number of training samples')
+    # plt.ylabel('Mean Value ± STD')
+    # plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
+    # plt.legend()
+    # plt.grid(True)
+    # fig6=plt.figure(6)
+    # plt.bar(x, mean_SED_0, width, yerr=std_SED_0, capsize=5, label='Original model', alpha=0.8, color='blue')
+    # plt.bar(x - width, pretext_mean_SED_0, width, yerr=pretext_std_SED_0, capsize=5, label='Pretext model', alpha=0.8, color='green')
+    # plt.bar(x + width, resnet_mean_SED_0, width, yerr=resnet_std_SED_0, capsize=5, label='ResNet', alpha=0.8, color='orange')
+    # plt.title('Barplot SED comparison of original, pretext and resnet models')
+    # plt.xlabel('Number of training samples')
+    # plt.ylabel('Mean Value ± STD')
+    # plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
+    # plt.legend()
+    # plt.grid(True)
 
+    # capsize is the width of the error bars, linewidth is the width of the line, markersize is the size of the points
     os.makedirs('results', exist_ok=True)
     fig1.savefig('results/SED_orig_frozen.png')
-    fig2.savefig('results/SED_orig_frozen_bar.png')
+    # fig2.savefig('results/SED_orig_frozen_bar.png')
     fig3.savefig('results/SED_pretext_frozen.png')
-    fig4.savefig('results/SED_pretext_bar_frozen.png')
+    # fig4.savefig('results/SED_pretext_bar_frozen.png')
     fig5.savefig('results/SED_models.png')
-    fig6.savefig('results/SED_model_bar.png')
+    # fig6.savefig('results/SED_model_bar.png')
     # plt.show()
 
 
