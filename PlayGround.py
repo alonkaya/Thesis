@@ -575,6 +575,13 @@ def plot_errors():
     resnet_mean_RE1_0 = [0.083333333, 0.196666667, 0.166666667,	 0.146666667, 0.206666667,	 0.243333333, 0.21,	 0.291666667]
     resnet_std_RE1_0 = [0.082512625, 0.077674535, 0.030550505, 0.055075705, 0.061101009, 0.046188022, 0.147986486, 0.032532035]
 
+    flying_clip_alg = [0.36, 0.39, 1]
+    flying_clip_SED = [0.71, 0.8, 3.34]
+    flying_clip_RE1 = [0.14, 0.16, 1.19]
+
+    flying_resnet_alg = [0.33, 0.44, 0.78]
+    flying_resnet_SED = [1.86, 1, 2.57]
+    flying_resnet_RE1 = [0.86, 0.21, 0.73]
 
     x_indices = range(len(mean_SED_0))  # For Frozen 0 (has an extra point)
     xticks_labels = ['2166', '1082', '540', '405', '269', '161', '88', '47']  # 5 points for Frozen 0
