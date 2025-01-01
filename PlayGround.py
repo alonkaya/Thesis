@@ -583,10 +583,28 @@ def plot_errors():
     flying_resnet_SED = [1.86, 1, 2.57]
     flying_resnet_RE1 = [0.86, 0.21, 0.73]
 
+    os.makedirs('results', exist_ok=True)
     x_indices = range(len(mean_SED_0))  # For Frozen 0 (has an extra point)
+    x_indices_flying = range(len(flying_clip_alg))  
     xticks_labels = ['2166', '1082', '540', '405', '269', '161', '88', '47']  # 5 points for Frozen 0
-    x = np.arange(len(xticks_labels))  # x-coordinates for the groups
-    width = 0.25  # Width of each bar
+    xticks_labels_flying = ['1431', '721', '88']  
+    # x = np.arange(len(xticks_labels))  # x-coordinates for the groups
+    # width = 0.25  # Width of each bar
+
+    fig7=plt.figure(7, figsize=(11, 6))
+    plt.errorbar(x_indices_flying, flying_clip_alg, marker='o', color='green', linestyle='-', label='ALG clip', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices_flying, flying_clip_SED, marker='o', color='blue', linestyle='-', label='SED clip', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices_flying, flying_clip_RE1, marker='o', color='orange', linestyle='-', label='RE1 clip', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices_flying, flying_resnet_alg, marker='o', color='green', linestyle='--', label='ALG ResNet', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices_flying, flying_resnet_SED, marker='o', color='blue', linestyle='--', label='SED ResNet', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices_flying, flying_resnet_RE1, marker='o', color='orange', linestyle='--', label='RE1 ResNet', capsize=4, linewidth=1, markersize=2)
+    plt.title('Fine tuned ViT and ResNet on F-Matrix task using FlyingThings3D dataset')
+    plt.xlabel('Number of training samples')
+    plt.ylabel('Mean Value ± STD')
+    plt.xticks(range(len(xticks_labels_flying)), labels=xticks_labels_flying)  # Adjusting X-axis labels for Frozen 0
+    plt.legend()
+    plt.grid(True)
+    fig7.savefig('results/SED_models_Flying.png')
 
     fig1=plt.figure(1, figsize=(11, 6))
     plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED 0 frozen layers', capsize=4, linewidth=1, markersize=2) 
@@ -600,15 +618,19 @@ def plot_errors():
     plt.grid(True)
 
     fig3=plt.figure(3, figsize=(11, 6))
-    plt.errorbar(x_indices, pretext_mean_SED_0, yerr=pretext_std_SED_0, marker='o', color='blue', linestyle='-', label='SED Frozen 0', capsize=5)
-    plt.errorbar(x_indices, pretext_mean_SED_4, yerr=pretext_std_SED_4, marker='o', color='green', linestyle='-', label='SED Frozen 4', capsize=5)
-    plt.errorbar(x_indices, pretext_mean_SED_8, yerr=pretext_std_SED_8, marker='o', color='orange', linestyle='-', label='SED Frozen 8', capsize=5)
-    plt.title('SED comparison of pretext model with different frozen layers')
+    plt.errorbar(x_indices, mean_alg_0, yerr=std_alg_0, marker='o', color='green', linestyle='-', label='ALG clip', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED clip', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, mean_RE1_0, yerr=std_RE1_0, marker='o', color='orange', linestyle='-', label='RE1 clip', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, pretext_mean_alg_0, yerr=pretext_std_alg_0, marker='o', color='green', linestyle='--', label='ALG Pretext clip', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, pretext_mean_SED_0, yerr=pretext_std_SED_0, marker='o', color='blue', linestyle='--', label='SED Pretext clip', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, pretext_mean_RE1_0, yerr=pretext_std_RE1_0, marker='o', color='orange', linestyle='--', label='RE1 Pretext clip', capsize=4, linewidth=1, markersize=2)
+    plt.title('Fine tuned pretext task ViT and original ViT on F-Matrix task using KITTI dataset')
     plt.xlabel('Number of training samples')
     plt.ylabel('Mean Value ± STD')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
+    fig3.savefig('results/pretext.png')
 
     "Comparing ViT frozen 0 with ResNet"
     fig5=plt.figure(5, figsize=(11, 6))
@@ -619,7 +641,7 @@ def plot_errors():
     plt.errorbar(x_indices, resnet_mean_alg_0, yerr=resnet_std_alg_0, marker='o', color='green', linestyle='--', label='ALG ResNet', capsize=4, linewidth=1, markersize=2)
     plt.errorbar(x_indices, resnet_mean_SED_0, yerr=resnet_std_SED_0, marker='o', color='blue', linestyle='--', label='SED ResNet', capsize=4, linewidth=1, markersize=2)
     plt.errorbar(x_indices, resnet_mean_RE1_0, yerr=resnet_std_RE1_0, marker='o', color='orange', linestyle='--', label='RE1 ResNet', capsize=4, linewidth=1, markersize=2)
-    plt.title('Comparison of fine tuned ViT and ResNet models on estimating F-Matrix')
+    plt.title('Fine tuned ViT and ResNet on F-Matrix task using KITTI dataset')
     plt.xlabel('Number of training samples')
     plt.ylabel('Mean Value ± STD')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
@@ -658,12 +680,10 @@ def plot_errors():
     # plt.grid(True)
 
     # capsize is the width of the error bars, linewidth is the width of the line, markersize is the size of the points
-    os.makedirs('results', exist_ok=True)
-    fig1.savefig('results/SED_orig_frozen.png')
+    # fig1.savefig('results/SED_orig_frozen.png')
     # fig2.savefig('results/SED_orig_frozen_bar.png')
-    fig3.savefig('results/SED_pretext_frozen.png')
     # fig4.savefig('results/SED_pretext_bar_frozen.png')
-    fig5.savefig('results/SED_models.png')
+    # fig5.savefig('results/SED_models.png')
     # fig6.savefig('results/SED_model_bar.png')
     # plt.show()
 
@@ -773,5 +793,5 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 if __name__ == "__main__":
     p = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_80__frozen_0"
 
-    test_trained(p)
+    plot_errors()
 
