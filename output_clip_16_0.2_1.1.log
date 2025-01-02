@@ -1,0 +1,52 @@
+/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+/home/alonkay/conda/alon/lib/python3.9/site-packages/huggingface_hub/file_download.py:1150: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/modeling_utils.py:479: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return torch.load(checkpoint_file, map_location=map_location)
+
+###########################################################################################################################################################
+
+ learning rate: 0.0001, mlp_hidden_sizes: [1024, 512], jump_frames: 6, use_reconstruction_layer: True
+batch_size: 8, norm: True, train_seqeunces: [0, 2, 3, 5], val_sequences: [6, 7, 8], RL_TEST_NAMES: ['fe2fadf89a84e92a', 'f01e8b6f8e10fdd9', 'f1ee9dc6135e5307', 'a41df4fa06fd391b', 'bc0ebb7482f14795', '9bdd34e784c04e3a', '98ebee1c36ecec55'], dataset: Stereo,
+average embeddings: False, model: openai/clip-vit-base-patch16, augmentation: True, random crop: True, part: head, get_old_path: False, computer: 1,
+RE1 coeff: 0 SED coeff: 0.5, ALG_COEFF: 0, L2_coeff: 1, huber_coeff: 1, frozen layers: 0, trained vit: None, MAX_POOL_SIZE: 7
+crop: 224 resize: 256, use conv: True pretrained: None, train_size: 0.2, norm_mean: tensor([0.4815, 0.4578, 0.4082], device='cuda:0'), norm_std: tensor([0.2686, 0.2613, 0.2758], device='cuda:0'), sched: None seed: 42
+
+train size: 2166, val size: 736, test size: 1064
+
+algebraic_truth: 0.016688654783467084		 val_algebraic_truth: 0.0171048641204834
+RE1_truth: 0.0001873162014897899		 val_RE1_truth: 0.0001986040936216064
+SED_truth: 0.0014985092671594936		 val_SED_truth: 0.0015886390338773313
+
+Epoch 1/4500: Training Loss: 173.06261531365314		 Val Loss: 2.8911205789317256
+             	Training MAE: 0.2347259223461151		 Val MAE: 0.24568647146224976
+             	Algebraic dist: 191.74292262453875		 Val Algebraic dist: 98.72709324048913
+             	RE1 dist: 592729.3874538746		 Val RE1 dist: 10946.461277173914
+             	SED dist: 345.7839310424354		 Val SED dist: 5.410916867463485
+
+Fatal Python error: Illegal instruction
+
+Thread 0x00007fb10ea006c0 (most recent call first):
+<no Python frame>
+
+Current thread 0x00007fb2c5f09580 (most recent call first):
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torchvision/transforms/v2/functional/_misc.py", line 45 in normalize_image
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torchvision/transforms/v2/_transform.py", line 35 in _call_kernel
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torchvision/transforms/v2/_misc.py", line 165 in _transform
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torchvision/transforms/v2/_transform.py", line 51 in <listcomp>
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torchvision/transforms/v2/_transform.py", line 50 in forward
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1562 in _call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1553 in _wrapped_call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torchvision/transforms/v2/_container.py", line 51 in forward
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1562 in _call_impl
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1553 in _wrapped_call_impl
+  File "/home/alonkay/Thesis/Dataset.py", line 95 in __getitem__
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/utils/data/dataset.py", line 350 in __getitem__
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 52 in <listcomp>
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 52 in fetch
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 673 in _next_data
+  File "/home/alonkay/conda/alon/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 630 in __next__
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 268 in dataloader_step
+  File "/home/alonkay/Thesis/FMatrixRegressor.py", line 194 in train_model
+  File "/home/alonkay/Thesis/Main.py", line 115 in <module>
