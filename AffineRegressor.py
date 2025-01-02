@@ -68,9 +68,9 @@ class AffineRegressor(nn.Module):
                 if layer_idx < self.frozen_layers:  
                     for param in layer.parameters():
                         param.requires_grad = False
-                elif layer_idx >= len(self.model.vision_model.encoder.layers) - self.frozen_high_layers:
-                    for param in layer.parameters():
-                        param.requires_grad = False
+                # elif layer_idx >= len(self.model.vision_model.encoder.layers) - self.frozen_high_layers:
+                #     for param in layer.parameters():
+                #         param.requires_grad = False
         
         if FREEZE_PRETRAINED_MODEL:
             for param in self.model.parameters():

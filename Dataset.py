@@ -18,6 +18,7 @@ class CustomDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.dataset)
 
+
     def __getitem__(self, idx):
         original_image = self.dataset[idx]['image']
 
@@ -30,11 +31,12 @@ class CustomDataset(torch.utils.data.Dataset):
         
         translated_image, original_image = F.to_tensor(translated_image), F.to_tensor(original_image)
         translated_image, original_image = F.normalize(translated_image, norm_mean, norm_std), F.normalize(original_image, norm_mean, norm_std)
+        translated_image, original_image = translated_image.to(device), original_image.to(device)
 
         # Rescale params -> [-1,1]
-        angle = 0 if self.angle_range==0 else torch.tensor(angle / self.angle_range, dtype=torch.float32)
-        shift_x = 0 if self.shift_range==0 else torch.tensor(shift_x / self.shift_range, dtype=torch.float32)
-        shift_y = 0 if self.shift_range==0 else torch.tensor(shift_y / self.shift_range, dtype=torch.float32)
+        angle = 0 if self.angle_range==0 else torch.tensor(angle / self.angle_range, dtype=torch.float32).to(device)
+        shift_x = 0 if self.shift_range==0 else torch.tensor(shift_x / self.shift_range, dtype=torch.float32).to(device)
+        shift_y = 0 if self.shift_range==0 else torch.tensor(shift_y / self.shift_range, dtype=torch.float32).to(device)
 
         if SHIFT_RANGE == 0:
             return original_image, translated_image, angle
