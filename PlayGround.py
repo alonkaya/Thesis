@@ -579,9 +579,9 @@ def plot_errors():
     flying_clip_SED = [0.71, 0.8, 3.34]
     flying_clip_RE1 = [0.14, 0.16, 1.19]
 
-    flying_resnet_alg = [0.33, 0.44, 0.78]
-    flying_resnet_SED = [1.86, 1, 2.57]
-    flying_resnet_RE1 = [0.86, 0.21, 0.73]
+    flying_resnet_alg = [0.41, 0.44, 0.78]
+    flying_resnet_SED = [0.84, 1, 2.57]
+    flying_resnet_RE1 = [0.175, 0.21, 0.73]
 
     os.makedirs('results', exist_ok=True)
     x_indices = range(len(mean_SED_0))  # For Frozen 0 (has an extra point)
@@ -791,7 +791,7 @@ import matplotlib.pyplot as plt
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 if __name__ == "__main__":
-    p = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_80__frozen_0"
+    p = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_170__frozen_0__seed_300"
 
-    plot_errors()
+    test_trained(p)
 
