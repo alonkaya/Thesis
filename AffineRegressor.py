@@ -173,6 +173,7 @@ class AffineRegressor(nn.Module):
         return output
 
     def train_model(self, train_loader, val_loader, test_loader):
+        break_when_good = False
         for epoch in range(self.start_epoch, self.num_epochs):
             epoch_stats = {"mae_shift": torch.tensor(0, dtype=torch.float32), "euclidean_shift": torch.tensor(0, dtype=torch.float32), \
                            "loss": torch.tensor(0, dtype=torch.float32), "mae_angle": torch.tensor(0, dtype=torch.float32), "mse_angle": torch.tensor(0, dtype=torch.float32),
