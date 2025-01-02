@@ -108,12 +108,23 @@ def check_nan(all_train_loss_last, all_val_loss_last, plots_path):
         return True
     return False
 
-
+def not_decreasing(val_loss, num_epochs, plots_path):
+    x = int(num_epochs/8)
+    if sum(val_loss[-x:]) > sum(val_loss[-2*x:-x]) + 0.05*x:
+        print_and_write("### Not decreasing ###\n", plots_path)
+        return True
+    
+def ready_to_break(val_loss):
+    length = 40
+    min_length = min(val_loss[-length:-1])
+    if val_loss[-1] < min_length:
+        return True
+    
 def print_and_write(output, plots_path):
     os.makedirs(plots_path, exist_ok=True)
     output_path = os.path.join(plots_path, "output.log")
     with open(output_path, "a") as f:
-        f.write(output)
+        f.write(f'{output}\n')
         print(output)
 
 

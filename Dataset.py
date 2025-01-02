@@ -29,10 +29,7 @@ class CustomDataset(torch.utils.data.Dataset):
         translated_image = F.affine(original_image, angle=angle, translate=(shift_x, shift_y), scale=1, shear=0)
         
         translated_image, original_image = F.to_tensor(translated_image), F.to_tensor(original_image)
-        if torch.isnan(original_image).any() or torch.isnan(translated_image).any(): print_and_write(f"dataset 4: Found nan after to_tensor {idx}\n", self.plots_path)
-
-        translated_image, original_image = F.normalize(translated_image, mean, std), F.normalize(original_image, mean, std)
-        if torch.isnan(original_image).any() or torch.isnan(translated_image).any(): print_and_write(f"dataset 5: Found nan after normalize {idx}\n", self.plots_path)
+        translated_image, original_image = F.normalize(translated_image, norm_mean, norm_std), F.normalize(original_image, norm_mean, norm_std)
 
         # Rescale params -> [-1,1]
         angle = 0 if self.angle_range==0 else torch.tensor(angle / self.angle_range, dtype=torch.float32)
@@ -53,6 +50,8 @@ def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length
         v2.Resize(256),
         v2.RandomCrop(224),
         v2.Grayscale(num_output_channels=3),
+        v2.ColorJitter(brightness=0.3, contrast=0.3),
+        v2.GaussianBlur(kernel_size=3, sigma=(0.1, 0.35)),
     ])
 
     # Load and display the image
@@ -78,7 +77,7 @@ def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length
 
 
 # Function to display original and rotated images using PIL
-def show_images(original_image, rotated_image, mean=mean, std=std):
+def show_images(original_image, rotated_image, mean=norm_mean, std=norm_std):
     mean = mean.view(-1, 1, 1)
     std = std.view(-1, 1, 1)
     

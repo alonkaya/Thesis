@@ -50,7 +50,7 @@ class AffineRegressor(nn.Module):
         self.all_train_mse_angle, self.all_val_mse_angle = [], [], [], [], [], [], [], [], [], []
         
         self.resnet = False
-        if model_name == CLIP_MODEL_NAME:
+        if model_name == CLIP_MODEL_NAME or model_name == CLIP_MODEL_NAME_16:
             # Initialize CLIP processor and pretrained model
             if TRAIN_FROM_SCRATCH:
                 config = CLIPVisionConfig()
@@ -63,11 +63,14 @@ class AffineRegressor(nn.Module):
             self.model = ResNetModel.from_pretrained(model_name).to(device)
     
         # Freeze frozen_layers bottom layers
-        for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
-            if layer_idx < self.frozen_layers:  
-                print(f'layer_idx: {layer_idx}')
-                for param in layer.parameters():
-                    param.requires_grad = False
+        if self.resnet == False:
+            for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
+                if layer_idx < self.frozen_layers:  
+                    for param in layer.parameters():
+                        param.requires_grad = False
+                elif layer_idx >= len(self.model.vision_model.encoder.layers) - self.frozen_high_layers:
+                    for param in layer.parameters():
+                        param.requires_grad = False
         
         if FREEZE_PRETRAINED_MODEL:
             for param in self.model.parameters():
@@ -89,7 +92,7 @@ class AffineRegressor(nn.Module):
 
             elif self.use_conv:
                 self.conv = ConvNet(input_dim= len(self.embedding_to_use)*self.hidden_size, batch_size=self.batch_size).to(device)
-                mlp_input_shape = 2 * self.conv.hidden_dims[-1] * 3 * 3 
+                mlp_input_shape = 2 * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2 
             
             # Initialize loss functions
             self.L2_loss = nn.MSELoss().to(device)
@@ -107,14 +110,7 @@ class AffineRegressor(nn.Module):
 
         self.to(device)
 
-    def FeatureExtractor(self, x1, x2):
-        if torch.isnan(x1).any():
-            print_and_write(f"0. Nan in x1_embeddings\n", self.plots_path)
-            return None
-        if torch.isnan(x2).any():
-            print_and_write(f"0. Nan in x2_embeddings\n", self.plots_path)
-            return None
-        
+    def FeatureExtractor(self, x1, x2):        
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model(pixel_values=x1).last_hidden_state.to(device)
         x2_embeddings = self.model(pixel_values=x2).last_hidden_state.to(device)
@@ -124,8 +120,12 @@ class AffineRegressor(nn.Module):
             x2_embeddings = x2_embeddings[:,0,:] # shape (batch_size, hidden_size)
 
         else: # patches
-            x1_embeddings = x1_embeddings[:, 1: ,:].reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
-            x2_embeddings = x2_embeddings[:, 1: ,:].reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
+            if not self.resnet:
+                x1_embeddings = x1_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
+                x2_embeddings = x2_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
+
+            x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
+            x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
 
             if self.avg_embeddings:
                 # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
@@ -148,11 +148,7 @@ class AffineRegressor(nn.Module):
                     embeddings = torch.cat((embeddings, x1_embeddings), dim=1)
                 if "mul_embedding" in self.embedding_to_use:
                     embeddings = torch.cat((embeddings, torch.mul(x1_embeddings, x2_embeddings)), dim=1)
-
                 embeddings = self.conv(embeddings)
-                if torch.isnan(embeddings).any():
-                    print_and_write(f"5. Nan in conv\n", self.plots_path)
-                    return None
                 
         if not self.use_conv:
             embeddings = torch.tensor([]).to(device)
@@ -168,19 +164,11 @@ class AffineRegressor(nn.Module):
     def forward(self, x1, x2):
         # x1, x2 shape is (batch_size, channels, height, width)
         embeddings = self.FeatureExtractor(x1, x2) # Output shape is (batch_size, -1)
-        if embeddings is None:
-            return None
         
         # output shape is (batch_size, 3)
         output = self.mlp(embeddings)
-        if torch.isnan(output).any():
-            print_and_write(f"3. Nan in mlp\n", self.plots_path)
-            return None
 
         output = norm_layer(output)
-        if torch.isnan(output).any():
-            print_and_write("4. Nan in norm", self.plots_path)
-            return None
 
         return output
 
@@ -229,7 +217,18 @@ class AffineRegressor(nn.Module):
 
             if SAVE_MODEL:
                 self.save_model(epoch+1)
+
+            # If the last epochs are not decreasing in val loss, raise break_when_good flag
+            if (epoch > int(self.num_epochs * 3/4) and not_decreasing(self.all_val_loss, self.num_epochs, self.plots_path)) \
+                or epoch > self.num_epochs:
+                break_when_good = True
+
+            # If last epoch got best results of psat 4 epochs, stop training
+            if break_when_good and ready_to_break(self.all_val_loss, self.num_epochs):
+                self.num_epochs = epoch + 1
+                break
         
+        self.save_model(epoch+1, definetly=True)
         self.test(test_loader)
 
         self.plot_all()
@@ -246,13 +245,6 @@ class AffineRegressor(nn.Module):
             else:
                 img1, img2, angle, shift_x, shift_y = batch
                 img1, img2, angle, shift = img1.to(device), img2.to(device), angle.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
-
-            if torch.isnan(img1).any():
-                print_and_write(f"step: Nan in img1\n", self.plots_path)
-                return None
-            if torch.isnan(img2).any():
-                print_and_write(f"step: Nan in img2\n", self.plots_path)
-                return None
             
             # Forward pass
             output = self.forward(img1, img2)
@@ -295,41 +287,54 @@ class AffineRegressor(nn.Module):
             epoch_stats[f'{prefix}loss'] += loss
         return 1
                
-    def save_model(self, epoch):
+    def save_model(self, epoch, definetly=False):
         checkpoint_path = os.path.join(self.plots_path, "model.pth")
-        torch.save({
-            'mlp': self.mlp.state_dict(),
-            'optimizer': self.optimizer.state_dict(),
-            'vit': self.model.state_dict() ,
-            'conv': self.conv.state_dict() if self.use_conv else '',
-            'alpha': self.alpha,
-            'avg_embeddings': self.avg_embeddings,
-            'frozen_layers': self.frozen_layers,
-            "batch_size" : self.batch_size,
-            "lr" : self.lr,
-            "model_name" : self.model_name,
-            "plots_path" : self.plots_path,
-            "use_conv" : self.use_conv,
-            "hidden_size" : self.hidden_size,
-            "num_patches" : self.num_patches,
-            'epoch' : epoch,
-            'cls' : self.cls,
-            'embedding_to_use' : self.embedding_to_use,
-            "all_train_loss" : self.all_train_loss, 
-            "all_val_loss" : self.all_val_loss,
-            "all_train_mae_shift" : self.all_train_mae_shift,
-            "all_val_mae_shift" : self.all_val_mae_shift,
-            "all_train_euclidean_shift" : self.all_train_euclidean_shift,
-            "all_val_euclidean_shift" : self.all_val_euclidean_shift,
-            "all_train_mae_angle" : self.all_train_mae_angle,
-            "all_val_mae_angle" : self.all_val_mae_angle,
-            "all_train_mse_angle" : self.all_train_mse_angle,
-            "all_val_mse_angle" : self.all_val_mse_angle,
-        }, checkpoint_path) 
+        if definetly or epoch % (self.num_epochs//50) == 0:
+            torch.save({
+                'mlp': self.mlp.state_dict(),
+                'optimizer': self.optimizer.state_dict(),
+                'vit': self.model.state_dict() ,
+                'conv': self.conv.state_dict() if self.use_conv else '',
+                "scheduler" : None if self.scheduler==None else self.scheduler.state_dict(),
+                "L2_coeff" : self.L2_coeff,
+                "huber_coeff" : self.huber_coeff,
+                "batch_size" : self.batch_size,
+                "lr" : self.lr,
+                "self.min_lr" : self.min_lr,
+                "average_embeddings" : self.average_embeddings,
+                "model_name" : self.model_name,
+                "augmentation" : self.augmentation,
+                "use_reconstruction" : self.use_reconstruction,
+                "re1_coeff" : self.re1_coeff,
+                "alg_coeff" : self.alg_coeff,
+                "sed_coeff" : self.sed_coeff,
+                "plots_path" : self.plots_path,
+                "use_conv" : self.use_conv,
+                "hidden_size" : self.hidden_size,
+                "num_patches" : self.num_patches,
+                'epoch' : epoch,
+                "frozen_layers" : self.frozen_layers,
+                "frozen_high_layers" : self.frozen_high_layers,
+                "all_train_loss" : self.all_train_loss, 
+                "all_val_loss" : self.all_val_loss, 
+                "all_train_mae" : self.all_train_mae, 
+                "all_val_mae" : self.all_val_mae, 
+                "all_algebraic_pred" : self.all_algebraic_pred, 
+                "all_RE1_pred" : self.all_RE1_pred, 
+                "all_SED_pred" : self.all_SED_pred, 
+                "all_val_algebraic_pred" : self.all_val_algebraic_pred, 
+                "all_val_RE1_pred" : self.all_val_RE1_pred, 
+                "all_val_SED_pred" : self.all_val_SED_pred
+            }, checkpoint_path) 
 
-    def load_model(self, model_path=None):
-        checkpoint = torch.load(model_path, map_location='cpu')
-
+    def load_model(self, path=None):
+        model_path = os.path.join(path, "model.pth")
+        if os.path.exists(model_path):
+            checkpoint = torch.load(model_path, map_location='cpu')
+        else:
+            print_and_write(f"Model {model_path} not found", self.plots_path)
+            raise FileNotFoundError
+        
         self.batch_size = checkpoint.get("batch_size", self.batch_size)
         self.lr = checkpoint.get("lr", self.lr)
         self.model_name = checkpoint.get("model_name", self.model_name)
@@ -365,7 +370,7 @@ class AffineRegressor(nn.Module):
 
         elif self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
-            mlp_input_shape = len(self.embedding_to_use) * self.conv.hidden_dims[-1] * 3 * 3 
+            mlp_input_shape = len(self.embedding_to_use) * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2
             self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
 

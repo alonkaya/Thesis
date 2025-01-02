@@ -22,17 +22,18 @@ if __name__ == "__main__":
         for i, (lr, bs, alpha, embeddings_to_use, use_cls) in enumerate(param_combinations):
                 scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
-                model = "CLIP" if MODEL == CLIP_MODEL_NAME else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google_ViT" 
+                model = "CLIP" if MODEL == CLIP_MODEL_NAME else "CLIP_16" if MODEL==CLIP_MODEL_NAME_16 else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
                 regress = 'avg' if AVG_EMBEDDINGS else 'conv' if USE_CONV else 'cls' if use_cls else 'all_patches'
                 which = "angle" if  SHIFT_RANGE==0 else "shift" if ANGLE_RANGE==0 else "angle_shift"
                 embeddings = 'all' if len(embeddings_to_use)==3 else 'original_rotated' if len(embeddings_to_use)==2 \
                                     else 'rotated' if embeddings_to_use[0] == "rotated_embeddings" else 'mul'
                 frozen = 'all' if FREEZE_PRETRAINED_MODEL else FROZEN_LAYERS
-                plots_path = os.path.join('plots', 'Affine', f'BS_{bs}__lr_{lr}__train_size_{train_length}__{model}__alpha_{alpha}__{regress}__{embeddings}__frozen_{frozen}{ADDITIONS}')
+                plots_path = os.path.join('plots', 'Affine', f'BS_{bs}__lr_{lr}__alpha_{alpha}__{regress}__{embeddings}', model, f'size_{train_length}__frozen_{frozen}{ADDITIONS}')
    
                 train_loader, val_loader, test_loader = get_dataloaders(batch_size=bs, train_length=train_length, val_length=val_length, test_length=test_length, plots_path=plots_path)
 
-                model = AffineRegressor(lr, bs, alpha, embeddings_to_use, use_cls, model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path=plots_path, frozen_layers=FROZEN_LAYERS, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS)
+                model = AffineRegressor(lr, bs, alpha, embeddings_to_use, use_cls, model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path=plots_path, \
+                                        frozen_layers=FROZEN_LAYERS, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS)
 
                 if model.start_epoch < model.num_epochs:
                         parameters = f"""###########################################################################################################################################################\n
