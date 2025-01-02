@@ -56,9 +56,8 @@ def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length
     ])
 
     # Load and display the image
-    dataset = load_dataset("frgfm/imagenette", "320px")
-
-    # Further split the test data into validation and test sets (e.g., 50% validation, 50% test)
+    dataset = load_dataset("frgfm/imagenette", "320px").to(device)
+    print(len(dataset['train']), len(dataset['validation']))
     train_data = dataset["train"].select(range(train_length))
     val_data = dataset['validation'].select(range(val_length))
     test_data = dataset['validation'].select(range(len(dataset['validation']) - test_length, len(dataset['validation'])))
