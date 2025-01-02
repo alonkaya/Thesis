@@ -206,14 +206,14 @@ class AffineRegressor(nn.Module):
             # Append epoch statistics to lists 
             self.append_epoch_stats(epoch_stats)
 
-            print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}\n""", self.plots_path)
+            print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}""", self.plots_path)
             if ANGLE_RANGE != 0:
                 print_and_write(f"""\t      Training MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
-              Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}\n""", self.plots_path)
+              Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}""", self.plots_path)
             if SHIFT_RANGE != 0:
                 print_and_write(f"""\t      Training MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
-              Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}\n""", self.plots_path)
-            print_and_write("\n\n", self.plots_path)
+              Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}""", self.plots_path)
+            print_and_write("\n", self.plots_path)
 
 
             if SAVE_MODEL:
@@ -296,36 +296,29 @@ class AffineRegressor(nn.Module):
                 'optimizer': self.optimizer.state_dict(),
                 'vit': self.model.state_dict() ,
                 'conv': self.conv.state_dict() if self.use_conv else '',
-                "scheduler" : None if self.scheduler==None else self.scheduler.state_dict(),
-                "L2_coeff" : self.L2_coeff,
-                "huber_coeff" : self.huber_coeff,
+                'alpha': self.alpha,
+                'avg_embeddings': self.avg_embeddings,
+                'frozen_layers': self.frozen_layers,
                 "batch_size" : self.batch_size,
                 "lr" : self.lr,
-                "self.min_lr" : self.min_lr,
-                "average_embeddings" : self.average_embeddings,
                 "model_name" : self.model_name,
-                "augmentation" : self.augmentation,
-                "use_reconstruction" : self.use_reconstruction,
-                "re1_coeff" : self.re1_coeff,
-                "alg_coeff" : self.alg_coeff,
-                "sed_coeff" : self.sed_coeff,
                 "plots_path" : self.plots_path,
                 "use_conv" : self.use_conv,
                 "hidden_size" : self.hidden_size,
                 "num_patches" : self.num_patches,
                 'epoch' : epoch,
-                "frozen_layers" : self.frozen_layers,
-                "frozen_high_layers" : self.frozen_high_layers,
+                'cls' : self.cls,
+                'embedding_to_use' : self.embedding_to_use,
                 "all_train_loss" : self.all_train_loss, 
-                "all_val_loss" : self.all_val_loss, 
-                "all_train_mae" : self.all_train_mae, 
-                "all_val_mae" : self.all_val_mae, 
-                "all_algebraic_pred" : self.all_algebraic_pred, 
-                "all_RE1_pred" : self.all_RE1_pred, 
-                "all_SED_pred" : self.all_SED_pred, 
-                "all_val_algebraic_pred" : self.all_val_algebraic_pred, 
-                "all_val_RE1_pred" : self.all_val_RE1_pred, 
-                "all_val_SED_pred" : self.all_val_SED_pred
+                "all_val_loss" : self.all_val_loss,
+                "all_train_mae_shift" : self.all_train_mae_shift,
+                "all_val_mae_shift" : self.all_val_mae_shift,
+                "all_train_euclidean_shift" : self.all_train_euclidean_shift,
+                "all_val_euclidean_shift" : self.all_val_euclidean_shift,
+                "all_train_mae_angle" : self.all_train_mae_angle,
+                "all_val_mae_angle" : self.all_val_mae_angle,
+                "all_train_mse_angle" : self.all_train_mse_angle,
+                "all_val_mse_angle" : self.all_val_mse_angle,
             }, checkpoint_path) 
 
     def load_model(self, path=None):
