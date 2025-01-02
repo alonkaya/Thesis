@@ -58,9 +58,10 @@ def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length
     # Load and display the image
     dataset = load_dataset("frgfm/imagenette", "320px")
     print(len(dataset['train']), len(dataset['validation']))
-    train_data = dataset["train"].select(range(train_length)).to(device)
-    val_data = dataset['validation'].select(range(val_length)).to(device)
-    test_data = dataset['validation'].select(range(len(dataset['validation']) - test_length, len(dataset['validation']))).to(device)
+
+    train_data = dataset["train"].select(range(train_length))
+    val_data = dataset['validation'].select(range(val_length))
+    test_data = dataset['validation'].select(range(len(dataset['validation']) - test_length, len(dataset['validation'])))
 
     # Create an instance dataset
     custom_train_dataset = CustomDataset(train_data, transform=transform, angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE, plots_path=plots_path)
