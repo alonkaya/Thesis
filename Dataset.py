@@ -18,7 +18,6 @@ class CustomDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.dataset)
 
-
     def __getitem__(self, idx):
         original_image = self.dataset[idx]['image']
 
@@ -70,9 +69,9 @@ def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length
     custom_test_dataset = CustomDataset(test_data, transform=transform,angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE, plots_path=plots_path)
 
     # # Create a DataLoader
-    train_loader = DataLoader(custom_train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=NUM_WORKERS)
-    val_loader = DataLoader(custom_val_dataset, batch_size=batch_size, shuffle=False, pin_memory=True, num_workers=NUM_WORKERS)
-    test_loader = DataLoader(custom_test_dataset, batch_size=batch_size, shuffle=False, pin_memory=True, num_workers=NUM_WORKERS)
+    train_loader = DataLoader(custom_train_dataset, batch_size=batch_size, shuffle=True, pin_memory=False, num_workers=NUM_WORKERS)
+    val_loader = DataLoader(custom_val_dataset, batch_size=batch_size, shuffle=False, pin_memory=False, num_workers=NUM_WORKERS)
+    test_loader = DataLoader(custom_test_dataset, batch_size=batch_size, shuffle=False, pin_memory=False, num_workers=NUM_WORKERS)
 
     return train_loader, val_loader, test_loader
 
