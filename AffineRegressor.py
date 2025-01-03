@@ -174,7 +174,7 @@ class AffineRegressor(nn.Module):
 
     def train_model(self, train_loader, val_loader, test_loader):
         break_when_good = False
-        for epoch in range(self.start_epoch, self.num_epochs):
+        for epoch in range(self.start_epoch, self.num_epochs*2):
             epoch_stats = {"mae_shift": torch.tensor(0, dtype=torch.float32), "euclidean_shift": torch.tensor(0, dtype=torch.float32), \
                            "loss": torch.tensor(0, dtype=torch.float32), "mae_angle": torch.tensor(0, dtype=torch.float32), "mse_angle": torch.tensor(0, dtype=torch.float32),
                            "val_mae_shift": torch.tensor(0, dtype=torch.float32), "val_euclidean_shift": torch.tensor(0, dtype=torch.float32), \
@@ -208,10 +208,10 @@ class AffineRegressor(nn.Module):
 
             print_and_write(f"""Epoch {epoch+1}/{self.num_epochs}: Training Loss: {self.all_train_loss[-1]}\t\t Val Loss: {self.all_val_loss[-1]}""", self.plots_path)
             if ANGLE_RANGE != 0:
-                print_and_write(f"""\t      Training MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
+                print_and_write(f"""\t\tTraining MAE Angle: {self.all_train_mae_angle[-1]}\t\t Val MAE Angle: {self.all_val_mae_angle[-1]}
               Training MSE Angle: {self.all_train_mse_angle[-1]}\t\t Val MSE Angle: {self.all_val_mse_angle[-1]}""", self.plots_path)
             if SHIFT_RANGE != 0:
-                print_and_write(f"""\t      Training MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
+                print_and_write(f"""\t\tTraining MAE Shift: {self.all_train_mae_shift[-1]}\t\t Val MAE Shift: {self.all_val_mae_shift[-1]}
               Training Euclidean Shift: {self.all_train_euclidean_shift[-1]}\t Val Euclidean Shift: {self.all_val_euclidean_shift[-1]}""", self.plots_path)
             print_and_write("\n", self.plots_path)
 
@@ -225,7 +225,7 @@ class AffineRegressor(nn.Module):
                 break_when_good = True
 
             # If last epoch got best results of psat 4 epochs, stop training
-            if break_when_good and ready_to_break(self.all_val_loss, self.num_epochs):
+            if break_when_good and ready_to_break(self.all_val_loss):
                 self.num_epochs = epoch + 1
                 break
         
@@ -436,7 +436,7 @@ class AffineRegressor(nn.Module):
 
         print_and_write(f"""## TEST RESULTS: ##
 Test Loss: {loss/10} 
-Test MAE Shift: {mae_shift/10}\t\t Test Euclidean Shift: {euclidean_shift/10}
+Test Euclidean Shift: {euclidean_shift/10}\t\t Test MAE Shift: {mae_shift/10}
 Test MAE Angle: {mae_angle/10}\t\t Test MSE Angle: {mse_angle/10}\n\n""", self.plots_path)
     
 
