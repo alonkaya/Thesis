@@ -26,7 +26,7 @@ NUM_EPOCHS = 500
 ADDITIONS = ""                                      
 GET_OLD_PATH = False
 SEED = 42
-ALPHA = [10]
+ALPHA = [100]
 EMBEDDINGS_TO_USE = [["rotated_embeddings", "original_embeddings"]]
 MAX_POOL_SIZE = 4 if not MODEL==CLIP_MODEL_NAME_16 else 7 
 
