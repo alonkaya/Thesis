@@ -4,7 +4,6 @@ import torchvision.transforms.functional as F
 from params import *
 from utils import *
 import torchvision.transforms as v2
-from torchvision.transforms.functional import to_pil_image
 
 
 class CustomDataset(torch.utils.data.Dataset):
@@ -20,7 +19,7 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         original_image = self.dataset[idx]['image']
-
+        
         # Transform: Resize, center, grayscale
         original_image = self.transform(original_image)
 
@@ -30,12 +29,11 @@ class CustomDataset(torch.utils.data.Dataset):
         
         translated_image, original_image = F.to_tensor(translated_image), F.to_tensor(original_image)
         translated_image, original_image = F.normalize(translated_image, norm_mean, norm_std), F.normalize(original_image, norm_mean, norm_std)
-        translated_image, original_image = translated_image.to(device), original_image.to(device)
 
         # Rescale params -> [-1,1]
-        angle = 0 if self.angle_range==0 else torch.tensor(angle / self.angle_range, dtype=torch.float32).to(device)
-        shift_x = 0 if self.shift_range==0 else torch.tensor(shift_x / self.shift_range, dtype=torch.float32).to(device)
-        shift_y = 0 if self.shift_range==0 else torch.tensor(shift_y / self.shift_range, dtype=torch.float32).to(device)
+        angle = 0 if self.angle_range==0 else torch.tensor(angle / self.angle_range, dtype=torch.float32)
+        shift_x = 0 if self.shift_range==0 else torch.tensor(shift_x / self.shift_range, dtype=torch.float32)
+        shift_y = 0 if self.shift_range==0 else torch.tensor(shift_y / self.shift_range, dtype=torch.float32)
 
         if SHIFT_RANGE == 0:
             return original_image, translated_image, angle
@@ -43,7 +41,6 @@ class CustomDataset(torch.utils.data.Dataset):
             return original_image, translated_image, shift_x, shift_y
         else:
             return original_image, translated_image, angle, shift_x, shift_y
-    
 
 
 def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length=val_length, test_length=test_length, plots_path=None):
@@ -57,7 +54,6 @@ def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length
 
     # Load and display the image
     dataset = load_dataset("frgfm/imagenette", "320px")
-    print(len(dataset['train']), len(dataset['validation']))
 
     train_data = dataset["train"].select(range(train_length))
     val_data = dataset['validation'].select(range(val_length))
@@ -82,8 +78,8 @@ def show_images(original_image, rotated_image, mean=norm_mean, std=norm_std):
     mean = mean.view(-1, 1, 1)
     std = std.view(-1, 1, 1)
     
-    original_pil_image = to_pil_image(original_image * std + mean)
-    rotated_pil_image = to_pil_image(rotated_image * std + mean)
+    original_pil_image = F.to_pil_image(original_image * std + mean)
+    rotated_pil_image = F.to_pil_image(rotated_image * std + mean)
 
     # Display the original and rotated images using PIL
     original_pil_image.show(title="Original Image")
@@ -94,10 +90,10 @@ def show_images(original_image, rotated_image, mean=norm_mean, std=norm_std):
     rotated_pil_image.save("rotated_image.png")
 
 if __name__ == "__main__":
-    train_loader, val_loader, test_loader = get_dataloaders(batch_size=32, train_length=train_length, val_length=val_length, test_length=test_length)
+    train_loader, val_loader, test_loader = get_dataloaders(batch_size=32, train_length=train_length[0], val_length=val_length, test_length=test_length)
     
     # Get a batch of images
-    it = iter(train_loader)
+    it = iter(test_loader)
     original_image, rotated_image, _, _, _ = next(it)
 
     # Visualize the first image in the batch

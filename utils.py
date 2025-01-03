@@ -41,7 +41,7 @@ class ConvNet(nn.Module):
 
         self.conv_layers = nn.Sequential(*layers)
         self.flatten = nn.Flatten()
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2, return_indices=True)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2, return_indices=True) if MAX_POOL_SIZE==3 or MAX_POOL_SIZE==7 else nn.MaxPool2d(kernel_size=2, stride=2, padding=1, return_indices=True)
 
     def forward(self, x):
         x = self.conv_layers(x) # shape: (batch_size, hidden_dims[-1], 7, 7)
