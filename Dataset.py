@@ -18,10 +18,10 @@ class CustomDataset(torch.utils.data.Dataset):
         return len(self.dataset)
 
     def __getitem__(self, idx):
-        original_image = self.dataset[idx]['image']
+        original_image = self.dataset[idx]
         
         # Transform: Resize, center, grayscale
-        original_image = self.transform(original_image).to(device)
+        original_image = self.transform(original_image)
 
         # Generate random affine params
         angle, shift_x, shift_y = random.uniform(-self.angle_range, self.angle_range), random.uniform(-self.shift_range, self.shift_range), random.uniform(-self.shift_range, self.shift_range)
@@ -50,7 +50,7 @@ def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length
         v2.Grayscale(num_output_channels=3),
         v2.ColorJitter(brightness=0.3, contrast=0.3),
         v2.GaussianBlur(kernel_size=3, sigma=(0.1, 0.35)),
-        v2.ToTensor(),
+        # v2.ToTensor(),
     ])
 
     # Load and display the image
@@ -60,10 +60,18 @@ def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length
     val_data = dataset['validation'].select(range(val_length))
     test_data = dataset['validation'].select(range(len(dataset['validation']) - test_length, len(dataset['validation'])))
 
+    train_images, val_images, test_images = [], [], []
+    for img in train_data:
+        train_images.append(F.to_tensor(img['image'].convert('RGB')).to(device))
+    for img in val_data:
+        val_images.append(F.to_tensor(img['image'].convert('RGB')).to(device))
+    for img in test_data:
+        test_images.append(F.to_tensor(img['image'].convert('RGB')).to(device))
+
     # Create an instance dataset
-    custom_train_dataset = CustomDataset(train_data, transform=transform, angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE, plots_path=plots_path)
-    custom_val_dataset = CustomDataset(val_data, transform=transform,angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE, plots_path=plots_path)
-    custom_test_dataset = CustomDataset(test_data, transform=transform,angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE, plots_path=plots_path)
+    custom_train_dataset = CustomDataset(train_images, transform=transform, angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE, plots_path=plots_path)
+    custom_val_dataset = CustomDataset(val_images, transform=transform,angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE, plots_path=plots_path)
+    custom_test_dataset = CustomDataset(test_images, transform=transform,angle_range=ANGLE_RANGE, shift_range=SHIFT_RANGE, plots_path=plots_path)
 
     # # Create a DataLoader
     train_loader = DataLoader(custom_train_dataset, batch_size=batch_size, shuffle=True, pin_memory=False, num_workers=NUM_WORKERS)
@@ -87,8 +95,8 @@ def show_images(original_image, rotated_image, mean=norm_mean, std=norm_std):
     rotated_pil_image.show(title="Rotated Image")
 
     # Optionally, save the images if needed
-    original_pil_image.save("original_image.png")
-    rotated_pil_image.save("rotated_image.png")
+    original_pil_image.save("original_image2.png")
+    rotated_pil_image.save("rotated_image2.png")
 
 if __name__ == "__main__":
     train_loader, val_loader, test_loader = get_dataloaders(batch_size=32, train_length=train_length[0], val_length=val_length, test_length=test_length)
