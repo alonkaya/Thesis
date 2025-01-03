@@ -17,7 +17,7 @@ INIT_DATA = True
 
 ### Training ###
 LR = [6e-5]
-BATCH_SIZE = [32]
+BATCH_SIZE = [4]
 NORM = True
 TRAIN_FROM_SCRATCH = False
 NUM_WORKERS = 0 # Probably setting this to > 0 causes Nans. If you get Nans then set it to 0.
@@ -26,7 +26,7 @@ NUM_EPOCHS = 500
 ADDITIONS = ""                                      
 GET_OLD_PATH = False
 SEED = 42
-ALPHA = [100]
+ALPHA = [10]
 EMBEDDINGS_TO_USE = [["rotated_embeddings", "original_embeddings"]]
 MAX_POOL_SIZE = 4 if not MODEL==CLIP_MODEL_NAME_16 else 7 
 
