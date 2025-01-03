@@ -32,9 +32,10 @@ if __name__ == "__main__":
                                           model, f'size_{size}__frozen_{frozen}{ADDITIONS}')
    
                 train_loader, val_loader, test_loader = get_dataloaders(batch_size=bs, train_length=size, val_length=val_length, test_length=test_length, plots_path=plots_path)
-
+                
+                num_epochs = NUM_EPOCHS * (i+1)
                 model = AffineRegressor(lr, bs, alpha, embeddings_to_use, use_cls, model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path=plots_path, \
-                                        frozen_layers=FROZEN_LAYERS, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=NUM_EPOCHS)
+                                        frozen_layers=FROZEN_LAYERS, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=num_epochs)
 
                 if model.start_epoch < model.num_epochs:
                         parameters = f"""###########################################################################################################################################################\n
