@@ -290,6 +290,7 @@ class AffineRegressor(nn.Module):
         return 1
                
     def save_model(self, epoch, definetly=False):
+        os.makedirs(self.parent_model_path, exist_ok=True)
         checkpoint_path = os.path.join(self.parent_model_path, "model.pth")
         if definetly or epoch % (self.num_epochs//50) == 0:
             torch.save({
