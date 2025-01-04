@@ -237,6 +237,7 @@ class AffineRegressor(nn.Module):
 
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
+        outputs, angles, shifts = torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device)
         for batch in dataloader:
             if SHIFT_RANGE == 0:
                 img1, img2, angle = batch
@@ -249,7 +250,7 @@ class AffineRegressor(nn.Module):
                 img1, img2, angle, shift = img1.to(device), img2.to(device), angle.to(device), torch.stack([shift_x, shift_y], dim=1).to(device)
             
             # Forward pass
-            output = self.forward(img1, img2)
+            output = self.forward(img1, img2) # output shape is (batch_size, 3)
             if output is None:
                 return None
 
@@ -273,10 +274,7 @@ class AffineRegressor(nn.Module):
                 with torch.no_grad():
                     mae_angle = torch.mean(torch.abs(output[:,0] - angle))
                     mae_shift = torch.mean(torch.abs(output[:, 1:] - shift))
-                    euclidean_shift = torch.mean(torch.sqrt(torch.sum((output[:, 1:] - shift)**2, dim=1))) 
-
-                    plot_errors2gt(torch.abs(output[:,0]-angle).detach().cpu(), torch.abs(angle).detach().cpu())
-                    return
+                    euclidean_shift = torch.mean(torch.sqrt(torch.sum((output[:, 1:] - shift)**2, dim=1)))                     
 
             if data_type == "train":
                 # Compute Backward pass and gradients
@@ -290,6 +288,15 @@ class AffineRegressor(nn.Module):
             epoch_stats[f'{prefix}mae_angle'] += mae_angle
             epoch_stats[f'{prefix}mse_angle'] += mse_angle
             epoch_stats[f'{prefix}loss'] += loss
+
+            outputs = torch.cat((outputs, output), dim=0)
+            angles = torch.cat((angles, angle), dim=0)
+            shifts = torch.cat((shifts, shift), dim=0)
+
+        
+        plot_errors2gt(torch.abs(outputs[:,0]-angles).detach().cpu(), torch.abs(angles).detach().cpu(), angles=True)
+        plot_errors2gt(torch.abs(outputs[:,0]-shifts).detach().cpu(), torch.abs(shifts).detach().cpu(), angles=False)
+
         return 1
                
     def save_model(self, epoch, definetly=False):
