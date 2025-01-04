@@ -299,8 +299,9 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
 
     def save_model(self, epoch, definetly=False):
         model_path = os.path.join(self.parent_model_path, "model.pth")
+        os.makedirs(self.parent_model_path, exist_ok=True)
         # Backup previous checkpoint
-        if os.path.exists(model_path) and epoch % (self.num_epochs//90) == 0: 
+        if os.path.exists(model_path) and epoch % (self.num_epochs//10) == 0: 
             backup_path = os.path.join(self.parent_model_path, "backup_model.pth")
             shutil.copy(model_path, backup_path)
         if definetly or epoch % (self.num_epochs//100) == 0:
