@@ -90,7 +90,7 @@ class FMatrixRegressor(nn.Module):
                         param.requires_grad = False
 
         ## THIS IS ONLY FOR CONTINUING TRAINING FROM A EARLY STOPPED CHECKPOINT!
-        self.parent_model_path = os.path.join("/mnt/sda2/Alon", self.plots_path) if COMPUTER==0 else self.plots_path
+        self.parent_model_path = os.path.join("/mnt/sda2/Alon", self.plots_path) if COMPUTER==0 else os.path.join("/mnt_hdd15tb/alonkay/Thesis", self.plots_path) if COMPUTER==1 else self.plots_path
         if pretrained_path or os.path.exists(os.path.join(self.parent_model_path, 'model.pth')): 
             path = pretrained_path if pretrained_path else self.parent_model_path
             self.load_model(path)
@@ -298,10 +298,10 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         return batch_SED_preds
 
     def save_model(self, epoch, definetly=False):
-        model_path = os.path.join(self.plots_path, "model.pth")
+        model_path = os.path.join(self.parent_model_path, "model.pth")
         # Backup previous checkpoint
         if os.path.exists(model_path) and epoch % (self.num_epochs//90) == 0: 
-            backup_path = os.path.join(self.plots_path, "backup_model.pth")
+            backup_path = os.path.join(self.parent_model_path, "backup_model.pth")
             shutil.copy(model_path, backup_path)
         if definetly or epoch % (self.num_epochs//100) == 0:
             torch.save({
@@ -341,13 +341,13 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 "all_val_SED_pred" : self.all_val_SED_pred
             }, model_path) 
 
-    def load_model(self, path=None, continue_training=True):
-        model_path = os.path.join(path, "model.pth")
+    def load_model(self, parent_model_path=None, continue_training=True):
+        model_path = os.path.join(parent_model_path, "model.pth")
         if os.path.exists(model_path):
             try:
                 checkpoint = torch.load(model_path, map_location='cpu')
             except Exception as e:
-                backup_path = os.path.join(self.plots_path, "backup_model.pth")
+                backup_path = os.path.join(parent_model_path, "backup_model.pth")
                 checkpoint = torch.load(backup_path, map_location='cpu')
                 print_and_write(f'\n#########\nusing backup:\n{e}\n', self.plots_path)
                 sys.stdout.flush()
