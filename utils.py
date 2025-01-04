@@ -110,12 +110,12 @@ def check_nan(all_train_loss_last, all_val_loss_last, plots_path):
 
 def not_decreasing(val_loss, num_epochs, plots_path):
     x = int(num_epochs/8)
-    if sum(val_loss[-x:]) > sum(val_loss[-2*x:-x]) + 0.05*x:
+    if sum(val_loss[-x:]) > sum(val_loss[-2*x:-x]) + 0.02*x:
         print_and_write("### Not decreasing ###\n", plots_path)
         return True
     
 def ready_to_break(val_loss):
-    length = 40
+    length = 70
     min_length = min(val_loss[-length:-1])
     if val_loss[-1] < min_length:
         return True
