@@ -38,7 +38,7 @@ if __name__ == "__main__":
                                         frozen_layers=FROZEN_LAYERS, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=num_epochs)
 
                 if model.start_epoch < model.num_epochs:
-                        parameters = f"""###########################################################################################################################################################\n
+                        parameters = f"""\n###########################################################################################################################################################\n
                         {ADDITIONS} learning rate: {lr},  mlp_hidden_sizes: {MLP_HIDDEN_DIM}, batch_size: {bs}, norm: {NORM}, alpha: {alpha}, avg embeddings: {AVG_EMBEDDINGS}, 
                         crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, seed: {SEED}, angle range: {ANGLE_RANGE}, shift range: {SHIFT_RANGE}, 
                         train length: {size}, val length: {val_length}, test length: {test_length}, get old path: {GET_OLD_PATH}, embeddings to use: {embeddings_to_use},
