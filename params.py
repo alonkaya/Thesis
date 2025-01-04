@@ -29,7 +29,7 @@ GET_OLD_PATH = False
 SEED = 42
 ALPHA = [10]
 EMBEDDINGS_TO_USE = [["rotated_embeddings", "original_embeddings"]]
-MAX_POOL_SIZE = 4 if not MODEL==CLIP_MODEL_NAME_16 else 7 
+MAX_POOL_SIZE = 3 if not MODEL==CLIP_MODEL_NAME_16 else 7 
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
