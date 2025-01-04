@@ -148,7 +148,7 @@ def plot_stats():
 def test():
     pretrained_path = "plots/Affine/BS_32__lr_6e-05__alpha_10__conv__original_rotated_angle_30__shift_32/CLIP/size_1048__frozen_0"
 
-    train_loader, val_loader, test_loader = get_dataloaders(batch_size=BATCH_SIZE[0], train_length=64, val_length=val_length, test_length=64)
+    train_loader, val_loader, test_loader = get_dataloaders(batch_size=BATCH_SIZE[0], train_length=64, val_length=val_length, test_length=test_length)
 
     model = AffineRegressor(LR[0], BATCH_SIZE[0], ALPHA[0], model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path="plots/test", pretrained_path=pretrained_path, use_conv=USE_CONV, num_epochs=NUM_EPOCHS)
 
