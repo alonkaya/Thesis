@@ -275,7 +275,7 @@ class AffineRegressor(nn.Module):
                     mae_shift = torch.mean(torch.abs(output[:, 1:] - shift))
                     euclidean_shift = torch.mean(torch.sqrt(torch.sum((output[:, 1:] - shift)**2, dim=1))) 
 
-                    plot_errors2gt(torch.abs(output[:0]-angle).detach().cpu(), torch.abs(angle).detach().cpu())
+                    plot_errors2gt(torch.abs(output[:,0]-angle).detach().cpu(), torch.abs(angle).detach().cpu())
                     return
 
             if data_type == "train":
