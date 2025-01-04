@@ -146,7 +146,7 @@ def plot_stats():
     plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_shift, train_euclidean_shift, val_euclidean_shift, train_mae_angle, val_mae_angle, train_mse_angle, val_mse_angle)
 
 def test():
-    pretrained_path = "plots/BS_32__lr_6e-05__train_size_6144__model_CLIP__avg__alpha_1__shift/output.log"
+    pretrained_path = "plots/Affine/BS_32__lr_6e-05__alpha_10__conv__original_rotated_angle_30__shift_32/CLIP/size_1048__frozen_0"
 
     train_loader, val_loader, test_loader = get_dataloaders(batch_size=BATCH_SIZE[0], train_length=train_length, val_length=val_length, test_length=test_length)
 
@@ -157,5 +157,5 @@ def test():
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    # test()
-    plot_stats()
+    test()
+    # plot_stats()

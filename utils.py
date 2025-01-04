@@ -166,3 +166,18 @@ def set_seed(seed):
     torch.cuda.manual_seed_all(seed)  # If using multi-GPU.
     random.seed(seed)
 
+def plot_errors2gt(errors, gts):
+    errors *=ANGLE_RANGE
+    gts *=ANGLE_RANGE
+    sorted_indices = torch.argsort(gts)
+    gts = gts[sorted_indices]
+    errors = errors[sorted_indices]
+
+    # Plotting
+    plt.figure(figsize=(10, 5))
+    plt.plot(gts.numpy(), errors.numpy(), marker='o')
+    plt.title('Error vs. Ground Truth Angles')
+    plt.xlabel('Ground Truth Angles (degrees)')
+    plt.ylabel('Errors')
+    plt.grid(True)
+    plt.savefig("errors2gt.png")

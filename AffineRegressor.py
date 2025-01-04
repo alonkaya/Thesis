@@ -275,6 +275,9 @@ class AffineRegressor(nn.Module):
                     mae_shift = torch.mean(torch.abs(output[:, 1:] - shift))
                     euclidean_shift = torch.mean(torch.sqrt(torch.sum((output[:, 1:] - shift)**2, dim=1))) 
 
+                    plot_errors2gt(torch.abs(output[:0]-angle).detach().cpu(), torch.abs(angle).detach().cpu())
+                    return
+
             if data_type == "train":
                 # Compute Backward pass and gradients
                 self.optimizer.zero_grad()
@@ -426,7 +429,7 @@ class AffineRegressor(nn.Module):
                 send_to_device(epoch_stats)
     
                 self.dataloader_step(test_loader, 0, epoch_stats, data_type="test")
-
+                break
                 divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
 
                 loss += epoch_stats["test_loss"]
