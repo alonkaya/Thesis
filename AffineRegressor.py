@@ -76,9 +76,10 @@ class AffineRegressor(nn.Module):
             for param in self.model.parameters():
                 param.requires_grad = False
 
-        if pretrained_path or os.path.exists(os.path.join(plots_path, 'model.pth')): 
-            model_path = os.path.join(pretrained_path, 'model.pth') if pretrained_path else os.path.join(plots_path, 'model.pth')
-            self.load_model(model_path=model_path)
+        self.parent_model_path = os.path.join("/mnt/sda2/Alon", self.plots_path) if COMPUTER==0 else os.path.join("/mnt_hdd15tb/alonkay/Thesis", self.plots_path) if COMPUTER==1 else self.plots_path
+        if pretrained_path or os.path.exists(os.path.join(self.parent_model_path, 'model.pth')): 
+            path = pretrained_path if pretrained_path else self.parent_model_path
+            self.load_model(path)
 
         else:
             # Get input dimension for the MLP based on ViT configuration
@@ -289,7 +290,7 @@ class AffineRegressor(nn.Module):
         return 1
                
     def save_model(self, epoch, definetly=False):
-        checkpoint_path = os.path.join(self.plots_path, "model.pth")
+        checkpoint_path = os.path.join(self.parent_model_path, "model.pth")
         if definetly or epoch % (self.num_epochs//50) == 0:
             torch.save({
                 'mlp': self.mlp.state_dict(),
@@ -321,7 +322,8 @@ class AffineRegressor(nn.Module):
                 "all_val_mse_angle" : self.all_val_mse_angle,
             }, checkpoint_path) 
 
-    def load_model(self, model_path=None):
+    def load_model(self, parent_model_path=None):
+        model_path = os.path.join(parent_model_path, "model.pth")
         if os.path.exists(model_path):
             checkpoint = torch.load(model_path, map_location='cpu')
         else:

@@ -14,6 +14,7 @@ train_length = [4048, 1048, 256, 64]  # Needs to be a multiple of batch size
 val_length = 320      # Needs to be a multiple of batch size
 test_length = 320     # Needs to be a multiple of batch size
 INIT_DATA = True
+COMPUTER = 1 # 0=250, 1=146, 2=else
 
 ### Training ###
 LR = [6e-5, 1e-4]
