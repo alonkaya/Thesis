@@ -78,7 +78,7 @@ if __name__ == "__main__":
                                         f"""BS_{batch_size}__{data_config}__frozen_{frozen}{ADDITIONS}{seed_param}""")
                 
                 if ONLY_CONTINUE:
-                        model_path = os.path.join("/mnt/sda2/Alon", plots_path, "model.pth") if COMPUTER==0 else os.path.join(plots_path, "model.pth")
+                        model_path = os.path.join("/mnt/sda2/Alon", plots_path, "model.pth") if COMPUTER==0 else os.path.join("/mnt_hdd15tb/alonkay/Thesis", plots_path, 'model.pth') if COMPUTER==1 else os.path.join(plots_path, "model.pth")
                         if not os.path.exists(model_path):
                                 print(f'no model for {model_path}')
                                 continue
@@ -114,17 +114,17 @@ crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH
                 
                         model.train_model(train_loader, val_loader, test_loader)
 
-                        if COMPUTER==0:
-                                os.makedirs(model.parent_model_path, exist_ok=True)
-                                source_model_path = os.path.join(model.plots_path, 'model.pth')
-                                dest_model_path = os.path.join(model.parent_model_path, 'model.pth')
-                                try:
-                                        shutil.move(source_model_path, dest_model_path)
-                                except Exception as e:
-                                        print(f"########\nError moving model to mnt from {source_model_path}\n{e}")
+                        # if COMPUTER==0:
+                        #         os.makedirs(model.parent_model_path, exist_ok=True)
+                        #         source_model_path = os.path.join(model.plots_path, 'model.pth')
+                        #         dest_model_path = os.path.join(model.parent_model_path, 'model.pth')
+                        #         try:
+                        #                 shutil.move(source_model_path, dest_model_path)
+                        #         except Exception as e:
+                        #                 print(f"########\nError moving model to mnt from {source_model_path}\n{e}")
 
-                        if os.path.exists(os.path.join(model.plots_path, 'backup_model.pth')):
-                                os.remove(os.path.join(model.plots_path, 'backup_model.pth'))
+                        if os.path.exists(os.path.join(model.parent_model_path, 'backup_model.pth')):
+                                os.remove(os.path.join(model.parent_model_path, 'backup_model.pth'))
                         else:
                                 print_and_write(f"\n{model.plots_path} no backup to delete after job done\n", model.plots_path)
 
