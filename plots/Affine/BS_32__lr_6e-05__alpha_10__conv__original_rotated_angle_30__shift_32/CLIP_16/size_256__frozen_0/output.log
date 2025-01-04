@@ -1,13 +1,3 @@
-/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
-  torch.utils._pytree._register_pytree_node(
-/home/alonkay/conda/alon/lib/python3.9/site-packages/huggingface_hub/file_download.py:1150: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
-  warnings.warn(
-/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/modeling_utils.py:479: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
-  return torch.load(checkpoint_file, map_location=map_location)
-/home/alonkay/Thesis/AffineRegressor.py:326: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
-  checkpoint = torch.load(model_path, map_location='cpu')
-Model plots/Affine/BS_32__lr_6e-05__alpha_10__conv__original_rotated_angle_30__shift_32/CLIP_16/size_4048__frozen_0 already trained
-Model plots/Affine/BS_32__lr_6e-05__alpha_10__conv__original_rotated_angle_30__shift_32/CLIP_16/size_1048__frozen_0 already trained
 ###########################################################################################################################################################
 
                          learning rate: 6e-05,  mlp_hidden_sizes: [1024, 512], batch_size: 32, norm: True, alpha: 10, avg embeddings: False, 
@@ -3818,4 +3808,48 @@ Epoch 543/1200: Training Loss: 0.03303717076778412		 Val Loss: 0.018801043927669
 
 
 Epoch 544/1200: Training Loss: 0.02581370249390602		 Val Loss: 0.0348401814699173
-		Training MAE Angle: 0.03896215185523033		 Val MAE
+		Training MAE Angle: 0.03896215185523033		 Val MAE Angle: 0.05457508563995361
+              Training MSE Angle: 0.009000439196825027		 Val MSE Angle: 0.004720379784703255
+		Training MAE Shift: 0.03026091679930687		 Val MAE Shift: 0.04305872917175293
+              Training Euclidean Shift: 0.047241490334272385	 Val Euclidean Shift: 0.06657443642616272
+
+
+Epoch 545/1200: Training Loss: 0.018005985766649246		 Val Loss: 0.037500622868537906
+		Training MAE Angle: 0.04041009023785591		 Val MAE Angle: 0.07084929347038268
+              Training MSE Angle: 0.004709687549620867		 Val MSE Angle: 0.00868675708770752
+		Training MAE Shift: 0.02728933095932007		 Val MAE Shift: 0.03972601890563965
+              Training Euclidean Shift: 0.04322876036167145	 Val Euclidean Shift: 0.06150553226470947
+
+
+Epoch 546/1200: Training Loss: 0.03177811950445175		 Val Loss: 0.02706950008869171
+		Training MAE Angle: 0.059597305953502655		 Val MAE Angle: 0.06003898978233337
+              Training MSE Angle: 0.016379494220018387		 Val MSE Angle: 0.009668029844760895
+		Training MAE Shift: 0.028488053008913994		 Val MAE Shift: 0.025811734795570373
+              Training Euclidean Shift: 0.044111572206020355	 Val Euclidean Shift: 0.04051193296909332
+
+
+Epoch 547/1200: Training Loss: 0.019942831248044968		 Val Loss: 0.03268952369689941
+		Training MAE Angle: 0.0519385002553463		 Val MAE Angle: 0.062811279296875
+              Training MSE Angle: 0.004539962857961655		 Val MSE Angle: 0.010265637934207917
+		Training MAE Shift: 0.027458621188998222		 Val MAE Shift: 0.030495405197143555
+              Training Euclidean Shift: 0.0427435003221035	 Val Euclidean Shift: 0.04782055020332336
+
+
+Epoch 548/1200: Training Loss: 0.021622659638524055		 Val Loss: 0.017890726029872895
+		Training MAE Angle: 0.038528479635715485		 Val MAE Angle: 0.039254993200302124
+              Training MSE Angle: 0.0030617169104516506		 Val MSE Angle: 0.00350872240960598
+		Training MAE Shift: 0.029571421444416046		 Val MAE Shift: 0.023701176047325134
+              Training Euclidean Shift: 0.04653588682413101	 Val Euclidean Shift: 0.03746325373649597
+
+
+Epoch 549/1200: Training Loss: 0.016318093985319138		 Val Loss: 0.024191725254058837
+		Training MAE Angle: 0.04396432638168335		 Val MAE Angle: 0.03460457921028137
+              Training MSE Angle: 0.0033762212842702866		 Val MSE Angle: 0.001989872381091118
+		Training MAE Shift: 0.025783874094486237		 Val MAE Shift: 0.029136329889297485
+              Training Euclidean Shift: 0.040187764912843704	 Val Euclidean Shift: 0.04546042084693909
+
+
+Epoch 550/1200: Training Loss: 0.020954731851816177		 Val Loss: 0.06760498881340027
+		Training MAE Angle: 0.047047510743141174		 Val MAE Angle: 0.08780936598777771
+              Training MSE Angle: 0.0049349660985171795		 Val MSE Angle: 0.013806900382041931
+		Training MAE Shift: 0.02741401642560959		 Val MAE Shift: 0
