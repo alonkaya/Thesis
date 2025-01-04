@@ -8,8 +8,8 @@ MODEL = CLIP_MODEL_NAME
 ### Dataset ###
 CROP = 224
 RESIZE = 256
-ANGLE_RANGE = 90
-SHIFT_RANGE = 110
+ANGLE_RANGE = 30
+SHIFT_RANGE = 32
 train_length = [4048, 1048, 256, 64]  # Needs to be a multiple of batch size
 val_length = 320      # Needs to be a multiple of batch size
 test_length = 320     # Needs to be a multiple of batch size
@@ -29,7 +29,7 @@ GET_OLD_PATH = False
 SEED = 42
 ALPHA = [10]
 EMBEDDINGS_TO_USE = [["rotated_embeddings", "original_embeddings"]]
-MAX_POOL_SIZE = 3 if not MODEL==CLIP_MODEL_NAME_16 else 7 
+MAX_POOL_SIZE = 4 if not MODEL==CLIP_MODEL_NAME_16 else 7 
 
 #### Model ###
 MLP_HIDDEN_DIM = [1024, 512]
