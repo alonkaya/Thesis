@@ -8,8 +8,8 @@ MODEL = CLIP_MODEL_NAME
 ### Dataset ###
 CROP = 224
 RESIZE = 256
-ANGLE_RANGE = 30
-SHIFT_RANGE = 32
+ANGLE_RANGE = 90
+SHIFT_RANGE = 110
 train_length = [4048, 1048, 256, 64]  # Needs to be a multiple of batch size
 val_length = 320      # Needs to be a multiple of batch size
 test_length = 320     # Needs to be a multiple of batch size
