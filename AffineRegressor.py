@@ -289,12 +289,11 @@ class AffineRegressor(nn.Module):
             epoch_stats[f'{prefix}mse_angle'] += mse_angle
             epoch_stats[f'{prefix}loss'] += loss
 
-            outputs = torch.cat((outputs, output), dim=0) 
-            angles = torch.cat((angles, angle), dim=0)
-            shifts = torch.cat((shifts, shift), dim=0)
+            # outputs = torch.cat((outputs, output), dim=0) 
+            # angles = torch.cat((angles, angle), dim=0)
+            # shifts = torch.cat((shifts, shift), dim=0)
 
-        
-        plot_errors2gt(torch.abs(outputs[:,0]-angles).detach().cpu(), torch.abs(angles).detach().cpu(), angles=True)
+        # plot_errors2gt(torch.abs(outputs[:,0]-angles).detach().cpu(), torch.abs(angles).detach().cpu(), angles=True)
         # plot_errors2gt(torch.abs(outputs[:,1:]-shifts).detach().cpu(), torch.abs(shifts).detach().cpu(), angles=False)
 
         return 1
@@ -436,7 +435,7 @@ class AffineRegressor(nn.Module):
                 send_to_device(epoch_stats)
     
                 self.dataloader_step(test_loader, 0, epoch_stats, data_type="test")
-                break
+
                 divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
 
                 loss += epoch_stats["test_loss"]

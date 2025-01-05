@@ -33,6 +33,8 @@ if __name__ == "__main__":
    
                 train_loader, val_loader, test_loader = get_dataloaders(batch_size=bs, train_length=size, val_length=val_length, test_length=test_length, plots_path=plots_path)
                 
+
+                bs = 4 if size < 1000 else bs
                 num_epochs = NUM_EPOCHS * (i+1)
                 model = AffineRegressor(lr, bs, alpha, embeddings_to_use, use_cls, model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path=plots_path, \
                                         frozen_layers=FROZEN_LAYERS, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=num_epochs)
