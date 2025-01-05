@@ -35,7 +35,7 @@ if __name__ == "__main__":
                 
 
                 bs = 4 if size < 1000 else bs
-                num_epochs = NUM_EPOCHS * (i+1)
+                num_epochs = 400 if size==4048 else 800 if size==1048 else 1000 if size==256 else 1400 if size==64 else 0
                 model = AffineRegressor(lr, bs, alpha, embeddings_to_use, use_cls, model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path=plots_path, \
                                         frozen_layers=FROZEN_LAYERS, pretrained_path=PRETRAINED_PATH, use_conv=USE_CONV, num_epochs=num_epochs)
 
