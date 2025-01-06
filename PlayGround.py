@@ -575,6 +575,14 @@ def plot_errors():
     resnet_mean_RE1_0 = [0.083333333, 0.196666667, 0.166666667,	 0.146666667, 0.206666667,	 0.243333333, 0.21,	 0.291666667]
     resnet_std_RE1_0 = [0.082512625, 0.077674535, 0.030550505, 0.055075705, 0.061101009, 0.046188022, 0.147986486, 0.032532035]
 
+    clip_16_mean_alg = [0.206666667, 0.245, 0.26, 0.295, 0.318, 0.266333333, 0.400333333, 0.46]
+    clip_16_mean_SED = [0.176666667, 0.233333333, 0.283333333, 0.33, 0.366, 0.346666667, 0.531, 0.653333333]
+    clip_16_mean_RE1 = [0.046666667, 0.064666667, 0.082666667, 0.1, 0.11, 0.083, 0.173333333, 0.24666666]
+    clip_16_std_alg = [0.04163332, 0.035355339, 0.026457513, 0.06, 0.051, 0.110545617, 0.025735838, 0.105830052]
+    clip_16_std_SED = [0.049328829, 0.05033223, 0.061101009, 0.11, 0.1, 0.092915732, 0.059253692, 0.192180471]    
+    clip_16_std_RE1 = [0.015275252, 0.023180452, 0.02532456, 0.035, 0.036, 0.065551506, 0.025166115, 0.119303534]
+
+
     flying_clip_alg = [0.36, 0.39, 1]
     flying_clip_SED = [0.71, 0.8, 3.34]
     flying_clip_RE1 = [0.14, 0.16, 1.19]
@@ -637,7 +645,9 @@ def plot_errors():
     plt.errorbar(x_indices, mean_alg_0, yerr=std_alg_0, marker='o', color='green', linestyle='-', label='ALG clip', capsize=4, linewidth=1, markersize=2) 
     plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED clip', capsize=4, linewidth=1, markersize=2)
     plt.errorbar(x_indices, mean_RE1_0, yerr=std_RE1_0, marker='o', color='orange', linestyle='-', label='RE1 clip', capsize=4, linewidth=1, markersize=2)
-    # plt.errorbar(x_indices, pretext_mean_SED_0, yerr=pretext_std_SED_0, marker='o', color='green', linestyle='-', label='SED Pretext Frozen 0', capsize=5)
+    plt.errorbar(x_indices, clip_16_mean_alg, yerr=clip_16_std_alg, marker='o', color='green', linestyle=':', label='ALG clip 16', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, clip_16_mean_SED, yerr=clip_16_std_SED, marker='o', color='blue', linestyle=':', label='SED clip 16', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, clip_16_mean_RE1, yerr=clip_16_std_RE1, marker='o', color='orange', linestyle=':', label='RE1 clip 16', capsize=4, linewidth=1, markersize=2)
     plt.errorbar(x_indices, resnet_mean_alg_0, yerr=resnet_std_alg_0, marker='o', color='green', linestyle='--', label='ALG ResNet', capsize=4, linewidth=1, markersize=2)
     plt.errorbar(x_indices, resnet_mean_SED_0, yerr=resnet_std_SED_0, marker='o', color='blue', linestyle='--', label='SED ResNet', capsize=4, linewidth=1, markersize=2)
     plt.errorbar(x_indices, resnet_mean_RE1_0, yerr=resnet_std_RE1_0, marker='o', color='orange', linestyle='--', label='RE1 ResNet', capsize=4, linewidth=1, markersize=2)
@@ -647,7 +657,8 @@ def plot_errors():
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
-
+    fig5.savefig('results/SED_models.png')
+    
     # fig2=plt.figure(2)
     # plt.bar(x, mean_SED_0, width, yerr=std_SED_0, capsize=5, label='SED Frozen 0', alpha=0.8, color='blue')
     # plt.bar(x - width, mean_SED_4, width, yerr=std_SED_4, capsize=5, label='SED Frozen 4', alpha=0.8, color='green')
@@ -683,7 +694,7 @@ def plot_errors():
     # fig1.savefig('results/SED_orig_frozen.png')
     # fig2.savefig('results/SED_orig_frozen_bar.png')
     # fig4.savefig('results/SED_pretext_bar_frozen.png')
-    # fig5.savefig('results/SED_models.png')
+
     # fig6.savefig('results/SED_model_bar.png')
     # plt.show()
 
@@ -793,5 +804,5 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 if __name__ == "__main__":
     p = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_170__frozen_0"
 
-    test_trained(p)
+    plot_errors()
 
