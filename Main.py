@@ -56,12 +56,13 @@ if __name__ == "__main__":
                         print("Invalid data ratio")
                         continue
                 
-                if (not PRETEXT_TRAIN and MODEL==CLIP_MODEL_NAME and not SCENEFLOW) and (train_size==0.05 or (train_size==0.025 and part=="head" and fl==0)):
+                frozen_high_layers = 0 if fl > 0 else FROZEN_HIGH_LAYERS
+
+                if (not PRETEXT_TRAIN and MODEL==CLIP_MODEL_NAME and not SCENEFLOW and ONLY_CONTINUE) and (train_size==0.05 or (train_size==0.025 and part=="head" and fl==0 and frozen_high_layers==0)):
                         batch_size = 4 
                 else:
                         batch_size = args.bs
 
-                frozen_high_layers = 0 if fl > 0 else FROZEN_HIGH_LAYERS
 
                 coeff = f'ALG_sqr_{alg_coeff}__' if alg_coeff > 0 else f'RE1_{re1_coeff}__' if re1_coeff > 0 else f'SED_{sed_coeff}__' if sed_coeff > 0 else ''
                 dataset = 'Kitti2Flying' if KITTI2SCENEFLOW and FLYING and SCENEFLOW else 'Flying' if FLYING and SCENEFLOW else 'Kitti2Monkaa' if KITTI2SCENEFLOW and SCENEFLOW else 'Monkaa' if SCENEFLOW else 'Stereo' if STEREO else 'RealEstate_split' if USE_REALESTATE and REALESTATE_SPLIT else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
