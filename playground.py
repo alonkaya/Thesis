@@ -180,13 +180,14 @@ def test():
     prefix = '/mnt_hdd15tb/alonkay/Thesis/'
     pretrained_path = "plots/Affine/BS_32__lr_6e-05__alpha_10__conv__original_rotated_angle_30__shift_32/CLIP/size_4048__frozen_0"
     pretrained_path = os.path.join(prefix, pretrained_path)
-    
+
     batch_size=1
     
     train_loader, val_loader, test_loader = get_dataloaders(batch_size=batch_size, train_length=64, val_length=val_length, test_length=test_length)
 
     model = AffineRegressor(LR[0], batch_size, ALPHA[0], model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path="plots/test", pretrained_path=pretrained_path, use_conv=USE_CONV, num_epochs=NUM_EPOCHS)
 
+    print(model.start_epoch)
     model.test(test_loader)
 
 if __name__ == "__main__":
