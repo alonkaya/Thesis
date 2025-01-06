@@ -86,6 +86,7 @@ class FMatrixRegressor(nn.Module):
                     for param in layer.parameters():
                         param.requires_grad = False
                 elif layer_idx >= len(self.model.vision_model.encoder.layers) - self.frozen_high_layers:
+                    print(layer_idx)
                     for param in layer.parameters():
                         param.requires_grad = False
 
