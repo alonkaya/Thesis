@@ -1,7 +1,7 @@
 import os
 
 # Specify the path to the main folder containing all subfolders
-main_folder_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True"
+main_folder_path = "plots/Affine/Ablation"
 
 # Iterate over all folders inside the main folder
 for subfolder_name in os.listdir(main_folder_path):
