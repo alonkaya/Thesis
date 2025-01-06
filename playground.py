@@ -145,6 +145,37 @@ def plot_stats():
     train_mae_angle, val_mae_angle, train_mse_angle, val_mse_angle = parse_data_from_file(file_path)
     plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_shift, train_euclidean_shift, val_euclidean_shift, train_mae_angle, val_mae_angle, train_mse_angle, val_mse_angle)
 
+def plot_results():
+    clip_shift = [0.022, 0.029, 0.048, 0.072]
+    clip_angle = [0.018, 0.018, 0.04, 0.055]
+
+    clip_16_shift = [0.022,  0    , 0.037, 0.069]
+    clip_16_angle = [0.023,   0   , 0.029, 0.056]
+
+    resnet_shift = [0.029, 0.041, 0.0468, 0.07]
+    resnet_angle = [0.028, 0.0327, 0.0415, 0.045]
+
+
+    os.makedirs('results', exist_ok=True)
+    x_indices = range(len(clip_shift))  # For Frozen 0 (has an extra point)
+    xticks_labels = ['4048', '1048', '256', '64']  # 5 points for Frozen 0
+
+    fig1=plt.figure(1, figsize=(11, 6))
+    plt.errorbar(x_indices, clip_shift, marker='o', color='blue', linestyle='-', label='CLIP Shift', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, clip_angle, marker='o', color='orange', linestyle='-', label='CLIP Rotation', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, clip_16_shift, marker='o', color='blue', linestyle=':', label='CLIP 16 Shift', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, clip_16_angle, marker='o', color='orange', linestyle=':', label='CLIP 16 Rotation', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, resnet_shift, marker='o', color='blue', linestyle='--', label='ResNet Shift', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, resnet_angle, marker='o', color='orange', linestyle='--', label='ResNet Rotation', capsize=4, linewidth=1, markersize=2)
+    plt.title('Rotation and translation estimation error')
+    plt.xlabel('Number of training samples')
+    plt.ylabel('Mean Value ± STD')
+    plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
+    plt.legend()
+    plt.grid(True)
+    fig1.savefig('results/Affine.png')
+
+
 def test():
     pretrained_path = "plots/Affine/BS_32__lr_6e-05__alpha_10__conv__original_rotated_angle_30__shift_32/CLIP/size_1048__frozen_0"
 
@@ -157,5 +188,6 @@ def test():
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    test()
+    # test()
     # plot_stats()
+    plot_results()
