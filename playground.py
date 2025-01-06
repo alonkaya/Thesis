@@ -178,7 +178,7 @@ def plot_results():
 
 def test():
     prefix = '/mnt_hdd15tb/alonkay/Thesis/'
-    pretrained_path = "plots/Affine/BS_32__lr_6e-05__alpha_10__conv__original_rotated_angle_30__shift_32/CLIP/size_4048__frozen_0"
+    pretrained_path = "plots/Affine/BS_32__lr_6e-05__alpha_10__conv__original_rotated_angle_30__shift_32/CLIP/size_1048__frozen_0"
     pretrained_path = os.path.join(prefix, pretrained_path)
 
     batch_size=1
