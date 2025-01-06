@@ -1,7 +1,7 @@
 import os
 
 # Specify the path to the main folder containing all subfolders
-main_folder_path = "plots/Kitti2Monkaa"
+main_folder_path = "plots/Kitti2Flying"
 
 for f in os.listdir(main_folder_path):
     p = os.path.join(main_folder_path, f)
