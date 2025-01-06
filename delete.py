@@ -7,7 +7,7 @@ for f in os.listdir(main_folder_path):
     p = os.path.join(main_folder_path, f)
     # Iterate over all folders inside the main folder
     for subfolder_name in os.listdir(p):
-        subfolder_path = os.path.join(main_folder_path, subfolder_name)
+        subfolder_path = os.path.join(p, subfolder_name)
         
         # Ensure we are only processing directories
         if os.path.isdir(subfolder_path):
