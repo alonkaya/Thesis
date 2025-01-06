@@ -446,6 +446,7 @@ class AffineRegressor(nn.Module):
                 print(max(sorted_angles), max(sorted_shifts))
                 trimmed_angle, trimmed_shift = sorted_angles[:int(len(sorted_angles) * 0.95)], sorted_shifts[:int(len(sorted_shifts) * 0.95)]
                 print(max(trimmed_angle), max(trimmed_shift))
+                print()
                 trimmed_angle, trimmed_shift = [x.cpu().numpy() for x in trimmed_angle], [x.cpu().numpy() for x in trimmed_shift]
                 trimmed_angles += np.mean(trimmed_angle)
                 trimmed_shifts += np.mean(trimmed_shift)
