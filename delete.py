@@ -16,10 +16,10 @@ for f in os.listdir(main_folder_path):
             backup_path = os.path.join(subfolder_path, 'backup_model.pth')
             # Check if the file exists and delete it
             if os.path.exists(model_path):
-                # os.remove(model_path)
+                os.remove(model_path)
                 print(f"Deleted: {model_path}")
                 
             if os.path.exists(backup_path):
-                # os.remove(backup_path)
+                os.remove(backup_path)
                 print(f"Deleted: {backup_path}")
                 
