@@ -252,12 +252,14 @@ class AffineRegressor(nn.Module):
             mae_shift, euclidean_shift, mae_angle, mse_angle = 0, 0, 0, 0
             if SHIFT_RANGE == 0:
                 mse_angle = self.L2_loss(output[:,0], angle)
+                huber_angle = self.huber_loss(output[:,0], angle)
                 loss = mse_angle
                 with torch.no_grad():
                     mae_angle = torch.mean(torch.abs(output[:,0] - angle))
 
             elif ANGLE_RANGE == 0:
                 mse_shift = self.L2_loss(output, shift)
+                huber_shift = self.huber_loss(output, shift)
                 loss = mse_shift
                 with torch.no_grad():
                     mae_shift = torch.mean(torch.abs(output - shift))
@@ -265,7 +267,9 @@ class AffineRegressor(nn.Module):
             else:
                 mse_angle = self.L2_loss(output[:,0], angle)
                 mse_shift = self.L2_loss(output[:,1:], shift)
-                loss = mse_angle + self.alpha * mse_shift
+                huber_angle = self.huber_loss(output[:,0], angle)
+                huber_shift = self.huber_loss(output[:,1:], shift)
+                loss = mse_angle + huber_angle + self.alpha * (mse_shift + huber_shift)
                 with torch.no_grad():
                     mae_angle = torch.mean(torch.abs(output[:,0] - angle))
                     mae_shift = torch.mean(torch.abs(output[:, 1:] - shift))

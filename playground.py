@@ -150,15 +150,15 @@ def plot_results():
     clip_angle = [0.018, 0.018, 0.04, 0.055]
 
     clip_16_shift = [0.022, 0.026, 0.037, 0.069]
-    clip_16_angle = [0.023, 0.021, 0.029, 0.056]
+    clip_16_angle = [0.023, 0.021, 0.029, 0.05]
 
     resnet_shift = [0.029, 0.041, 0.0468, 0.07]
-    resnet_angle = [0.028, 0.0327, 0.0415, 0.045]
+    resnet_angle = [0.028, 0.0327, 0.0415, 0.052]
 
 
     os.makedirs('results', exist_ok=True)
     x_indices = range(len(clip_shift))  # For Frozen 0 (has an extra point)
-    xticks_labels = ['4048', '1048', '256', '64']  # 5 points for Frozen 0
+    xticks_labels = ['4048', '1024', '256', '64']  # 5 points for Frozen 0
 
     fig1=plt.figure(1, figsize=(11, 6))
     plt.errorbar(x_indices, clip_shift, marker='o', color='blue', linestyle='-', label='CLIP Shift', capsize=4, linewidth=1, markersize=2) 
@@ -169,7 +169,7 @@ def plot_results():
     plt.errorbar(x_indices, resnet_angle, marker='o', color='orange', linestyle='--', label='ResNet Rotation', capsize=4, linewidth=1, markersize=2)
     plt.title('Rotation and translation estimation error')
     plt.xlabel('Number of training samples')
-    plt.ylabel('Mean Value ± STD')
+    plt.ylabel('Mean Values')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
@@ -193,6 +193,6 @@ def test():
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    test()
+    # test()
     # plot_stats()
-    # plot_results()
+    plot_results()

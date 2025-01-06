@@ -4,6 +4,8 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16 = torch.device(f"
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 # /mnt_hdd15tb/alonkay/Thesis/
 
+
+### Huber loss added!!!!!!!!!!!!!!!!!!!!!
 MODEL = CLIP_MODEL_NAME_16
 
 ### Dataset ###
