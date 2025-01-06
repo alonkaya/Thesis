@@ -2,7 +2,7 @@ from params import *
 from utils import *
 import torch.optim as optim
 from transformers import CLIPVisionModel, CLIPVisionConfig, ResNetModel
-
+import numpy as np
 
 class AffineRegressor(nn.Module):
     def __init__(self, lr, batch_size, alpha, embedding_to_use=None, cls=None, avg_embeddings=AVG_EMBEDDINGS, frozen_layers=FROZEN_LAYERS, \
@@ -184,18 +184,13 @@ class AffineRegressor(nn.Module):
 
             # Training
             self.train()
-            output = self.dataloader_step(train_loader, epoch, epoch_stats, data_type="train")
-            if output is None:
-                self.num_epochs = epoch
-                break
+            self.dataloader_step(train_loader, epoch, epoch_stats, data_type="train")
 
             # Validation
             self.eval()
             with torch.no_grad():
-                output = self.dataloader_step(val_loader, epoch, epoch_stats, data_type="val")
-                if output is None:
-                    self.num_epochs = epoch
-                    break  
+                self.dataloader_step(val_loader, epoch, epoch_stats, data_type="val")
+
 
             # Divide by the number of batches
             divide_by_dataloader(epoch_stats, len(train_loader), len(val_loader))
@@ -237,7 +232,7 @@ class AffineRegressor(nn.Module):
 
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
-        outputs, angles, shifts = torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device)
+        outputs, angles, shifts, mae_angles, euclidean_shifts = torch.tensor([]).to(device), torch.tensor([]).to(device), torch.tensor([]).to(device), [], []
         for batch in dataloader:
             if SHIFT_RANGE == 0:
                 img1, img2, angle = batch
@@ -274,7 +269,9 @@ class AffineRegressor(nn.Module):
                 with torch.no_grad():
                     mae_angle = torch.mean(torch.abs(output[:,0] - angle))
                     mae_shift = torch.mean(torch.abs(output[:, 1:] - shift))
-                    euclidean_shift = torch.mean(torch.sqrt(torch.sum((output[:, 1:] - shift)**2, dim=1)))                     
+                    euclidean_shift = torch.mean(torch.sqrt(torch.sum((output[:, 1:] - shift)**2, dim=1)))    
+                    mae_angles.append(mae_angle)
+                    euclidean_shifts.append(euclidean_shift)                 
 
             if data_type == "train":
                 # Compute Backward pass and gradients
@@ -296,7 +293,7 @@ class AffineRegressor(nn.Module):
         # plot_errors2gt(torch.abs(outputs[:,0]-angles).detach().cpu(), torch.abs(angles).detach().cpu(), angles=True)
         # plot_errors2gt(torch.abs(outputs[:,1:]-shifts).detach().cpu(), torch.abs(shifts).detach().cpu(), angles=False)
 
-        return 1
+        return mae_angles, euclidean_shifts
                
     def save_model(self, epoch, definetly=False):
         os.makedirs(self.parent_model_path, exist_ok=True)
@@ -427,6 +424,7 @@ class AffineRegressor(nn.Module):
 
     def test(self, test_loader):
         with torch.no_grad():
+            trimmed_angles, trimmed_shifts = 0, 0
             loss, mae_shift, euclidean_shift, mae_angle, mse_angle = \
                 torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32), torch.tensor(0, dtype=torch.float32)
             for epoch in range(10):
@@ -434,7 +432,7 @@ class AffineRegressor(nn.Module):
                                "test_mae_angle": torch.tensor(0, dtype=torch.float32), "test_mse_angle": torch.tensor(0, dtype=torch.float32)}
                 send_to_device(epoch_stats)
     
-                self.dataloader_step(test_loader, 0, epoch_stats, data_type="test")
+                angles, shifts = self.dataloader_step(test_loader, 0, epoch_stats, data_type="test")
 
                 divide_by_dataloader(epoch_stats, len_test_loader=len(test_loader))
 
@@ -444,10 +442,19 @@ class AffineRegressor(nn.Module):
                 mae_angle += epoch_stats["test_mae_angle"]
                 mse_angle += epoch_stats["test_mse_angle"]
 
+                sorted_angles, sorted_shifts = sorted(angles, key=lambda x: x.cpu().item()), sorted(shifts, key=lambda x: x.cpu().item())
+                trimmed_angle, trimmed_shift = sorted_angles[:int(len(sorted_angles) * 0.95)], sorted_shifts[:int(len(sorted_shifts) * 0.95)]
+                trimmed_angle, trimmed_shift = [x.cpu().numpy() for x in trimmed_angle], [x.cpu().numpy() for x in trimmed_shift]
+                trimmed_angles += np.mean(trimmed_angle)
+                trimmed_shifts += np.mean(trimmed_shift)
+
 
         print_and_write(f"""## TEST RESULTS: ##
 Test Loss: {loss/10} 
 Test Euclidean Shift: {euclidean_shift/10}\t\t Test MAE Shift: {mae_shift/10}
-Test MAE Angle: {mae_angle/10}\t\t Test MSE Angle: {mse_angle/10}\n\n""", self.plots_path)
+Test MAE Angle: {mae_angle/10}\t\t Test MSE Angle: {mse_angle/10}
+
+Trimmed angle: {trimmed_angles/10}\t\t Trimmed shift: {trimmed_shifts/10}\n\n""", self.plots_path)
+
     
 

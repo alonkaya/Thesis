@@ -149,8 +149,8 @@ def plot_results():
     clip_shift = [0.022, 0.029, 0.048, 0.072]
     clip_angle = [0.018, 0.018, 0.04, 0.055]
 
-    clip_16_shift = [0.022,  0    , 0.037, 0.069]
-    clip_16_angle = [0.023,   0   , 0.029, 0.056]
+    clip_16_shift = [0.022, 0.026, 0.037, 0.069]
+    clip_16_angle = [0.023, 0.021, 0.029, 0.056]
 
     resnet_shift = [0.029, 0.041, 0.0468, 0.07]
     resnet_angle = [0.028, 0.0327, 0.0415, 0.045]
@@ -177,17 +177,19 @@ def plot_results():
 
 
 def test():
-    pretrained_path = "plots/Affine/BS_32__lr_6e-05__alpha_10__conv__original_rotated_angle_30__shift_32/CLIP/size_1048__frozen_0"
+    pretrained_path = "plots/Affine/BS_32__lr_6e-05__alpha_10__conv__original_rotated_angle_30__shift_32/CLIP/size_4048__frozen_0"
+    
+    batch_size=1
+    
+    train_loader, val_loader, test_loader = get_dataloaders(batch_size=batch_size, train_length=64, val_length=val_length, test_length=test_length)
 
-    train_loader, val_loader, test_loader = get_dataloaders(batch_size=BATCH_SIZE[0], train_length=64, val_length=val_length, test_length=test_length)
-
-    model = AffineRegressor(LR[0], BATCH_SIZE[0], ALPHA[0], model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path="plots/test", pretrained_path=pretrained_path, use_conv=USE_CONV, num_epochs=NUM_EPOCHS)
+    model = AffineRegressor(LR[0], batch_size, ALPHA[0], model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path="plots/test", pretrained_path=pretrained_path, use_conv=USE_CONV, num_epochs=NUM_EPOCHS)
 
     model.test(test_loader)
 
 if __name__ == "__main__":
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-    # test()
+    test()
     # plot_stats()
-    plot_results()
+    # plot_results()
