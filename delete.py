@@ -1,7 +1,7 @@
 import os
 
 # Specify the path to the main folder containing all subfolders
-main_folder_path = "plots/Affine/BS_32__lr_0.0001__alpha_10__conv__original_rotated_angle_30__shift_32"
+main_folder_path = "plots/Affine/BS_32__lr_6e-05__alpha_10__conv__original_rotated_angle_30__shift_32"
 
 for f in os.listdir(main_folder_path):
     p = os.path.join(main_folder_path, f)
