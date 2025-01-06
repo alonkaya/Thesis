@@ -443,7 +443,9 @@ class AffineRegressor(nn.Module):
                 mse_angle += epoch_stats["test_mse_angle"]
 
                 sorted_angles, sorted_shifts = sorted(angles, key=lambda x: x.cpu().item()), sorted(shifts, key=lambda x: x.cpu().item())
+                print(max(sorted_angles), max(sorted_shifts))
                 trimmed_angle, trimmed_shift = sorted_angles[:int(len(sorted_angles) * 0.95)], sorted_shifts[:int(len(sorted_shifts) * 0.95)]
+                print(max(trimmed_angle), max(trimmed_shift))
                 trimmed_angle, trimmed_shift = [x.cpu().numpy() for x in trimmed_angle], [x.cpu().numpy() for x in trimmed_shift]
                 trimmed_angles += np.mean(trimmed_angle)
                 trimmed_shifts += np.mean(trimmed_shift)
@@ -454,7 +456,7 @@ Test Loss: {loss/10}
 Test Euclidean Shift: {euclidean_shift/10}\t\t Test MAE Shift: {mae_shift/10}
 Test MAE Angle: {mae_angle/10}\t\t Test MSE Angle: {mse_angle/10}
 
-Trimmed angle: {trimmed_angles/10}\t\t Trimmed shift: {trimmed_shifts/10}\n\n""", self.plots_path)
+Trimmed shift: {trimmed_shifts/10}\t\t Trimmed angle: {trimmed_angles/10} \n\n""", self.plots_path)
 
     
 
