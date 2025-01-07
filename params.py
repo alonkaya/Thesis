@@ -5,7 +5,7 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16 = torch.device(f"
 # /mnt_hdd15tb/alonkay/Thesis/
 
 
-MODEL = CLIP_MODEL_NAME
+MODEL = RESNET_MODEL_NAME
 
 ### Dataset ###
 CROP = 224
