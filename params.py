@@ -21,7 +21,7 @@ COMPUTER = 1 # 0=250, 1=146, 2=else
 
 ### Training ###
 LR = [6e-5, 1e-4]
-BATCH_SIZE = [32]
+BATCH_SIZE = [31]
 NORM = True
 TRAIN_FROM_SCRATCH = False
 NUM_WORKERS = 0 # Probably setting this to > 0 causes Nans. If you get Nans then set it to 0.
