@@ -43,7 +43,7 @@ class CustomDataset(torch.utils.data.Dataset):
             return original_image, translated_image, angle, shift_x, shift_y
 
 
-def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length=val_length, test_length=test_length, plots_path=None):
+def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length=val_length, test_length=test_length, plots_path=None, part=PART):
     transform = v2.Compose([
         v2.Resize(256),
         v2.RandomCrop(224),
@@ -55,8 +55,9 @@ def get_dataloaders(batch_size=BATCH_SIZE, train_length=train_length, val_length
 
     # Load and display the image
     dataset = load_dataset("frgfm/imagenette", "320px")
-    print(len(dataset['train']), len(dataset['validation']))
-    train_data = dataset["train"].select(range(train_length))
+
+    
+    train_data = dataset["train"].select(range(train_length)) if part=="head" else dataset["train"].select(range(len(dataset['train']) - train_length, len(dataset['train']))) if part=="tail" else 0
     val_data = dataset['validation'].select(range(val_length))
     test_data = dataset['validation'].select(range(len(dataset['validation']) - test_length, len(dataset['validation'])))
 

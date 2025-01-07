@@ -5,7 +5,6 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16 = torch.device(f"
 # /mnt_hdd15tb/alonkay/Thesis/
 
 
-### Huber loss added!!!!!!!!!!!!!!!!!!!!!
 MODEL = CLIP_MODEL_NAME_16
 
 ### Dataset ###
@@ -13,15 +12,17 @@ CROP = 224
 RESIZE = 256
 ANGLE_RANGE = 30
 SHIFT_RANGE = 32
-train_length = [64]  # Needs to be a multiple of batch size
+train_length = [4048, 1024, 256, 64, 32]  # Needs to be a multiple of batch size
 val_length = 320      # Needs to be a multiple of batch size
 test_length = 320     # Needs to be a multiple of batch size
 INIT_DATA = True
 COMPUTER = 1 # 0=250, 1=146, 2=else
+PART = "tail"
+HUBER = False
 
 ### Training ###
 LR = [6e-5, 1e-4]
-BATCH_SIZE = [31]
+BATCH_SIZE = [32]
 NORM = True
 TRAIN_FROM_SCRATCH = False
 NUM_WORKERS = 0 # Probably setting this to > 0 causes Nans. If you get Nans then set it to 0.

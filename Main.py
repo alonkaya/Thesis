@@ -31,9 +31,9 @@ if __name__ == "__main__":
                                     else 'rotated' if embeddings_to_use[0] == "rotated_embeddings" else 'mul'
                 frozen = 'all' if FREEZE_PRETRAINED_MODEL else FROZEN_LAYERS
                 plots_path = os.path.join('plots', 'Affine', f'BS_{bs}__lr_{lr}__alpha_{alpha}__{regress}__{embeddings}_angle_{ANGLE_RANGE}__shift_{SHIFT_RANGE}', \
-                                          model, f'size_{size}__frozen_{frozen}{ADDITIONS}')
+                                          model, f'size_{size}__frozen_{frozen}__{PART}{ADDITIONS}')
    
-                train_loader, val_loader, test_loader = get_dataloaders(batch_size=bs, train_length=size, val_length=val_length, test_length=test_length, plots_path=plots_path)
+                train_loader, val_loader, test_loader = get_dataloaders(batch_size=bs, train_length=size, val_length=val_length, test_length=test_length, plots_path=plots_path, part=PART)
                 
                 num_epochs = 400 if size==4048 else 800 if size==1048 else 1000 if size==256 else 1400 if size==64 else 0
                 model = AffineRegressor(lr, bs, alpha, embeddings_to_use, use_cls, model_name=MODEL, avg_embeddings=AVG_EMBEDDINGS, plots_path=plots_path, \
