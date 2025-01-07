@@ -161,19 +161,19 @@ def plot_results():
     xticks_labels = ['4048', '1024', '256', '64']  # 5 points for Frozen 0
 
     fig1=plt.figure(1, figsize=(11, 6))
-    plt.errorbar(x_indices, clip_shift, marker='o', color='blue', linestyle='-', label='CLIP Shift', capsize=4, linewidth=1, markersize=2) 
-    plt.errorbar(x_indices, clip_angle, marker='o', color='orange', linestyle='-', label='CLIP Rotation', capsize=4, linewidth=1, markersize=2)
-    plt.errorbar(x_indices, clip_16_shift, marker='o', color='blue', linestyle=':', label='CLIP 16 Shift', capsize=4, linewidth=1, markersize=2)
-    plt.errorbar(x_indices, clip_16_angle, marker='o', color='orange', linestyle=':', label='CLIP 16 Rotation', capsize=4, linewidth=1, markersize=2)
-    plt.errorbar(x_indices, resnet_shift, marker='o', color='blue', linestyle='--', label='ResNet Shift', capsize=4, linewidth=1, markersize=2)
-    plt.errorbar(x_indices, resnet_angle, marker='o', color='orange', linestyle='--', label='ResNet Rotation', capsize=4, linewidth=1, markersize=2)
+    # plt.errorbar(x_indices, clip_shift, marker='o', color='blue', linestyle='-', label='CLIP Shift', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, clip_angle, marker='o', color='blue', linestyle='-', label='CLIP Rotation', capsize=4, linewidth=1, markersize=2)
+    # plt.errorbar(x_indices, clip_16_shift, marker='o', color='orange', linestyle='-', label='CLIP 16 Shift', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, clip_16_angle, marker='o', color='orange', linestyle='-', label='CLIP 16 Rotation', capsize=4, linewidth=1, markersize=2)
+    # plt.errorbar(x_indices, resnet_shift, marker='o', color='green', linestyle='-', label='ResNet Shift', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, resnet_angle, marker='o', color='green', linestyle='-', label='ResNet Rotation', capsize=4, linewidth=1, markersize=2)
     plt.title('Rotation and translation estimation error')
     plt.xlabel('Number of training samples')
     plt.ylabel('Mean Values')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
-    fig1.savefig('results/Affine.png')
+    fig1.savefig('results/Affine2.png')
 
 
 def test():
