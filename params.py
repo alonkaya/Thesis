@@ -4,14 +4,14 @@ device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16 = torch.device(f"
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output.log 2>&1"
 # /mnt_hdd15tb/alonkay/Thesis/
 
-MODEL = RESNET_MODEL_NAME
+MODEL = CLIP_MODEL_NAME_16
 
 ### Dataset ###
 CROP = 224
 RESIZE = 256
 ANGLE_RANGE = 30
 SHIFT_RANGE = 32
-train_length = [ 1024]  # Needs to be a multiple of batch size
+train_length = [ 1024, 32]  # Needs to be a multiple of batch size
 val_length = 320      # Needs to be a multiple of batch size
 test_length = 320     # Needs to be a multiple of batch size
 INIT_DATA = True
