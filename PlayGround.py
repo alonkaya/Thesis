@@ -544,6 +544,12 @@ def plot_errors():
     std_SED_8 = [0.037322915, 0.036055513, 0.055075705, 0.025166115, 0.032145503, 0.121243557, 0.167431578, 0.243378991]
     std_RE1_8 = [0.011269428, 0.017559423, 0.02081666,  0.005773503, 0.02081666, 0.060827625, 0.075498344, 0.191398363]
 
+    mean_alg_5 = [0.226666667,0.315333333,	0.33,	0.331,	0.404666667,	0.452666667,	0.47,	0.686]
+    mean_SED_5 = [0.21,	0.356666667,	0.358,	0.402,	0.52,	0.64,	0.676,	1.15666666]
+    mean_RE1_5 = [0.054666667,	0.106666667,	0.105,	0.128333333,	0.176666667,	0.223333333,	0.257666667,	0.53]
+    std_alg_5 = [0.005773503,	0.02532456,	0,	0.025357445,	0.054197171,	0.071143048,	0.052915026,	0.084071398]
+    std_SED_5 = [0,	0.045092498,	0.011313708,	0.031176915,	0.085440037,	0.165227116,	0.105910339,	0.160104133]
+    std_RE1_5 = [0.004163332,	0.02081666,	0.007071068,	0.01106044,	0.035118846,	0.077674535,	0.058620247,	0.051961524]
 
     # PRETAINED VIT #
     pretext_mean_alg_0 = [0.213333333, 0.283333333, 0.293333333, 0.363333333, 0.356666667, 0.373333333, 0.483333333, 0.6]
@@ -615,15 +621,37 @@ def plot_errors():
     fig7.savefig('results/SED_models_Flying.png')
 
     fig1=plt.figure(1, figsize=(11, 6))
-    plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED 0 frozen layers', capsize=4, linewidth=1, markersize=2) 
-    plt.errorbar(x_indices, mean_SED_4, yerr=std_SED_4 , marker='o', color='green', linestyle='-', label='SED 4 frozen layers', capsize=4, linewidth=1, markersize=2) 
-    plt.errorbar(x_indices, mean_SED_8, yerr=std_SED_8, marker='o', color='orange', linestyle='-', label='SED 8 frozen layers', capsize=4, linewidth=1, markersize=2) 
-    plt.title('SED comparison of ViT model freezing bottom layers')
+    plt.errorbar(x_indices, mean_alg_0, yerr=std_alg_0, marker='o', color='blue', linestyle='-', label='ALG 0 frozen layers', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0 , marker='o', color='blue', linestyle='--', label='SED 0 frozen layers', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_RE1_0, yerr=std_RE1_0, marker='o', color='blue', linestyle=':', label='RE1 0 frozen layers', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_alg_4, yerr=std_alg_4, marker='o', color='green', linestyle='-', label='ALG 4 frozen layers', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_SED_4, yerr=std_SED_4 , marker='o', color='green', linestyle='--', label='SED 4 frozen layers', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_RE1_4, yerr=std_RE1_4, marker='o', color='green', linestyle=':', label='RE1 4 frozen layers', capsize=4, linewidth=1, markersize=2)  
+    plt.errorbar(x_indices, mean_alg_8, yerr=std_alg_8, marker='o', color='orange', linestyle='-', label='ALG 8 frozen layers', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_SED_8, yerr=std_SED_8 , marker='o', color='orange', linestyle='--', label='SED 8 frozen layers', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_RE1_8, yerr=std_RE1_8, marker='o', color='orange', linestyle=':', label='RE1 8 frozen layers', capsize=4, linewidth=1, markersize=2)     
+    plt.title('Comparison of ViT model freezing bottom layers')
     plt.xlabel('Number of training samples')
     plt.ylabel('Mean Value ± STD')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
+    fig1.savefig('results/Frozen_low.png')
+
+    fig4=plt.figure(4, figsize=(11, 6))
+    plt.errorbar(x_indices, mean_alg_0, yerr=std_alg_0, marker='o', color='blue', linestyle='-', label='ALG clip 32 Frozen 0', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='--', label='SED clip 32 Frozen 0', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, mean_RE1_0, yerr=std_RE1_0, marker='o', color='blue', linestyle=':', label='RE1 clip 32 Frozen 0', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, mean_alg_5, yerr=std_alg_5, marker='o', color='orange', linestyle='-', label='ALG clip 32 Frozen 5 Layers', capsize=4, linewidth=1, markersize=2) 
+    plt.errorbar(x_indices, mean_SED_5, yerr=std_SED_5, marker='o', color='orange', linestyle='--', label='SED clip 32 Frozen 5 Layers', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, mean_RE1_5, yerr=std_RE1_5, marker='o', color='orange', linestyle=':', label='RE1 clip 32 Frozen 5 Layers', capsize=4, linewidth=1, markersize=2)
+    plt.title('Comparison of ViT model freezing top layers')
+    plt.xlabel('Number of training samples')
+    plt.ylabel('Mean Value ± STD')
+    plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
+    plt.legend()
+    plt.grid(True)
+    fig4.savefig('results/Frozen_high.png')    
 
     fig3=plt.figure(3, figsize=(11, 6))
     plt.errorbar(x_indices, mean_alg_0, yerr=std_alg_0, marker='o', color='green', linestyle='-', label='ALG clip', capsize=4, linewidth=1, markersize=2) 
@@ -659,6 +687,8 @@ def plot_errors():
     plt.grid(True)
     fig5.savefig('results/SED_models.png')
     
+    
+
     # fig2=plt.figure(2)
     # plt.bar(x, mean_SED_0, width, yerr=std_SED_0, capsize=5, label='SED Frozen 0', alpha=0.8, color='blue')
     # plt.bar(x - width, mean_SED_4, width, yerr=std_SED_4, capsize=5, label='SED Frozen 4', alpha=0.8, color='green')
