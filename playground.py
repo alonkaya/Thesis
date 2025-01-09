@@ -145,35 +145,70 @@ def plot_stats():
     train_mae_angle, val_mae_angle, train_mse_angle, val_mse_angle = parse_data_from_file(file_path)
     plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_shift, train_euclidean_shift, val_euclidean_shift, train_mae_angle, val_mae_angle, train_mse_angle, val_mse_angle)
 
+
+def mult_by_range(CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD):        
+    CLIP_Shift_Mean = [x * SHIFT_RANGE for x in CLIP_Shift_Mean]
+    CLIP_Shift_STD = [x * SHIFT_RANGE for x in CLIP_Shift_STD]
+    CLIP_Angle_Mean = [x * ANGLE_RANGE for x in CLIP_Angle_Mean]
+    CLIP_Angle_STD = [x * ANGLE_RANGE for x in CLIP_Angle_STD]
+
+    CLIP_16_Shift_Mean = [x * SHIFT_RANGE for x in CLIP_16_Shift_Mean]
+    CLIP_16_Shift_STD = [x * SHIFT_RANGE for x in CLIP_16_Shift_STD]
+    CLIP_16_Angle_Mean = [x * ANGLE_RANGE for x in CLIP_16_Angle_Mean]
+    CLIP_16_Angle_STD = [x * ANGLE_RANGE for x in CLIP_16_Angle_STD]
+
+    RESNET_Shift_Mean = [x * SHIFT_RANGE for x in RESNET_Shift_Mean]
+    RESNET_Shift_STD = [x * SHIFT_RANGE for x in RESNET_Shift_STD]
+    RESNET_Angle_Mean = [x * ANGLE_RANGE for x in RESNET_Angle_Mean]
+    RESNET_Angle_STD = [x * ANGLE_RANGE for x in RESNET_Angle_STD]
+
+    return CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD
+
 def plot_results():
-    clip_shift = [0.022, 0.029, 0.048, 0.072]
-    clip_angle = [0.018, 0.018, 0.04, 0.055]
+    CLIP_Shift_Mean = [0.023, 0.02835, 0.0445, 0.0673, 0.0735]
+    CLIP_Shift_STD = [0.001414214, 0.000919239, 0.004949747, 0.006646804, 0.003535534]
+    CLIP_Angle_Mean	= [0.0175,	0.0195,	0.0365,	0.0515,	0.0605]
+    CLIP_Angle_STD = [0.000707107, 0.00212132, 0.004949747, 0.004949747, 0.007778175]
 
-    clip_16_shift = [0.022, 0.026, 0.037, 0.069]
-    clip_16_angle = [0.023, 0.021, 0.029, 0.05]
+    CLIP_16_Shift_Mean = [0.0225,0.0255, 0.04, 0.0615, 0.0775]
+    CLIP_16_Shift_STD = [0.000707107, 0.000707107, 0.004242641, 0.010606602, 0.003535534]
+    CLIP_16_Angle_Mean =[0.0205, 0.0225,	0.032,	0.0475,	0.06]
+    CLIP_16_Angle_STD =	[0.003535534, 0.00212132,	0.004242641, 0.003535534,	0.001414214]
 
-    resnet_shift = [0.029, 0.041, 0.0468, 0.07]
-    resnet_angle = [0.028, 0.0327, 0.0415, 0.052]
+    RESNET_Shift_Mean =[0.0283,	0.0353,	0.0451,	0.065, 0.0845]
+    RESNET_Shift_STD =	[0.000989949,	0.008061017, 0.002404163, 0.007071068, 0.02192031]
+    RESNET_Angle_Mean =	[0.032,	0.03, 0.04, 0.058, 0.058]
+    RESNET_Angle_STD =	[0.005656854, 0.006434672, 0.00212132, 0.008485281, 0.002828427]
 
+    CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD =  mult_by_range(CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD)
 
     os.makedirs('results', exist_ok=True)
-    x_indices = range(len(clip_shift))  # For Frozen 0 (has an extra point)
-    xticks_labels = ['4048', '1024', '256', '64']  # 5 points for Frozen 0
+    x_indices = range(len(RESNET_Shift_Mean))  # For Frozen 0 (has an extra point)
+    xticks_labels = ['4048', '1024', '256', '64', '32']  # 5 points for Frozen 0
 
     fig1=plt.figure(1, figsize=(11, 6))
-    # plt.errorbar(x_indices, clip_shift, marker='o', color='blue', linestyle='-', label='CLIP Shift', capsize=4, linewidth=1, markersize=2) 
-    plt.errorbar(x_indices, clip_angle, marker='o', color='blue', linestyle='-', label='CLIP Rotation', capsize=4, linewidth=1, markersize=2)
-    # plt.errorbar(x_indices, clip_16_shift, marker='o', color='orange', linestyle='-', label='CLIP 16 Shift', capsize=4, linewidth=1, markersize=2)
-    plt.errorbar(x_indices, clip_16_angle, marker='o', color='orange', linestyle='-', label='CLIP 16 Rotation', capsize=4, linewidth=1, markersize=2)
-    # plt.errorbar(x_indices, resnet_shift, marker='o', color='green', linestyle='-', label='ResNet Shift', capsize=4, linewidth=1, markersize=2)
-    plt.errorbar(x_indices, resnet_angle, marker='o', color='green', linestyle='-', label='ResNet Rotation', capsize=4, linewidth=1, markersize=2)
-    plt.title('Rotation and translation estimation error')
+    plt.errorbar(x_indices, CLIP_Shift_Mean, yerr=CLIP_Shift_STD, marker='o', color='blue', linestyle='-', label='ViT-B/32 Translation Error', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, CLIP_16_Shift_Mean, yerr=CLIP_16_Shift_STD, marker='o', color='orange', linestyle='-', label='ViT-B/16 Translation Error', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, RESNET_Shift_Mean, yerr=RESNET_Shift_STD, marker='o', color='green', linestyle='-', label='ResNet Translation Error', capsize=4, linewidth=1, markersize=2)
+    plt.title('Translation estimation errors')
     plt.xlabel('Number of training samples')
-    plt.ylabel('Mean Values')
+    plt.ylabel('Mean Values + STD')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
-    fig1.savefig('results/Affine2.png')
+    fig1.savefig('results/AffineT ranslation Error.png')
+
+    fig2=plt.figure(2, figsize=(11, 6))
+    plt.errorbar(x_indices, CLIP_Angle_Mean, yerr=CLIP_Angle_STD, marker='o', color='blue', linestyle='-', label='ViT-B/32 Rotation Error', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, CLIP_16_Angle_Mean, yerr=CLIP_16_Angle_STD, marker='o', color='orange', linestyle='-', label='ViT-B/16 Rotation Error', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, RESNET_Angle_Mean, yerr=RESNET_Angle_STD, marker='o', color='green', linestyle='-', label='ResNet Rotation Error', capsize=4, linewidth=1, markersize=2)
+    plt.title('Rotation estimation errors')
+    plt.xlabel('Number of training samples')
+    plt.ylabel('Mean Values + STD')
+    plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
+    plt.legend()
+    plt.grid(True)
+    fig2.savefig('results/Affine Rotation Error.png')
 
 
 def test():
