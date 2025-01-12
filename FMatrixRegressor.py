@@ -301,45 +301,45 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         os.makedirs(self.parent_model_path, exist_ok=True)
         # Backup previous checkpoint
         # if os.path.exists(model_path) and epoch % (self.num_epochs//10) == 0: 
-        backup_path = os.path.join(self.parent_model_path, "backup_model.pth")
-        shutil.copy(model_path, backup_path)
-        # if definetly or epoch % (self.num_epochs//100) == 0:
-        #     torch.save({
-        #         'mlp': self.mlp.state_dict(),
-        #         'optimizer': self.optimizer.state_dict(),
-        #         'vit': self.model.state_dict() ,
-        #         'conv': self.conv.state_dict() if self.use_conv else '',
-        #         "scheduler" : None if self.scheduler==None else self.scheduler.state_dict(),
-        #         "L2_coeff" : self.L2_coeff,
-        #         "huber_coeff" : self.huber_coeff,
-        #         "batch_size" : self.batch_size,
-        #         "lr" : self.lr,
-        #         "self.min_lr" : self.min_lr,
-        #         "average_embeddings" : self.average_embeddings,
-        #         "model_name" : self.model_name,
-        #         "augmentation" : self.augmentation,
-        #         "use_reconstruction" : self.use_reconstruction,
-        #         "re1_coeff" : self.re1_coeff,
-        #         "alg_coeff" : self.alg_coeff,
-        #         "sed_coeff" : self.sed_coeff,
-        #         "plots_path" : self.plots_path,
-        #         "use_conv" : self.use_conv,
-        #         "hidden_size" : self.hidden_size,
-        #         "num_patches" : self.num_patches,
-        #         'epoch' : epoch,
-        #         "frozen_layers" : self.frozen_layers,
-        #         "frozen_high_layers" : self.frozen_high_layers,
-        #         "all_train_loss" : self.all_train_loss, 
-        #         "all_val_loss" : self.all_val_loss, 
-        #         "all_train_mae" : self.all_train_mae, 
-        #         "all_val_mae" : self.all_val_mae, 
-        #         "all_algebraic_pred" : self.all_algebraic_pred, 
-        #         "all_RE1_pred" : self.all_RE1_pred, 
-        #         "all_SED_pred" : self.all_SED_pred, 
-        #         "all_val_algebraic_pred" : self.all_val_algebraic_pred, 
-        #         "all_val_RE1_pred" : self.all_val_RE1_pred, 
-        #         "all_val_SED_pred" : self.all_val_SED_pred
-        #     }, model_path) 
+        #     backup_path = os.path.join(self.parent_model_path, "backup_model.pth")
+        #     shutil.copy(model_path, backup_path)
+        if definetly:
+            torch.save({
+                'mlp': self.mlp.state_dict(),
+                'optimizer': self.optimizer.state_dict(),
+                'vit': self.model.state_dict() ,
+                'conv': self.conv.state_dict() if self.use_conv else '',
+                "scheduler" : None if self.scheduler==None else self.scheduler.state_dict(),
+                "L2_coeff" : self.L2_coeff,
+                "huber_coeff" : self.huber_coeff,
+                "batch_size" : self.batch_size,
+                "lr" : self.lr,
+                "self.min_lr" : self.min_lr,
+                "average_embeddings" : self.average_embeddings,
+                "model_name" : self.model_name,
+                "augmentation" : self.augmentation,
+                "use_reconstruction" : self.use_reconstruction,
+                "re1_coeff" : self.re1_coeff,
+                "alg_coeff" : self.alg_coeff,
+                "sed_coeff" : self.sed_coeff,
+                "plots_path" : self.plots_path,
+                "use_conv" : self.use_conv,
+                "hidden_size" : self.hidden_size,
+                "num_patches" : self.num_patches,
+                'epoch' : epoch,
+                "frozen_layers" : self.frozen_layers,
+                "frozen_high_layers" : self.frozen_high_layers,
+                "all_train_loss" : self.all_train_loss, 
+                "all_val_loss" : self.all_val_loss, 
+                "all_train_mae" : self.all_train_mae, 
+                "all_val_mae" : self.all_val_mae, 
+                "all_algebraic_pred" : self.all_algebraic_pred, 
+                "all_RE1_pred" : self.all_RE1_pred, 
+                "all_SED_pred" : self.all_SED_pred, 
+                "all_val_algebraic_pred" : self.all_val_algebraic_pred, 
+                "all_val_RE1_pred" : self.all_val_RE1_pred, 
+                "all_val_SED_pred" : self.all_val_SED_pred
+            }, model_path) 
 
     def load_model(self, parent_model_path=None, continue_training=True):
         model_path = os.path.join(parent_model_path, "model.pth")
