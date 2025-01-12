@@ -46,7 +46,7 @@ class FMatrixRegressor(nn.Module):
         self.sed_coeff = sed_coeff
         self.L2_coeff = L2_coeff
         self.huber_coeff = huber_coeff
-        self.plots_path = plots_path
+        self.plots_path = pretrained_path if pretrained_path else plots_path 
         self.use_conv = use_conv
         self.num_epochs = num_epochs
         self.frozen_layers = frozen_layers
@@ -92,8 +92,7 @@ class FMatrixRegressor(nn.Module):
         ## THIS IS ONLY FOR CONTINUING TRAINING FROM A EARLY STOPPED CHECKPOINT!
         self.parent_model_path = os.path.join("/mnt/sda2/Alon", self.plots_path) if COMPUTER==0 else os.path.join("/mnt_hdd15tb/alonkay/Thesis", self.plots_path) if COMPUTER==1 else self.plots_path
         if pretrained_path or os.path.exists(os.path.join(self.parent_model_path, 'model.pth')): 
-            path = pretrained_path if pretrained_path else self.parent_model_path
-            self.load_model(path)
+            self.load_model(self.parent_model_path)
         
         elif self.kitti2sceneflow:
                 self.load_model(KITTI_MODEL_PATH, continue_training=False)

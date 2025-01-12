@@ -797,7 +797,7 @@ def test_trained(pretrained_model):
     # model.test(test_loader=test_loader, write=False)
     e = time.time()
     print(f"Time taken: {e-s}")
-    print(pretrained_model)
+    print(model.plots_path)
 
 import matplotlib
 matplotlib.use('Agg') # If want to show images then disable this
@@ -805,7 +805,7 @@ import matplotlib.pyplot as plt
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 if __name__ == "__main__":
-    p = "/mnt_hdd15tb/alonkay/Thesis/plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_80__frozen_0_2/"
+    p = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_80__frozen_0_2/"
 
     test_trained(p)
     # plot_errors()
