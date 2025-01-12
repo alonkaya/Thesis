@@ -788,16 +788,13 @@ def test_trained(pretrained_model):
     " Only need to change the data type in params i.e SCENEFLOW, KITTI.. "
     batch_size=8
 
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=9, part='head', batch_size=batch_size)
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.004, part='head', batch_size=batch_size)
 
     model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
 
-    s = time.time()
-    model.save_model(epoch=model.start_epoch, definetly=True)
-    # model.test(test_loader=test_loader, write=False)
-    e = time.time()
-    print(f"Time taken: {e-s}")
+    model.test(test_loader=test_loader, write=False)
     print(model.plots_path)
+    print(pretrained_model)
 
 import matplotlib
 matplotlib.use('Agg') # If want to show images then disable this
@@ -805,7 +802,7 @@ import matplotlib.pyplot as plt
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 if __name__ == "__main__":
-    p = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_80__frozen_0_2/"
+    p = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_170__frozen_0"
 
     test_trained(p)
     # plot_errors()
