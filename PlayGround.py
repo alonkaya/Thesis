@@ -793,7 +793,7 @@ def test_trained(pretrained_model):
     model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
 
     s = time.time()
-    model.save_model(epoch=model.start_epoch, defined=True)
+    model.save_model(epoch=model.start_epoch, definetly=True)
     # model.test(test_loader=test_loader, write=False)
     e = time.time()
     print(f"Time taken: {e-s}")
