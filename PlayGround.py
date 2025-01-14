@@ -845,11 +845,9 @@ def RANSAC():
         pts2_np = pts2.squeeze(0).cpu().numpy()[:,:2]
         print(pts1_np.shape)
 
-        F, mask = cv2.findFundamentalMat(pts1_np, pts2_np, cv2.FM_RANSAC, 2, 0.99)
+        F, mask = cv2.findFundamentalMat(pts1_np, pts2_np, cv2.FM_RANSAC, 1, 0.99)
         
         F = torch.from_numpy(F).float().unsqueeze(0).to(device)
-        pts1 = torch.from_numpy(pts1).float().to(device)
-        pts2 = torch.from_numpy(pts2).float().to(device)
 
         ep = EpipolarGeometry(None, None, F, pts1, pts2)
 
@@ -859,9 +857,9 @@ def RANSAC():
         print(f'SED: {sed.cpu().numpy()}\n')
 
         # if i > 200: break
-    avg_sed = avg_sed/(did)
-    print(f'Average SED: {avg_sed}, {did}')
-    return 
+    avg_sed = avg_sed / did
+    print(f'\nAverage SED: {avg_sed}, {did}')
+    return avg_sed
 
 import matplotlib
 matplotlib.use('Agg') # If want to show images then disable this
@@ -873,5 +871,8 @@ if __name__ == "__main__":
 
     # test_trained(p)
     # plot_errors()
-    RANSAC()
+    sed = 0
+    for i in range(10):
+        sed += RANSAC()
+    print(f'\n\n Final Total Average SED: {sed/10}')
 
