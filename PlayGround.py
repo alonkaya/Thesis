@@ -841,8 +841,8 @@ def RANSAC():
     did = 1
     for i, (_, _, _, pts1, pts2, _) in enumerate(test_loader):
         if pts1.shape[1] < 10: continue
-        pts1_np = pts1.unsqueeze(0).cpu().numpy()[:,:2]
-        pts2_np = pts2.unsqueeze(0).cpu().numpy()[:,:2]
+        pts1_np = pts1.squeeze(0).cpu().numpy()[:,:2]
+        pts2_np = pts2.squeeze(0).cpu().numpy()[:,:2]
         print(pts1_np.shape)
 
         F, mask = cv2.findFundamentalMat(pts1_np, pts2_np, cv2.FM_RANSAC, 2, 0.99)
