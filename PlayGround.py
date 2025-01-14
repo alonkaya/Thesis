@@ -861,6 +861,8 @@ def RANSAC():
         # print(f'ALG: {alg.cpu().numpy()}\n SED: {sed.cpu().numpy()}\n RE1: {re1.cpu().numpy()}\n')
         print(f'SED: {sed.cpu().numpy()}\n')
 
+        if i > 20: break
+
 import matplotlib
 matplotlib.use('Agg') # If want to show images then disable this
 import matplotlib.pyplot as plt
