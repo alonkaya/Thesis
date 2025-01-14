@@ -841,7 +841,7 @@ def RANSAC():
         pts1 = pts1.cpu().numpy()
         pts2 = pts2.cpu().numpy()
         F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 0.1, 0.99)
-
+        print(pts1.shape)
         try:
             F = torch.from_numpy(F).float().unsqueeze(0).to(device)
         except Exception as e:
@@ -856,8 +856,8 @@ def RANSAC():
         sed = ep.get_SED_distance()
         re1 = ep.get_RE1_distance()
 
-        print(f'ALG: {alg.cpu().numpy()}\n SED: {sed.cpu().numpy()}\n RE1: {re1.cpu().numpy()}\n')
-
+        # print(f'ALG: {alg.cpu().numpy()}\n SED: {sed.cpu().numpy()}\n RE1: {re1.cpu().numpy()}\n')
+        print(f'SED: {sed.cpu().numpy()}\n')
 
 import matplotlib
 matplotlib.use('Agg') # If want to show images then disable this
