@@ -867,7 +867,7 @@ def avg_trained():
     
     avg_F = torch.zeros((3, 3)).to(device)
     for img1, img2, _, _, _, _ in test_loader:
-        print("a")
+        print(avg_F)
         img1, img2 = img1.to(device), img2.to(device)
 
         output = model.forward(img1, img2)
