@@ -851,6 +851,7 @@ def RANSAC():
         pts1 = torch.from_numpy(pts1).float().to(device)
         pts2 = torch.from_numpy(pts2).float().to(device)
         ep = EpipolarGeometry(img1, img2, F, pts1, pts2)
+        print(ep.F.shape)
 
         alg = ep.get_algebraic_distance()
         sed = ep.get_SED_distance()
