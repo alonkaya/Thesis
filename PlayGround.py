@@ -842,12 +842,10 @@ def RANSAC():
         pts2 = pts2.cpu().numpy()
         print(f'pts1 shape: {pts1.shape}, pts2 shape: {pts2.shape}')
         F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 0.1, 0.99)
-        print(f'F: {F}')
 
-        F = torch.from_numpy(F).unsqueeze(0).to(device)
-        print(F)
-        pts1 = torch.from_numpy(pts1).to(device)
-        pts2 = torch.from_numpy(pts2).to(device)
+        F = torch.from_numpy(F, dtype=torch.float32).unsqueeze(0).to(device)
+        pts1 = torch.from_numpy(pts1, dtype=torch.float32).to(device)
+        pts2 = torch.from_numpy(pts2, dtype=torch.float32).to(device)
         ep = EpipolarGeometry(img1, img2, F, pts1, pts2)
 
         alg = ep.get_algebraic_distance()
