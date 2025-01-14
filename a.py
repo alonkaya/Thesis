@@ -45,7 +45,7 @@ def estimate_fundamental_matrix(img1, img2):
 
     return pts1, pts2
 
-def trim_by_sed(pts1, pts2, Fgt, threshold=SED_TRIM_THRESHOLD, min_keypoints=9):       
+def trim_by_sed(pts1, pts2, Fgt, threshold=SED_TRIM_THRESHOLD, min_keypoints=10):       
         # sed = symmetric_epipolar_distance(Fgt, pts1, pts2) # shape (n,)
         sed = get_SED_distance(Fgt, pts1, pts2) # shape (n,)
         
@@ -117,7 +117,11 @@ for i in range(end):
     img1 = cv2.imread(p1)  # Update the path to the image
     img2 = cv2.imread(p2)  # Update the path to the image
     # Estimate the fundamental matrix
-    pts1, pts2 = estimate_fundamental_matrix(img1, img2)
+    try:
+        pts1, pts2 = estimate_fundamental_matrix(img1, img2)
+    except Exception as e:
+        print(e)
+        continue
 
     # Compute Fundamental Matrix using RANSAC
     F, mask = cv2.findFundamentalMat(pts1[:,:2], pts2[:,:2], cv2.FM_RANSAC, ransacReprojThreshold=1.0, confidence=0.99)   
