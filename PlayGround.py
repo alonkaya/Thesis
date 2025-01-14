@@ -840,11 +840,14 @@ def RANSAC():
     for i, (img1, img2, label, pts1, pts2, _) in enumerate(train_loader):
         pts1 = pts1.cpu().numpy()
         pts2 = pts2.cpu().numpy()
-        print(f'pts1 shape: {pts1.shape}, pts2 shape: {pts2.shape}')
         F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 0.1, 0.99)
-        if F==None: print("F is None")
 
-        F = torch.from_numpy(F).float().unsqueeze(0).to(device)
+        try:
+            F = torch.from_numpy(F).float().unsqueeze(0).to(device)
+        except Exception as e:
+            print(e)
+            print(f'F: {F}')
+            
         pts1 = torch.from_numpy(pts1).float().to(device)
         pts2 = torch.from_numpy(pts2).float().to(device)
         ep = EpipolarGeometry(img1, img2, F, pts1, pts2)
