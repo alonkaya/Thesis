@@ -842,6 +842,7 @@ def RANSAC():
         pts2 = pts2.cpu().numpy()
         print(f'pts1 shape: {pts1.shape}, pts2 shape: {pts2.shape}')
         F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 0.1, 0.99)
+        if F==None: print("F is None")
 
         F = torch.from_numpy(F).float().unsqueeze(0).to(device)
         pts1 = torch.from_numpy(pts1).float().to(device)
@@ -852,7 +853,7 @@ def RANSAC():
         sed = ep.get_SED_distance()
         re1 = ep.get_RE1_distance()
 
-        print(f'ALG: {alg}, SED: {sed}, RE1: {re1}')
+        print(f'ALG: {alg.cpu().numpy()}\n SED: {sed.cpu().numpy()}\n RE1: {re1.cpu().numpy()}\n')
 
 
 import matplotlib
