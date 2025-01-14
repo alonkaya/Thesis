@@ -40,7 +40,7 @@ def estimate_fundamental_matrix(img1, img2):
     
     # print(pts1.shape)
     pts1, pts2 = trim_by_sed(pts1, pts2, Fgt)
-    # print(pts1.shape)
+    print(pts1.shape)
     # print()
 
     return pts1, pts2
