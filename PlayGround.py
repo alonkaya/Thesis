@@ -842,7 +842,6 @@ def RANSAC():
         pts1 = pts1.cpu().numpy()
         pts2 = pts2.cpu().numpy()
         F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 2, 0.99)
-        print(label)
         print(pts1.shape)
         
         F = torch.from_numpy(F).float().unsqueeze(0).to(device)
@@ -855,7 +854,7 @@ def RANSAC():
 
         print(f'SED: {sed.cpu().numpy()}\n')
 
-        if i > 20: break
+        if i > 200: break
 
 import matplotlib
 matplotlib.use('Agg') # If want to show images then disable this
