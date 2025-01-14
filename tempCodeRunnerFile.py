@@ -1,1 +1,0 @@
-r='green', linestyle='-', label='ALG ViT-B/1
