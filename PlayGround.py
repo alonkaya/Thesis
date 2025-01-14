@@ -854,7 +854,7 @@ def RANSAC():
         ep = EpipolarGeometry(img1, img2, F, pts1, pts2)
 
         alg = ep.get_algebraic_distance()
-        sed = ep.get_SED_distance()
+        sed = ep.get_mean_SED_distance()
         re1 = ep.get_RE1_distance()
 
         # print(f'ALG: {alg.cpu().numpy()}\n SED: {sed.cpu().numpy()}\n RE1: {re1.cpu().numpy()}\n')
