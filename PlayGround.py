@@ -843,7 +843,7 @@ def RANSAC():
         if pts1.shape[1] < 10: continue
         pts1_np = pts1.squeeze(0).cpu().numpy()[:,:2]
         pts2_np = pts2.squeeze(0).cpu().numpy()[:,:2]
-        print(pts1_np.shape)
+        # print(pts1_np.shape)
 
         F, mask = cv2.findFundamentalMat(pts1_np, pts2_np, cv2.FM_RANSAC, 1, 0.99)
         
@@ -854,7 +854,7 @@ def RANSAC():
         sed = ep.get_mean_SED_distance()
         avg_sed += sed
         did += 1
-        print(f'SED: {sed.cpu().numpy()}\n')
+        # print(f'SED: {sed.cpu().numpy()}\n')
 
         # if i > 200: break
     avg_sed = avg_sed / did
