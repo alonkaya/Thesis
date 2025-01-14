@@ -835,14 +835,15 @@ def test_trained(pretrained_model):
 
 def RANSAC():
     batch_size=1
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.004, part='head', batch_size=batch_size)
+    _, _, test_loader = get_data_loaders(train_size=0.004, part='head', batch_size=batch_size)
+
     avg_sed = 0
     did = 1
-    for i, (_, _, label, pts1, pts2, _) in enumerate(test_loader):
+    for i, (_, _, _, pts1, pts2, _) in enumerate(test_loader):
         if pts1.shape[1] < 10: continue
-        pts1 = pts1.cpu().numpy()
-        pts2 = pts2.cpu().numpy()
-        F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 2, 0.99)
+        pts1_np = pts1.unsqueeze(0).cpu().numpy()[:,:2]
+        pts2_np = pts2.unsqueeze(0).cpu().numpy()[:,:2]
+        F, mask = cv2.findFundamentalMat(pts1_np, pts2_np, cv2.FM_RANSAC, 2, 0.99)
         print(pts1.shape)
         
         F = torch.from_numpy(F).float().unsqueeze(0).to(device)
@@ -857,7 +858,9 @@ def RANSAC():
         print(f'SED: {sed.cpu().numpy()}\n')
 
         # if i > 200: break
-    print(f'Average SED: {avg_sed/(did+1)}, {did}')
+    avg_sed = avg_sed/(did)
+    print(f'Average SED: {avg_sed}, {did}')
+    return 
 
 import matplotlib
 matplotlib.use('Agg') # If want to show images then disable this
