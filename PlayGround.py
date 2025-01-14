@@ -841,7 +841,7 @@ def RANSAC():
         if pts1.shape[1] < 10: continue
         pts1 = pts1.cpu().numpy()
         pts2 = pts2.cpu().numpy()
-        F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 0.1, 0.99)
+        F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 2, 0.99)
         print(sum(mask), len(mask))
         print(pts1.shape)
         try:
