@@ -837,11 +837,12 @@ def RANSAC():
     batch_size=1
     train_loader, val_loader, test_loader = get_data_loaders(train_size=0.004, part='head', batch_size=batch_size)
 
-    for i, (img1, img2, label, pts1, pts2, _) in enumerate(train_loader):
+    for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
         if pts1.shape[1] < 10: continue
         pts1 = pts1.cpu().numpy()
         pts2 = pts2.cpu().numpy()
         F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 0.1, 0.99)
+        print(sum(mask), len(mask))
         print(pts1.shape)
         try:
             F = torch.from_numpy(F).float().unsqueeze(0).to(device)
@@ -851,7 +852,7 @@ def RANSAC():
             
         pts1 = torch.from_numpy(pts1).float().to(device)
         pts2 = torch.from_numpy(pts2).float().to(device)
-        ep = EpipolarGeometry(img1, img2, F, pts1, pts2)
+        ep = EpipolarGeometry(img1, img2, label, pts1, pts2)
 
         alg = ep.get_algebraic_distance()
         sed = ep.get_mean_SED_distance()
