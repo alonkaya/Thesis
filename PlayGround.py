@@ -842,23 +842,17 @@ def RANSAC():
         pts1 = pts1.cpu().numpy()
         pts2 = pts2.cpu().numpy()
         F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 2, 0.99)
-        print(sum(mask), len(mask))
+        print(label)
         print(pts1.shape)
-        try:
-            F = torch.from_numpy(F).float().unsqueeze(0).to(device)
-        except Exception as e:
-            print(e)
-            print(f'F: {F}')
-            
+        
+        F = torch.from_numpy(F).float().unsqueeze(0).to(device)
         pts1 = torch.from_numpy(pts1).float().to(device)
         pts2 = torch.from_numpy(pts2).float().to(device)
-        ep = EpipolarGeometry(img1, img2, label, pts1, pts2)
 
-        alg = ep.get_algebraic_distance()
+        ep = EpipolarGeometry(img1, img2, F, pts1, pts2)
+
         sed = ep.get_mean_SED_distance()
-        re1 = ep.get_RE1_distance()
 
-        # print(f'ALG: {alg.cpu().numpy()}\n SED: {sed.cpu().numpy()}\n RE1: {re1.cpu().numpy()}\n')
         print(f'SED: {sed.cpu().numpy()}\n')
 
         if i > 20: break
