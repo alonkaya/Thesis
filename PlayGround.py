@@ -833,6 +833,21 @@ def test_trained(pretrained_model):
     print(model.start_epoch)
     print(pretrained_model)
 
+def test_specific_F(F):
+    batch_size=1
+    _, _, test_loader = get_data_loaders(train_size=0.004, part='head', batch_size=batch_size)
+
+    avg_sed = 0
+    for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
+        ep = EpipolarGeometry(None, None, F, pts1, pts2)
+        sed = ep.get_mean_SED_distance()
+
+        avg_sed += sed
+
+    avg_sed = avg_sed / (i+1)
+    print(f'\nAverage SED: {avg_sed}, {i+1}')
+    return avg_sed
+
 def RANSAC():
     batch_size=1
     _, _, test_loader = get_data_loaders(train_size=0.004, part='head', batch_size=batch_size)
@@ -886,5 +901,8 @@ if __name__ == "__main__":
     # test_trained(p)
     # plot_errors()
     # RANSAC()
-    avg_trained()
+    avg_F = torch.tensor([[[-5.6917e-06,  2.5964e-03, -2.0555e-01],
+                          [-2.5585e-03,  1.0635e-04, -6.8064e-01],
+                          [ 2.0113e-01,  6.7193e-01,  4.3438e-02]]]).to(device)
 
+    test_specific_F(avg_F)
