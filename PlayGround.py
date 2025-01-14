@@ -843,8 +843,9 @@ def RANSAC():
         if pts1.shape[1] < 10: continue
         pts1_np = pts1.unsqueeze(0).cpu().numpy()[:,:2]
         pts2_np = pts2.unsqueeze(0).cpu().numpy()[:,:2]
-        F, mask = cv2.findFundamentalMat(pts1_np, pts2_np, cv2.FM_RANSAC, 2, 0.99)
         print(pts1.shape)
+
+        F, mask = cv2.findFundamentalMat(pts1_np, pts2_np, cv2.FM_RANSAC, 2, 0.99)
         
         F = torch.from_numpy(F).float().unsqueeze(0).to(device)
         pts1 = torch.from_numpy(pts1).float().to(device)
