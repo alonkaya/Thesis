@@ -845,6 +845,7 @@ def RANSAC():
         print(f'F: {F}')
 
         F = torch.from_numpy(F).unsqueeze(0).to(device)
+        print(F)
         pts1 = torch.from_numpy(pts1).to(device)
         pts2 = torch.from_numpy(pts2).to(device)
         ep = EpipolarGeometry(img1, img2, F, pts1, pts2)
