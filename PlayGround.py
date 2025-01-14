@@ -843,23 +843,37 @@ def RANSAC():
         if pts1.shape[1] < 10: continue
         pts1_np = pts1.squeeze(0).cpu().numpy()[:,:2]
         pts2_np = pts2.squeeze(0).cpu().numpy()[:,:2]
-        # print(pts1_np.shape)
 
         F, mask = cv2.findFundamentalMat(pts1_np, pts2_np, cv2.FM_RANSAC, 1, 0.99)
-        
         F = torch.from_numpy(F).float().unsqueeze(0).to(device)
 
         ep = EpipolarGeometry(None, None, F, pts1, pts2)
-
         sed = ep.get_mean_SED_distance()
+
         avg_sed += sed
         did += 1
-        # print(f'SED: {sed.cpu().numpy()}\n')
-
         # if i > 200: break
+
     avg_sed = avg_sed / did
     print(f'\nAverage SED: {avg_sed}, {did}')
     return avg_sed
+
+def avg_trained():
+    batch_size=1
+    _, _, test_loader = get_data_loaders(train_size=0.004, part='head', batch_size=batch_size)
+
+    pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
+    model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_path).to(device)
+    
+    avg_F = torch.zeros((3, 3)).to(device)
+    for img1, img2, _, _, _, _ in test_loader:
+        img1, img2 = img1.to(device), img2.to(device)
+
+        output = model.forward(img1, img2)
+        avg_F += output.squeeze(0)
+    
+    avg_F = avg_F / len(test_loader)
+    print(avg_F)
 
 import matplotlib
 matplotlib.use('Agg') # If want to show images then disable this
@@ -871,8 +885,6 @@ if __name__ == "__main__":
 
     # test_trained(p)
     # plot_errors()
-    sed = 0
-    for i in range(10):
-        sed += RANSAC()
-    print(f'\n\n Final Total Average SED: {sed/10}')
+    # RANSAC()
+    avg_trained()
 
