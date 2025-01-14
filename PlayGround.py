@@ -836,8 +836,8 @@ def test_trained(pretrained_model):
 def RANSAC():
     batch_size=1
     train_loader, val_loader, test_loader = get_data_loaders(train_size=0.004, part='head', batch_size=batch_size)
-
-    for i, (img1, img2, label, pts1, pts2, _) in enumerate(test_loader):
+    avg_sed = 0
+    for i, (_, _, label, pts1, pts2, _) in enumerate(test_loader):
         if pts1.shape[1] < 10: continue
         pts1 = pts1.cpu().numpy()
         pts2 = pts2.cpu().numpy()
@@ -848,13 +848,14 @@ def RANSAC():
         pts1 = torch.from_numpy(pts1).float().to(device)
         pts2 = torch.from_numpy(pts2).float().to(device)
 
-        ep = EpipolarGeometry(img1, img2, F, pts1, pts2)
+        ep = EpipolarGeometry(None, None, F, pts1, pts2)
 
         sed = ep.get_mean_SED_distance()
-
+        avg_sed += sed
         print(f'SED: {sed.cpu().numpy()}\n')
 
-        if i > 200: break
+        # if i > 200: break
+    print(f'Average SED: {avg_sed/(i+1)}')
 
 import matplotlib
 matplotlib.use('Agg') # If want to show images then disable this

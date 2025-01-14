@@ -90,21 +90,6 @@ def point_2_line_distance_all_points(points, lines):
     dist = np.abs(np.sum(lines * points, axis=-1))  # Element-wise multiplication and sum over last dimension
     return dist # shape (batch_size, n)
 
-# def symmetric_epipolar_distance(F, pts1, pts2):
-#     # Compute epipolar lines for each set of points
-#     lines2 = cv2.computeCorrespondEpilines(pts1, 1, F).reshape(-1, 3)
-#     lines1 = cv2.computeCorrespondEpilines(pts2, 2, F).reshape(-1, 3)
-
-#     pts1 = np.hstack([pts1, np.ones((pts1.shape[0], 1))])
-#     pts2 = np.hstack([pts2, np.ones((pts2.shape[0], 1))])
-#     # Calculate the distances of points from their corresponding epipolar lines
-#     dist1 = np.abs(np.sum(lines1 * pts1, axis=1)) / np.sqrt(lines1[:, 0]**2 + lines1[:, 1]**2)
-#     dist2 = np.abs(np.sum(lines2 * pts2, axis=1)) / np.sqrt(lines2[:, 0]**2 + lines2[:, 1]**2)
-
-#     # Calculate the symmetric epipolar distance
-#     sed = dist1**2 + dist2**2 
-
-#     return sed
 
 avg_sed = 0
 end = 1600
@@ -126,12 +111,13 @@ for i in range(end):
     # Compute Fundamental Matrix using RANSAC
     F, mask = cv2.findFundamentalMat(pts1[:,:2], pts2[:,:2], cv2.FM_RANSAC, ransacReprojThreshold=1.0, confidence=0.99)   
 
-    # pts1 = torch.from_numpy(pts1).float().unsqueeze(0)
-    # pts2 = torch.from_numpy(pts2).float().unsqueeze(0)
-    # F = torch.from_numpy(F).float().unsqueeze(0)
-    # ep = EpipolarGeometry(None, None, F, pts1, pts2)
-    # sed = ep.get_mean_SED_distance()
+    pts1 = torch.from_numpy(pts1).float().unsqueeze(0)
+    pts2 = torch.from_numpy(pts2).float().unsqueeze(0)
+    F = torch.from_numpy(F).float().unsqueeze(0)
+    ep = EpipolarGeometry(None, None, F, pts1, pts2)
+    sed = ep.get_mean_SED_distance()
     
+
     # Assuming F_matrix, points1, and points2 are defined as from your previous function call
     sed = np.mean(get_SED_distance(F, pts1, pts2))
     # print("SED:", sed)
