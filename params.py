@@ -1,5 +1,5 @@
 import torch
-device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16 = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32", "openai/clip-vit-base-patch16"
+device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16, DINO = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32", "openai/clip-vit-base-patch16", "facebook/dino-vitb16"
 USE_REALESTATE = False
 STEREO = True
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &   ### REMEMBER TO FIRST MOVE THE MODEL FROM ORIGINAL PATH TO MNT PATH IN CASE OF COMPUTER==0 AND THE LAST RUN EXITED!!
@@ -9,11 +9,11 @@ STEREO = True
 PRETEXT_TRAIN = False
 SCENEFLOW = False
 FLYING = False
-MODEL = CLIP_MODEL_NAME
+MODEL = DINO
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0]
 FROZEN_HIGH_LAYERS = 0
 COMPUTER = 1 # 0 = 250  1 = 146  2 = else  
-SEQ_RATIOS = [0.05] if not SCENEFLOW else [9] if FLYING else [1]     # [0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]                                               
+SEQ_RATIOS = [0.2] if not SCENEFLOW else [9] if FLYING else [1]     # [0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]                                               
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = False
 PART = ["head", "mid", "tail"] 

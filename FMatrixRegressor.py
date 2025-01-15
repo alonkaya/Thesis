@@ -3,7 +3,7 @@ from params import *
 from utils import *
 from FunMatrix import *
 import torch.optim as optim
-from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetModel
+from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetModel, AutoModel
 
 
 class FMatrixRegressor(nn.Module):
@@ -75,6 +75,8 @@ class FMatrixRegressor(nn.Module):
         elif model_name == RESNET_MODEL_NAME:
             self.resnet = True
             self.model = ResNetModel.from_pretrained(model_name).to(device)
+        elif model_name == DINO:
+            self.model = AutoModel.from_pretrained(model_name).to(device)
         else:
             # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
@@ -118,7 +120,8 @@ class FMatrixRegressor(nn.Module):
             if self.average_embeddings:
                 mlp_input_shape //= (self.num_patches**2)     
             if self.use_conv:
-                self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
+                convnet_input_dim = 1 if self.cc else 2*self.hidden_size 
+                self.conv = ConvNet(input_dim= convnet_input_dim, batch_size=self.batch_size).to(device)
                 mlp_input_shape = 2 * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2 
 
             # Initialize MLP
@@ -143,23 +146,22 @@ class FMatrixRegressor(nn.Module):
             x1_embeddings = x1_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
             x2_embeddings = x2_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
 
-        x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
-        x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size * self.num_patches * self.num_patches)
+        if self.cc:
+            x1_embeddings = x1_embeddings.reshape(-1, 1, self.num_patches**2, self.hidden_size) # [batch, 1, num_patches^2, hidden_size]
+            x2_embeddings = x2_embeddings.reshape(-1, self.num_patches**2, self.hidden_size, 1) # [batch, num_patches^2, hidden_size, 1]
 
-        if self.average_embeddings:
-            # Input shape is (batch_size, self.hidden_size, self.num_patches, self.num_patches). Output shape is (batch_size, self.hidden_size)
-            avg_patches = nn.AdaptiveAvgPool2d(1)
-            x1_embeddings = avg_patches(x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
-            x2_embeddings = avg_patches(x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)).reshape(-1, self.hidden_size)
+            # Multipling each vector in x1 with the whole matrix x2 results in Shape: [batch, num_patches^2, num_patches^2, 1]
+            cc = torch.matmul(x1_embeddings, x2_embeddings).reshape(-1, 1, self.num_patches**2, self.num_patches**2)  # [batch, num_patches^2, num_patches^2, 1]
 
-        if self.use_conv:
-            # Input shape is (batch_size, self.hidden_size * 2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
+            # Input shape is (batch_size, 1, self.num_patches^2, self.num_patches^2). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
+            embeddings = self.conv(cc)
+
+        else:
+            # Input shape is (batch_size, self.hidden_size*2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
             x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
             x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
             embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
             embeddings = self.conv(embeddings)
-        else:
-            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
         
         return embeddings
 

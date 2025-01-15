@@ -890,6 +890,11 @@ def avg_trained():
     avg_F = avg_F / len(test_loader)
     print(avg_F)
 
+    # Got:
+    # avg_F = torch.tensor([[[-5.6917e-06,  2.5964e-03, -2.0555e-01],
+    #                   [-2.5585e-03,  1.0635e-04, -6.8064e-01],
+    #                   [ 2.0113e-01,  6.7193e-01,  4.3438e-02]]]).to(device)
+
 import matplotlib
 matplotlib.use('Agg') # If want to show images then disable this
 import matplotlib.pyplot as plt
@@ -901,8 +906,5 @@ if __name__ == "__main__":
     # test_trained(p)
     # plot_errors()
     # RANSAC()
-    avg_F = torch.tensor([[[-5.6917e-06,  2.5964e-03, -2.0555e-01],
-                          [-2.5585e-03,  1.0635e-04, -6.8064e-01],
-                          [ 2.0113e-01,  6.7193e-01,  4.3438e-02]]]).to(device)
 
-    test_specific_F(avg_F)
+    # test_specific_F(avg_F)
