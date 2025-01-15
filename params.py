@@ -21,6 +21,7 @@ SEED = [42, 300, 500]
 TRIM_PTS = False
 MAX_POOL_SIZE = 3 if not MODEL==CLIP_MODEL_NAME_16 else 7 ######################################################################
 ADDITIONS = "__Max" if MAX_POOL_SIZE==4 else "" ## REMEMBER TO PUT "__" !!!!!
+CC = False
 
 ### Dataset ###  
 RIGHTCAMVAL = False
