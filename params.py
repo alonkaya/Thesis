@@ -6,7 +6,7 @@ STEREO = True
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 # find . -type f -name "model.pth"
 
-PRETEXT_TRAIN = RESNET_MODEL_NAME
+PRETEXT_TRAIN = CLIP_MODEL_NAME
 SCENEFLOW = False
 FLYING = False
 MODEL = DINO
