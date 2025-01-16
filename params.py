@@ -6,7 +6,7 @@ STEREO = True
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 # find . -type f -name "model.pth"
 
-PRETEXT_TRAIN = DINO
+PRETEXT_TRAIN = False
 SCENEFLOW = False
 FLYING = False
 MODEL = DINO
@@ -20,7 +20,7 @@ PART = ["head", "mid", "tail"]
 SEED = [42, 300, 500]
 TRIM_PTS = False
 MAX_POOL_SIZE = 7 if MODEL==CLIP_MODEL_NAME_16 or MODEL==DINO else 3 ######################################################################
-ADDITIONS = "__Max" if MAX_POOL_SIZE==4 else "" ## REMEMBER TO PUT "__" !!!!!
+ADDITIONS = "__Max" if MAX_POOL_SIZE==4 else "_delete" ## REMEMBER TO PUT "__" !!!!!
 CC = False
 
 ### Dataset ###  
