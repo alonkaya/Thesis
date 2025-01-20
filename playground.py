@@ -180,7 +180,13 @@ def plot_results():
     RESNET_Angle_Mean =	[0.032,	0.03, 0.04, 0.058, 0.058]
     RESNET_Angle_STD =	[0.005656854, 0.006434672, 0.00212132, 0.008485281, 0.002828427]
 
+
     CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD =  mult_by_range(CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD)
+
+
+    colors = ['Lightseagreen', 'burlywood', 'red']  # Red, Yellow, Cyan
+    markers = ['o', 's', '^']  # Markers for each model
+    linestyles = ['-', '--', ':']  # Line styles for each model    
 
     os.makedirs('results', exist_ok=True)
     x_indices = range(len(RESNET_Shift_Mean))  # For Frozen 0 (has an extra point)
