@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
                 scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
-                model = "CLIP" if MODEL == CLIP_MODEL_NAME else "CLIP_16" if MODEL==CLIP_MODEL_NAME_16 else "Resnet" if MODEL == RESNET_MODEL_NAME else "Google ViT" 
+                model = "CLIP" if MODEL==CLIP_MODEL_NAME else "CLIP_16" if MODEL==CLIP_MODEL_NAME_16 else "Resnet" if MODEL==RESNET_MODEL_NAME else "DINO" if MODEL==DINO else "Google ViT" 
                 regress = 'avg' if AVG_EMBEDDINGS else 'conv' if USE_CONV else 'cls' if use_cls else 'all_patches'
                 which = "angle" if  SHIFT_RANGE==0 else "shift" if ANGLE_RANGE==0 else "angle_shift"
                 embeddings = 'all' if len(embeddings_to_use)==3 else 'original_rotated' if len(embeddings_to_use)==2 \

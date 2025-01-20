@@ -1,7 +1,7 @@
 from params import *
 from utils import *
 import torch.optim as optim
-from transformers import CLIPVisionModel, CLIPVisionConfig, ResNetModel
+from transformers import CLIPVisionModel, CLIPVisionConfig, ResNetModel, AutoModel
 import numpy as np
 
 class AffineRegressor(nn.Module):
@@ -61,13 +61,16 @@ class AffineRegressor(nn.Module):
         elif model_name == RESNET_MODEL_NAME:
             self.resnet = True
             self.model = ResNetModel.from_pretrained(model_name).to(device)
+            
+        elif model_name == DINO:
+            self.model = AutoModel.from_pretrained(model_name).to(device)
     
         # Freeze frozen_layers bottom layers
-        if self.resnet == False:
-            for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
-                if layer_idx < self.frozen_layers:  
-                    for param in layer.parameters():
-                        param.requires_grad = False
+        # if self.resnet == False:
+        #     for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
+        #         if layer_idx < self.frozen_layers:  
+        #             for param in layer.parameters():
+        #                 param.requires_grad = False
                 # elif layer_idx >= len(self.model.vision_model.encoder.layers) - self.frozen_high_layers:
                 #     for param in layer.parameters():
                 #         param.requires_grad = False

@@ -180,41 +180,46 @@ def plot_results():
     RESNET_Angle_Mean =	[0.032,	0.03, 0.04, 0.058, 0.058]
     RESNET_Angle_STD =	[0.005656854, 0.006434672, 0.00212132, 0.008485281, 0.002828427]
 
+    DINO_Shift_mean = [1,1,2,2,3]
+    DINO_Shift_std = [0.1,0.1,0.1,0.1,0.1]
+    DINO_Angle_mean = [1,1,1,1,1]
+    DINO_Angle_std = [0.1,0.1,0.1,0.1,0.1]
 
     CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD =  mult_by_range(CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD)
 
-
-    colors = ['Lightseagreen', 'burlywood', 'red']  # Red, Yellow, Cyan
-    markers = ['o', 's', '^']  # Markers for each model
-    linestyles = ['-', '--', ':']  # Line styles for each model    
+    colors = ['Lightseagreen', 'gold', 'red', 'darkorchid']  # Red, Yellow, Cyan
+    markers = ['o', 's', '^', 'x']  # Markers for each model
+    linestyles = ['-', '--', ':', '-.']  # Line styles for each model    
 
     os.makedirs('results', exist_ok=True)
     x_indices = range(len(RESNET_Shift_Mean))  # For Frozen 0 (has an extra point)
     xticks_labels = ['4048', '1024', '256', '64', '32']  # 5 points for Frozen 0
 
     fig1=plt.figure(1, figsize=(11, 6))
-    plt.errorbar(x_indices, CLIP_Shift_Mean, yerr=CLIP_Shift_STD, marker='o', color='blue', linestyle='-', label='ViT-B/32 Translation Error', capsize=4, linewidth=1, markersize=2)
-    plt.errorbar(x_indices, CLIP_16_Shift_Mean, yerr=CLIP_16_Shift_STD, marker='o', color='orange', linestyle='-', label='ViT-B/16 Translation Error', capsize=4, linewidth=1, markersize=2)
-    plt.errorbar(x_indices, RESNET_Shift_Mean, yerr=RESNET_Shift_STD, marker='o', color='green', linestyle='-', label='ResNet Translation Error', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, CLIP_Shift_Mean, yerr=CLIP_Shift_STD, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='ViT-B/32 Translation Error', capsize=8, linewidth=2, markersize=7)
+    plt.errorbar(x_indices, CLIP_16_Shift_Mean, yerr=CLIP_16_Shift_STD, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='ViT-B/16 Translation Error', capsize=8, linewidth=2, markersize=7)
+    plt.errorbar(x_indices, RESNET_Shift_Mean, yerr=RESNET_Shift_STD, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet Translation Error', capsize=8, linewidth=2, markersize=7)
+    # plt.errorbar(x_indices, DINO_Shift_mean, yerr=DINO_Shift_std, marker=markers[3], color=colors[3], linestyle=linestyles[3], label='DINO Translation Error', capsize=8, linewidth=2, markersize=7)
     plt.title('Translation estimation errors')
     plt.xlabel('Number of training samples')
     plt.ylabel('Mean Values + STD')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
-    fig1.savefig('results/AffineT ranslation Error.png')
+    fig1.savefig('results/Affine Translation.png')
 
     fig2=plt.figure(2, figsize=(11, 6))
-    plt.errorbar(x_indices, CLIP_Angle_Mean, yerr=CLIP_Angle_STD, marker='o', color='blue', linestyle='-', label='ViT-B/32 Rotation Error', capsize=4, linewidth=1, markersize=2)
-    plt.errorbar(x_indices, CLIP_16_Angle_Mean, yerr=CLIP_16_Angle_STD, marker='o', color='orange', linestyle='-', label='ViT-B/16 Rotation Error', capsize=4, linewidth=1, markersize=2)
-    plt.errorbar(x_indices, RESNET_Angle_Mean, yerr=RESNET_Angle_STD, marker='o', color='green', linestyle='-', label='ResNet Rotation Error', capsize=4, linewidth=1, markersize=2)
+    plt.errorbar(x_indices, CLIP_Angle_Mean, yerr=CLIP_Angle_STD, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='ViT-B/32 Rotation Error', capsize=8, linewidth=2, markersize=7)
+    plt.errorbar(x_indices, CLIP_16_Angle_Mean, yerr=CLIP_16_Angle_STD, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='ViT-B/16 Rotation Error', capsize=8, linewidth=2, markersize=7)
+    plt.errorbar(x_indices, RESNET_Angle_Mean, yerr=RESNET_Angle_STD, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet Rotation Error', capsize=8, linewidth=2, markersize=7)
+    # plt.errorbar(x_indices, DINO_Angle_mean, yerr=DINO_Angle_std, marker=markers[3], color=colors[3], linestyle=linestyles[3], label='DINO Rotation Error', capsize=8, linewidth=2, markersize=7)
     plt.title('Rotation estimation errors')
     plt.xlabel('Number of training samples')
     plt.ylabel('Mean Values + STD')
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
     plt.legend()
     plt.grid(True)
-    fig2.savefig('results/Affine Rotation Error.png')
+    fig2.savefig('results/Affine Rotation.png')
 
 
 def test():
