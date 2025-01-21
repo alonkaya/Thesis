@@ -746,8 +746,8 @@ def remove_images_with_low_keypoints():
 
         print(i)
 
-# if __name__ == "__main__":
-    # train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.02, part="tail", batch_size=1)
+if __name__ == "__main__":
+    train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.02, part="tail", batch_size=1)
     # remove_images_with_low_keypoints()
 
     

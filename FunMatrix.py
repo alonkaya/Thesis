@@ -127,6 +127,10 @@ def get_F(k0, k1, poses=None, idx=None, jump_frames=JUMP_FRAMES, R_relative=None
     if R_relative == None:
         R_relative, t_relative = compute_relative_transformations(poses[idx], poses[idx+jump_frames])
         E = compute_essential(R_relative, t_relative)
+    elif FLYING:
+        E = torch.tensor([[ 0,     0,        0],
+                          [ 0,     0,       -1],
+                          [ 0,     1,     0]]).to(device)
     else:
         E = torch.tensor([[ 0,     0,        0],
                           [ 0,     0,       -0.54],
@@ -503,25 +507,123 @@ singular values: {S.cpu().tolist()}
 
     return F
 
+
+def NormalizeKeypoints(keypoints, K):
+    C_x = K[0, 2]
+    C_y = K[1, 2]
+    f_x = K[0, 0]
+    f_y = K[1, 1]
+    keypoints = (keypoints - np.array([[C_x, C_y]])) / np.array([[f_x, f_y]])
+    return keypoints
+
+
+def ComputeEssentialMatrix(F, K1, K2, kp1, kp2):
+    '''Compute the Essential matrix from the Fundamental matrix, given the calibration matrices. Note that we ask participants to estimate F, i.e., without relying on known intrinsics.'''
+
+    # Use OpenCV's recoverPose to solve the cheirality check: https://docs.opencv.org/4.5.4/d9/d0c/group__calib3d.html#gadb7d2dfcc184c1d2f496d8639f4371c0
+    E = np.matmul(np.matmul(K2.T, F), K1).astype(np.float64)
+    
+    kp1n = NormalizeKeypoints(kp1, K1)
+    kp2n = NormalizeKeypoints(kp2, K2)
+    num_inliers, R, T, mask = cv2.recoverPose(E, kp1n, kp2n)
+
+    return E, R, T
+
+
+def QuaternionFromMatrix(matrix):
+    '''Transform a rotation matrix into a quaternion.'''
+
+    M = np.array(matrix, dtype=np.float64, copy=False)[:4, :4]
+    m00 = M[0, 0]
+    m01 = M[0, 1]
+    m02 = M[0, 2]
+    m10 = M[1, 0]
+    m11 = M[1, 1]
+    m12 = M[1, 2]
+    m20 = M[2, 0]
+    m21 = M[2, 1]
+    m22 = M[2, 2]
+
+    K = np.array([[m00 - m11 - m22, 0.0, 0.0, 0.0],
+              [m01 + m10, m11 - m00 - m22, 0.0, 0.0],
+              [m02 + m20, m12 + m21, m22 - m00 - m11, 0.0],
+              [m21 - m12, m02 - m20, m10 - m01, m00 + m11 + m22]])
+    K /= 3.0
+
+    # The quaternion is the eigenvector of K that corresponds to the largest eigenvalue.
+    w, V = np.linalg.eigh(K)
+    q = V[[3, 0, 1, 2], np.argmax(w)]
+
+    if q[0] < 0:
+        np.negative(q, q)
+
+    return q
+
+def ComputeErrorForOneExample(q_gt, T_gt, q, T, scale):
+    '''Compute the error metric for a single example.
+    
+    The function returns two errors, over rotation and translation. These are combined at different thresholds by ComputeMaa in order to compute the mean Average Accuracy.'''
+    eps = 1e-9
+
+    q_gt_norm = q_gt / (np.linalg.norm(q_gt) + eps)
+    q_norm = q / (np.linalg.norm(q) + eps)
+
+    loss_q = np.maximum(eps, (1.0 - np.sum(q_norm * q_gt_norm)**2))
+    err_q = np.arccos(1 - 2 * loss_q)
+
+    # Apply the scaling factor for this scene.
+    T_gt_scaled = T_gt * scale
+    T_scaled = T * np.linalg.norm(T_gt) * scale / (np.linalg.norm(T) + eps)
+
+    err_t = min(np.linalg.norm(T_gt_scaled - T_scaled), np.linalg.norm(T_gt_scaled + T_scaled))
+
+    return err_q * 180 / np.pi, err_t
+
+
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 if __name__ == "__main__":
     R = torch.tensor([[1,0,0],[0,1,0],[0,0,1]], dtype=torch.float32).to(device)
-    t = torch.tensor([1, 0, 0], dtype=torch.float32).to(device)
-    K = torch.tensor([[105, 0,    479.5],
-                      [0,   1050, 269.5],
-                      [0,   0,    1]], dtype=torch.float32).to(device)
-    
     t_stereo = torch.tensor([0.54, 0, 0], dtype=torch.float32).to(device)
-    K_stereo = torch.tensor([[7.188560000000e+02, 0.000000000000e+00, 6.071928000000e+02],
-    [0.000000000000e+00, 7.188560000000e+02, 1.852157000000e+02],
-    [0.000000000000e+00, 0.000000000000e+00, 1.000000000000e+00]], dtype=torch.float32).to(device)
-
+    t_flying = torch.tensor([1, 0, 0], dtype=torch.float32).to(device)    
+    # K = torch.tensor([[105, 0,    479.5],
+    #                   [0,   1050, 269.5],
+    #                   [0,   0,    1]], dtype=torch.float32).to(device)
+    k_stereo_seq_00 = torch.tensor([[718.8560,   0.0000, 607.1928],
+                                    [  0.0000, 718.8560, 185.2157],
+                                    [  0.0000,   0.0000,   1.0000]]).to(device)
+    k_stereo_seq_03 = torch.tensor([[721.5377,   0.0000, 609.5593],
+                                    [  0.0000, 721.5377, 172.8540],
+                                    [  0.0000,   0.0000,   1.0000]])
+    k_stereo_seq_09 = torch.tensor([[707.0912,   0.0000, 601.8873],
+                                    [  0.0000, 707.0912, 183.1104],
+                                    [  0.0000,   0.0000,   1.0000]])
     E_stereo = compute_essential(R, t_stereo)
-    F_stereo = compute_fundamental(E_stereo, K_stereo, K_stereo)
-    print(F_stereo)
 
-    E = compute_essential(R, t)
-    F = compute_fundamental(E, K, K)
-    print(F)
-    F_monkaa = torch.tensor([[ 0,     0,        0],
-                      [ 0,     0,       -9.5238e-04],
-                      [ 0,     9.5238e-04,     0]]).to(device)
+    p1_all_points = np.array([[954.50146484375, 273.3850402832031, 1.0], [583.0065307617188, 95.25467681884766, 1.0], [901.4805297851562, 294.1755676269531, 1.0], [305.2536315917969, 145.3797149658203, 1.0], [942.4246215820312, 292.0307312011719, 1.0], [564.30810546875, 127.34349822998047, 1.0], [144.40972900390625, 141.80636596679688, 1.0], [320.59979248046875, 113.97738647460938, 1.0], [329.90411376953125, 138.82640075683594, 1.0], [912.8888549804688, 291.69195556640625, 1.0], [912.8888549804688, 291.69195556640625, 1.0], [938.4361572265625, 286.61602783203125, 1.0], [947.6397705078125, 283.4416809082031, 1.0], [307.32696533203125, 115.20600128173828, 1.0], [307.32696533203125, 115.20600128173828, 1.0], [307.32696533203125, 115.20600128173828, 1.0], [430.09490966796875, 214.14500427246094, 1.0], [430.09490966796875, 214.14500427246094, 1.0], [335.5152893066406, 138.78111267089844, 1.0], [409.05950927734375, 103.82512664794922, 1.0], [1210.900146484375, 195.22467041015625, 1.0], [1210.900146484375, 195.22467041015625, 1.0], [306.300537109375, 123.38407897949219, 1.0], [376.99810791015625, 13.855710983276367, 1.0], [306.46087646484375, 185.67483520507812, 1.0], [262.7192077636719, 125.0037612915039, 1.0], [335.6313171386719, 146.07986450195312, 1.0], [811.343994140625, 360.6255798339844, 1.0], [572.0613403320312, 116.88536071777344, 1.0]])
+    p2_all_points = np.array([[900.7084350585938, 273.3834228515625, 1.0], [572.9094848632812, 95.25273895263672, 1.0], [847.4996948242188, 294.1819152832031, 1.0], [292.8212890625, 145.3708038330078, 1.0], [888.59716796875, 292.0195617675781, 1.0], [558.93994140625, 127.35503387451172, 1.0], [127.74665069580078, 141.7941436767578, 1.0], [309.0122375488281, 113.98966979980469, 1.0], [318.6395568847656, 138.81390380859375, 1.0], [858.8424682617188, 291.6739807128906, 1.0], [858.8424682617188, 291.6739807128906, 1.0], [884.5206298828125, 286.5979309082031, 1.0], [893.9510498046875, 283.4609375, 1.0], [295.00494384765625, 115.17601013183594, 1.0], [295.00494384765625, 115.17601013183594, 1.0], [295.00494384765625, 115.17601013183594, 1.0], [416.3359069824219, 214.17831420898438, 1.0], [416.3359069824219, 214.17831420898438, 1.0], [324.5880432128906, 138.82034301757812, 1.0], [394.7772216796875, 103.78234100341797, 1.0], [1116.6712646484375, 195.26763916015625, 1.0], [1116.6712646484375, 195.26763916015625, 1.0], [293.8830871582031, 123.42768096923828, 1.0], [363.0408630371094, 13.811367988586426, 1.0], [293.92633056640625, 185.6283721923828, 1.0], [241.74366760253906, 125.05216217041016, 1.0], [324.78369140625, 146.1437225341797, 1.0], [751.7247314453125, 360.689697265625, 1.0], [566.6904907226562, 116.821044921875, 1.0]])
+    p1 = p1_all_points[0]
+    p2 = p2_all_points[0]
+
+    F_estimated_seq_9 = torch.tensor([[-5.6917e-06,  2.5964e-03, -2.0555e-01],
+                                       [-2.5585e-03,  1.0635e-04, -6.8064e-01],
+                                       [ 2.0113e-01,  6.7193e-01,  4.3438e-02]]).to(device)
+    
+    F_gt_seq_9 = compute_fundamental(E_stereo, k_stereo_seq_09, k_stereo_seq_09)
+
+    # Normalize points
+    kp1n = NormalizeKeypoints(p1[:2], k_stereo_seq_09)
+    kp2n = NormalizeKeypoints(p2[:2], k_stereo_seq_09)
+    
+    E_est, R_est, T_est = ComputeEssentialMatrix(F_estimated_seq_9.numpy(), k_stereo_seq_09.numpy(), k_stereo_seq_09.numpy(), kp1n[:2], kp2n[:2])
+    q_est = QuaternionFromMatrix(R_est)
+
+    E_gt, R_gt, T_gt = ComputeEssentialMatrix(F_gt_seq_9.numpy(), k_stereo_seq_09.numpy(), k_stereo_seq_09.numpy(), kp1n[:2], kp2n[:2])
+    q_gt = QuaternionFromMatrix(R_gt)
+    print(E_est)
+    print(E_gt)
+    
+    # Compute errors
+    err_q, err_t = ComputeErrorForOneExample(q_gt, T_gt, q_est, T_est, 0.54)
+    
+    print("Rotation Error (degrees):", err_q)
+    print("Translation Error:", err_t)

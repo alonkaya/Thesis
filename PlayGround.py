@@ -886,6 +886,8 @@ def avg_trained():
         img1, img2 = img1.to(device), img2.to(device)
 
         output = model.forward(img1, img2).detach()
+        print(output)
+        return
         avg_F += output.squeeze(0)
     
     avg_F = avg_F / len(test_loader)
@@ -907,5 +909,5 @@ if __name__ == "__main__":
     # test_trained(p)
     # plot_errors()
     # RANSAC()
-
+    avg_trained()
     # test_specific_F(avg_F)
