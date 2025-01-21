@@ -607,7 +607,7 @@ if __name__ == "__main__":
     F_estimated_seq_9 = torch.tensor([[-5.6917e-06,  2.5964e-03, -2.0555e-01],
                                        [-2.5585e-03,  1.0635e-04, -6.8064e-01],
                                        [ 2.0113e-01,  6.7193e-01,  4.3438e-02]]).to(device)
-    
+
     F_gt_seq_9 = compute_fundamental(E_stereo, k_stereo_seq_09, k_stereo_seq_09)
 
     # Normalize points

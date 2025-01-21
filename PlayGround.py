@@ -862,7 +862,7 @@ def RANSAC():
 
         F, mask = cv2.findFundamentalMat(pts1_np, pts2_np, cv2.FM_RANSAC, 1, 0.99)
         F = torch.from_numpy(F).float().unsqueeze(0).to(device)
-
+        print(F)
         ep = EpipolarGeometry(None, None, F, pts1, pts2)
         sed = ep.get_mean_SED_distance()
 
@@ -908,6 +908,6 @@ if __name__ == "__main__":
 
     # test_trained(p)
     # plot_errors()
-    # RANSAC()
-    avg_trained()
+    RANSAC()
+    # avg_trained()
     # test_specific_F(avg_F)
