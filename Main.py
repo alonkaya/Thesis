@@ -53,5 +53,6 @@ if __name__ == "__main__":
                         model.train_model(train_loader, val_loader, test_loader)
                 else: 
                         print(f"Model {plots_path} already trained")
-
+                
+                del model
                 torch.cuda.empty_cache()
