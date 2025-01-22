@@ -232,12 +232,13 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 self.num_epochs = epoch + 1
                 os.rename(self.plots_path, self.plots_path + "__bad")
                 self.plots_path = self.plots_path + "__bad"
-                if COMPUTER==0:
+                if COMPUTER==0 or COMPUTER==1:
                     try:
                         os.rename(self.parent_model_path, self.parent_model_path + "__bad")
-                        self.parent_model_path = self.parent_model_path + "__bad"
                     except Exception as e:
                         print_and_write(f"Renaming failed: {e}", self.plots_path)
+                        break
+                self.parent_model_path = self.parent_model_path + "__bad"
                 print_and_write("\nModel not learning and is very bad, stopping training\n", self.plots_path)
                 break
 
