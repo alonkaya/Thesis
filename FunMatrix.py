@@ -608,7 +608,7 @@ if __name__ == "__main__":
                                        [-2.5585e-03,  1.0635e-04, -6.8064e-01],
                                        [ 2.0113e-01,  6.7193e-01,  4.3438e-02]]).to(device)
     
-    F_gt_seq_9 = compute_fundamental(E_stereo, k_stereo_seq_09, k_stereo_seq_09)
+    F_gt_seq_9 = compute_fundamental(E_stereo, k_stereo_seq_09, k_stereo_seq_09) 
 
     # Normalize points
     kp1n = NormalizeKeypoints(p1[:2], k_stereo_seq_09)

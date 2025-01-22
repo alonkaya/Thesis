@@ -3,8 +3,8 @@ from params import *
 from utils import *
 from FunMatrix import *
 import torch.optim as optim
+from torchvision import models
 from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetModel, AutoModel
-
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
@@ -78,12 +78,15 @@ class FMatrixRegressor(nn.Module):
             self.model = ResNetModel.from_pretrained(model_name).to(device)
         elif model_name == DINO:
             self.model = AutoModel.from_pretrained(model_name).to(device)
+        elif model_name == EFFICIENTNET:
+            weights = models.efficientnet.EfficientNet_V2_M_Weights.DEFAULT
+            self.model = models.efficientnet_v2_m(weights=weights).to(device)
         else:
             # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
             
         # Freeze frozen_layers layers
-        if MODEL==CLIP_MODEL_NAME or MODEL==CLIP_MODEL_NAME_16:
+        if MODEL==CLIP_MODEL_NAME:
             for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
                 if layer_idx < self.frozen_layers:  
                     for param in layer.parameters():
@@ -108,21 +111,17 @@ class FMatrixRegressor(nn.Module):
                 self.model.load_state_dict(checkpoint['vit']) 
                 self.model.to(device)
 
-            # Get input dimension for the MLP based on ViT configuration
-            self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]
-            self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
-            mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
-
             # Initialize loss functions
             self.L2_loss = nn.MSELoss().to(device)
             self.huber_loss = nn.HuberLoss().to(device)
-        
-            # Load conv/average embeddings
-            if self.average_embeddings:
-                mlp_input_shape //= (self.num_patches**2)     
+
+            # Get input dimension for the MLP based on ViT configuration
+            self.hidden_size = self.model.config.hidden_sizes[-1] if self.resnet else 1280 if model_name==EFFICIENTNET else self.model.config.hidden_size
+            self.num_patches = 7 if self.resnet or model_name==EFFICIENTNET else self.model.config.image_size // self.model.config.patch_size   
+
             if self.use_conv:
                 convnet_input_dim = 1 if self.cc else 2*self.hidden_size 
-                self.conv = ConvNet(input_dim= convnet_input_dim, batch_size=self.batch_size).to(device)
+                self.conv = ConvNet(input_dim=convnet_input_dim, batch_size=self.batch_size).to(device)
                 mlp_input_shape = 2 * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2 
 
             # Initialize MLP
@@ -140,10 +139,10 @@ class FMatrixRegressor(nn.Module):
 
     def FeatureExtractor(self, x1, x2):
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
-        x1_embeddings = self.model(pixel_values=x1).last_hidden_state
-        x2_embeddings = self.model(pixel_values=x2).last_hidden_state
+        x1_embeddings = self.model.features(x1) if self.model_name==EFFICIENTNET else self.model(x1).last_hidden_state
+        x2_embeddings = self.model.features(x2) if self.model_name==EFFICIENTNET else self.model(x2).last_hidden_state
 
-        if not self.resnet:
+        if not self.resnet or not self.model_name==EFFICIENTNET:
             x1_embeddings = x1_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
             x2_embeddings = x2_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
 
@@ -388,21 +387,18 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.all_val_RE1_pred = checkpoint.get("all_val_RE1_pred", []) if continue_training else []
         self.all_val_SED_pred = checkpoint.get("all_val_SED_pred", []) if continue_training else []
 
-        # Get input dimension for the MLP based on ViT configuration
-        self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]
-        self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
-        mlp_input_shape = 2 * (self.num_patches**2) * self.hidden_size 
-
         # Initialize loss functions
         self.L2_loss = nn.MSELoss().to(device)
         self.huber_loss = nn.HuberLoss().to(device)
 
-        # Load conv/average embeddings
-        if self.average_embeddings:
-            mlp_input_shape //= (self.num_patches**2)     
+        # Get input dimension for the MLP based on ViT configuration
+        self.hidden_size = self.model.config.hidden_sizes[-1] if self.resnet else 1280 if self.model_name==EFFICIENTNET else self.model.config.hidden_size
+        self.num_patches = 7 if self.resnet or self.model_name==EFFICIENTNET else self.model.config.image_size // self.model.config.patch_size   
+                
         if self.use_conv:
-            self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
-            mlp_input_shape = 2 * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2
+            convnet_input_dim = 1 if self.cc else 2*self.hidden_size 
+            self.conv = ConvNet(input_dim=convnet_input_dim, batch_size=self.batch_size).to(device)
+            mlp_input_shape = 2 * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2 
             self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
 

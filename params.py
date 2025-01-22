@@ -1,5 +1,5 @@
 import torch
-device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16, DINO = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32", "openai/clip-vit-base-patch16", "facebook/dino-vitb16"
+device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16, DINO, EFFICIENTNET = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32", "openai/clip-vit-base-patch16", "facebook/dino-vitb16", "timm/tf_efficientnetv2_m.in1k"
 USE_REALESTATE = False
 STEREO = True
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &   ### REMEMBER TO FIRST MOVE THE MODEL FROM ORIGINAL PATH TO MNT PATH IN CASE OF COMPUTER==0 AND THE LAST RUN EXITED!!
@@ -7,20 +7,20 @@ STEREO = True
 # find . -type f -name "model.pth"      /mnt_hdd15tb/alonkay/Thesis/
 
 PRETEXT_TRAIN = False
-SCENEFLOW = True
-FLYING = True
-MODEL = DINO
+SCENEFLOW = False
+FLYING = False
+MODEL = EFFICIENTNET
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0]
 FROZEN_HIGH_LAYERS = 0
-COMPUTER = 2 # 0 = 250  1 = 146  2 = else  
-SEQ_RATIOS = [0.002] if not SCENEFLOW else [9] if FLYING else [1]     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]                                               
+COMPUTER = 1 # 0 = 250  1 = 146  2 = else  
+SEQ_RATIOS = [0.2] if not SCENEFLOW else [9] if FLYING else [1]     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]                                               
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = False
-PART = ["tail"] 
+PART = ["head", "mid", "tail"] 
 SEED = [42, 300, 500]
 TRIM_PTS = False
 MAX_POOL_SIZE = 7 if MODEL==CLIP_MODEL_NAME_16 or MODEL==DINO else 3 ######################################################################
-ADDITIONS = "__Max" if MAX_POOL_SIZE==4 else "__correct_F" ## REMEMBER TO PUT "__" !!!!!
+ADDITIONS = "__Max" if MAX_POOL_SIZE==4 else "" ## REMEMBER TO PUT "__" !!!!!
 CC = False
 
 ### Dataset ###  
@@ -29,7 +29,7 @@ CROP = 224
 RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
-INIT_DATA = True 
+INIT_DATA = True
 BATCH_SIZE = 8  
 
 ### STEREO KITTI ###

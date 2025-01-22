@@ -115,15 +115,6 @@ crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH
                 
                         model.train_model(train_loader, val_loader, test_loader)
 
-                        # if COMPUTER==0:
-                        #         os.makedirs(model.parent_model_path, exist_ok=True)
-                        #         source_model_path = os.path.join(model.plots_path, 'model.pth')
-                        #         dest_model_path = os.path.join(model.parent_model_path, 'model.pth')
-                        #         try:
-                        #                 shutil.move(source_model_path, dest_model_path)
-                        #         except Exception as e:
-                        #                 print(f"########\nError moving model to mnt from {source_model_path}\n{e}")
-
                         if os.path.exists(os.path.join(model.parent_model_path, 'backup_model.pth')):
                                 os.remove(os.path.join(model.parent_model_path, 'backup_model.pth'))
                         else:
