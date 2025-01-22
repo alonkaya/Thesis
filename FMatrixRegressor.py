@@ -141,7 +141,7 @@ class FMatrixRegressor(nn.Module):
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
         x1_embeddings = self.model.features(x1) if self.model_name==EFFICIENTNET else self.model(x1).last_hidden_state
         x2_embeddings = self.model.features(x2) if self.model_name==EFFICIENTNET else self.model(x2).last_hidden_state
-
+        print(x1_embeddings.shape, x2_embeddings.shape)
         if not self.resnet or not self.model_name==EFFICIENTNET:
             x1_embeddings = x1_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
             x2_embeddings = x2_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
