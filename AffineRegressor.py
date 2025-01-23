@@ -103,15 +103,15 @@ class AffineRegressor(nn.Module):
 
     def FeatureExtractor(self, x1, x2):        
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
-        x1_embeddings = self.model(pixel_values=x1).last_hidden_state.to(device)
-        x2_embeddings = self.model(pixel_values=x2).last_hidden_state.to(device)
+        x1_embeddings = self.model.features(x1) if self.model_name==EFFICIENTNET else self.model(x1).last_hidden_state
+        x2_embeddings = self.model.features(x2) if self.model_name==EFFICIENTNET else self.model(x2).last_hidden_state
 
         if self.cls == True:
             x1_embeddings = x1_embeddings[:,0,:] # shape (batch_size, hidden_size)
             x2_embeddings = x2_embeddings[:,0,:] # shape (batch_size, hidden_size)
 
         else: # patches
-            if not self.resnet:
+            if not self.resnet and not self.model_name==EFFICIENTNET:
                 x1_embeddings = x1_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
                 x2_embeddings = x2_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
 
