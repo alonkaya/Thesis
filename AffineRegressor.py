@@ -3,6 +3,7 @@ from utils import *
 import torch.optim as optim
 from transformers import CLIPVisionModel, CLIPVisionConfig, ResNetModel, AutoModel
 import numpy as np
+from torchvision import models
 
 class AffineRegressor(nn.Module):
     def __init__(self, lr, batch_size, alpha, embedding_to_use=None, cls=None, avg_embeddings=AVG_EMBEDDINGS, frozen_layers=FROZEN_LAYERS, \
@@ -57,23 +58,14 @@ class AffineRegressor(nn.Module):
                 self.model = CLIPVisionModel(config).to(device)
             else:
                 self.model = CLIPVisionModel.from_pretrained(model_name).to(device)
-
         elif model_name == RESNET_MODEL_NAME:
             self.resnet = True
-            self.model = ResNetModel.from_pretrained(model_name).to(device)
-            
+            self.model = ResNetModel.from_pretrained(model_name).to(device)  
         elif model_name == DINO:
             self.model = AutoModel.from_pretrained(model_name).to(device)
-    
-        # Freeze frozen_layers bottom layers
-        # if self.resnet == False:
-        #     for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
-        #         if layer_idx < self.frozen_layers:  
-        #             for param in layer.parameters():
-        #                 param.requires_grad = False
-                # elif layer_idx >= len(self.model.vision_model.encoder.layers) - self.frozen_high_layers:
-                #     for param in layer.parameters():
-                #         param.requires_grad = False
+        elif model_name == EFFICIENTNET:
+            weights = models.efficientnet.EfficientNet_V2_M_Weights.DEFAULT
+            self.model = models.efficientnet_v2_m(weights=weights).to(device)
         
         if FREEZE_PRETRAINED_MODEL:
             for param in self.model.parameters():
@@ -85,22 +77,17 @@ class AffineRegressor(nn.Module):
             self.load_model(path)
 
         else:
-            # Get input dimension for the MLP based on ViT configuration
-            self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]
-            self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
-            
-            mlp_input_shape = len(self.embedding_to_use) * (self.num_patches**2) * self.hidden_size 
-    
-            if self.avg_embeddings or self.cls:
-                mlp_input_shape //= (self.num_patches**2) 
-
-            elif self.use_conv:
-                self.conv = ConvNet(input_dim= len(self.embedding_to_use)*self.hidden_size, batch_size=self.batch_size).to(device)
-                mlp_input_shape = 2 * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2 
-            
             # Initialize loss functions
             self.L2_loss = nn.MSELoss().to(device)
             self.huber_loss = nn.HuberLoss().to(device)
+
+            # Get input dimension for the MLP based on ViT configuration
+            self.hidden_size = self.model.config.hidden_sizes[-1] if self.resnet else 1280 if model_name==EFFICIENTNET else self.model.config.hidden_size
+            self.num_patches = 7 if self.resnet or model_name==EFFICIENTNET else self.model.config.image_size // self.model.config.patch_size   
+
+            if self.use_conv:
+                self.conv = ConvNet(input_dim= 2*self.hidden_size , batch_size=self.batch_size).to(device)
+                mlp_input_shape = 2 * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2 
 
             # Initialize MLP
             self.mlp = MLP(input_dim=mlp_input_shape).to(device)
@@ -366,24 +353,19 @@ class AffineRegressor(nn.Module):
         self.all_train_mse_angle = checkpoint.get("all_train_mse_angle", [])
         self.all_val_mse_angle = checkpoint.get("all_val_mse_angle", [])
 
+        # Initialize loss functions
+        self.L2_loss = nn.MSELoss().to(device)
+        self.huber_loss = nn.HuberLoss().to(device)
+
         # Get input dimension for the MLP based on ViT configuration
-        self.hidden_size = self.model.config.hidden_size if not self.resnet else self.model.config.hidden_sizes[-1]
-        self.num_patches = self.model.config.image_size // self.model.config.patch_size if not self.resnet else 7
-        
-        mlp_input_shape = len(self.embedding_to_use) * (self.num_patches**2) * self.hidden_size 
+        self.hidden_size = self.model.config.hidden_sizes[-1] if self.resnet else 1280 if self.model_name==EFFICIENTNET else self.model.config.hidden_size
+        self.num_patches = 7 if self.resnet or self.model_name==EFFICIENTNET else self.model.config.image_size // self.model.config.patch_size  
 
-        if self.avg_embeddings or self.cls:
-            mlp_input_shape //= (self.num_patches**2) 
-
-        elif self.use_conv:
+        if self.use_conv:
             self.conv = ConvNet(input_dim= 2*self.hidden_size, batch_size=self.batch_size).to(device)
             mlp_input_shape = len(self.embedding_to_use) * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2
             self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
-
-        # Initialize loss functions
-        self.L2_loss = nn.MSELoss().to(device)
-        self.huber_loss = nn.HuberLoss().to(device)
 
         # Load MLP
         self.mlp = MLP(input_dim=mlp_input_shape).to(device)

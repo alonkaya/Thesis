@@ -1,10 +1,10 @@
 import torch
-device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16, DINO = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32", "openai/clip-vit-base-patch16", "facebook/dino-vitb16"
+device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16, DINO, EFFICIENTNET = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32", "openai/clip-vit-base-patch16", "facebook/dino-vitb16", "timm/tf_efficientnetv2_m.in1k"
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &   ### REMEMBER TO FIRST MOVE THE MODEL FROM ORIGINAL PATH TO MNT PATH IN CASE OF COMPUTER==0 AND THE LAST RUN EXITED!!
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output.log 2>&1"
-# /mnt_hdd15tb/alonkay/Thesis/
+# find . -type f -name "model.pth"                  /mnt_hdd15tb/alonkay/Thesis/        /mnt/sda2/Alon
 
-MODEL = DINO
+MODEL = EFFICIENTNET
 
 ### Dataset ###
 CROP = 224
