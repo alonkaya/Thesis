@@ -836,7 +836,7 @@ def test_trained(pretrained_model):
         print(f'F_est: {F_est}')
         break
     # model.test(test_loader=test_loader, write=False)
-    # print(model.start_epoch)
+    print(model.start_epoch)
     # print(pretrained_model)
 
 def test_specific_F(F):
