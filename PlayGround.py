@@ -834,9 +834,11 @@ def test_trained(pretrained_model):
         F_est = model.forward(img1, img2)
         print(f'label: {label}')
         print(f'F_est: {F_est}')
+        print(f'First point pts1: {pts1[0]}')
+        print(f'First point pts2: {pts2[0]}')
         break
     # model.test(test_loader=test_loader, write=False)
-    print(model.start_epoch)
+    # print(model.start_epoch)
     # print(pretrained_model)
 
 def test_specific_F(F):
