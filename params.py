@@ -7,9 +7,9 @@ STEREO = True
 # find . -type f -name "model.pth"                  /mnt_hdd15tb/alonkay/Thesis/        /mnt/sda2/Alon
 
 PRETEXT_TRAIN = False
-SCENEFLOW = True
-FLYING = True
-MODEL = CLIP_MODEL_NAME
+SCENEFLOW = False
+FLYING = False
+MODEL = CLIP_MODEL_NAME_16
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0]
 FROZEN_HIGH_LAYERS = 0
 COMPUTER = 0 # 0 = 250  1 = 146  2 = else  

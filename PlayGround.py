@@ -823,15 +823,21 @@ def delete_odd_files(folder_path):
 
 def test_trained(pretrained_model):
     " Only need to change the data type in params i.e SCENEFLOW, KITTI.. "
-    batch_size=8
+    batch_size=1
 
     train_loader, val_loader, test_loader = get_data_loaders(train_size=0.004, part='head', batch_size=batch_size)
 
     model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
 
-    model.test(test_loader=test_loader, write=False)
-    print(model.start_epoch)
-    print(pretrained_model)
+    for img1, img2, label, pts1, pts2, _,  in test_loader:
+        img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
+        F_est = model.forward(img1, img2)
+        print(f'label: {label}')
+        print(f'F_est: {F_est}')
+        break
+    # model.test(test_loader=test_loader, write=False)
+    # print(model.start_epoch)
+    # print(pretrained_model)
 
 def test_specific_F(F):
     batch_size=1
@@ -905,8 +911,8 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 if __name__ == "__main__":
     p = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
 
-    # test_trained(p)
-    plot_errors()
+    test_trained(p)
+    # plot_errors()
     # RANSAC()
     # avg_trained()
     # test_specific_F(avg_F)
