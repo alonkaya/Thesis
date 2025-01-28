@@ -39,13 +39,13 @@ class RoMaNet(nn.Module):
         # For simplicity, assume x1_embeddings as queries and x2_embeddings as keys and values
         query = x1_embeddings.permute(1, 0, 2)  # Shape: [seq_len, batch, features]
         key_value = x2_embeddings.permute(1, 0, 2)  # Shape: [seq_len, batch, features]
-        decoded_features = self.transformer_decoder(query, key_value)
-        print(decoded_features.shape)
+        decoded_features = self.transformer_decoder(query, key_value) # Shape [num_patches, batch, features]
+
         # Classify probabilities for each anchor point
-        anchor_probs = F.softmax(self.classifier(decoded_features), dim=-1)
+        anchor_probs = F.softmax(self.classifier(decoded_features), dim=-1) # Shape [batch, num_patches]
 
         # Compute softargmax to get predicted coordinates
-        predicted_coordinates = torch.matmul(anchor_probs, self.anchor_points)
+        predicted_coordinates = torch.matmul(anchor_probs, self.anchor_points) # Shape [batch, 2]
 
         return predicted_coordinates
 
