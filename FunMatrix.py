@@ -30,13 +30,13 @@ def get_intrinsic_KITTI(calib_path, original_image_size, adjust_resize=True):
 
     k0, k1 = decompose_k(projection_matrix_cam0.reshape(3, 4)).to(device), decompose_k(projection_matrix_cam1.reshape(3, 4)).to(device)
 
-    if adjust_resize:
-        # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-        resized = torch.tensor([RESIZE, RESIZE]).to(device)
-        k0, k1 = adjust_k_resize(k0, original_image_size, resized), adjust_k_resize(k1, original_image_size, resized)
+    # if adjust_resize:
+    #     # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
+    #     resized = torch.tensor([RESIZE, RESIZE]).to(device)
+    #     k0, k1 = adjust_k_resize(k0, original_image_size, resized), adjust_k_resize(k1, original_image_size, resized)
 
-    center_crop_size = (RESIZE - CROP) // 2
-    k0, k1 = adjust_k_crop(k0, center_crop_size, center_crop_size) if not RANDOM_CROP else k0, adjust_k_crop(k1, center_crop_size, center_crop_size) if not RANDOM_CROP else k1
+    # center_crop_size = (RESIZE - CROP) // 2
+    # k0, k1 = adjust_k_crop(k0, center_crop_size, center_crop_size) if not RANDOM_CROP else k0, adjust_k_crop(k1, center_crop_size, center_crop_size) if not RANDOM_CROP else k1
 
     return k0, k1
 
@@ -603,24 +603,34 @@ if __name__ == "__main__":
     p1 = p1_all_points[0]
     p2 = p2_all_points[0]
     
+    p1_scaled = np.array([58.3084,  45.5892,   1.0000])
+    p2_scaled = np.array([59.0644,  45.5891,   1.0000])
 
     k_est = torch.tensor([[147.6471,   0.0000, 105.6796],
             [  0.0000, 489.2307, 125.6926],
             [  0.0000,   0.0000,   1.0000]])
-    label_est = torch.tensor([[[ 0.0000,  0.0000,  0.0000],
+    label_est = torch.tensor([[ 0.0000,  0.0000,  0.0000],
             [ 0.0000,  0.0000, -0.7071],
-            [ 0.0000,  0.7071,  0.0000]]])
-    F_est = torch.tensor([[[ 2.6418e-06,  2.3211e-03, -1.9656e-01],
+            [ 0.0000,  0.7071,  0.0000]])
+    F_est = torch.tensor([[ 2.6418e-06,  2.3211e-03, -1.9656e-01],
             [-2.2879e-03,  9.6480e-05, -6.8374e-01],
-            [ 1.9407e-01,  6.7338e-01,  5.2351e-02]]])
+            [ 1.9407e-01,  6.7338e-01,  5.2351e-02]])
 
 
-    p1_scaled = np.array([58.3084,  45.5892,   1.0000])
-    p2_scaled = np.array([59.0644,  45.5891,   1.0000])
-
+    k_ransac = torch.tensor([[147.6471,   0.0000, 122.6796],
+                            [  0.0000, 489.2307, 102.6926],
+                            [  0.0000,   0.0000,   1.0000]])
+    F_ransac = torch.tensor([[-1.1811e-05,  5.5577e-03, -1.0545e-01],
+                            [-5.1402e-03,  3.3468e-04, -7.3048e-01],
+                            [ 9.7062e-02,  6.7880e-01,  1.0000e+00]])
+    
+    pts1_ransac_scaled = np.array([76.0644,    22.589096])
+    pts2_ransac_scaled = np.array([75.30843,    22.589153])
 
     E_est, R_est, t_est = ComputeEssentialMatrix(F_est.numpy(), k_est.numpy(), k_est.numpy(), p1_scaled[:2], p2_scaled[:2])
     q_est = QuaternionFromMatrix(R_est)
+    # E_est_ransac, R_est_ransac, t_est_ransac = ComputeEssentialMatrix(F_ransac.numpy(), k_ransac.numpy(), k_ransac.numpy(), pts1_ransac_scaled[:2], pts1_ransac_scaled[:2])
+    # q_est_ransac = QuaternionFromMatrix(R_est_ransac)
 
     # E_gt, R_gt, t_gt = ComputeEssentialMatrix(label_est.numpy(), k_est.numpy(), k_est.numpy(), p1[:2], p2[:2])
     q_gt = QuaternionFromMatrix(R_gt)

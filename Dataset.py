@@ -85,14 +85,14 @@ class Dataset_stereo(torch.utils.data.Dataset):
 
         k0=self.k0.clone()
         k1=self.k1.clone()
-        if RANDOM_CROP:
-            top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
-            img0, img1 = TF.resize(img0, (RESIZE, RESIZE), antialias=True), TF.resize(img1, (RESIZE, RESIZE), antialias=True)
-            img0, img1 = TF.crop(img0, top_crop, left_crop, CROP, CROP), TF.crop(img1, top_crop, left_crop, CROP, CROP)
-            k0 = adjust_k_crop(k0, top_crop, left_crop)
-            k1 = adjust_k_crop(k1, top_crop, left_crop)
-            print(f'k0: {k0}')
-            print(f'k1: {k1}')
+        # if RANDOM_CROP:
+        #     top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
+        #     img0, img1 = TF.resize(img0, (RESIZE, RESIZE), antialias=True), TF.resize(img1, (RESIZE, RESIZE), antialias=True)
+        #     img0, img1 = TF.crop(img0, top_crop, left_crop, CROP, CROP), TF.crop(img1, top_crop, left_crop, CROP, CROP)
+        #     k0 = adjust_k_crop(k0, top_crop, left_crop)
+        #     k1 = adjust_k_crop(k1, top_crop, left_crop)
+        print(f'k0: {k0}')
+        print(f'k1: {k1}')
 
         img0 = self.transform(img0) # shape (channels, height, width)
         img1 = self.transform(img1) # shape (channels, height, width)
@@ -102,8 +102,8 @@ class Dataset_stereo(torch.utils.data.Dataset):
         # Normalize F-Matrix
         F = norm_layer(unnormalized_F.view(-1, 9)).view(3,3)
 
-        pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, height=H, width=W)
-        
+        # pts1, pts2 = adjust_points(self.keypoints, idx, top_crop, left_crop, height=H, width=W)
+        pts1, pts2 = adjust_points(self.keypoints, idx, height=H, width=W)
         if SCENEFLOW:
             # left_path = os.path.join(self.sequence_path, 'left', f'{idx:04}.{IMAGE_TYPE}')
             return img0, img1, F, pts1[:100], pts2[:100], self.seq_name
@@ -133,11 +133,11 @@ def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
 
 def get_transform():
     transforms = []
-    if not RANDOM_CROP: # original image size ~ 1200 * 700
-        transforms.extend([
-            v2.Resize((RESIZE, RESIZE), antialias=True),
-            v2.CenterCrop(CROP)
-        ])
+    # if not RANDOM_CROP: # original image size ~ 1200 * 700
+    #     transforms.extend([
+    #         v2.Resize((RESIZE, RESIZE), antialias=True),
+    #         v2.CenterCrop(CROP)
+    #     ])
     transforms.append(v2.Grayscale(num_output_channels=3))
     if AUGMENTATION:
         transforms.append(v2.ColorJitter(brightness=0.3, contrast=0.3))
