@@ -86,9 +86,9 @@ class Dataset_stereo(torch.utils.data.Dataset):
         k0=self.k0.clone()
         k1=self.k1.clone()
         # if RANDOM_CROP:
-        #     top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
-        #     img0, img1 = TF.resize(img0, (RESIZE, RESIZE), antialias=True), TF.resize(img1, (RESIZE, RESIZE), antialias=True)
-        #     img0, img1 = TF.crop(img0, top_crop, left_crop, CROP, CROP), TF.crop(img1, top_crop, left_crop, CROP, CROP)
+        top_crop, left_crop = random.randint(0, RESIZE-CROP), random.randint(0, RESIZE-CROP)
+        img0, img1 = TF.resize(img0, (RESIZE, RESIZE), antialias=True), TF.resize(img1, (RESIZE, RESIZE), antialias=True)
+        img0, img1 = TF.crop(img0, top_crop, left_crop, CROP, CROP), TF.crop(img1, top_crop, left_crop, CROP, CROP)
         #     k0 = adjust_k_crop(k0, top_crop, left_crop)
         #     k1 = adjust_k_crop(k1, top_crop, left_crop)
         print(f'k0: {k0}')
