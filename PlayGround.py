@@ -938,8 +938,8 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 if __name__ == "__main__":
     # p = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0" # Epochs 4518
-    p = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Efficient__use_reconstruction_True/BS_8__ratio_0.025__head__frozen_0"
-    # p = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Efficient__use_reconstruction_True/BS_8__ratio_0.05__head__frozen_0"
+    # p = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Efficient__use_reconstruction_True/BS_8__ratio_0.025__head__frozen_0"
+    p = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Efficient__use_reconstruction_True/BS_8__ratio_0.05__head__frozen_0"
 
     test_trained(p)
     # plot_errors()
