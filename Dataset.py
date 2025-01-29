@@ -91,8 +91,8 @@ class Dataset_stereo(torch.utils.data.Dataset):
             img0, img1 = TF.crop(img0, top_crop, left_crop, CROP, CROP), TF.crop(img1, top_crop, left_crop, CROP, CROP)
             k0 = adjust_k_crop(k0, top_crop, left_crop)
             k1 = adjust_k_crop(k1, top_crop, left_crop)
-            # print(f'k0: {k0}')
-            # print(f'k1: {k1}')
+            print(f'k0: {k0}')
+            print(f'k1: {k1}')
 
         img0 = self.transform(img0) # shape (channels, height, width)
         img1 = self.transform(img1) # shape (channels, height, width)
