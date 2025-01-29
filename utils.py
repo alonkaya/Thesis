@@ -307,27 +307,27 @@ def avg_results(output_path):
 
 
 
-def adjust_points(keypoints_dict, idx, top_crop=0, left_crop=0, height=0, width=0):
+def adjust_points(keypoints_dict, idx, top_crop, left_crop, height, width):
     " Keypoints_dict: A dictionary containing the keypoints for each image e.g {0: (pts1, pts2), 1: (pts1, pts2), ...} "
     # Convert keypoints to torch tensors
     pts1 = torch.tensor(keypoints_dict[idx][0], dtype=torch.float32).to(device) # shape [num_keypoints, 3]
     pts2 = torch.tensor(keypoints_dict[idx][1], dtype=torch.float32).to(device) # shape [num_keypoints, 3]
 
-    # # Adjust keypoints for the resized image
-    # scale = torch.tensor([RESIZE / width, RESIZE / height, 1], dtype=torch.float32).unsqueeze(0).to(device) # shape [1, 2]
-    # pts1 *= scale
-    # pts2 *= scale
+    # Adjust keypoints for the resized image
+    scale = torch.tensor([RESIZE / width, RESIZE / height, 1], dtype=torch.float32).unsqueeze(0).to(device) # shape [1, 2]
+    pts1 *= scale
+    pts2 *= scale
 
-    # edge_safety = 8 if SCENEFLOW else 1
-    # # Filter and adjust keypoints for the cropped image
-    # mask = (pts1[:, 0] >= left_crop+edge_safety) & (pts1[:, 0] < left_crop + CROP-edge_safety) & (pts1[:, 1] >= top_crop+edge_safety) & (pts1[:, 1] < top_crop + CROP-edge_safety) & \
-    #        (pts2[:, 0] >= left_crop+edge_safety) & (pts2[:, 0] < left_crop + CROP-edge_safety) & (pts2[:, 1] >= top_crop+edge_safety) & (pts2[:, 1] < top_crop + CROP-edge_safety) # shape [num_keypoints]
-    # pts1 = pts1[mask] 
-    # pts2 = pts2[mask]
+    edge_safety = 8 if SCENEFLOW else 1
+    # Filter and adjust keypoints for the cropped image
+    mask = (pts1[:, 0] >= left_crop+edge_safety) & (pts1[:, 0] < left_crop + CROP-edge_safety) & (pts1[:, 1] >= top_crop+edge_safety) & (pts1[:, 1] < top_crop + CROP-edge_safety) & \
+           (pts2[:, 0] >= left_crop+edge_safety) & (pts2[:, 0] < left_crop + CROP-edge_safety) & (pts2[:, 1] >= top_crop+edge_safety) & (pts2[:, 1] < top_crop + CROP-edge_safety) # shape [num_keypoints]
+    pts1 = pts1[mask] 
+    pts2 = pts2[mask]
     
-    # crop_offset = torch.tensor([left_crop, top_crop, 0], dtype=torch.float32).unsqueeze(0).to(device) # shape [1, 2]
-    # pts1 -= crop_offset
-    # pts2 -= crop_offset
+    crop_offset = torch.tensor([left_crop, top_crop, 0], dtype=torch.float32).unsqueeze(0).to(device) # shape [1, 2]
+    pts1 -= crop_offset
+    pts2 -= crop_offset
 
     return pts1, pts2
 

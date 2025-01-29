@@ -30,13 +30,13 @@ def get_intrinsic_KITTI(calib_path, original_image_size, adjust_resize=True):
 
     k0, k1 = decompose_k(projection_matrix_cam0.reshape(3, 4)).to(device), decompose_k(projection_matrix_cam1.reshape(3, 4)).to(device)
 
-    # if adjust_resize:
-    #     # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
-    #     resized = torch.tensor([RESIZE, RESIZE]).to(device)
-    #     k0, k1 = adjust_k_resize(k0, original_image_size, resized), adjust_k_resize(k1, original_image_size, resized)
+    if adjust_resize:
+        # Adjust K according to resize and center crop transforms and compute ground-truth F matrix
+        resized = torch.tensor([RESIZE, RESIZE]).to(device)
+        k0, k1 = adjust_k_resize(k0, original_image_size, resized), adjust_k_resize(k1, original_image_size, resized)
 
-    # center_crop_size = (RESIZE - CROP) // 2
-    # k0, k1 = adjust_k_crop(k0, center_crop_size, center_crop_size) if not RANDOM_CROP else k0, adjust_k_crop(k1, center_crop_size, center_crop_size) if not RANDOM_CROP else k1
+    center_crop_size = (RESIZE - CROP) // 2
+    k0, k1 = adjust_k_crop(k0, center_crop_size, center_crop_size) if not RANDOM_CROP else k0, adjust_k_crop(k1, center_crop_size, center_crop_size) if not RANDOM_CROP else k1
 
     return k0, k1
 
@@ -167,14 +167,14 @@ def update_distances(img1, img2, F, pts1, pts2):
     epipolar_geo = EpipolarGeometry(img1, img2, F, pts1, pts2)
 
     algebraic_dist = epipolar_geo.get_mean_algebraic_distance()
-    RE1_dist = epipolar_geo.get_RE1_distance()
     SED_dist = epipolar_geo.get_mean_SED_distance()
-    return algebraic_dist, RE1_dist, SED_dist
+    RE1_dist = epipolar_geo.get_RE1_distance()
+    return algebraic_dist, SED_dist, RE1_dist
 
 def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, data_type, epoch=0):
     prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
 
-    algebraic_dist_pred, RE1_dist_pred, SED_dist_pred = update_distances(img1, img2, output, pts1, pts2)
+    algebraic_dist_pred, SED_dist_pred, RE1_dist_pred = update_distances(img1, img2, output, pts1, pts2)
 
     stats[f"{prefix}algebraic_pred"] = stats[f"{prefix}algebraic_pred"] + (algebraic_dist_pred.detach())
     stats[f"{prefix}RE1_pred"] = stats[f"{prefix}RE1_pred"] + (RE1_dist_pred.detach())
@@ -182,13 +182,13 @@ def update_epoch_stats(stats, img1, img2, label, output, pts1, pts2, data_type, 
 
     # Compute the distances from the ground truth
     if epoch == 0 or data_type == "test":
-        algebraic_dist_truth, RE1_dist_truth, SED_dist_truth = update_distances(img1, img2, label, pts1.detach(), pts2.detach())
+        algebraic_dist_truth, SED_dist_truth, RE1_dist_truth  = update_distances(img1, img2, label, pts1.detach(), pts2.detach())
 
         stats[f"{prefix}algebraic_truth"] = stats[f"{prefix}algebraic_truth"] + (algebraic_dist_truth)
         stats[f"{prefix}RE1_truth"] = stats[f"{prefix}RE1_truth"] + (RE1_dist_truth) 
         stats[f"{prefix}SED_truth"] = stats[f"{prefix}SED_truth"] + (SED_dist_truth) 
 
-    return SED_dist_pred
+    return algebraic_dist_pred, SED_dist_pred, RE1_dist_pred
 
 
 class EpipolarGeometry:
