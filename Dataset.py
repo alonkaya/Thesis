@@ -133,11 +133,11 @@ def get_valid_indices(sequence_len, sequence_path, jump_frames=JUMP_FRAMES):
 
 def get_transform():
     transforms = []
-    # if not RANDOM_CROP: # original image size ~ 1200 * 700
-    #     transforms.extend([
-    #         v2.Resize((RESIZE, RESIZE), antialias=True),
-    #         v2.CenterCrop(CROP)
-    #     ])
+    if not RANDOM_CROP: # original image size ~ 1200 * 700
+        transforms.extend([
+            v2.Resize((RESIZE, RESIZE), antialias=True),
+            v2.CenterCrop(CROP)
+        ])
     transforms.append(v2.Grayscale(num_output_channels=3))
     if AUGMENTATION:
         transforms.append(v2.ColorJitter(brightness=0.3, contrast=0.3))
