@@ -512,13 +512,13 @@ Test Algebraic dist: {alg/10}
 Test SED dist: {sed/10}
 Test RE1 dist: {re1/10}
 
+Trimmed algs: {trimmed_algs/10}
+Trimmed seds: {trimmed_seds/10}
+Trimmed re1s: {trimmed_re1s/10}
+
 Test Algebraic dist truth: {epoch_stats["test_algebraic_truth"]}
 Test SED dist truth: {epoch_stats["test_SED_truth"]}
 Test RE1 dist truth: {epoch_stats["test_RE1_truth"]}
-
-Mean Trimmed algs: {trimmed_algs/10}
-Mean Trimmed seds: {trimmed_seds/10}
-Mean Trimmed re1s: {trimmed_re1s/10}
 
 {self.plots_path}\n"""
         print_and_write(output, self.plots_path) if write else print(output)
