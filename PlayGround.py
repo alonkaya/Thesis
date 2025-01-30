@@ -850,18 +850,17 @@ def test_trained(pretrained_model):
     train_loader, val_loader, test_loader = get_data_loaders(train_size=0.002, part='head', batch_size=batch_size)
     with torch.no_grad():
         model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
+        print(f'\nEpochs: {model.start_epoch}')
 
-        for img1, img2, label, pts1, pts2, _,  in test_loader:
-            img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
-            F_est = model.forward(img1, img2)
+        # for img1, img2, label, pts1, pts2, _,  in test_loader:
+        #     img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
+        #     F_est = model.forward(img1, img2)
             # print(f'label: {label}')
             # print(f'F_est: {F_est}')
             # print(f'First point pts1: {pts1[0]}')
             # print(f'First point pts2: {pts2[0]}')
             # break
         model.test(test_loader=test_loader, write=False)
-        print(model.start_epoch)
-        print(pretrained_model)
 
 def test_specific_F(F):
     batch_size=1
