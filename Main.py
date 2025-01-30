@@ -84,8 +84,6 @@ if __name__ == "__main__":
                                 print(f'no model for {model_path}')
                                 continue
 
-                train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
-
                 model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, \
                                          plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl, frozen_high_layers=frozen_high_layers).to(device)
 
@@ -99,7 +97,9 @@ if __name__ == "__main__":
                         print(f"\n{model.plots_path}\nAlready well trained, no need for other seed training\n")
                         sys.stdout.flush()
 
-                elif model.start_epoch < model.num_epochs:
+                elif model.start_epoch < model.num_epochs+1000:
+                        train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
+
                         parameters = f"""\n###########################################################################################################################################################\n
 {ADDITIONS} learning rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
 batch_size: {batch_size}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo}, val_sequences: {val_sequences_stereo}, RL_TEST_NAMES: {RL_TEST_NAMES}, dataset: {dataset},
@@ -119,11 +119,12 @@ crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH
                                 os.remove(os.path.join(model.parent_model_path, 'backup_model.pth'))
                         else:
                                 print_and_write(f"\n{model.plots_path} no backup to delete after job done\n", model.plots_path)
-
+                        
+                        del train_loader, val_loader, test_loader,
                 else: 
                         print(f"Model {plots_path} already trained")
                         sys.stdout.flush()
                 
-                del train_loader, val_loader, test_loader, model
+                del model
                 torch.cuda.empty_cache()
 
