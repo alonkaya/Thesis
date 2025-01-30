@@ -501,7 +501,7 @@ def paramterization_layer(x, plots_path):
             print_and_write(f'{f}\n', plots_path)
         if rank != 2:
             U, S, V = torch.svd(f)
-            print_and_write(f"""rank of estimated F not 2: {rank}                            
+            print_and_write(f"""\n##################\nrank of estimated F not 2: {rank}                            
 singular values: {S.cpu().tolist()}
 {f}\n\n""", plots_path)
 
