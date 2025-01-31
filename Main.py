@@ -97,7 +97,7 @@ if __name__ == "__main__":
                         print(f"\n{model.plots_path}\nAlready well trained, no need for other seed training\n")
                         sys.stdout.flush()
 
-                elif model.start_epoch < model.num_epochs:
+                elif model.start_epoch < model.num_epochs+10000:
                         train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
 
                         parameters = f"""\n###########################################################################################################################################################\n
