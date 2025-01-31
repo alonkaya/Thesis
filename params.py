@@ -59,7 +59,7 @@ NUM_WORKERS = 0
 SAVE_MODEL = True
 GET_OLD_PATH = False
 LR = [1e-4]             
-SEED = [ 600]
+SEED = [700]
 TRIM_PTS = False
 
 ### Epipolar geometry ###
