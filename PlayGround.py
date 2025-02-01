@@ -601,23 +601,30 @@ def plot_errors():
     dino_std_RE1 =  [0.006350853, 0.021571586, 0.011590226, 0.0090185,    0.011547005,   0.049662192, 0.079657601, 0.105509873, 0.165955817]
 
     # EfficientNet
-    efficient_mean_alg =  []
-    efficient_mean_SED =  []
-    efficient_mean_RE1 =  []
-    efficient_std_alg =  []
-    efficient_std_SED =  []
-    efficient_std_RE1 =  []
+    efficient_mean_alg = [0.241333333, 0.332666667, 0.356666667, 0.351333333, 0.44,         0.422,     0.434666667]
+    efficient_mean_SED = [0.248333333, 0.414333333, 0.492666667, 0.442666667, 0.596666667, 0.558,       0.607666667]
+    efficient_mean_RE1 = [0.070666667, 0.137,       0.156,       0.161666667, 0.223333333,  0.212666667, 0.265333333]
+    efficient_std_alg =  [0.002309401, 0.042442117, 0.040414519, 0.082099533, 0.01,         0.076315136, 0.145661709]
+    efficient_std_SED =  [0.014433757, 0.086001938, 0.097372138, 0.139173752, 0.015275252, 0.140114239, 0.255551039]
+    efficient_std_RE1 =  [0.001154701, 0.047085029, 0.015099669, 0.072002315, 0.025166115, 0.079757967, 0.16218919]
+
 
     # Flying
-    flying_clip_alg =  [0.36, 0.39, 1]
-    flying_clip_SED = [0.71, 0.8, 3.34]
-    flying_clip_RE1 = [0.14, 0.16, 1.19]
-    flying_clip_16_alg =  [0.38, 0.34, 0.738]
-    flying_clip_16_SED =  [0.73, 0.71, 2.34]
-    flying_clip_16_RE1 = [0.14, 0.138, 0.689]
-    flying_resnet_alg =  [0.41, 0.44, 0.78]
-    flying_resnet_SED =  [0.84, 1, 2.57]
-    flying_resnet_RE1 =  [0.175, 0.21, 0.73]
+    flying_clip_alg =  [0.293, 0.389, 0.67]
+    flying_clip_SED = [0.54, 0.828, 2.1]
+    flying_clip_RE1 = [0.097, 0.169, 0.53]
+    flying_clip_16_alg =  [0.35, 0.355, 0.578]
+    flying_clip_16_SED =  [0.69, 0.75, 1.74]
+    flying_clip_16_RE1 = [0.13, 0.143, 0.414]
+    flying_resnet_alg =  []
+    flying_resnet_SED =  []
+    flying_resnet_RE1 =  []
+    flying_dino_alg = [0.34, 0.325, 0.589]
+    flying_dino_SED = [0.7, 0.71, 1.814]
+    flying_dino_RE1 = [0.13, 0.135, 0.43]
+    flying_efficient_alg =  []
+    flying_efficient_SED =  []
+    flying_efficient_RE1 =  []
 
     os.makedirs('results', exist_ok=True)
     x_indices = range(len(clip_32_mean_alg_0))  # For Frozen 0 (has an extra point)
