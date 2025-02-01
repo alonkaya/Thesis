@@ -16,7 +16,7 @@ transform = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    transforms.Normalize(mean=norm_mean, std=norm_std)
 ])
 
 # class RoMaNet(nn.Module):
@@ -129,8 +129,8 @@ class ImageFeatureTransformer(nn.Module):
 if __name__ == '__main__':
     img1 = Image.open('sequences/00/image_0/000088.png').convert('RGB')
     img2 = Image.open('sequences/00/image_1/000088.png').convert('RGB')
-    img1 = transform(img1).unsqueeze(0)  
-    img2 = transform(img2).unsqueeze(0)  
+    img1 = transform(img1).unsqueeze(0).to(device)
+    img2 = transform(img2).unsqueeze(0).to(device)
 
     pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
     # pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
