@@ -1,4 +1,6 @@
 from PIL import Image
+from matplotlib import pyplot as plt
+import numpy as np
 from Dataset import get_data_loaders
 from params import *
 import torch
@@ -6,6 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import  CLIPVisionModel
 from torchvision import transforms
+import seaborn as sns
 
 # Define the transform
 transform = transforms.Compose([
@@ -15,39 +18,109 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
+# class RoMaNet(nn.Module):
+#     def __init__(self, dino_model):
+#         super(RoMaNet, self).__init__()
+#         self.device = device
+#         self.model = CLIPVisionModel.from_pretrained(dino_model).to(device)
 
-class RoMaNet(nn.Module):
-    def __init__(self, dino_model, device='cuda'):
-        super(RoMaNet, self).__init__()
-        self.model = CLIPVisionModel.from_pretrained(dino_model)
+#         num_features = 768  # assuming this matches the output dimension of CLIP's transformer
+#         self.num_patches = (224 // 16) * (224 // 16)  # image size is 224 and patch size is 16
+#         self.transformer_decoder = nn.TransformerDecoder(
+#             nn.TransformerDecoderLayer(d_model=num_features, nhead=12), 
+#             num_layers=6
+#         )
+#         self.anchor_points = nn.Parameter(torch.rand(self.num_patches, 2))  # Randomly initialize anchor points
+#         self.classifier = nn.Linear(num_features, self.num_patches)  # Output layer for anchor probabilities
 
-        # Assuming an output size similar to the number of patches
-        self.num_patches = (224 // 16) * (224 // 16)  # as image size is 224 and patch size is 16
-        self.transformer_decoder = nn.TransformerDecoder(
-            nn.TransformerDecoderLayer(d_model=768, nhead=12), 
-            num_layers=6
+#     def forward(self, x1, x2):
+#         x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :]  # Eliminate the CLS token
+#         x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :]  # Eliminate the CLS token
+
+#         query = x1_embeddings.permute(1, 0, 2)  # [seq_len, batch, features]
+#         key_value = x2_embeddings.permute(1, 0, 2)  # [seq_len, batch, features]
+#         # decoded_features = self.transformer_decoder(query, key_value)
+#         # attention_weights = self.transformer_decoder.layers[0].self_attn.attn_output_weights.detach().cpu().numpy()
+
+#         # anchor_probs = F.softmax(self.classifier(decoded_features), dim=-1)
+
+#         # Capture attention weights
+#         attn_weights_list = []
+#         def hook_fn(module, input, output):
+#             print(output.shape)
+#             attn_weights_list.append(output[1].detach().cpu().numpy())
+
+#         # Hook the attention module to extract attention weights
+#         for layer in self.transformer_decoder.layers:
+#             layer.self_attn.register_forward_hook(hook_fn)
+
+#         # Transformer decoder expects (target, memory)
+#         output = self.transformer_decoder(query, key_value)
+
+#         # Average across heads for visualization
+#         attention_weights = np.mean(attention_weights, axis=0)
+#         plt.imshow(attention_weights, cmap='viridis')
+#         plt.colorbar()
+#         plt.title('Transformer Decoder Attention Map')
+#         plt.show()
+
+#         return attention_weights
+
+#     def visualize_attention(self, attention_weights, layer=0, head=0, batch=0):
+#         # Extract attention map for specific layer, head, and image in batch
+#         attention_map = attention_weights[layer][batch][head].detach().cpu().numpy()
+
+#         plt.figure(figsize=(10, 8))
+#         sns.heatmap(attention_map, cmap='viridis', square=True)
+#         plt.title(f'Attention Map - Layer {layer}, Head {head}, Batch {batch}')
+#         plt.xlabel('Key Sequences (Image 2 Patches)')
+#         plt.ylabel('Query Sequences (Image 1 Patches)')
+#         plt.show()
+class ImageFeatureTransformer(nn.Module):
+    def __init__(self, dino_model='openai/clip-vit-base-patch32', num_features=768, device='cuda'):
+        super().__init__()
+        self.device = device
+        self.model = CLIPVisionModel.from_pretrained(dino_model).to(device)
+
+        # Transformer Decoder Layer
+        self.decoder_layer = nn.TransformerDecoderLayer(
+            d_model=num_features, nhead=12, batch_first=True
         )
-        self.anchor_points = nn.Parameter(torch.rand(self.num_patches, 2))  # Randomly initialize anchor points
-        self.classifier = nn.Linear(768, self.num_patches)  # Output layer for anchor probabilities
+        self.transformer_decoder = nn.TransformerDecoder(self.decoder_layer, num_layers=6).to(device)
 
     def forward(self, x1, x2):
-        # Extract features
-        x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :]  # Eliminate the CLS token
-        x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :]  # Eliminate the CLS token
+        # Extract image embeddings
+        x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :]  # Remove CLS token
+        x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :]  # Remove CLS token
 
-        # Feature matching using transformer decoder
-        # For simplicity, assume x1_embeddings as queries and x2_embeddings as keys and values
-        query = x1_embeddings.permute(1, 0, 2)  # Shape: [seq_len, batch, features]
-        key_value = x2_embeddings.permute(1, 0, 2)  # Shape: [seq_len, batch, features]
-        decoded_features = self.transformer_decoder(query, key_value) # Shape [num_patches, batch, features]
+        query = x1_embeddings  # [batch, seq_len, features]
+        key_value = x2_embeddings  # [batch, seq_len, features]
 
-        # Classify probabilities for each anchor point
-        anchor_probs = F.softmax(self.classifier(decoded_features), dim=-1) # Shape [batch, num_patches]
+        attention_maps = []
+        output_features = query.clone()
 
-        # Compute softargmax to get predicted coordinates
-        predicted_coordinates = torch.matmul(anchor_probs, self.anchor_points) # Shape [batch, 2]
+        for layer in self.transformer_decoder.layers:
+            # Ensure need_weights=True to get attention maps
+            attn_output, attn_weights = layer.self_attn(output_features, key_value, key_value, need_weights=True)
+            attention_maps.append(attn_weights.detach().cpu().numpy())
 
-        return predicted_coordinates
+            # Apply residual connection and normalization
+            output_features = layer.norm1(attn_output + output_features)
+
+        return output_features, attention_maps
+
+    def visualize_attention(self, image1, image2):
+
+        _, attention_maps = self.forward(image1, image2)
+
+        # Take the first layer's attention map and average over heads
+        avg_attention = np.mean(attention_maps[0], axis=0)
+
+        plt.imshow(avg_attention, cmap='viridis')
+        plt.colorbar()
+        plt.title('Transformer Decoder Attention Map')
+        plt.show()
+
 
 if __name__ == '__main__':
     img1 = Image.open('sequences/00/image_0/000000.png').convert('RGB')
@@ -58,12 +131,11 @@ if __name__ == '__main__':
     dino = "facebook/dino-vitb16"
     clip = "openai/clip-vit-base-patch16"
 
-    roma = RoMaNet(clip)
-    predictions = roma(img1, img2)
-    print(predictions.shape) 
+    # model = RoMaNet(clip)
+    # anchor_probs, attention_weights = model(img1, img2)
 
-
-
+    model = ImageFeatureTransformer(device=device)
+    model.visualize_attention(img1, img2)
 
 
 
@@ -128,7 +200,7 @@ class ManualTransformerDecoder(nn.Module):
         # Calculate attention scores
         attention_scores = torch.matmul(queries, keys.transpose(-2, -1)) / (self.head_dim ** 0.5)
         attention_probs = F.softmax(attention_scores, dim=-1)
-        attention_probs = self.dropout(attention_probs)
+        attention_probs = self.dropout(attention_probs) # shape (batch_size, num_heads, num_patches, num_patches)
         
         # Weighted sum of values
         context = torch.matmul(attention_probs, values)
