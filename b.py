@@ -123,7 +123,7 @@ class ImageFeatureTransformer(nn.Module):
 
         # Add a colorbar for both subplots
         cbar = fig.colorbar(im2, ax=axs, orientation='vertical', shrink=0.8)
-        cbar.set_label('Attention Weight')
+        cbar.set_label('Attention Weight no ft')
         fig.savefig('attention_maps.png')
 
 
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_path).to(device)
     
     for img1, img2, _, _, _, _ in test_loader:
-        model = ImageFeatureTransformer(model, device=device)
+        model = ImageFeatureTransformer(device=device)
         model.visualize_attention(img1, img2)
         break
 
