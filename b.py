@@ -127,8 +127,8 @@ class ImageFeatureTransformer(nn.Module):
 
 
 if __name__ == '__main__':
-    img1 = Image.open('sequences/00/image_0/000000.png').convert('RGB')
-    img2 = Image.open('sequences/00/image_1/000000.png').convert('RGB')
+    img1 = Image.open('sequences/00/image_0/000088.png').convert('RGB')
+    img2 = Image.open('sequences/00/image_1/000088.png').convert('RGB')
     img1 = transform(img1).unsqueeze(0)  
     img2 = transform(img2).unsqueeze(0)  
 
