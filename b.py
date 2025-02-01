@@ -103,15 +103,15 @@ class ImageFeatureTransformer(nn.Module):
         attention_scores = torch.matmul(query, key.transpose(-2, -1))  # [batch, seq_len, seq_len]
         attention_scores = attention_scores / (d_k ** 0.5)             # Scale by sqrt(d_k)
 
-        attn_weights = F.softmax(attention_scores, dim=-1).detach().cpu().numpy()        # [batch, seq_len, seq_len]
+        attn_weights = F.softmax(attention_scores, dim=-1)        # [batch, seq_len, seq_len]
 
         # for layer in self.transformer_decoder.layers:
         #     # Ensure need_weights=True to get attention maps
         #     attn_output, attn_weights = layer.self_attn(query, key, value, need_weights=True) # attn_weights shape: [batch, num_patches, num_patches] After averaging heads.
         #     attention_maps.append(attn_weights.detach().cpu().numpy())
 
-        print(attn_weights[0].shape)
-        return attn_weights
+        print(attn_weights.shape)
+        return attention_scores.detach().cpu().numpy()
 
     def visualize_attention(self, image1, image2):
         with torch.no_grad():
