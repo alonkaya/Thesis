@@ -114,13 +114,21 @@ class ImageFeatureTransformer(nn.Module):
         
         fig, axs = plt.subplots(1, 2, figsize=(14, 8))
 
-        axs[0].imshow(attention_layer_1[0], cmap='viridis')
-        axs[0].set_title('Attention Map First layer')
-        axs[1].imshow(attention_maps_6[0], cmap='viridis')
-        axs[1].set_title('Attention Map Last layer')
-        for ax in axs:
-            plt.colorbar(ax=ax)
-        
+        # Display attention maps
+        im1 = axs[0].imshow(attention_layer_1[0], cmap='viridis')
+        axs[0].set_title('Attention Map First Layer')
+
+        im2 = axs[1].imshow(attention_maps_6[0], cmap='viridis')
+        axs[1].set_title('Attention Map Last Layer')
+
+        # Add a colorbar for both subplots
+        cbar = fig.colorbar(im2, ax=axs, orientation='vertical', shrink=0.8)
+        cbar.set_label('Attention Weight')
+
+        # Improve layout
+        plt.tight_layout()
+
+        # Save the figure
         fig.savefig('attention_maps.png')
 
 
