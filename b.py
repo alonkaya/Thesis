@@ -99,10 +99,12 @@ class ImageFeatureTransformer(nn.Module):
         value = x2_embeddings  # [batch, seq_len, features]
         attention_maps = []
 
-        for layer in self.transformer_decoder.layers:
-            # Ensure need_weights=True to get attention maps
-            attn_output, attn_weights = layer.self_attn(query, key, value, need_weights=True) # attn_weights shape: [batch, num_patches, num_patches] After averaging heads.
-            attention_maps.append(attn_weights.detach().cpu().numpy())
+        cc = x1_embeddings @ x2_embeddings.permute(0, 2, 1)
+        attention_maps.append(cc.detach().cpu().numpy())
+        # for layer in self.transformer_decoder.layers:
+        #     # Ensure need_weights=True to get attention maps
+        #     attn_output, attn_weights = layer.self_attn(query, key, value, need_weights=True) # attn_weights shape: [batch, num_patches, num_patches] After averaging heads.
+        #     attention_maps.append(attn_weights.detach().cpu().numpy())
 
         print(len(attention_maps), attention_maps[0].shape)
         return attention_maps
@@ -126,7 +128,7 @@ class ImageFeatureTransformer(nn.Module):
 
         # Add a colorbar for both subplots
         cbar = fig.colorbar(im2, ax=axs, orientation='vertical', shrink=0.8)
-        fig.savefig('attention_maps_clip_16_orig_images.png')
+        fig.savefig('attention_maps_clip_16_cc.png')
 
 
 if __name__ == '__main__':
