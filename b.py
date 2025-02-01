@@ -95,9 +95,9 @@ class ImageFeatureTransformer(nn.Module):
         x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :]  # Remove CLS token
         x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :]  # Remove CLS token
 
-        query = x1_embeddings  # [batch, seq_len(num_patches), features]
-        key = x2_embeddings  # [batch, seq_len(num_patches), features]
-        value = x2_embeddings  # [batch, seq_len, features]
+        query = x2_embeddings  # [batch, seq_len(num_patches), features]
+        key = x1_embeddings  # [batch, seq_len(num_patches), features]
+        value = x1_embeddings  # [batch, seq_len, features]
         attention_maps = []
 
         for layer in self.transformer_decoder.layers:
