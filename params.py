@@ -7,12 +7,12 @@ STEREO = True
 # find . -type f -name "model.pth"                  /mnt_hdd15tb/alonkay/Thesis/        /mnt/sda2/Alon
 
 PRETEXT_TRAIN = False
-SCENEFLOW = False
-FLYING = False
-MODEL = EFFICIENTNET
+SCENEFLOW = True
+FLYING = True
+MODEL = RESNET_MODEL_NAME
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0]
 FROZEN_HIGH_LAYERS = 0
-COMPUTER = 1 # 0 = 250  1 = 146  2 = else  
+COMPUTER = 2 # 0 = 250  1 = 146  2 = else  
 SEQ_RATIOS = [0.004] if not SCENEFLOW else [170] if FLYING else None     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]  /  [9, 80, 170]                                             
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = False
@@ -59,7 +59,7 @@ NUM_WORKERS = 0
 SAVE_MODEL = True
 GET_OLD_PATH = False
 LR = [1e-4]             
-SEED = [600]
+SEED = [42,300,500,600,700] # 42, 300, 500, 600, 700
 TRIM_PTS = False
 
 ### Epipolar geometry ###
