@@ -109,22 +109,21 @@ class ImageFeatureTransformer(nn.Module):
         return attention_maps
 
     def visualize_attention(self, image1, image2):
-        attention_layer_1 = self.forward(image1, image2)[0]  # First Layer
-        attention_maps_6 = self.forward(image1, image2)[5] # Last Layer
-        
+        with torch.no_grad():
+            attention_layers = self.forward(image1, image2)  # First Layer
+            attention_layer_1 = attention_layers[0] # First Layer
+            attention_maps_6 = attention_layers[-1] # Last Layer
+
         fig, axs = plt.subplots(1, 2, figsize=(14, 8))
 
-        # Display attention maps
         im1 = axs[0].imshow(attention_layer_1[0], cmap='viridis')
-        axs[0].set_title('Attention Map First Layer')
-
         im2 = axs[1].imshow(attention_maps_6[0], cmap='viridis')
+        axs[0].set_title('Attention Map First Layer')
         axs[1].set_title('Attention Map Last Layer')
 
         # Add a colorbar for both subplots
         cbar = fig.colorbar(im2, ax=axs, orientation='vertical', shrink=0.8)
-        cbar.set_label('Attention Weight')
-        fig.savefig('attention_maps_no_ft.png')
+        fig.savefig('attention_maps_clip.png')
 
 
 if __name__ == '__main__':
@@ -133,17 +132,18 @@ if __name__ == '__main__':
     # img1 = transform(img1).unsqueeze(0)  
     # img2 = transform(img2).unsqueeze(0)  
 
-    pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
+    pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
 
     batch_size=1
     _, _, test_loader = get_data_loaders(train_size=0.002, part='head', batch_size=batch_size)
 
-    model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_path).to(device)
-    
-    for img1, img2, _, _, _, _ in test_loader:
-        model = ImageFeatureTransformer(device=device)
-        model.visualize_attention(img1, img2)
-        break
+    with torch.no_grad():
+        model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_path).to(device)
+        
+        for img1, img2, _, _, _, _ in test_loader:
+            model = ImageFeatureTransformer(model, device=device)
+            model.visualize_attention(img1, img2)
+            break
 
 
 
