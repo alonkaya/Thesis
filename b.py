@@ -79,9 +79,8 @@ transform = transforms.Compose([
 #         plt.show()
 
 class ImageFeatureTransformer(nn.Module):
-    def __init__(self, model=None, dino_model='openai/clip-vit-base-patch16', num_features=768, device='cuda'):
+    def __init__(self, model=None, dino_model='openai/clip-vit-base-patch16', num_features=768):
         super().__init__()
-        self.device = device
         self.model = CLIPVisionModel.from_pretrained(dino_model).to(device) if model==None else model.model
 
         # Transformer Decoder Layer
@@ -120,6 +119,10 @@ class ImageFeatureTransformer(nn.Module):
         im2 = axs[1].imshow(attention_maps_6[0], cmap='viridis')
         axs[0].set_title('Attention Map First Layer')
         axs[1].set_title('Attention Map Last Layer')
+        axs[0].set_xlabel('Patch num in first image')        
+        axs[0].set_ylabel('Patch num in second image')
+        axs[1].set_xlabel('Patch num in first image')
+        axs[1].set_ylabel('Patch num in second image')
 
         # Add a colorbar for both subplots
         cbar = fig.colorbar(im2, ax=axs, orientation='vertical', shrink=0.8)
@@ -144,7 +147,7 @@ if __name__ == '__main__':
         # for img1, img2, _, _, _, _ in test_loader:
         model = ImageFeatureTransformer(model, device=device)
         model.visualize_attention(img1, img2)
-        # break
+            # break
 
 
 
