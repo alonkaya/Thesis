@@ -95,9 +95,9 @@ class ImageFeatureTransformer(nn.Module):
         x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :]  # Remove CLS token
         x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :]  # Remove CLS token
 
-        query = x2_embeddings  # [batch, seq_len(num_patches), features]
-        key = x1_embeddings  # [batch, seq_len(num_patches), features]
-        value = x1_embeddings  # [batch, seq_len, features]
+        query = x1_embeddings  # [batch, seq_len(num_patches), features]
+        key = x2_embeddings  # [batch, seq_len(num_patches), features]
+        value = x2_embeddings  # [batch, seq_len, features]
         attention_maps = []
 
         for layer in self.transformer_decoder.layers:
@@ -123,17 +123,17 @@ class ImageFeatureTransformer(nn.Module):
 
         # Add a colorbar for both subplots
         cbar = fig.colorbar(im2, ax=axs, orientation='vertical', shrink=0.8)
-        fig.savefig('attention_maps_clip.png')
+        fig.savefig('attention_maps_clip_16_orig_images.png')
 
 
 if __name__ == '__main__':
-    # img1 = Image.open('sequences/00/image_0/000000.png').convert('RGB')
-    # img2 = Image.open('sequences/00/image_1/000000.png').convert('RGB')
-    # img1 = transform(img1).unsqueeze(0)  
-    # img2 = transform(img2).unsqueeze(0)  
+    img1 = Image.open('sequences/00/image_0/000000.png').convert('RGB')
+    img2 = Image.open('sequences/00/image_1/000000.png').convert('RGB')
+    img1 = transform(img1).unsqueeze(0)  
+    img2 = transform(img2).unsqueeze(0)  
 
-    # pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
-    pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
+    pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
+    # pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
 
     batch_size=1
     _, _, test_loader = get_data_loaders(train_size=0.002, part='head', batch_size=batch_size)
@@ -141,10 +141,10 @@ if __name__ == '__main__':
     with torch.no_grad():
         model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_path).to(device)
         
-        for img1, img2, _, _, _, _ in test_loader:
-            model = ImageFeatureTransformer(model, device=device)
-            model.visualize_attention(img1, img2)
-            break
+        # for img1, img2, _, _, _, _ in test_loader:
+        model = ImageFeatureTransformer(model, device=device)
+        model.visualize_attention(img1, img2)
+        # break
 
 
 
