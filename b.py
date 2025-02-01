@@ -115,12 +115,12 @@ class ImageFeatureTransformer(nn.Module):
         fig, axs = plt.subplots(1, 2, figsize=(14, 8))
 
         axs[0].imshow(attention_layer_1[0], cmap='viridis')
-        axs[0].title('Attention Map First layer')
+        axs[0].set_title('Attention Map First layer')
         axs[1].imshow(attention_maps_6[0], cmap='viridis')
-        axs[1].title('Attention Map Last layer')
+        axs[1].set_title('Attention Map Last layer')
         
         plt.colorbar()
-        plt.savefig('attention_maps.png')
+        fig.savefig('attention_maps.png')
 
 
 if __name__ == '__main__':
@@ -129,8 +129,6 @@ if __name__ == '__main__':
     # img1 = transform(img1).unsqueeze(0)  
     # img2 = transform(img2).unsqueeze(0)  
 
-    dino = "facebook/dino-vitb16"
-    clip = "openai/clip-vit-base-patch16"
     pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
 
     batch_size=1
