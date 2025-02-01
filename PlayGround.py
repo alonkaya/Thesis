@@ -915,7 +915,7 @@ def RANSAC():
 
 def avg_trained():
     batch_size=1
-    _, _, test_loader = get_data_loaders(train_size=0.004, part='head', batch_size=batch_size)
+    _, _, test_loader = get_data_loaders(train_size=0.002, part='head', batch_size=batch_size)
 
     pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
     model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_path).to(device)
