@@ -121,8 +121,8 @@ class ImageFeatureTransformer(nn.Module):
 
         fig, axs = plt.subplots(1, 2, figsize=(14, 8))
 
-        im1 = axs[0].imshow(attention_layer_1[0], cmap='viridis')
-        im2 = axs[1].imshow(attention_maps_6[0], cmap='viridis')
+        im1 = axs[0].imshow(attention_layer_1, cmap='viridis')
+        im2 = axs[1].imshow(attention_maps_6, cmap='viridis')
         axs[0].set_title('Attention Map First Layer')
         axs[1].set_title('Attention Map Last Layer')
         axs[0].set_xlabel('Patch num in first image')        
