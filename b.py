@@ -132,7 +132,7 @@ class ImageFeatureTransformer(nn.Module):
 
         # Add a colorbar for both subplots
         cbar = fig.colorbar(im2, ax=axs, orientation='vertical', shrink=0.8)
-        fig.savefig('attention_maps_clip_16_cc.png')
+        fig.savefig('attention_maps_clip_16_cc_no_softmax.png')
 
 
 if __name__ == '__main__':
