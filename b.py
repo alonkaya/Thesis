@@ -118,8 +118,9 @@ class ImageFeatureTransformer(nn.Module):
         axs[0].set_title('Attention Map First layer')
         axs[1].imshow(attention_maps_6[0], cmap='viridis')
         axs[1].set_title('Attention Map Last layer')
+        for ax in axs:
+            plt.colorbar(ax=ax)
         
-        plt.colorbar()
         fig.savefig('attention_maps.png')
 
 
