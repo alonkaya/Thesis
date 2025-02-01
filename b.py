@@ -99,15 +99,19 @@ class ImageFeatureTransformer(nn.Module):
         value = x2_embeddings  # [batch, seq_len, features]
         attention_maps = []
 
-        cc = x1_embeddings @ x2_embeddings.permute(0, 2, 1)
-        attention_maps.append(cc.detach().cpu().numpy())
+        d_k = query.size(-1)  # Feature dimension for scaling
+        attention_scores = torch.matmul(query, key.transpose(-2, -1))  # [batch, seq_len, seq_len]
+        attention_scores = attention_scores / (d_k ** 0.5)             # Scale by sqrt(d_k)
+
+        attn_weights = F.softmax(attention_scores, dim=-1)        # [batch, seq_len, seq_len]
+
         # for layer in self.transformer_decoder.layers:
         #     # Ensure need_weights=True to get attention maps
         #     attn_output, attn_weights = layer.self_attn(query, key, value, need_weights=True) # attn_weights shape: [batch, num_patches, num_patches] After averaging heads.
         #     attention_maps.append(attn_weights.detach().cpu().numpy())
 
-        print(len(attention_maps), attention_maps[0].shape)
-        return attention_maps
+        print(attn_weights[0].shape)
+        return attn_weights
 
     def visualize_attention(self, image1, image2):
         with torch.no_grad():
