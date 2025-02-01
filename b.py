@@ -79,7 +79,7 @@ transform = transforms.Compose([
 #         plt.show()
 
 class ImageFeatureTransformer(nn.Module):
-    def __init__(self, model=None, dino_model='openai/clip-vit-base-patch32', num_features=768, device='cuda'):
+    def __init__(self, model=None, dino_model='openai/clip-vit-base-patch16', num_features=768, device='cuda'):
         super().__init__()
         self.device = device
         self.model = CLIPVisionModel.from_pretrained(dino_model).to(device) if model==None else model.model
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_path).to(device)
     
     for img1, img2, _, _, _, _ in test_loader:
-        model = ImageFeatureTransformer(model, device=device)
+        model = ImageFeatureTransformer(device=device)
         model.visualize_attention(img1, img2)
         break
 
