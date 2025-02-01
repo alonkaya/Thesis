@@ -111,16 +111,16 @@ class ImageFeatureTransformer(nn.Module):
     def visualize_attention(self, image1, image2):
         attention_layer_1 = self.forward(image1, image2)[0]  # First Layer
         attention_maps_6 = self.forward(image1, image2)[5] # Last Layer
+        
+        fig, axs = plt.subplots(1, 2, figsize=(14, 8))
 
-        plt.imshow(attention_layer_1[0], cmap='viridis')
+        axs[0].imshow(attention_layer_1[0], cmap='viridis')
+        axs[0].title('Attention Map First layer')
+        axs[1].imshow(attention_maps_6[0], cmap='viridis')
+        axs[1].title('Attention Map Last layer')
+        
         plt.colorbar()
-        plt.title('Attention Map First layer')
-        plt.savefig('attention_map_first.png')
-
-        plt.imshow(attention_maps_6[0], cmap='viridis')
-        plt.colorbar()
-        plt.title('Attention Map Last layer')
-        plt.savefig('attention_map_last.png')
+        plt.savefig('attention_maps.png')
 
 
 if __name__ == '__main__':
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     
     for img1, img2, _, _, _, _ in test_loader:
         model = ImageFeatureTransformer(device=device)
-        model.visualize_attention(img1, img2)
+        model.visualize_attention(model, img1, img2)
         break
 
 
