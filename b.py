@@ -145,7 +145,7 @@ if __name__ == '__main__':
         model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_path).to(device)
         
         # for img1, img2, _, _, _, _ in test_loader:
-        model = ImageFeatureTransformer(model, device=device)
+        model = ImageFeatureTransformer(model)
         model.visualize_attention(img1, img2)
             # break
 
