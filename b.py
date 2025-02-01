@@ -123,8 +123,8 @@ class ImageFeatureTransformer(nn.Module):
 
         # Add a colorbar for both subplots
         cbar = fig.colorbar(im2, ax=axs, orientation='vertical', shrink=0.8)
-        cbar.set_label('Attention Weight no ft')
-        fig.savefig('attention_maps.png')
+        cbar.set_label('Attention Weight')
+        fig.savefig('attention_maps_no_ft.png')
 
 
 if __name__ == '__main__':
