@@ -7,13 +7,13 @@ STEREO = True
 # find . -type f -name "model.pth"                  /mnt_hdd15tb/alonkay/Thesis/        /mnt/sda2/Alon
 
 PRETEXT_TRAIN = False
-SCENEFLOW = False
-FLYING = False
+SCENEFLOW = True
+FLYING = True
 MODEL = EFFICIENTNET
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0]
 FROZEN_HIGH_LAYERS = 0
-COMPUTER = 1 # 0 = 250  1 = 146  2 = else  
-SEQ_RATIOS = [0.002] if not SCENEFLOW else [170] if FLYING else None     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]  /  [9, 80, 170]                                             
+COMPUTER = 2 # 0 = 250  1 = 146  2 = else  
+SEQ_RATIOS = [0.002] if not SCENEFLOW else [22] if FLYING else None     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]  /  [9, 80, 170]                                             
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = False
 PART = ["head"] 
@@ -32,7 +32,7 @@ INIT_DATA = True
 BATCH_SIZE = 8  
 
 ### STEREO KITTI ###
-train_seqeunces_stereo = [0,2,3,5] #  10840 images 
+train_seqeunces_stereo = [0,2,3,5] #  10840 images g
 val_sequences_stereo =  [6,7,8]    #  3682 images
 test_sequences_stereo = [9]        #  1064 images
 
