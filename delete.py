@@ -9,9 +9,9 @@ for f in os.listdir(main_folder_path):
     for subfolder_name in os.listdir(folder_name):
         subfolder_path = os.path.join(folder_name, subfolder_name)
         # Ensure we are only processing directories
-        if os.path.isdir(subfolder_path) and subfolder_name.endswith("bad") or subfolder_name.endswith("Max"):
+        if os.path.isdir(subfolder_path) and (subfolder_name.endswith("bad") or subfolder_name.endswith("Max")):
             print(subfolder_path)
-            shutil.rmtree(subfolder_path)
+            # shutil.rmtree(subfolder_path)
 
             # model_path = os.path.join(subfolder_path, 'model.pth')
             # backup_path = os.path.join(subfolder_path, 'backup_model.pth')
