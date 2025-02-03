@@ -16,7 +16,7 @@ val_length = 320      # Needs to be a multiple of batch size
 test_length = 320     # Needs to be a multiple of batch size
 INIT_DATA = True
 COMPUTER = 1 # 0=250, 1=146, 2=else
-PART = "head"
+PART = "tail"
 HUBER = False
 
 ### Training ###
