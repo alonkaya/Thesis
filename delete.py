@@ -9,13 +9,16 @@ for f in os.listdir(main_folder_path):
         subfolder_path = os.path.join(folder_name, subfolder_name)
         # Ensure we are only processing directories
         if os.path.isdir(subfolder_path) and subfolder_name.endswith("bad"):
-            model_path = os.path.join(subfolder_path, 'model.pth')
-            backup_path = os.path.join(subfolder_path, 'backup_model.pth')
-            # Check if the file exists and delete it
-            if os.path.exists(model_path):
-                # os.remove(model_path)
-                print(f"Deleted: {model_path}")
+            print(subfolder_path)
+            # os.remove(subfolder_path)
+            
+            # model_path = os.path.join(subfolder_path, 'model.pth')
+            # backup_path = os.path.join(subfolder_path, 'backup_model.pth')
+            # # Check if the file exists and delete it
+            # if os.path.exists(model_path):
+            #     # os.remove(model_path)
+            #     print(f"Deleted: {model_path}")
                 
-            if os.path.exists(backup_path):
-                # os.remove(backup_path)
-                print(f"Deleted: {backup_path}")
+            # if os.path.exists(backup_path):
+            #     # os.remove(backup_path)
+            #     print(f"Deleted: {backup_path}")
