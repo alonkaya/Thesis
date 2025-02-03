@@ -11,7 +11,7 @@ for f in os.listdir(main_folder_path):
         # Ensure we are only processing directories
         if os.path.isdir(subfolder_path) and subfolder_name.endswith("bad"):
             print(subfolder_path)
-            # shutil.rmtree(subfolder_path)
+            shutil.rmtree(subfolder_path)
 
             # model_path = os.path.join(subfolder_path, 'model.pth')
             # backup_path = os.path.join(subfolder_path, 'backup_model.pth')
