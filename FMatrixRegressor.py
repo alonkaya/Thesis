@@ -88,7 +88,9 @@ class FMatrixRegressor(nn.Module):
         # Freeze frozen_layers layers
         if MODEL==CLIP_MODEL_NAME:
             for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
-                if layer_idx < self.frozen_layers:  
+                print(f'layer_idx: {layer_idx}')
+                if layer_idx < self.frozen_layers:
+                    print(f'freezing layer {layer_idx}')  
                     for param in layer.parameters():
                         param.requires_grad = False
                 elif layer_idx >= len(self.model.vision_model.encoder.layers) - self.frozen_high_layers:
@@ -245,9 +247,9 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
                 self.save_model(epoch+1)
             
             # If the last epochs are not decreasing in val loss, raise break_when_good flag
-            # if (self.resnet and epoch > int(self.num_epochs * 3/5) and not_decreasing(self.all_val_loss, self.num_epochs, self.plots_path)) or \
-            #     (not self.resnet and epoch > int(self.num_epochs * 3/4) and not_decreasing(self.all_val_loss, self.num_epochs, self.plots_path)) or \
-            if epoch > self.num_epochs:
+            if (self.resnet and epoch > int(self.num_epochs * 3/5) and not_decreasing(self.all_val_loss, self.num_epochs, self.plots_path)) or \
+                (not self.resnet and epoch > int(self.num_epochs * 3/4) and not_decreasing(self.all_val_loss, self.num_epochs, self.plots_path)) or \
+                epoch > self.num_epochs:
                 break_when_good = True
 
             # If last epoch got best results of psat 4 epochs, stop training
