@@ -93,9 +93,9 @@ if __name__ == "__main__":
                         sys.stdout.flush()
      
                 # If the model was already trained well, skip training with other seed
-                elif "seed" in model.plots_path and (os.path.exists(model.plots_path.split("__seed_")[0]) or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_300') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_500') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_600') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_700')):
-                        print(f"\n{model.plots_path}\nAlready well trained, no need for other seed training\n")
-                        sys.stdout.flush()
+                # elif "seed" in model.plots_path and (os.path.exists(model.plots_path.split("__seed_")[0]) or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_300') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_500') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_600') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_700') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_800')):
+                #         print(f"\n{model.plots_path}\nAlready well trained, no need for other seed training\n")
+                #         sys.stdout.flush()
 
                 elif model.start_epoch < model.num_epochs:
                         train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
