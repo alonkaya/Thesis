@@ -1,4 +1,5 @@
 import os
+import shutil
 
 # Specify the path to the main folder containing all subfolders
 main_folder_path = "plots/Stereo/Winners/"
@@ -10,7 +11,7 @@ for f in os.listdir(main_folder_path):
         # Ensure we are only processing directories
         if os.path.isdir(subfolder_path) and subfolder_name.endswith("bad"):
             # print(subfolder_path)
-            os.remove(subfolder_path)
+            shutil.rmtree(subfolder_path)
 
             # model_path = os.path.join(subfolder_path, 'model.pth')
             # backup_path = os.path.join(subfolder_path, 'backup_model.pth')
