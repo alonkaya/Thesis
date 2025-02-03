@@ -2,16 +2,16 @@ import os
 import shutil
 
 # Specify the path to the main folder containing all subfolders
-main_folder_path = "plots/Stereo/Winners/"
+main_folder_path = "/mnt_hdd15tb/alonkay/Thesis/plots/Stereo/Winners/"
 for f in os.listdir(main_folder_path):
     folder_name = os.path.join(main_folder_path, f)
     # Iterate over all folders inside the main folder
     for subfolder_name in os.listdir(folder_name):
         subfolder_path = os.path.join(folder_name, subfolder_name)
         # Ensure we are only processing directories
-        if os.path.isdir(subfolder_path) and subfolder_name.endswith("bad"):
-            # print(subfolder_path)
-            shutil.rmtree(subfolder_path)
+        if os.path.isdir(subfolder_path) and subfolder_name.endswith("Max"):
+            print(subfolder_path)
+            # shutil.rmtree(subfolder_path)
 
             # model_path = os.path.join(subfolder_path, 'model.pth')
             # backup_path = os.path.join(subfolder_path, 'backup_model.pth')
