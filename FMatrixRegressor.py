@@ -88,9 +88,7 @@ class FMatrixRegressor(nn.Module):
         # Freeze frozen_layers layers
         if MODEL==CLIP_MODEL_NAME:
             for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
-                print(f'layer_idx: {layer_idx}')
                 if layer_idx < self.frozen_layers:
-                    print(f'freezing layer {layer_idx}')  
                     for param in layer.parameters():
                         param.requires_grad = False
                 elif layer_idx >= len(self.model.vision_model.encoder.layers) - self.frozen_high_layers:
