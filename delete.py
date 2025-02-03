@@ -2,7 +2,7 @@ import os
 import shutil
 
 # Specify the path to the main folder containing all subfolders
-main_folder_path = "/mnt_hdd15tb/alonkay/Thesis/plots/Stereo/Winners/"
+main_folder_path = "plots/Stereo/Winners/"
 for f in os.listdir(main_folder_path):
     folder_name = os.path.join(main_folder_path, f)
     # Iterate over all folders inside the main folder
