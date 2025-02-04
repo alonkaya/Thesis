@@ -617,14 +617,16 @@ def plot_errors():
     flying_clip_16_SED =  [0.69, 0.75, 1.74]
     flying_clip_16_RE1 = [0.13, 0.143, 0.414]
     flying_resnet_alg =  [0.4, 0.42, 0.64]
-    flying_resnet_SED =  [0.85, 1.15, 1.83]
+    flying_resnet_SED =  [0.885, 1.15, 1.83]
     flying_resnet_RE1 =  [0.2,0.243, 0.46]
     flying_dino_alg = [0.34, 0.325, 0.589]
     flying_dino_SED = [0.7, 0.71, 1.814]
     flying_dino_RE1 = [0.13, 0.135, 0.43]
-    flying_efficient_alg =  [0.4, 0.45, 0.6]
-    flying_efficient_SED =  [0.85, 1.12, 1.8]
-    flying_efficient_RE1 =  [0.2, 0.25, 0.43]
+    flying_efficient_alg =  [0.415, 0.45, 0.6]
+    flying_efficient_SED =  [0.872, 1.12, 1.8]
+    flying_efficient_RE1 =  [0.17, 0.25, 0.43]
+
+
 
 
     os.makedirs('results', exist_ok=True)
@@ -861,10 +863,10 @@ def delete_odd_files(folder_path):
             except OSError as e:    
                 print(f"Error deleting {left_file_path}: {e}")
 
-def test_trained(pretrained_model):
+def test_trained():
     " Only need to change the data type in params i.e SCENEFLOW, KITTI.. "
     batch_size=1
-
+    pretrained_model = KITTI_MODEL_PATH
     train_loader, val_loader, test_loader = get_data_loaders(train_size=0.002, part='head', batch_size=batch_size)
     with torch.no_grad():
         model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
@@ -954,11 +956,8 @@ import matplotlib.pyplot as plt
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 if __name__ == "__main__":
-    # p = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0" # Epochs 4518
-    # p = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Efficient__use_reconstruction_True/BS_8__ratio_0.1__tail__frozen_0"
-    p = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Efficient__use_reconstruction_True/BS_8__ratio_0.004__tail__frozen_0__seed_600"
-    # test_trained(p)
-    plot_errors()
+    test_trained()
+    # plot_errors()
     # RANSAC()
     # avg_trained()
     # test_specific_F(avg_F)
