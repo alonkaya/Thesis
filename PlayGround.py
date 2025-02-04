@@ -867,7 +867,8 @@ def test_trained():
     " Only need to change the data type in params i.e SCENEFLOW, KITTI.. "
     batch_size=1
     pretrained_model = KITTI_MODEL_PATH
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=0.002, part='head', batch_size=batch_size)
+    train_size = 9 if FLYING else 0.002 
+    train_loader, val_loader, test_loader = get_data_loaders(train_size=train_size, part='head', batch_size=batch_size)
     with torch.no_grad():
         model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
         print(f'\nEpochs: {model.start_epoch}')
