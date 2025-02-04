@@ -1,7 +1,7 @@
 import os
 import shutil
 
-COMP = 1
+COMP = 0
 # Specify the path to the main folder containing all subfolders
 main_folder_path = "plots/Flying"
 for f in os.listdir(main_folder_path):
