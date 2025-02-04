@@ -12,10 +12,10 @@ for f in os.listdir(main_folder_path):
         if os.path.isdir(subfolder_path) and (subfolder_name.endswith("bad") or "correct_F" not in subfolder_name):
             comp0 = os.path.join("/mnt/sda2/Alon", subfolder_path)
             comp1 = os.path.join("/mnt_hdd15tb/alonkay/Thesis/", subfolder_path)
-            if os.exists(comp0):
+            if os.path.exists(comp0):
                 # shutil.rmtree(comp0)
                 print(f"Deleted: {comp0}")
-            elif os.exists(comp1):
+            elif os.path.exists(comp1):
                 # shutil.rmtree(comp1)
                 print(f"Deleted: {comp1}")
             else:
