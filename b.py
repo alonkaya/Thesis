@@ -93,8 +93,8 @@ class ImageFeatureTransformer(nn.Module):
         # Extract image embeddings
         x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :]  # Remove CLS token
         x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :]  # Remove CLS token
-
-        query = x1_embeddings  # [batch, seq_len(num_patches), features]
+    
+        query = x1_embeddings[:, 0, :]  # [batch, seq_len(num_patches), features]
         key = x2_embeddings  # [batch, seq_len(num_patches), features]
         value = x2_embeddings  # [batch, seq_len, features]
 
@@ -113,24 +113,22 @@ class ImageFeatureTransformer(nn.Module):
 
     def visualize_attention(self, image1, image2):
         with torch.no_grad():
-            attention_layers = self.forward(image1, image2)  # First Layer
-            attention_layer_1 = attention_layers[0] # First Layer
-            attention_maps_6 = attention_layers[-1] # Last Layer
+            attention_weights = self.forward(image1, image2)  # First Layer
+            attention_map = attention_weights[0, 0, :]       # Select batch 0, first patch attention
+            print(attention_map.shape[0]//2)
+            attention_map.reshape(attention_map.shape[0]//2, -1)
 
-        fig, axs = plt.subplots(1, 2, figsize=(14, 8))
+           # Plotting
+        plt.figure(figsize=(10, 6))
+        plt.imshow(attention_map[np.newaxis, :], cmap='viridis', aspect='auto')  # Add a new axis for display
+        plt.colorbar()
+        plt.title('Attention Map: First Patch of Image 1 vs All Patches in Image 2')
+        plt.xlabel('Patch Number in Image 2')
+        plt.ylabel('First Patch in Image 1')
 
-        im1 = axs[0].imshow(attention_layer_1, cmap='viridis')
-        im2 = axs[1].imshow(attention_maps_6, cmap='viridis')
-        axs[0].set_title('Attention Map First Layer')
-        axs[1].set_title('Attention Map Last Layer')
-        axs[0].set_xlabel('Patch num in first image')        
-        axs[0].set_ylabel('Patch num in second image')
-        axs[1].set_xlabel('Patch num in first image')
-        axs[1].set_ylabel('Patch num in second image')
-
-        # Add a colorbar for both subplots
-        cbar = fig.colorbar(im2, ax=axs, orientation='vertical', shrink=0.8)
-        fig.savefig('attention_maps_clip_16_self.png')
+        # Save and show
+        plt.savefig('attention_map_single_patch.png')
+        plt.show()
 
 
 if __name__ == '__main__':
