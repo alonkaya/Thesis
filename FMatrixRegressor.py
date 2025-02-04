@@ -101,7 +101,8 @@ class FMatrixRegressor(nn.Module):
             self.load_model(self.parent_model_path)
         
         elif self.kitti2sceneflow:
-                self.load_model(KITTI_MODEL_PATH, continue_training=False)
+                kitti_path = os.path.join("/mnt/sda2/Alon", KITTI_MODEL_PATH) if COMPUTER==0 else os.path.join("/mnt_hdd15tb/alonkay/Thesis", KITTI_MODEL_PATH) if COMPUTER==1 else KITTI_MODEL_PATH
+                self.load_model(kitti_path, continue_training=False)
                 for param in self.model.parameters():
                     param.requires_grad = False
         else:
