@@ -648,7 +648,7 @@ def plot_errors():
 
 
 
-    fig5, axes5 = plt.subplots(3, 1, figsize=(10, 11), sharex=True)
+    fig5, axes5 = plt.subplots(2, 1, figsize=(10, 11), sharex=True)
     fig5.subplots_adjust(hspace=4)  # Add space between subplots
     axes5[0].errorbar(x_indices, clip_32_mean_alg_0, yerr=clip_32_std_alg_0, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='CLIP-ViT/B32', capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes5[0].errorbar(x_indices, clip_16_mean_alg, yerr=clip_16_std_alg, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='CLIP-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
@@ -662,12 +662,12 @@ def plot_errors():
     axes5[1].errorbar(x_indices, dino_mean_SED, yerr=dino_std_SED, marker=markers[3], color=colors[3], linestyle=linestyles[3], label='DINO-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes5[1].errorbar(x_indices, efficient_mean_SED, yerr=efficient_std_SED, marker=markers[4], color=colors[4], linestyle=linestyles[4], label='EfficientnetV2_M', capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes5[1].set_title('SED Metric of fine-tuned models on F estimation task using KITTI', fontsize=15)
-    axes5[2].errorbar(x_indices, clip_32_mean_RE1_0, yerr=clip_32_std_RE1_0, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='CLIP-ViT/B32', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[2].errorbar(x_indices, clip_16_mean_RE1, yerr=clip_16_std_RE1, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='CLIP-ViT/B/6', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[2].errorbar(x_indices, resnet_mean_RE1, yerr=resnet_std_RE1, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet-152', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[2].errorbar(x_indices, dino_mean_RE1, yerr=dino_std_RE1, marker=markers[3], color=colors[3], linestyle=linestyles[3], label='DINO-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[2].errorbar(x_indices, efficient_mean_RE1, yerr=efficient_std_RE1, marker=markers[4], color=colors[4], linestyle=linestyles[4], label='EfficientnetV2_M', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[2].set_title('SAM Metric of fine-tuned models on F estimation task using KITTI', fontsize=15)
+    # axes5[2].errorbar(x_indices, clip_32_mean_RE1_0, yerr=clip_32_std_RE1_0, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='CLIP-ViT/B32', capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes5[2].errorbar(x_indices, clip_16_mean_RE1, yerr=clip_16_std_RE1, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='CLIP-ViT/B/6', capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes5[2].errorbar(x_indices, resnet_mean_RE1, yerr=resnet_std_RE1, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet-152', capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes5[2].errorbar(x_indices, dino_mean_RE1, yerr=dino_std_RE1, marker=markers[3], color=colors[3], linestyle=linestyles[3], label='DINO-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes5[2].errorbar(x_indices, efficient_mean_RE1, yerr=efficient_std_RE1, marker=markers[4], color=colors[4], linestyle=linestyles[4], label='EfficientnetV2_M', capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes5[2].set_title('SAM Metric of fine-tuned models on F estimation task using KITTI', fontsize=15)
 
     for ax in axes5:
         ax.set_xlabel('Number of Training Samples', fontsize=13)        
@@ -680,7 +680,7 @@ def plot_errors():
     fig5.savefig('results/models_kitti.png')
     
 
-    fig7, axes7 = plt.subplots(3, 1, figsize=(10, 11), sharex=True)
+    fig7, axes7 = plt.subplots(2, 1, figsize=(10, 11), sharex=True)
     fig7.subplots_adjust(hspace=4)
     axes7[0].errorbar(x_indices_flying, flying_clip_alg, label='CLIP-ViT/B32', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes7[0].errorbar(x_indices_flying, flying_clip_16_alg, label='CLIP-ViT/B16', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
@@ -694,12 +694,12 @@ def plot_errors():
     axes7[1].errorbar(x_indices_flying, flying_dino_SED, label='DINO-ViT/B16', color=colors[3], marker=markers[3], linestyle=linestyles[3], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes7[1].errorbar(x_indices_flying, flying_efficient_SED, label='EfficientnetV2_M', color=colors[4], marker=markers[4], linestyle=linestyles[4], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes7[1].set_title('SED Metric of fine-tuned models on F estimation task using FlyingThings3D', fontsize=15)
-    axes7[2].errorbar(x_indices_flying, flying_clip_RE1, label='ViT-B/32', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[2].errorbar(x_indices_flying, flying_clip_16_RE1, label='ViT-B/16', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[2].errorbar(x_indices_flying, flying_resnet_RE1, label='ResNet-152', color=colors[2], marker=markers[2], linestyle=linestyles[2], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[2].errorbar(x_indices_flying, flying_dino_RE1, label='DINO-ViT/B16', color=colors[3], marker=markers[3], linestyle=linestyles[3], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[2].errorbar(x_indices_flying , flying_efficient_RE1, label='EfficientnetV2_M', color=colors[4], marker=markers[4], linestyle=linestyles[4], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[2].set_title('SAM Metric of fine-tuned models on F estimation task using FlyingThings3D', fontsize=15)
+    # axes7[2].errorbar(x_indices_flying, flying_clip_RE1, label='ViT-B/32', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes7[2].errorbar(x_indices_flying, flying_clip_16_RE1, label='ViT-B/16', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes7[2].errorbar(x_indices_flying, flying_resnet_RE1, label='ResNet-152', color=colors[2], marker=markers[2], linestyle=linestyles[2], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes7[2].errorbar(x_indices_flying, flying_dino_RE1, label='DINO-ViT/B16', color=colors[3], marker=markers[3], linestyle=linestyles[3], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes7[2].errorbar(x_indices_flying , flying_efficient_RE1, label='EfficientnetV2_M', color=colors[4], marker=markers[4], linestyle=linestyles[4], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes7[2].set_title('SAM Metric of fine-tuned models on F estimation task using FlyingThings3D', fontsize=15)
     for ax in axes7:
         ax.set_xlabel('Number of Training Samples', fontsize=13)      
         ax.set_ylabel('Mean Value ± STD', fontsize=13)  
@@ -711,7 +711,7 @@ def plot_errors():
     fig7.savefig('results/models_flying.png')
 
 
-    fig1, axes1 = plt.subplots(3, 1, figsize=(10, 11), sharex=True)
+    fig1, axes1 = plt.subplots(2, 1, figsize=(10, 11), sharex=True)
     fig1.subplots_adjust(hspace=4)  # Add space between subplots   
     axes1[0].errorbar(x_indices, clip_32_mean_alg_0, yerr=clip_32_std_alg_0, label='ALG 0 bottom frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes1[0].errorbar(x_indices, clip_32_mean_alg_4, yerr=clip_32_std_alg_4, label='ALG 4 bottom frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
@@ -721,10 +721,10 @@ def plot_errors():
     axes1[1].errorbar(x_indices, clip_32_mean_SED_4, yerr=clip_32_std_SED_4, label='SED 4 bottom frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes1[1].errorbar(x_indices, clip_32_mean_SED_8, yerr=clip_32_std_SED_8, label='SED 8 bottom frozen layers', color=colors[3], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes1[1].set_title('SED Metric of ViT-B/32 freezing bottom layers on F estimation task using KITTI', fontsize=15)
-    axes1[2].errorbar(x_indices, clip_32_mean_RE1_0, yerr=clip_32_std_RE1_0, label='SAM 0 bottom frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[2].errorbar(x_indices, clip_32_mean_RE1_4, yerr=clip_32_std_RE1_4, label='SAM 4 bottom frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[2].errorbar(x_indices, clip_32_mean_RE1_8, yerr=clip_32_std_RE1_8, label='SAM 8 bottom frozen layers', color=colors[3], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[2].set_title('SAM Metric of ViT-B/32 freezing bottom layers on F estimation task using KITTI', fontsize=15)
+    # axes1[2].errorbar(x_indices, clip_32_mean_RE1_0, yerr=clip_32_std_RE1_0, label='SAM 0 bottom frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes1[2].errorbar(x_indices, clip_32_mean_RE1_4, yerr=clip_32_std_RE1_4, label='SAM 4 bottom frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes1[2].errorbar(x_indices, clip_32_mean_RE1_8, yerr=clip_32_std_RE1_8, label='SAM 8 bottom frozen layers', color=colors[3], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes1[2].set_title('SAM Metric of ViT-B/32 freezing bottom layers on F estimation task using KITTI', fontsize=15)
     for ax in axes1:
         ax.set_xlabel('Number of Training Samples', fontsize=13) 
         ax.set_ylabel('Mean Value ± STD', fontsize=13)       

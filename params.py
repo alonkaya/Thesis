@@ -9,18 +9,19 @@ STEREO = True
 PRETEXT_TRAIN = False
 SCENEFLOW = False
 FLYING = False
-MODEL = CLIP_MODEL_NAME
+MODEL = EFFICIENTNET
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [12]
 FROZEN_HIGH_LAYERS = 0
-COMPUTER = 2 # 0 = 250  1 = 146  2 = else  
-SEQ_RATIOS = [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2] if not SCENEFLOW else [22] if FLYING else None     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]  /  [9, 80, 170]                                             
+COMPUTER = 1 # 0 = 250  1 = 146  2 = else  
+SEQ_RATIOS = [0.002] if not SCENEFLOW else [22] if FLYING else None     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]  /  [9, 80, 170]                                             
 KITTI2SCENEFLOW = False
 ONLY_CONTINUE = False
-PART = ["tail"] 
+PART = ["head"] 
 MAX_POOL_SIZE = 7 if MODEL==CLIP_MODEL_NAME_16 or MODEL==DINO else 3 ######################################################################
 ADDITIONS = "__Max" if MAX_POOL_SIZE==4 else "" ## REMEMBER TO PUT "__" !!!!!
 ADDITIONS += "__correct_F" if FLYING else ""    #  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 CC = False
+SEED = [800] # 42, 300, 500, 600, 700, 800
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -59,7 +60,6 @@ NUM_WORKERS = 0
 SAVE_MODEL = True
 GET_OLD_PATH = False
 LR = [1e-4]             
-SEED = [42,300,500,600,700,800] # 42, 300, 500, 600, 700, 800
 TRIM_PTS = False
 
 ### Epipolar geometry ###
