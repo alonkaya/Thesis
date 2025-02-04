@@ -1,0 +1,25 @@
+nohup: ignoring input
+/home/alonkay/conda/alon/lib/python3.9/site-packages/transformers/utils/generic.py:260: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+/home/alonkay/Thesis/FMatrixRegressor.py:356: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(model_path, map_location='cpu')
+
+Epochs: 8021
+
+
+## TEST RESULTS: ##
+Test Loss: 0.18228679169389536		 Test MAE: 0.04296042732894421
+Test Algebraic dist: 0.2845412892506535
+Test SED dist: 0.3479175223443741
+Test RE1 dist: 0.07503722843370939
+
+Trimmed algs: 0.265562704205513
+Trimmed seds: 0.2976449728012085
+Trimmed re1s: 0.06297365017235279
+
+Test Algebraic dist truth: 0.017809113165489714
+Test SED dist truth: 0.001751700066086045
+Test RE1 dist truth: 0.0002189626202995616
+
+plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Efficient__use_reconstruction_True/BS_8__ratio_170__frozen_0__correct_F
+
