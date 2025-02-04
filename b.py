@@ -114,6 +114,7 @@ class ImageFeatureTransformer(nn.Module):
     def visualize_attention(self, image1, image2):
         with torch.no_grad():
             attention_weights = self.forward(image1, image2)  # First Layer
+            print(attention_weights.shape)
             attention_map = attention_weights[0, 0, :]       # Select batch 0, first patch attention
             print(attention_map.shape[0]//2)
             attention_map.reshape(attention_map.shape[0]//2, -1)
@@ -137,10 +138,8 @@ if __name__ == '__main__':
     img1 = transform(img1).unsqueeze(0).to(device)
     img2 = transform(img2).unsqueeze(0).to(device)
 
-    pre = "/mnt_hdd15tb/alonkay/Thesis/"
     pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
     # pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
-    # pretrained_path = pre + pretrained_path
 
     batch_size=1
     _, _, test_loader = get_data_loaders(train_size=0.002, part='head', batch_size=batch_size)
