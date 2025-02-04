@@ -866,7 +866,7 @@ def delete_odd_files(folder_path):
 def test_trained():
     " Only need to change the data type in params i.e SCENEFLOW, KITTI.. "
     batch_size=1
-    pretrained_model = FLYING_MODEL_PATH if FLYING else KITTI_MODEL_PATH 
+    pretrained_model = FLYING_MODEL_PATH
     train_size = 9 if FLYING else 0.002 
     train_loader, val_loader, test_loader = get_data_loaders(train_size=train_size, part='head', batch_size=batch_size)
     with torch.no_grad():
