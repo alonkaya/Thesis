@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
 
                 coeff = f'ALG_sqr_{alg_coeff}__' if alg_coeff > 0 else f'RE1_{re1_coeff}__' if re1_coeff > 0 else f'SED_{sed_coeff}__' if sed_coeff > 0 else ''
-                dataset = 'Kitti2Flying' if KITTI2SCENEFLOW and FLYING and SCENEFLOW else 'Flying' if FLYING and SCENEFLOW else 'Kitti2Monkaa' if KITTI2SCENEFLOW and SCENEFLOW else 'Monkaa' if SCENEFLOW else 'Stereo' if STEREO else 'RealEstate_split' if USE_REALESTATE and REALESTATE_SPLIT else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
+                dataset = 'Kitti2Flying' if KITTI2SCENEFLOW and FLYING and SCENEFLOW else 'Flying' if FLYING and SCENEFLOW else 'Stereo' if STEREO else 'RealEstate_split' if USE_REALESTATE and REALESTATE_SPLIT else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
                 scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
                 model = "CLIP" if MODEL==CLIP_MODEL_NAME else "CLIP_16" if MODEL==CLIP_MODEL_NAME_16 else "Resnet" if MODEL==RESNET_MODEL_NAME else "DINO" if MODEL==DINO else "Efficient" if MODEL==EFFICIENTNET else "Google_ViT" 
@@ -93,9 +93,9 @@ if __name__ == "__main__":
                         sys.stdout.flush()
      
                 # If the model was already trained well, skip training with other seed
-                # elif "seed" in model.plots_path and (os.path.exists(model.plots_path.split("__seed_")[0]) or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_300') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_500') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_600') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_700') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_800')):
-                #         print(f"\n{model.plots_path}\nAlready well trained, no need for other seed training\n")
-                #         sys.stdout.flush()
+                elif "seed" in model.plots_path and (os.path.exists(model.plots_path.split("__seed_")[0]) or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_300') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_500') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_600') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_700') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_800')):
+                        print(f"\n{model.plots_path}\nAlready well trained, no need for other seed training\n")
+                        sys.stdout.flush()
 
                 elif model.start_epoch < model.num_epochs:
                         train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)

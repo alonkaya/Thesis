@@ -7,21 +7,20 @@ STEREO = True
 # find . -type f -name "model.pth"                  /mnt_hdd15tb/alonkay/Thesis/        /mnt/sda2/Alon
 
 PRETEXT_TRAIN = False
-SCENEFLOW = False
-FLYING = False
-MODEL = EFFICIENTNET
+SCENEFLOW = True
+FLYING = True
+MODEL = CLIP_MODEL_NAME
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0]
 FROZEN_HIGH_LAYERS = 0
 COMPUTER = 1 # 0 = 250  1 = 146  2 = else  
-SEQ_RATIOS = [0.002] if not SCENEFLOW else [22] if FLYING else None     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]  /  [9, 80, 170]                                             
-KITTI2SCENEFLOW = False
+SEQ_RATIOS = [0.002] if not SCENEFLOW else [9] if FLYING else None     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]  /  [9, 80, 170]                                             
+KITTI2SCENEFLOW = True
 ONLY_CONTINUE = False
 PART = ["head"] 
 MAX_POOL_SIZE = 7 if MODEL==CLIP_MODEL_NAME_16 or MODEL==DINO else 3 ######################################################################
 ADDITIONS = "__Max" if MAX_POOL_SIZE==4 else "" ## REMEMBER TO PUT "__" !!!!!
-ADDITIONS += "__correct_F" if FLYING else ""    #  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 CC = False
-SEED = [800] # 42, 300, 500, 600, 700, 800
+SEED = [42, 300, 500, 600, 700, 800] # 42, 300, 500, 600, 700, 800
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -76,8 +75,11 @@ MLP_HIDDEN_DIM = [1024, 512]
 CONV_HIDDEN_DIM = [256, 512]
 VIT_MODEL_NAME = "google/vit-base-patch32-224-in21k"
 KITTI_MODEL_CLIP_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
+KITTI_MODEL_CLIP_16_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
+KITTI_MODEL_DINO_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__DINO__use_reconstruction_True/BS_8__ratio_0.2__tail__frozen_0"
 KITTI_MODEL_RESNET_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0__seed_300"
-KITTI_MODEL_PATH = KITTI_MODEL_CLIP_PATH if MODEL==CLIP_MODEL_NAME or MODEL==CLIP_MODEL_NAME_16 else KITTI_MODEL_RESNET_PATH
+KITTI_MODEL_EFFIEICNT_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Efficient__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
+KITTI_MODEL_PATH = KITTI_MODEL_CLIP_PATH if MODEL==CLIP_MODEL_NAME else KITTI_MODEL_RESNET_PATH if MODEL==RESNET_MODEL_NAME else KITTI_MODEL_CLIP_16_PATH if MODEL==CLIP_MODEL_NAME_16 else KITTI_MODEL_DINO_PATH if MODEL==DINO else KITTI_MODEL_EFFIEICNT_PATH if MODEL==EFFICIENTNET else "PROBLEMA"
 TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or not PRETEXT_TRAIN else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
 PRETRAINED_PATH = None # make sure you set GET_OLD_PATH !! 
 AVG_EMBEDDINGS = False
