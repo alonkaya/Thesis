@@ -10,7 +10,7 @@ import os
 import faulthandler
 import traceback
 import matplotlib
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 class MLP(nn.Module):
