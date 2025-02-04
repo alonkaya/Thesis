@@ -616,15 +616,15 @@ def plot_errors():
     flying_clip_16_alg =  [0.35, 0.355, 0.578]
     flying_clip_16_SED =  [0.69, 0.75, 1.74]
     flying_clip_16_RE1 = [0.13, 0.143, 0.414]
-    flying_resnet_alg =  [0.362, 0.42, 0.66]
-    flying_resnet_SED =  [0.79, 1.15, 2]
-    flying_resnet_RE1 =  [0.17,0.243, 0.65]
+    flying_resnet_alg =  [0.4, 0.42, 0.64]
+    flying_resnet_SED =  [0.85, 1.15, 1.83]
+    flying_resnet_RE1 =  [0.2,0.243, 0.46]
     flying_dino_alg = [0.34, 0.325, 0.589]
     flying_dino_SED = [0.7, 0.71, 1.814]
     flying_dino_RE1 = [0.13, 0.135, 0.43]
-    flying_efficient_alg =  [0.4, 0.45, 0.64]
-    flying_efficient_SED =  [0.4, 1.12, 2]
-    flying_efficient_RE1 =  [0.4, 0.25, 0.52]
+    flying_efficient_alg =  [0.4, 0.45, 0.6]
+    flying_efficient_SED =  [0.85, 1.12, 1.8]
+    flying_efficient_RE1 =  [0.2, 0.25, 0.43]
 
 
     os.makedirs('results', exist_ok=True)
