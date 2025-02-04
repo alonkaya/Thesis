@@ -7,8 +7,8 @@ STEREO = True
 # find . -type f -name "model.pth"                  /mnt_hdd15tb/alonkay/Thesis/        /mnt/sda2/Alon
 
 PRETEXT_TRAIN = False
-SCENEFLOW = True
-FLYING = True
+SCENEFLOW = False
+FLYING = False
 MODEL = DINO
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0]
 FROZEN_HIGH_LAYERS = 0
@@ -79,7 +79,13 @@ KITTI_MODEL_CLIP_16_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.00
 KITTI_MODEL_DINO_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__DINO__use_reconstruction_True/BS_8__ratio_0.2__tail__frozen_0"
 KITTI_MODEL_RESNET_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0__seed_300"
 KITTI_MODEL_EFFIEICNT_PATH = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Efficient__use_reconstruction_True/BS_8__ratio_0.2__tail__frozen_0"
+FLYING_MODEL_CLIP_PATH = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_170__frozen_0__correct_F"
+FLYING_MODEL_CLIP_16_PATH = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_170__frozen_0__correct_F"
+FLYING_MODEL_DINO_PATH = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__DINO__use_reconstruction_True/BS_8__ratio_170__frozen_0__correct_F"
+FLYING_MODEL_RESNET_PATH = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Resnet__use_reconstruction_True/BS_8__ratio_170__frozen_0__correct_F"
+FLYING_MODEL_EFFIEICNT_PATH = "plots/Flying/SED_0.5__L2_1__huber_1__lr_0.0001__conv__Efficient__use_reconstruction_True/BS_8__ratio_170__frozen_0__correct_F"
 KITTI_MODEL_PATH = KITTI_MODEL_CLIP_PATH if MODEL==CLIP_MODEL_NAME else KITTI_MODEL_RESNET_PATH if MODEL==RESNET_MODEL_NAME else KITTI_MODEL_CLIP_16_PATH if MODEL==CLIP_MODEL_NAME_16 else KITTI_MODEL_DINO_PATH if MODEL==DINO else KITTI_MODEL_EFFIEICNT_PATH if MODEL==EFFICIENTNET else "PROBLEMA"
+FLYING_MODEL_PATH = FLYING_MODEL_CLIP_PATH if MODEL==CLIP_MODEL_NAME else FLYING_MODEL_RESNET_PATH if MODEL==RESNET_MODEL_NAME else FLYING_MODEL_CLIP_16_PATH if MODEL==CLIP_MODEL_NAME_16 else FLYING_MODEL_DINO_PATH if MODEL==DINO else FLYING_MODEL_EFFIEICNT_PATH if MODEL==EFFICIENTNET else "PROBLEMA"
 TRAINED_VIT = None if MODEL==RESNET_MODEL_NAME or USE_REALESTATE or not PRETEXT_TRAIN else "plots/Affine/BS_32__lr_6e-05__train_size_9216__CLIP__alpha_10__conv__original_rotated/model.pth" # This is for when wanting to fine-tune an already trained vit (for example fine-tuning a vit which had been trained on the affine transfomration task)
 PRETRAINED_PATH = None # make sure you set GET_OLD_PATH !! 
 AVG_EMBEDDINGS = False
