@@ -102,7 +102,7 @@ class ImageFeatureTransformer(nn.Module):
         attention_scores = torch.matmul(query, key.transpose(-2, -1))  # [batch, seq_len, seq_len]
         attn_weights = attention_scores / (d_k ** 0.5)             # Scale by sqrt(d_k)
 
-        attn_weights = F.softmax(attn_weights, dim=-1)        # [batch, seq_len, seq_len]
+        # attn_weights = F.softmax(attn_weights, dim=-1)        # [batch, seq_len, seq_len]
 
         # for layer in self.transformer_decoder.layers:
         #     # Ensure need_weights=True to get attention maps
