@@ -185,20 +185,22 @@ def plot_results():
     CLIP_16_Angle_Mean =[0.0205,        0.0225, 	0.032,	    0.04075,         0.0445]
     CLIP_16_Angle_STD =	[0.003535534, 0.00212132,	0.004242641, 0.00106066,  0.004949747]
 
-    RESNET_Shift_Mean = [0.0283,	   0.0353,	       0.0451,	     0.0645,	        0.067]
-    RESNET_Shift_STD =	[0.000989949,  0.008061017,    0.002404163,  0.006363961,	0.002828427]
-    RESNET_Angle_Mean =	[0.032,	        0.03,          0.04,         0.053,         0.0565]
-    RESNET_Angle_STD =	[0.005656854,  0.006434672,    0.00212132,   0.001414214,	0.000707107]
-    
+    RESNET_Shift_Mean = [0.0283,	   0.0353,	       0.0451,	     0.05675,	        0.067]
+    RESNET_Shift_STD =	[0.000989949,  0.008061017,    0.002404163,  0.00106066,	0.002828427]
+    RESNET_Angle_Mean =	[0.032,	        0.03,          0.04,         0.0465,         0.053]
+    RESNET_Angle_STD =	[0.005656854,  0.006434672,    0.00212132,   0.006363961,	0.004242641]
+
+
     DINO_Shift_mean = [0.0193,	    0.0222,	      0.032,	    0.049,	      0.05835]
     DINO_Shift_std = [0.000707107,	0.000848528,  0.006505382,	0.005656854,  0.002333452]
     DINO_Angle_mean = [0.01565,	    0.01895,	  0.0267,	    0.03825,	  0.04285]
     DINO_Angle_std = [0.002616295,	0.004596194,  0.003252691,	0.005303301,  0.004454773]
 
-    EFFICIENT_shift_mean = [0.028,	    0.0285,	      0.033,	    0.0482,	      0.0629]
-    EFFICIENT_shift_std =  [0.001,	    0.00212132,   0.004242641,	0.009616652,  0.001555635]
-    EFFICIENT_angle_mean = [0.03,	    0.0256,	      0.0343,	    0.0464,	      0.05]
-    EFFICIENT_angle_std =  [0.005,	    0.004808326,  0.013152186,	0.007636753,  0.002828427]
+    EFFICIENT_shift_mean = [0.02655,	    0.0285,	      0.0405,	    0.0482,	      0.0629]
+    EFFICIENT_shift_std =  [0.000777817,    0.00212132,   0.000707107,	0.009616652,  0.001555635]
+    EFFICIENT_angle_mean = [0.02365,	    0.0256,	      0.0343,	    0.045,	      0.048]
+    EFFICIENT_angle_std =  [0.00516188,	0.004808326,  0.013152186,	0.007071068,  0.001414214]
+
 
 
     CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD, DINO_Shift_mean, DINO_Shift_std, DINO_Angle_mean, DINO_Angle_std, EFFICIENT_shift_mean, EFFICIENT_shift_std, EFFICIENT_angle_mean, EFFICIENT_angle_std  =  mult_by_range(CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD, DINO_Shift_mean, DINO_Shift_std, DINO_Angle_mean, DINO_Angle_std, EFFICIENT_shift_mean, EFFICIENT_shift_std, EFFICIENT_angle_mean, EFFICIENT_angle_std) 
