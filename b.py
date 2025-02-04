@@ -115,7 +115,7 @@ class ImageFeatureTransformer(nn.Module):
         with torch.no_grad():
             attention_weights = self.forward(image1, image2)  # First Layer
             attention_map = attention_weights[0, 0]       
-            attention_map.reshape(14,14)
+            attention_map = attention_map.reshape(14,14)
 
            # Plotting
         plt.figure(figsize=(10, 6))
