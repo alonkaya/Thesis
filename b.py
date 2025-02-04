@@ -99,7 +99,7 @@ class ImageFeatureTransformer(nn.Module):
         value = x2_embeddings  # [batch, seq_len, features]
 
         d_k = query.size(-1)  # Feature dimension for scaling
-        attention_scores = torch.matmul(query, query.transpose(-2, -1))  # [batch, seq_len, seq_len]
+        attention_scores = torch.matmul(query, key.transpose(-2, -1))  # [batch, seq_len, seq_len]
         attn_weights = attention_scores / (d_k ** 0.5)             # Scale by sqrt(d_k)
 
         attn_weights = F.softmax(attn_weights, dim=-1)        # [batch, seq_len, seq_len]
