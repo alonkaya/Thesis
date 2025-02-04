@@ -119,7 +119,7 @@ class ImageFeatureTransformer(nn.Module):
 
            # Plotting
         plt.figure(figsize=(10, 6))
-        plt.imshow(attention_map[np.newaxis, :], cmap='viridis', aspect='auto')  # Add a new axis for display
+        plt.imshow(attention_map, cmap='viridis', aspect='auto')  # Add a new axis for display
         plt.colorbar()
         plt.title('Attention Map: First Patch of Image 1 vs All Patches in Image 2')
         plt.xlabel('Patch Number in Image 2')
