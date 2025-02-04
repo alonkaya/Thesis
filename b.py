@@ -115,7 +115,7 @@ class ImageFeatureTransformer(nn.Module):
         with torch.no_grad():
             attention_weights = self.forward(image1, image2)  # First Layer
             print(attention_weights.shape)
-            attention_map = attention_weights[0]       # Select batch 0
+            attention_map = attention_weights[0, 0]       
             print(attention_map.shape[0]//2)
             attention_map.reshape(attention_map.shape[0]//2, -1)
 
