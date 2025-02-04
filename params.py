@@ -19,6 +19,7 @@ ONLY_CONTINUE = False
 PART = ["head"] 
 MAX_POOL_SIZE = 7 if MODEL==CLIP_MODEL_NAME_16 or MODEL==DINO else 3 ######################################################################
 ADDITIONS =  "" ## REMEMBER TO PUT "__" !!!!!
+ADDITIONS += "__correct_F" if FLYING else ""
 CC = False
 SEED = [42, 300, 500, 600, 700, 800] # 42, 300, 500, 600, 700, 800
 
