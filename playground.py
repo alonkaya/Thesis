@@ -146,7 +146,7 @@ def plot_stats():
     plot_training_stats(epochs, train_loss, val_loss, train_mae_shift, val_mae_shift, train_euclidean_shift, val_euclidean_shift, train_mae_angle, val_mae_angle, train_mse_angle, val_mse_angle)
 
 
-def mult_by_range(CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD):        
+def mult_by_range(CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD, DINO_Shift_mean, DINO_Shift_std, DINO_Angle_mean, DINO_Angle_std, EFFICIENT_shift_mean, EFFICIENT_shift_std, EFFICIENT_angle_mean, EFFICIENT_angle_std):   
     CLIP_Shift_Mean = [x * SHIFT_RANGE for x in CLIP_Shift_Mean]
     CLIP_Shift_STD = [x * SHIFT_RANGE for x in CLIP_Shift_STD]
     CLIP_Angle_Mean = [x * ANGLE_RANGE for x in CLIP_Angle_Mean]
@@ -162,7 +162,17 @@ def mult_by_range(CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_S
     RESNET_Angle_Mean = [x * ANGLE_RANGE for x in RESNET_Angle_Mean]
     RESNET_Angle_STD = [x * ANGLE_RANGE for x in RESNET_Angle_STD]
 
-    return CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD
+    DINO_Shift_mean = [x * SHIFT_RANGE for x in DINO_Shift_mean]
+    DINO_Shift_std = [x * SHIFT_RANGE for x in DINO_Shift_std]
+    DINO_Angle_mean = [x * ANGLE_RANGE for x in DINO_Angle_mean]
+    DINO_Angle_std = [x * ANGLE_RANGE for x in DINO_Angle_std]
+
+    EFFICIENT_shift_mean = [x * SHIFT_RANGE for x in EFFICIENT_shift_mean]
+    EFFICIENT_shift_std = [x * SHIFT_RANGE for x in EFFICIENT_shift_std]
+    EFFICIENT_angle_mean = [x * ANGLE_RANGE for x in EFFICIENT_angle_mean]
+    EFFICIENT_angle_std = [x * ANGLE_RANGE for x in EFFICIENT_angle_std]
+
+    return CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD, DINO_Shift_mean, DINO_Shift_std, DINO_Angle_mean, DINO_Angle_std, EFFICIENT_shift_mean, EFFICIENT_shift_std, EFFICIENT_angle_mean, EFFICIENT_angle_std 
 
 def plot_results():
     CLIP_Shift_Mean = [0.023, 0.02835, 0.0445, 0.0673, 0.0735]
@@ -170,56 +180,73 @@ def plot_results():
     CLIP_Angle_Mean	= [0.0175,	0.0195,	0.0365,	0.0515,	0.0605]
     CLIP_Angle_STD = [0.000707107, 0.00212132, 0.004949747, 0.004949747, 0.007778175]
 
-    CLIP_16_Shift_Mean = [0.0225,0.0255, 0.04, 0.0615, 0.0775]
-    CLIP_16_Shift_STD = [0.000707107, 0.000707107, 0.004242641, 0.010606602, 0.003535534]
-    CLIP_16_Angle_Mean =[0.0205, 0.0225,	0.032,	0.0475,	0.06]
-    CLIP_16_Angle_STD =	[0.003535534, 0.00212132,	0.004242641, 0.003535534,	0.001414214]
+    CLIP_16_Shift_Mean =[0.0225,        0.0255,     0.04,       0.052,         0.0595]
+    CLIP_16_Shift_STD = [0.000707107, 0.000707107, 0.004242641, 0.002828427,     0.00212132]
+    CLIP_16_Angle_Mean =[0.0205,        0.0225, 	0.032,	    0.04075,         0.0445]
+    CLIP_16_Angle_STD =	[0.003535534, 0.00212132,	0.004242641, 0.00106066,  0.004949747]
 
-    RESNET_Shift_Mean =[0.0283,	0.0353,	0.0451,	0.065, 0.0845]
-    RESNET_Shift_STD =	[0.000989949,	0.008061017, 0.002404163, 0.007071068, 0.02192031]
-    RESNET_Angle_Mean =	[0.032,	0.03, 0.04, 0.058, 0.058]
-    RESNET_Angle_STD =	[0.005656854, 0.006434672, 0.00212132, 0.008485281, 0.002828427]
+    RESNET_Shift_Mean = [0.0283,	   0.0353,	       0.0451,	     0.0645,	        0.067]
+    RESNET_Shift_STD =	[0.000989949,  0.008061017,    0.002404163,  0.006363961,	0.002828427]
+    RESNET_Angle_Mean =	[0.032,	        0.03,          0.04,         0.053,         0.0565]
+    RESNET_Angle_STD =	[0.005656854,  0.006434672,    0.00212132,   0.001414214,	0.000707107]
+    
+    DINO_Shift_mean = [0.0193,	    0.0222,	      0.032,	    0.049,	      0.05835]
+    DINO_Shift_std = [0.000707107,	0.000848528,  0.006505382,	0.005656854,  0.002333452]
+    DINO_Angle_mean = [0.01565,	    0.01895,	  0.0267,	    0.03825,	  0.04285]
+    DINO_Angle_std = [0.002616295,	0.004596194,  0.003252691,	0.005303301,  0.004454773]
 
-    DINO_Shift_mean = [1,1,2,2,3]
-    DINO_Shift_std = [0.1,0.1,0.1,0.1,0.1]
-    DINO_Angle_mean = [1,1,1,1,1]
-    DINO_Angle_std = [0.1,0.1,0.1,0.1,0.1]
+    EFFICIENT_shift_mean = [0.028,	    0.0285,	      0.033,	    0.0482,	      0.0629]
+    EFFICIENT_shift_std =  [0.001,	    0.00212132,   0.004242641,	0.009616652,  0.001555635]
+    EFFICIENT_angle_mean = [0.03,	    0.0256,	      0.0343,	    0.0464,	      0.05]
+    EFFICIENT_angle_std =  [0.005,	    0.004808326,  0.013152186,	0.007636753,  0.002828427]
 
-    CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD =  mult_by_range(CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD)
 
-    colors = ['Lightseagreen', 'gold', 'red', 'darkorchid']  # Red, Yellow, Cyan
-    markers = ['o', 's', '^', 'x']  # Markers for each model
-    linestyles = ['-', '--', ':', '-.']  # Line styles for each model    
+    CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD, DINO_Shift_mean, DINO_Shift_std, DINO_Angle_mean, DINO_Angle_std, EFFICIENT_shift_mean, EFFICIENT_shift_std, EFFICIENT_angle_mean, EFFICIENT_angle_std  =  mult_by_range(CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD, DINO_Shift_mean, DINO_Shift_std, DINO_Angle_mean, DINO_Angle_std, EFFICIENT_shift_mean, EFFICIENT_shift_std, EFFICIENT_angle_mean, EFFICIENT_angle_std) 
 
+    colors = [
+        'xkcd:electric blue',
+        'xkcd:red',
+        'xkcd:bright purple', #magneta
+        'xkcd:emerald',
+        'xkcd:dark navy blue'
+    ]    
+    markers = ['o', 's', '^', 'D', 'x']  # Markers for each model
+    linestyles = ['-', '--']  # Line styles for each model    
+    capsize= 4      # Width of the error bars
+    linewidth= 1.2  # Width of the line
+    markersize= 4.4 # size of the dots
+    
     os.makedirs('results', exist_ok=True)
     x_indices = range(len(RESNET_Shift_Mean))  # For Frozen 0 (has an extra point)
     xticks_labels = ['4048', '1024', '256', '64', '32']  # 5 points for Frozen 0
 
-    fig1=plt.figure(1, figsize=(11, 6))
-    plt.errorbar(x_indices, CLIP_Shift_Mean, yerr=CLIP_Shift_STD, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='ViT-B/32 Translation Error', capsize=8, linewidth=2, markersize=7)
-    plt.errorbar(x_indices, CLIP_16_Shift_Mean, yerr=CLIP_16_Shift_STD, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='ViT-B/16 Translation Error', capsize=8, linewidth=2, markersize=7)
-    plt.errorbar(x_indices, RESNET_Shift_Mean, yerr=RESNET_Shift_STD, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet Translation Error', capsize=8, linewidth=2, markersize=7)
-    # plt.errorbar(x_indices, DINO_Shift_mean, yerr=DINO_Shift_std, marker=markers[3], color=colors[3], linestyle=linestyles[3], label='DINO Translation Error', capsize=8, linewidth=2, markersize=7)
-    plt.title('Translation estimation errors')
-    plt.xlabel('Number of training samples')
-    plt.ylabel('Mean Values + STD')
+    fig1=plt.figure(1, figsize=(10, 6))
+    plt.errorbar(x_indices, CLIP_Shift_Mean, yerr=CLIP_Shift_STD, label='CLIP-ViT/B32 Translation Error', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, CLIP_16_Shift_Mean, yerr=CLIP_16_Shift_STD, label='CLIP-ViT/B16 Translation Error', color=colors[1], marker=markers[1], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, RESNET_Shift_Mean, yerr=RESNET_Shift_STD,label='ResNet-152 Translation Error', color=colors[2], marker=markers[2], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, DINO_Shift_mean, yerr=DINO_Shift_std,  label='DINO-ViT/B16 Translation Error', color=colors[3], marker=markers[3], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, EFFICIENT_shift_mean, yerr=EFFICIENT_shift_std, label='EfficientNet Translation Error', color=colors[4], marker=markers[4], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.title('Translation estimation errors', fontsize=15)
+    plt.xlabel('Number of training samples', fontsize=13) 
+    plt.ylabel('Mean Values + STD', fontsize=13) 
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
-    plt.legend()
+    plt.legend(loc='upper left', fontsize=10)
     plt.grid(True)
-    fig1.savefig('results/Affine Translation.png')
+    fig1.savefig('results/Affine_Translation.png')
 
-    fig2=plt.figure(2, figsize=(11, 6))
-    plt.errorbar(x_indices, CLIP_Angle_Mean, yerr=CLIP_Angle_STD, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='ViT-B/32 Rotation Error', capsize=8, linewidth=2, markersize=7)
-    plt.errorbar(x_indices, CLIP_16_Angle_Mean, yerr=CLIP_16_Angle_STD, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='ViT-B/16 Rotation Error', capsize=8, linewidth=2, markersize=7)
-    plt.errorbar(x_indices, RESNET_Angle_Mean, yerr=RESNET_Angle_STD, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet Rotation Error', capsize=8, linewidth=2, markersize=7)
-    # plt.errorbar(x_indices, DINO_Angle_mean, yerr=DINO_Angle_std, marker=markers[3], color=colors[3], linestyle=linestyles[3], label='DINO Rotation Error', capsize=8, linewidth=2, markersize=7)
-    plt.title('Rotation estimation errors')
-    plt.xlabel('Number of training samples')
-    plt.ylabel('Mean Values + STD')
+    fig2=plt.figure(2, figsize=(10, 6))
+    plt.errorbar(x_indices, CLIP_Angle_Mean, yerr=CLIP_Angle_STD, label='CLIP-ViT/B32 Rotation Error', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, CLIP_16_Angle_Mean, yerr=CLIP_16_Angle_STD,  label='CLIP-ViT/B16 Rotation Error', color=colors[1], marker=markers[1], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, RESNET_Angle_Mean, yerr=RESNET_Angle_STD, label='ResNet Rotation Error', color=colors[2], marker=markers[2], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, DINO_Angle_mean, yerr=DINO_Angle_std, label='DINO-ViT/B16 Rotation Error', color=colors[3], marker=markers[3], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, EFFICIENT_angle_mean, yerr=EFFICIENT_angle_std, label='EfficientNet Rotation Error', color=colors[4], marker=markers[4], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.title('Rotation estimation errors', fontsize=15)
+    plt.xlabel('Number of training samples', fontsize=13) 
+    plt.ylabel('Mean Values + STD', fontsize=13) 
     plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  # Adjusting X-axis labels for Frozen 0
-    plt.legend()
+    plt.legend(loc='upper left', fontsize=10)
     plt.grid(True)
-    fig2.savefig('results/Affine Rotation.png')
+    fig2.savefig('results/Affine_Rotation.png')
 
 
 def test():
