@@ -140,7 +140,7 @@ if __name__ == '__main__':
     pre = "/mnt_hdd15tb/alonkay/Thesis/"
     pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
     # pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
-    pretrained_path = pre + pretrained_path
+    # pretrained_path = pre + pretrained_path
 
     batch_size=1
     _, _, test_loader = get_data_loaders(train_size=0.002, part='head', batch_size=batch_size)
