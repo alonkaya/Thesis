@@ -94,7 +94,7 @@ class ImageFeatureTransformer(nn.Module):
         x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :]  # Remove CLS token
         x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :]  # Remove CLS token
     
-        query = x1_embeddings[:, 0, :].view(1,1,-1)  # [batch, seq_len(num_patches), features]
+        query = x1_embeddings[:, 7, :].view(1,1,-1)  # [batch, seq_len(num_patches), features]
         key = x2_embeddings  # [batch, seq_len(num_patches), features]
         value = x2_embeddings  # [batch, seq_len, features]
 
