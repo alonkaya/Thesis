@@ -1,6 +1,7 @@
 import os
 import shutil
 
+COMP = 1
 # Specify the path to the main folder containing all subfolders
 main_folder_path = "plots/Flying"
 for f in os.listdir(main_folder_path):
@@ -12,13 +13,13 @@ for f in os.listdir(main_folder_path):
         if os.path.isdir(subfolder_path) and (subfolder_name.endswith("bad") or "correct_F" not in subfolder_name):
             comp0 = os.path.join("/mnt/sda2/Alon", subfolder_path)
             comp1 = os.path.join("/mnt_hdd15tb/alonkay/Thesis/", subfolder_path)
-            if os.path.exists(comp0):
+            if COMP==0 and os.path.exists(comp0):
                 # shutil.rmtree(comp0)
                 print(f"Deleted: {comp0}")
-            elif os.path.exists(comp1):
+            elif COMP==1 and os.path.exists(comp1):
                 # shutil.rmtree(comp1)
                 print(f"Deleted: {comp1}")
-            else:
+            elif COMP==2 and os.path.exists(subfolder_path):
                 # shutil.rmtree(subfolder_path)
                 print(f"Deleted: {subfolder_path}")
 
