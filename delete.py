@@ -14,13 +14,13 @@ for f in os.listdir(main_folder_path):
             comp0 = os.path.join("/mnt/sda2/Alon", subfolder_path)
             comp1 = os.path.join("/mnt_hdd15tb/alonkay/Thesis/", subfolder_path)
             if COMP==0 and os.path.exists(comp0):
-                # shutil.rmtree(comp0)
+                shutil.rmtree(comp0)
                 print(f"Deleted: {comp0}")
             elif COMP==1 and os.path.exists(comp1):
-                # shutil.rmtree(comp1)
+                shutil.rmtree(comp1)
                 print(f"Deleted: {comp1}")
             elif COMP==2 and os.path.exists(subfolder_path):
-                # shutil.rmtree(subfolder_path)
+                shutil.rmtree(subfolder_path)
                 print(f"Deleted: {subfolder_path}")
 
 
