@@ -7,19 +7,19 @@ STEREO = True
 # find . -type f -name "model.pth"                  /mnt_hdd15tb/alonkay/Thesis/        /mnt/sda2/Alon
 
 PRETEXT_TRAIN = False
-SCENEFLOW = False
-FLYING = False
+SCENEFLOW = True
+FLYING = True
 MODEL = CLIP_MODEL_NAME_16
 FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0]
 FROZEN_HIGH_LAYERS = 0
 COMPUTER = 1 # 0 = 250  1 = 146  2 = else  
-SEQ_RATIOS = [0.002] if not SCENEFLOW else [22] if FLYING else None     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]  /  [9, 80, 170]                                             
-KITTI2SCENEFLOW = False
+SEQ_RATIOS = [0.002] if not SCENEFLOW else [9] if FLYING else None     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]  /  [9, 80, 170]                                             
+KITTI2SCENEFLOW = True
 ONLY_CONTINUE = False
 PART = ["head"] 
 MAX_POOL_SIZE = 7 if MODEL==CLIP_MODEL_NAME_16 or MODEL==DINO else 3 ######################################################################
 ADDITIONS =  "" ## REMEMBER TO PUT "__" !!!!!
-ADDITIONS += "__correct_F" if FLYING else ""
+# ADDITIONS += "__correct_F" if FLYING else ""
 CC = False
 SEED = [42, 300, 500, 600, 700, 800] # 42, 300, 500, 600, 700, 800
 

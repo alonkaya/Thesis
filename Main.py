@@ -55,7 +55,7 @@ if __name__ == "__main__":
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
-                
+                num_epochs = 100
                 frozen_high_layers = 0 if fl > 0 else FROZEN_HIGH_LAYERS
 
                 if not PRETEXT_TRAIN and MODEL==CLIP_MODEL_NAME and not SCENEFLOW and ONLY_CONTINUE and (train_size==0.05 or (train_size==0.025 and part=="head" and fl==0 and frozen_high_layers==0)):
