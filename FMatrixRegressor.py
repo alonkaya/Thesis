@@ -8,7 +8,7 @@ from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetMode
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
-                 augmentation=AUGMENTATION, model_name=MODEL, trained_vit=TRAINED_VIT, kitti2sceneflow=KITTI2SCENEFLOW,
+                 augmentation=AUGMENTATION, model_name=MODEL, trained_vit=TRAINED_VIT, kitti2sceneflow=KITTI2SCENEFLOW, sceneflow2kitti=SCENEFLOW2KITTI,
                  frozen_layers=0, frozen_high_layers=0, use_reconstruction=USE_RECONSTRUCTION_LAYER, cc=CC, pretrained_path=None, 
                  alg_coeff=0, re1_coeff=0, sed_coeff=0, plots_path=None, use_conv=USE_CONV, num_epochs=0):
 
@@ -52,7 +52,6 @@ class FMatrixRegressor(nn.Module):
         self.frozen_layers = frozen_layers
         self.frozen_high_layers = frozen_high_layers
         self.start_epoch = 0
-        self.kitti2sceneflow = kitti2sceneflow
         self.cc = cc
         self.trained_vit = trained_vit # This is for when wanting to fine-tune an already trained vit 
                                        #(for example fine-tuning a vit which had been trained on the affine transfomration task)
@@ -100,11 +99,13 @@ class FMatrixRegressor(nn.Module):
         if pretrained_path or os.path.exists(os.path.join(self.parent_model_path, 'model.pth')): 
             self.load_model(self.parent_model_path)
         
-        elif self.kitti2sceneflow:
-                kitti_path = os.path.join("/mnt/sda2/Alon", KITTI_MODEL_PATH) if COMPUTER==0 else os.path.join("/mnt_hdd15tb/alonkay/Thesis", KITTI_MODEL_PATH) if COMPUTER==1 else KITTI_MODEL_PATH
+        elif kitti2sceneflow or sceneflow2kitti:
+                p = FLYING_MODEL_PATH if self.sceneflow2kitti else KITTI_MODEL_PATH
+                kitti_path = os.path.join("/mnt/sda2/Alon", p) if COMPUTER==0 else os.path.join("/mnt_hdd15tb/alonkay/Thesis", p) if COMPUTER==1 else p
                 self.load_model(kitti_path, continue_training=False)
                 for param in self.model.parameters():
                     param.requires_grad = False
+
         else:
             if self.trained_vit != None:
                 # This is for when wanting to fine-tune an already trained vit 
