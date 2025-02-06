@@ -10,7 +10,7 @@ import os
 import faulthandler
 import traceback
 import matplotlib
-# matplotlib.use('Agg')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 class MLP(nn.Module):
@@ -419,3 +419,6 @@ def set_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)  # If using multi-GPU.
+
+
+

@@ -143,7 +143,6 @@ def get_F(k0, k1, poses=None, idx=None, jump_frames=JUMP_FRAMES, R_relative=None
 def pose_to_F(pose, k):
     # compute unormalized_F and F from unormalized_pose and pose
 
-    # TODO: change this if batch size > 1 !! they are originally (-1,3,4)
     pose = pose.view(3, 4)
 
     R = pose[:, :3]
@@ -355,7 +354,7 @@ class EpipolarGeometry:
         return dist # shape (batch_size, n)
      
     def point_2_line_distance(self, point, l):
-        # Both point and line are of shape (3,) #TODO remove norm from here
+        # Both point and line are of shape (3,) # remove norm from here
         return abs(np.sum(l * point) / np.sqrt(l[0]**2 + l[1]**2))
     
     def algebraic_distance_single_point(self, F, pt1, pt2):

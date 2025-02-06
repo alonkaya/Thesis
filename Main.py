@@ -55,7 +55,7 @@ if __name__ == "__main__":
                 if num_epochs == 0:
                         print("Invalid data ratio")
                         continue
-                num_epochs = 100 # TODO
+
                 frozen_high_layers = 0 if fl > 0 else FROZEN_HIGH_LAYERS
 
                 if not PRETEXT_TRAIN and MODEL==CLIP_MODEL_NAME and not SCENEFLOW and ONLY_CONTINUE and (train_size==0.05 or (train_size==0.025 and part=="head" and fl==0 and frozen_high_layers==0)):
@@ -95,7 +95,7 @@ if __name__ == "__main__":
                 # If the model was already trained well, skip training with other seed
                 # elif "seed" in model.plots_path and (os.path.exists(model.plots_path.split("__seed_")[0]) or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_300') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_500') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_600') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_700') or os.path.exists(f'{model.plots_path.split("__seed_")[0]}__seed_800')):
                 #         print(f"\n{model.plots_path}\nAlready well trained, no need for other seed training\n")
-                #         sys.stdout.flush() # TODO
+                #         sys.stdout.flush() 
 
                 elif model.start_epoch < model.num_epochs:
                         train_loader, val_loader, test_loader = get_data_loaders(train_size, part, batch_size=batch_size)
@@ -128,3 +128,9 @@ crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH
                 del model
                 torch.cuda.empty_cache()
 
+320
+480
+372
+230
+620
+972
