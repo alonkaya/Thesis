@@ -554,32 +554,40 @@ def plot_errors():
     clip_32_std_RE1_0 = [0,             0.028868, 0.011547,  0.005774,   0.049329,  0.077675,  0.030551,      0.225906,  0.140475383]
 
     # Frozen: 4
-    clip_32_mean_alg_4 = [0.216667, 0.303333, 0.248667, 0.306667,   0.366667, 0.373333, 0.446667, 0.57,     0.563333333]
-    clip_32_mean_SED_4 = [0.195667, 0.326667, 0.253333, 0.36,       0.456667, 0.476667, 0.626667, 0.92,     0.896]
-    clip_32_mean_RE1_4 = [0.05,     0.096,    0.066667, 0.113333,   0.143333, 0.163333, 0.22,     0.4,      0.36]
+    clip_32_mean_alg_4 = [0.216667, 0.303333, 0.248667, 0.306667,   0.366667, 0.373333, 0.446667, 0.545,     0.563333333]
+    clip_32_mean_SED_4 = [0.195667, 0.326667, 0.253333, 0.36,       0.456667, 0.476667, 0.626667, 0.885,     0.896]
+    clip_32_mean_RE1_4 = [0.05,     0.096,    0.066667, 0.113333,   0.143333, 0.163333, 0.22,     0.35,      0.36]
     clip_32_std_alg_4 =  [0.011547, 0.047258, 0.024194, 0.015275,   0.037859, 0.066583, 0.061101, 0.079373, 0.032145503]
     clip_32_std_SED_4 =  [0.005859, 0.068069, 0.025166, 0.03,       0.080829, 0.124231, 0.135031, 0.240624, 0.176714459]
     clip_32_std_RE1_4 =  [8.5e-18,  0.0151,   0.011547, 0.011547,   0.023094, 0.066583, 0.06,     0.160935, 0.13114877]
 
     # Frozen: 8
-    clip_32_mean_alg_8 = [0.213333,    0.283333,   0.26,       0.326667,     0.376667,      0.346667,   0.503333,   0.633333,    0.673333333]
-    clip_32_mean_SED_8 = [0.199,       0.31,       0.293333,    0.386667,    0.456667,      0.44,       0.763333,   1.053333,    1.121666667]
-    clip_32_mean_RE1_8 = [0.047,       0.091667,   0.083333,    0.123333,    0.153333,      0.14,       0.28,       0.483333,    0.518333333]
+    clip_32_mean_alg_8 = [0.213333,    0.283333,   0.26,       0.326667,     0.376667,      0.352,   0.48,   0.58,    0.673333333]
+    clip_32_mean_SED_8 = [0.199,       0.31,       0.293333,    0.386667,    0.456667,      0.458,       0.72,   0.97,    1.121666667]
+    clip_32_mean_RE1_8 = [0.047,       0.091667,   0.083333,    0.123333,    0.153333,      0.15,       0.252,       0.45,    0.518333333]
     clip_32_std_alg_8 =  [0.025166115, 0.02081666, 0.03,        0.023094011, 0.015275252,  0.06350853,  0.056862407, 0.096090235, 0.045092498]
     clip_32_std_SED_8 =  [0.037322915, 0.036055513, 0.055075705, 0.025166115, 0.032145503, 0.121243557, 0.167431578, 0.243378991, 0.07285831]
     clip_32_std_RE1_8 =  [0.011269428, 0.017559423, 0.02081666,  0.005773503, 0.02081666,  0.060827625, 0.075498344, 0.191398363, 0.044859038]
 
+    # Frozen: 12
+    clip_32_mean_alg_12 = [0.245,    0.33,   0.3,       0.4,     0.41,      0.40,          0.512333333,   0.605,    0.704]
+    clip_32_mean_SED_12 = [0.24,       0.36,       0.34,    0.52,    0.533,      0.514,       0.730333333,    0.99,    1.2]
+    clip_32_mean_RE1_12 = [0.59,       0.12,   0.1,    0.192,    0.182,      0.188,       0.286333333,    0.4,    0.565]
+    # clip_32_std_alg_12 =  [0.025166115, 0.02081666, 0.03,        0.023094011, 0.015275252,  0.06350853,  0.056862407, 0.096090235, 0.045092498]
+    # clip_32_std_SED_12 =  [0.037322915, 0.036055513, 0.055075705, 0.025166115, 0.032145503, 0.121243557, 0.167431578, 0.243378991, 0.07285831]
+    # clip_32_std_RE1_12 =  [0.011269428, 0.017559423, 0.02081666,  0.005773503, 0.02081666,  0.060827625, 0.075498344, 0.191398363, 0.044859038]
+
     # Frozen: top 5
-    clip_32_mean_alg_5 = [0.226666667, 0.315333333,  0.335333333,	0.331,	        0.404666667,	0.452666667,	0.47,	        0.686]
-    clip_32_mean_SED_5 = [0.21,	        0.356666667,  0.38,	        0.402,	        0.52,	        0.64,	        0.676,	        1.15666666]
-    clip_32_mean_RE1_5 = [0.054666667,	0.106666667,  0.115,	    0.128333333,	0.176666667,	0.223333333,	0.257666667,	0.53]
-    clip_32_std_alg_5 =  [0.005773503,	0.02532456,	  0.009237604,	0.025357445,	0.054197171,	0.071143048,	0.052915026,	0.084071398]
-    clip_32_std_SED_5 =  [0,	        0.045092498,  0.038935845,	0.031176915,	0.085440037,	0.165227116,	0.105910339,	0.160104133]
-    clip_32_std_RE1_5 =  [0.004163332,	0.02081666,   0.018027756,  0.01106044,	   0.035118846,	   0.077674535,  	0.058620247,	0.051961524]
+    clip_32_mean_alg_5 = [0.226666667, 0.315333333,  0.335333333,	0.331,	        0.404666667,	0.452666667,	0.47,	        0.686,       0.734]
+    clip_32_mean_SED_5 = [0.21,	        0.356666667,  0.38,	        0.402,	        0.52,	        0.64,	        0.676,	        1.15666666,  1.33]
+    clip_32_mean_RE1_5 = [0.054666667,	0.106666667,  0.115,	    0.128333333,	0.176666667,	0.223333333,	0.257666667,	0.53,        0.61]
+    clip_32_std_alg_5 =  [0.005773503,	0.02532456,	  0.009237604,	0.025357445,	0.054197171,	0.071143048,	0.052915026,	0.084071398, 0.073711148]
+    clip_32_std_SED_5 =  [0,	        0.045092498,  0.038935845,	0.031176915,	0.085440037,	0.165227116,	0.105910339,	0.160104133, 0.155026879]
+    clip_32_std_RE1_5 =  [0.004163332,	0.02081666,   0.018027756,  0.01106044,	   0.035118846,	   0.077674535,  	0.058620247,	0.051961524, 0.111355287]
 
     # Resnet #
-    resnet_mean_alg = [0.246666667, 0.37,         0.378666667,  0.353333333,  0.423333333,  0.466666667,  0.42,        0.508333333, 0.522]
-    resnet_mean_SED = [0.476666667, 0.463333333,  0.48,         0.413333333,  0.55,         0.586666667,  0.576666667, 0.696666667, 0.714]
+    resnet_mean_alg = [0.275,       0.37,         0.378666667,  0.4,  0.423333333,  0.466666667,  0.42,        0.508333333, 0.522]
+    resnet_mean_SED = [0.476666667, 0.463333333,  0.48,         0.46,  0.55,         0.586666667,  0.576666667, 0.696666667, 0.714]
     resnet_mean_RE1 =  [0.083333333, 0.196666667, 0.166666667,	 0.146666667, 0.206666667,	 0.243333333, 0.21,	       0.291666667, 0.314666667]
     resnet_std_alg =  [0.135769412, 0.05,         0.043650124,  0.065064071,  0.072341781, 	0.066583281,  0.173205081, 0.007637626, 0.136864897]
     resnet_std_SED = [0.255799401, 0.090737717,   0.081853528,  0.105039675,  0.132287566,   0.092915732, 0.351046056, 0.032145503, 0.231144976]
@@ -602,38 +610,43 @@ def plot_errors():
     dino_std_RE1 =  [0.006350853, 0.021571586, 0.011590226, 0.0090185,    0.011547005,   0.049662192, 0.079657601, 0.105509873, 0.165955817]
 
     # EfficientNet
-    efficient_mean_alg = [0.241333333, 0.332666667, 0.356666667, 0.351333333, 0.44,         0.422,       0.434666667, 0.466666667, 0.502]
-    efficient_mean_SED = [0.248333333, 0.414333333, 0.492666667, 0.442666667, 0.596666667, 0.558,        0.607666667, 0.654,       0.7095]
-    efficient_mean_RE1 = [0.070666667, 0.137,       0.156,       0.161666667, 0.223333333,  0.212666667, 0.265333333, 0.26,        0.309]
-    efficient_std_alg =  [0.002309401, 0.042442117, 0.040414519, 0.082099533, 0.01,         0.076315136, 0.145661709, 0.049328829, 0.053740115]
-    efficient_std_SED =  [0.014433757, 0.086001938, 0.097372138, 0.139173752, 0.015275252, 0.140114239,  0.255551039, 0.127165247, 0.036062446]
-    efficient_std_RE1 =  [0.001154701, 0.047085029, 0.015099669, 0.072002315, 0.025166115, 0.079757967,  0.16218919,  0.081853528, 0.026870058]
+    efficient_mean_alg = [0.26, 0.332666667, 0.356666667, 0.38, 0.44,         0.422,       0.434666667, 0.466666667, 0.509]
+    efficient_mean_SED = [0.275, 0.414333333, 0.492666667, 0.445, 0.596666667, 0.558,        0.607666667, 0.654,       0.701233333]
+    efficient_mean_RE1 = [0.075, 0.137,       0.156,       0.161666667, 0.223333333,  0.212666667, 0.265333333, 0.26,        0.312666667]
+    efficient_std_alg =  [0.002309401, 0.042442117, 0.040414519, 0.082099533, 0.01,         0.076315136, 0.145661709, 0.049328829, 0.039887341]
+    efficient_std_SED =  [0.014433757, 0.086001938, 0.097372138, 0.139173752, 0.015275252, 0.140114239,  0.255551039, 0.127165247, 0.029244886]
+    efficient_std_RE1 =  [0.001154701, 0.047085029, 0.015099669, 0.072002315, 0.025166115, 0.079757967,  0.16218919,  0.081853528, 0.020033306]
 
     # Flying
-    flying_clip_alg =  [0.293, 0.389, 0.67]
-    flying_clip_SED = [0.54, 0.828, 2.1]
-    flying_clip_RE1 = [0.097, 0.169, 0.53]
-    flying_clip_16_alg =  [0.35, 0.355, 0.578]
-    flying_clip_16_SED =  [0.69, 0.75, 1.74]
-    flying_clip_16_RE1 = [0.13, 0.143, 0.414]
-    flying_resnet_alg =  [0.4, 0.42, 0.64]
-    flying_resnet_SED =  [0.885, 1.15, 1.83]
-    flying_resnet_RE1 =  [0.2,0.243, 0.46]
-    flying_dino_alg = [0.34, 0.325, 0.589]
-    flying_dino_SED = [0.7, 0.71, 1.814]
-    flying_dino_RE1 = [0.13, 0.135, 0.43]
-    flying_efficient_alg =  [0.415, 0.45, 0.6]
-    flying_efficient_SED =  [0.872, 1.12, 1.8]
-    flying_efficient_RE1 =  [0.17, 0.25, 0.43]
+    flying_clip_alg =  [0.293, 0.389, 0.51, 0.67]
+    flying_clip_SED =  [0.54, 0.828,  1.465, 2.1]
+    flying_clip_RE1 =  [0.097, 0.169, 0.4, 0.53]
 
+    flying_clip_16_alg =  [0.31, 0.355, 0.459, 0.578]
+    flying_clip_16_SED =  [0.65, 0.75,  1.18,   1.52]
+    flying_clip_16_RE1 =  [0.11, 0.143, 0.2,  0.25]
 
+    flying_resnet_alg =  [0.4,   0.42,  0.54,   0.6]
+    flying_resnet_SED =  [0.88, 1.1,  1.55,   1.7]
+    flying_resnet_RE1 =  [0.2,   0.243, 0.38,   0.42]
+
+    flying_dino_alg = [0.3, 0.325, 0.42,  0.512]
+    flying_dino_SED = [0.61,  0.71,  1.27,   1.48]
+    flying_dino_RE1 = [0.1, 0.135, 0.23,   0.28]
+
+    flying_efficient_alg =  [0.415, 0.45, 0.48, 0.55]
+    flying_efficient_SED =  [0.93, 1.185, 1.4, 1.6]
+    flying_efficient_RE1 =  [0.17, 0.25, 0.33, 0.38]
+				
+				
+				
 
 
     os.makedirs('results', exist_ok=True)
     x_indices = range(len(clip_32_mean_alg_0))  # For Frozen 0 (has an extra point)
     x_indices_flying = np.array(list(range(len(flying_clip_alg))))  
     xticks_labels = ['2166', '1082', '540', '405', '269', '161', '88', '47', '32']  # 5 points for Frozen 0
-    xticks_labels_flying = ['1431', '721', '88']  
+    xticks_labels_flying = ['1431', '721', '198', '88']  
     # colors = ['steelblue', 'limegreen', 'red', 'darkviolet', 'orange']  # Colors for each model
     colors = [
         'xkcd:electric blue',
@@ -715,14 +728,18 @@ def plot_errors():
 
     fig1, axes1 = plt.subplots(2, 1, figsize=(10, 11), sharex=True)
     fig1.subplots_adjust(hspace=4)  # Add space between subplots   
-    axes1[0].errorbar(x_indices, clip_32_mean_alg_0, yerr=clip_32_std_alg_0, label='ALG 0 bottom frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[0].errorbar(x_indices, clip_32_mean_alg_4, yerr=clip_32_std_alg_4, label='ALG 4 bottom frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[0].errorbar(x_indices, clip_32_mean_alg_8, yerr=clip_32_std_alg_8, label='ALG 8 bottom frozen layers', color=colors[3], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[0].set_title('ALG Metric of ViT-B/32 freezing bottom layers on F estimation task using KITTI', fontsize=15)
-    axes1[1].errorbar(x_indices, clip_32_mean_SED_0, yerr=clip_32_std_SED_0, label='SED 0 bottom frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[1].errorbar(x_indices, clip_32_mean_SED_4, yerr=clip_32_std_SED_4, label='SED 4 bottom frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[1].errorbar(x_indices, clip_32_mean_SED_8, yerr=clip_32_std_SED_8, label='SED 8 bottom frozen layers', color=colors[3], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[1].set_title('SED Metric of ViT-B/32 freezing bottom layers on F estimation task using KITTI', fontsize=15)
+    axes1[0].errorbar(x_indices, clip_32_mean_alg_0, yerr=clip_32_std_alg_0, label='ALG no frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[0].errorbar(x_indices, clip_32_mean_alg_4, yerr=clip_32_std_alg_4, label='ALG freezing bottom 4 layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[0].errorbar(x_indices, clip_32_mean_alg_8, yerr=clip_32_std_alg_8, label='ALG freezing bottom 8 layers', color=colors[2], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes1[0].errorbar(x_indices, clip_32_mean_alg_5, clip_32_std_alg_5, label='ALG freezing top 5 layers', color=colors[4], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[0].errorbar(x_indices, clip_32_mean_alg_12, label='ALG freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[0].set_title('ALG Metric of ViT-B/32 with frozen layers layers on F estimation task using KITTI', fontsize=15)
+    axes1[1].errorbar(x_indices, clip_32_mean_SED_0, yerr=clip_32_std_SED_0, label='SED no frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[1].errorbar(x_indices, clip_32_mean_SED_4, yerr=clip_32_std_SED_4, label='SED freezing bottom 4 layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[1].errorbar(x_indices, clip_32_mean_SED_8, yerr=clip_32_std_SED_8, label='SED freezing bottom 8 layers', color=colors[2], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes1[1].errorbar(x_indices, clip_32_mean_SED_5, clip_32_std_SED_5, label='SED freezing top 5 layers', color=colors[4], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[1].errorbar(x_indices, clip_32_mean_SED_12, label='SED freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[1].set_title('SED Metric of ViT-B/32 with frozen layers on F estimation task using KITTI', fontsize=15)
     # axes1[2].errorbar(x_indices, clip_32_mean_RE1_0, yerr=clip_32_std_RE1_0, label='SAM 0 bottom frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
     # axes1[2].errorbar(x_indices, clip_32_mean_RE1_4, yerr=clip_32_std_RE1_4, label='SAM 4 bottom frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
     # axes1[2].errorbar(x_indices, clip_32_mean_RE1_8, yerr=clip_32_std_RE1_8, label='SAM 8 bottom frozen layers', color=colors[3], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
@@ -959,8 +976,8 @@ import matplotlib.pyplot as plt
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 if __name__ == "__main__":
-    test_trained()
-    # plot_errors()
+    # test_trained()
+    plot_errors()
     # RANSAC()
     # avg_trained()
     # test_specific_F(avg_F)
