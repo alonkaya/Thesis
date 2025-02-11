@@ -570,12 +570,12 @@ def plot_errors():
     clip_32_std_RE1_8 =  [0.011269428, 0.017559423, 0.02081666,  0.005773503, 0.02081666,  0.060827625, 0.075498344, 0.191398363, 0.044859038]
 
     # Frozen: 12
-    clip_32_mean_alg_12 = [0.26,      0.33,   0.338,     0.4,     0.41,      0.40,         0.512333333,   0.605,    0.704]
-    clip_32_mean_SED_12 = [0.26,       0.385,   0.421,    0.52,    0.533,      0.514,       0.730333333,    0.99,    1.2]
-    clip_32_mean_RE1_12 = [0.59,       0.12,   0.151,    0.192,    0.182,      0.188,       0.286333333,    0.4,    0.565]
-    # clip_32_std_alg_12 =  [0.025166115, 0.02081666, 0.03,        0.023094011, 0.015275252,  0.06350853,  0.056862407, 0.096090235, 0.045092498]
-    # clip_32_std_SED_12 =  [0.037322915, 0.036055513, 0.055075705, 0.025166115, 0.032145503, 0.121243557, 0.167431578, 0.243378991, 0.07285831]
-    # clip_32_std_RE1_12 =  [0.011269428, 0.017559423, 0.02081666,  0.005773503, 0.02081666,  0.060827625, 0.075498344, 0.191398363, 0.044859038]
+    clip_32_mean_alg_12 = [0.32,      0.346,    0.338,     0.4,     0.41,      0.40,       0.512333333,     0.605,   0.704]
+    clip_32_mean_SED_12 = [0.38,       0.429,   0.421,     0.52,     0.533,     0.514,      0.730333333,     0.99,    1.2]
+    clip_32_mean_RE1_12 = [0.14,      0.152,    0.151,    0.192,    0.182,     0.188,     0.286333333,      0.4,     0.565]
+    clip_32_std_alg_12 =  [0.119716331, 0.028867513, 0.032807519, 0.036226142, 0.038974351, 0.06767816,  0.04747982, 0.157559513,  0.09539392]
+    clip_32_std_SED_12 =  [0.275, 0.090072193, 0.070465121, 0.036055513, 0.066910388, 0.146642422, 0.113799531, 0.38509739,  0.132035349]
+    clip_32_std_RE1_12 =  [0.152, 0.056695091, 0.042003968, 0.023115651, 0.01569501,  0.086152965, 0.071626345, 0.210713075, 0.057735027]
 
     # Frozen: top 5
     clip_32_mean_alg_5 = [0.226666667, 0.315333333,  0.335333333,	0.331,	        0.404666667,	0.452666667,	0.47,	        0.686,       0.734]
@@ -731,14 +731,12 @@ def plot_errors():
     axes1[0].errorbar(x_indices, clip_32_mean_alg_0, yerr=clip_32_std_alg_0, label='No frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes1[0].errorbar(x_indices, clip_32_mean_alg_4, yerr=clip_32_std_alg_4, label='Freezing bottom 4 layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes1[0].errorbar(x_indices, clip_32_mean_alg_8, yerr=clip_32_std_alg_8, label='Freezing bottom 8 layers', color=colors[2], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes1[0].errorbar(x_indices, clip_32_mean_alg_5, clip_32_std_alg_5, label='Freezing top 5 layers', color=colors[4], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[0].errorbar(x_indices, clip_32_mean_alg_12, label='Freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[0].errorbar(x_indices, clip_32_mean_alg_12, yerr=clip_32_std_alg_12, label='Freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes1[0].set_title('AD Metric of ViT-B/32 with frozen layers layers on F estimation task using KITTI', fontsize=15)
     axes1[1].errorbar(x_indices, clip_32_mean_SED_0, yerr=clip_32_std_SED_0, label='No frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes1[1].errorbar(x_indices, clip_32_mean_SED_4, yerr=clip_32_std_SED_4, label='Freezing bottom 4 layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes1[1].errorbar(x_indices, clip_32_mean_SED_8, yerr=clip_32_std_SED_8, label='Freezing bottom 8 layers', color=colors[2], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes1[1].errorbar(x_indices, clip_32_mean_SED_5, clip_32_std_SED_5, label='Freezing top 5 layers', color=colors[4], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[1].errorbar(x_indices, clip_32_mean_SED_12, label='Freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[1].errorbar(x_indices, clip_32_mean_SED_12, yerr=clip_32_std_SED_12, label='Freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes1[1].set_title('SED Metric of ViT-B/32 with frozen layers on F estimation task using KITTI', fontsize=15)
     # axes1[2].errorbar(x_indices, clip_32_mean_RE1_0, yerr=clip_32_std_RE1_0, label='SAM 0 bottom frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
     # axes1[2].errorbar(x_indices, clip_32_mean_RE1_4, yerr=clip_32_std_RE1_4, label='SAM 4 bottom frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)

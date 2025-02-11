@@ -504,7 +504,7 @@ def save_keypoints_stereo():
 
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
         if i not in train_seqeunces_stereo and i not in val_sequences_stereo and i not in test_sequences_stereo: continue
-
+        if i != 9: continue
         image_0_path = os.path.join(sequence_path, 'image_0')
 
         # Get a list of all poses [R,t] in this sequence
@@ -531,7 +531,7 @@ def save_keypoints_stereo():
 
             epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False)
 
-            filepath = os.path.join(sequence_path, f'keypoints.txt')
+            filepath = os.path.join(sequence_path, f'keypoints2.txt')
             with open(filepath, 'a') as f:
                 line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
                 f.write(line)
@@ -559,40 +559,6 @@ def save_keypoints_stereo():
             # # Show the plot
             # plt.show()
     
-def save_keypoints_monkaa():
-    monkaa_path = "SceneFlow/Monkaa_cleanpass"
-    F_monkaa = torch.tensor([[ 0,     0,        0],
-                             [ 0,     0,       -9.5238e-04],
-                             [ 0,     9.5238e-04,     0]]).to(device)
-    
-    # for i, seq_name  in enumerate(os.listdir(monkaa_path)):
-    seq_name = "treeflight_x2"     
-    seq_path = os.path.join(monkaa_path, seq_name) 
-    left_path = os.path.join(seq_path, 'left')
-    right_path = os.path.join(seq_path, 'right')
-
-    # Indices of 'good' image frames
-    valid_indices = get_valid_indices_stereo(left_path)
-
-    for idx in valid_indices:
-        img0 = torchvision.io.read_image(os.path.join(left_path, f'{idx:04}.{IMAGE_TYPE}')) # shape (channels, height, width)
-        img1 = torchvision.io.read_image(os.path.join(right_path, f'{idx:04}.{IMAGE_TYPE}')) # shape (channels, height, width)
-        
-        img0 = TF.rgb_to_grayscale(img0, num_output_channels=1)
-        img1 = TF.rgb_to_grayscale(img1, num_output_channels=1)
-        
-        # Normalize F-Matrix
-        F = norm_layer(F_monkaa.view(-1, 9)).view(3,3)
-
-        epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False, threshold=0.3)
-        if epi.pts1.shape[0] < 5:
-            print(f'{epi.pts1.shape[0]} points at {seq_name}, {idx}')
-
-        filepath = os.path.join(seq_path, f'keypoints.txt')
-        with open(filepath, 'a') as f:
-            line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
-            f.write(line)
-
 def save_keypoints_flying(train_sequences_flying):
     F_flying = torch.tensor([[ 0,     0,        0],
                              [ 0,     0,       -9.5238e-04],
@@ -749,9 +715,6 @@ def remove_images_with_low_keypoints():
         print(i)
 
 if __name__ == "__main__":
-    train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.02, part="tail", batch_size=1)
+    # train_loader, val_loader, test_loader = get_dataloader_stereo(data_ratio=0.02, part="tail", batch_size=1)
     # remove_images_with_low_keypoints()
-
-    
-
-    
+    save_keypoints_stereo()
