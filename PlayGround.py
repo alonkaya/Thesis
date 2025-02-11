@@ -570,9 +570,9 @@ def plot_errors():
     clip_32_std_RE1_8 =  [0.011269428, 0.017559423, 0.02081666,  0.005773503, 0.02081666,  0.060827625, 0.075498344, 0.191398363, 0.044859038]
 
     # Frozen: 12
-    clip_32_mean_alg_12 = [0.245,    0.33,   0.3,       0.4,     0.41,      0.40,          0.512333333,   0.605,    0.704]
-    clip_32_mean_SED_12 = [0.24,       0.36,       0.34,    0.52,    0.533,      0.514,       0.730333333,    0.99,    1.2]
-    clip_32_mean_RE1_12 = [0.59,       0.12,   0.1,    0.192,    0.182,      0.188,       0.286333333,    0.4,    0.565]
+    clip_32_mean_alg_12 = [0.26,      0.33,   0.338,     0.4,     0.41,      0.40,         0.512333333,   0.605,    0.704]
+    clip_32_mean_SED_12 = [0.26,       0.385,   0.421,    0.52,    0.533,      0.514,       0.730333333,    0.99,    1.2]
+    clip_32_mean_RE1_12 = [0.59,       0.12,   0.151,    0.192,    0.182,      0.188,       0.286333333,    0.4,    0.565]
     # clip_32_std_alg_12 =  [0.025166115, 0.02081666, 0.03,        0.023094011, 0.015275252,  0.06350853,  0.056862407, 0.096090235, 0.045092498]
     # clip_32_std_SED_12 =  [0.037322915, 0.036055513, 0.055075705, 0.025166115, 0.032145503, 0.121243557, 0.167431578, 0.243378991, 0.07285831]
     # clip_32_std_RE1_12 =  [0.011269428, 0.017559423, 0.02081666,  0.005773503, 0.02081666,  0.060827625, 0.075498344, 0.191398363, 0.044859038]
@@ -670,7 +670,7 @@ def plot_errors():
     axes5[0].errorbar(x_indices, resnet_mean_alg, yerr=resnet_std_alg, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet-152', capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes5[0].errorbar(x_indices, dino_mean_alg, yerr=dino_std_alg, marker=markers[3], color=colors[3], linestyle=linestyles[3], label='DINO-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes5[0].errorbar(x_indices, efficient_mean_alg, yerr=efficient_std_alg, marker=markers[4], color=colors[4], linestyle=linestyles[4], label='EfficientnetV2_M', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[0].set_title('ALG Metric of fine-tuned models on F estimation task using KITTI', fontsize=15)
+    axes5[0].set_title('AD Metric of fine-tuned models on F estimation task using KITTI', fontsize=15)
     axes5[1].errorbar(x_indices, clip_32_mean_SED_0, yerr=clip_32_std_SED_0, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='CLIP-ViT/B32', capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes5[1].errorbar(x_indices, clip_16_mean_SED, yerr=clip_16_std_SED, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='CLIP-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes5[1].errorbar(x_indices, resnet_mean_SED, yerr=resnet_std_SED, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet-152', capsize=capsize, linewidth=linewidth, markersize=markersize)
@@ -687,7 +687,7 @@ def plot_errors():
     for ax in axes5:
         ax.set_xlabel('Number of Training Samples', fontsize=13)        
         ax.set_ylabel('Mean Value ± STD', fontsize=13)
-        ax.legend(loc='upper left', fontsize=10)
+        ax.legend(loc='upper left', fontsize=11)
         ax.grid(True, linestyle='-', color='#d3d3d3')
         ax.set_xticks(range(len(xticks_labels)), labels=xticks_labels) 
         ax.tick_params(axis='both', labelbottom=True, labelsize=13)  # Force x-tick labels to be shown
@@ -702,9 +702,9 @@ def plot_errors():
     axes7[0].errorbar(x_indices_flying, flying_resnet_alg, label='ResNet-152', color=colors[2], marker=markers[2], linestyle=linestyles[2], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes7[0].errorbar(x_indices_flying, flying_dino_alg, label='DINO-ViT/B16', color=colors[3], marker=markers[3], linestyle=linestyles[3], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes7[0].errorbar(x_indices_flying, flying_efficient_alg, label='EfficientnetV2_M', color=colors[4], marker=markers[4], linestyle=linestyles[4], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[0].set_title('ALG Metric of fine-tuned models on F estimation task using FlyingThings3D', fontsize=15)
-    axes7[1].errorbar(x_indices_flying, flying_clip_SED, label='ViT-B/32', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[1].errorbar(x_indices_flying, flying_clip_16_SED, label='ViT-B/16', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes7[0].set_title('AD Metric of fine-tuned models on F estimation task using FlyingThings3D', fontsize=15)
+    axes7[1].errorbar(x_indices_flying, flying_clip_SED, label='CLIP-ViT-B/32', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes7[1].errorbar(x_indices_flying, flying_clip_16_SED, label='CLIP-ViT-B/16', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes7[1].errorbar(x_indices_flying, flying_resnet_SED, label='ResNet-152', color=colors[2], marker=markers[2], linestyle=linestyles[2], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes7[1].errorbar(x_indices_flying, flying_dino_SED, label='DINO-ViT/B16', color=colors[3], marker=markers[3], linestyle=linestyles[3], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes7[1].errorbar(x_indices_flying, flying_efficient_SED, label='EfficientnetV2_M', color=colors[4], marker=markers[4], linestyle=linestyles[4], capsize=capsize, linewidth=linewidth, markersize=markersize)
@@ -718,7 +718,7 @@ def plot_errors():
     for ax in axes7:
         ax.set_xlabel('Number of Training Samples', fontsize=13)      
         ax.set_ylabel('Mean Value ± STD', fontsize=13)  
-        ax.legend(loc='upper left', fontsize=10)
+        ax.legend(loc='upper left', fontsize=11)
         ax.set_xticks(range(len(xticks_labels_flying)), labels=xticks_labels_flying) 
         ax.tick_params(axis='both', labelbottom=True, labelsize=13)  # Force x-tick labels to be shown
         ax.grid(True, linestyle='-', color='#d3d3d3')
@@ -728,17 +728,17 @@ def plot_errors():
 
     fig1, axes1 = plt.subplots(2, 1, figsize=(10, 11), sharex=True)
     fig1.subplots_adjust(hspace=4)  # Add space between subplots   
-    axes1[0].errorbar(x_indices, clip_32_mean_alg_0, yerr=clip_32_std_alg_0, label='ALG no frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[0].errorbar(x_indices, clip_32_mean_alg_4, yerr=clip_32_std_alg_4, label='ALG freezing bottom 4 layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[0].errorbar(x_indices, clip_32_mean_alg_8, yerr=clip_32_std_alg_8, label='ALG freezing bottom 8 layers', color=colors[2], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes1[0].errorbar(x_indices, clip_32_mean_alg_5, clip_32_std_alg_5, label='ALG freezing top 5 layers', color=colors[4], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[0].errorbar(x_indices, clip_32_mean_alg_12, label='ALG freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[0].set_title('ALG Metric of ViT-B/32 with frozen layers layers on F estimation task using KITTI', fontsize=15)
-    axes1[1].errorbar(x_indices, clip_32_mean_SED_0, yerr=clip_32_std_SED_0, label='SED no frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[1].errorbar(x_indices, clip_32_mean_SED_4, yerr=clip_32_std_SED_4, label='SED freezing bottom 4 layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[1].errorbar(x_indices, clip_32_mean_SED_8, yerr=clip_32_std_SED_8, label='SED freezing bottom 8 layers', color=colors[2], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes1[1].errorbar(x_indices, clip_32_mean_SED_5, clip_32_std_SED_5, label='SED freezing top 5 layers', color=colors[4], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[1].errorbar(x_indices, clip_32_mean_SED_12, label='SED freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[0].errorbar(x_indices, clip_32_mean_alg_0, yerr=clip_32_std_alg_0, label='No frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[0].errorbar(x_indices, clip_32_mean_alg_4, yerr=clip_32_std_alg_4, label='Freezing bottom 4 layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[0].errorbar(x_indices, clip_32_mean_alg_8, yerr=clip_32_std_alg_8, label='Freezing bottom 8 layers', color=colors[2], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes1[0].errorbar(x_indices, clip_32_mean_alg_5, clip_32_std_alg_5, label='Freezing top 5 layers', color=colors[4], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[0].errorbar(x_indices, clip_32_mean_alg_12, label='Freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[0].set_title('AD Metric of ViT-B/32 with frozen layers layers on F estimation task using KITTI', fontsize=15)
+    axes1[1].errorbar(x_indices, clip_32_mean_SED_0, yerr=clip_32_std_SED_0, label='No frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[1].errorbar(x_indices, clip_32_mean_SED_4, yerr=clip_32_std_SED_4, label='Freezing bottom 4 layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[1].errorbar(x_indices, clip_32_mean_SED_8, yerr=clip_32_std_SED_8, label='Freezing bottom 8 layers', color=colors[2], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    # axes1[1].errorbar(x_indices, clip_32_mean_SED_5, clip_32_std_SED_5, label='Freezing top 5 layers', color=colors[4], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    axes1[1].errorbar(x_indices, clip_32_mean_SED_12, label='Freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
     axes1[1].set_title('SED Metric of ViT-B/32 with frozen layers on F estimation task using KITTI', fontsize=15)
     # axes1[2].errorbar(x_indices, clip_32_mean_RE1_0, yerr=clip_32_std_RE1_0, label='SAM 0 bottom frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
     # axes1[2].errorbar(x_indices, clip_32_mean_RE1_4, yerr=clip_32_std_RE1_4, label='SAM 4 bottom frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
@@ -747,7 +747,7 @@ def plot_errors():
     for ax in axes1:
         ax.set_xlabel('Number of Training Samples', fontsize=13) 
         ax.set_ylabel('Mean Value ± STD', fontsize=13)       
-        ax.legend(loc='upper left', fontsize=10)
+        ax.legend(loc='upper left', fontsize=11)
         ax.grid(True, linestyle='-', color='#d3d3d3')
         ax.set_xticks(range(len(xticks_labels)), labels=xticks_labels) 
         ax.tick_params(axis='both', labelbottom=True, labelsize=13)  # Force x-tick labels to be shown
