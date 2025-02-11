@@ -884,7 +884,7 @@ def test_trained():
     num_epochs = 0
     pretrained_model = FLYING_MODEL_PATH
     pretrained_model = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
-    
+
     train_size = 9 if FLYING else 0.002 
     train_loader, val_loader, test_loader = get_data_loaders(train_size=train_size, part='head', batch_size=batch_size)
     with torch.no_grad():
@@ -975,8 +975,8 @@ import matplotlib.pyplot as plt
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 if __name__ == "__main__":
-    # test_trained()
-    plot_errors()
+    test_trained()
+    # plot_errors()
     # RANSAC()
     # avg_trained()
     # test_specific_F(avg_F)
