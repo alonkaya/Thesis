@@ -453,7 +453,7 @@ def get_dataloader_flying(train_size, batch_size, num_workers=NUM_WORKERS):
             images_0 = {idx: torchvision.io.read_image(os.path.join(left_path, f'{idx:04}.{IMAGE_TYPE}')).to(device) for idx in valid_indices} if INIT_DATA else None    
             images_1 = {idx: torchvision.io.read_image(os.path.join(right_path, f'{idx:04}.{IMAGE_TYPE}')).to(device) for idx in valid_indices} if INIT_DATA else None
 
-            keypoints_dict = load_keypoints(os.path.join(seq_path, 'keypoints.txt')) # TODO
+            keypoints_dict = load_keypoints(os.path.join(seq_path, 'keypoints.txt'))
 
             dataset_stereo = Dataset_stereo(seq_path, transform, K, K, R, t, images_0, images_1, keypoints_dict, valid_indices, seq_name=seq_name)
 
@@ -504,7 +504,7 @@ def save_keypoints_stereo():
 
     for i, (sequence_path, poses_path, calib_path) in enumerate(zip(sequence_paths, poses_paths, calib_paths)):
         if i not in train_seqeunces_stereo and i not in val_sequences_stereo and i not in test_sequences_stereo: continue
-        if i != 9: continue # TODO
+
         image_0_path = os.path.join(sequence_path, 'image_0')
 
         # Get a list of all poses [R,t] in this sequence
@@ -531,7 +531,7 @@ def save_keypoints_stereo():
 
             epi = EpipolarGeometry(img0, img1, F=F.unsqueeze(0), is_scaled=False)
 
-            filepath = os.path.join(sequence_path, f'keypoints2.txt') # TODO
+            filepath = os.path.join(sequence_path, f'keypoints.txt')
             with open(filepath, 'a') as f:
                 line = f"{idx}; {epi.pts1.tolist()}; {epi.pts2.tolist()}\n"
                 f.write(line)

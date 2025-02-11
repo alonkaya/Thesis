@@ -240,7 +240,7 @@ class EpipolarGeometry:
         self.pts1 = torch.cat((pts1, torch.ones(pts1.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
         self.pts2 = torch.cat((pts2, torch.ones(pts2.shape[0], 1)), dim=-1).to(device) # shape (n, 3)
 
-        # self.pts1, self.pts2 = self.trim_by_sed() # TODO
+        self.pts1, self.pts2 = self.trim_by_sed()
 
     def trim_by_sed(self, threshold=SED_TRIM_THRESHOLD, min_keypoints=5, max_keypoints=100):
         self.pts1, self.pts2 = self.pts1.unsqueeze(0), self.pts2.unsqueeze(0)  # shape (1, n, 3)
