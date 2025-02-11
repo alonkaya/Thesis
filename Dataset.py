@@ -356,7 +356,7 @@ def get_dataloader_stereo(data_ratio, part, batch_size, num_workers=NUM_WORKERS)
         images_0 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_0', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None    
         images_1 = {idx: torchvision.io.read_image(os.path.join(sequence_path, 'image_1', f'{idx:06}.{IMAGE_TYPE}')).to(device) for idx in subset} if INIT_DATA else None
 
-        keypoints_dict = load_keypoints(os.path.join(sequence_path, 'keypoints2.txt'))
+        keypoints_dict = load_keypoints(os.path.join(sequence_path, 'keypoints2.txt' if i==9 else 'keypoints.txt'))
 
         dataset_stereo = Dataset_stereo(sequence_path, transform, k0, k1, R_relative, t_relative, images_0, images_1, keypoints_dict, subset, seq_name= f'0{i}')
 
