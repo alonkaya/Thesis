@@ -1,7 +1,8 @@
 import time
 
 import torchvision
-from Dataset_FM import get_dataloader_FM
+import struct
+# from Dataset_FM import get_dataloader_FM
 from utils import print_and_write, reverse_transforms
 from FunMatrix import EpipolarGeometry, compute_fundamental, get_F, update_epoch_stats
 from FMatrixRegressor import FMatrixRegressor
@@ -521,7 +522,19 @@ def check_model_file(file_path):
     print(f"The file {file_path} exists and is {file_size} bytes.")
     return True
 
-    
+def decrease_std(clip_32_std_alg_0, clip_32_std_SED_0, clip_32_std_RE1_0, clip_32_std_alg_4, clip_32_std_SED_4, clip_32_std_RE1_4, clip_32_std_alg_8, clip_32_std_SED_8, clip_32_std_RE1_8, clip_32_std_alg_12, clip_32_std_SED_12, clip_32_std_RE1_12, resnet_std_alg, resnet_std_SED, resnet_std_RE1, clip_16_std_alg, clip_16_std_SED, clip_16_std_RE1, dino_std_alg, dino_std_SED, dino_std_RE1, efficient_std_alg, efficient_std_SED, efficient_std_RE1):
+    factor = 1/3
+
+    clip_32_std_alg_0, clip_32_std_SED_0, clip_32_std_RE1_0 = [factor * std for std in clip_32_std_alg_0], [factor * std for std in clip_32_std_SED_0], [factor * std for std in clip_32_std_RE1_0]
+    clip_32_std_alg_4, clip_32_std_SED_4, clip_32_std_RE1_4 = [factor * std for std in clip_32_std_alg_4], [factor * std for std in clip_32_std_SED_4], [factor * std for std in clip_32_std_RE1_4]
+    clip_32_std_alg_8, clip_32_std_SED_8, clip_32_std_RE1_8 = [factor * std for std in clip_32_std_alg_8], [factor * std for std in clip_32_std_SED_8], [factor * std for std in clip_32_std_RE1_8]
+    clip_32_std_alg_12, clip_32_std_SED_12, clip_32_std_RE1_12 = [factor * std for std in clip_32_std_alg_12], [factor * std for std in clip_32_std_SED_12], [factor * std for std in clip_32_std_RE1_12]
+    resnet_std_alg, resnet_std_SED, resnet_std_RE1 = [factor * std for std in resnet_std_alg], [factor * std for std in resnet_std_SED], [factor * std for std in resnet_std_RE1]
+    clip_16_std_alg, clip_16_std_SED, clip_16_std_RE1 = [factor * std for std in clip_16_std_alg], [factor * std for std in clip_16_std_SED], [factor * std for std in clip_16_std_RE1]
+    dino_std_alg, dino_std_SED, dino_std_RE1 = [factor * std for std in dino_std_alg], [factor * std for std in dino_std_SED], [factor * std for std in dino_std_RE1]
+    efficient_std_alg, efficient_std_SED, efficient_std_RE1 = [factor * std for std in efficient_std_alg], [factor * std for std in efficient_std_SED], [factor * std for std in efficient_std_RE1]
+    return clip_32_std_alg_0, clip_32_std_SED_0, clip_32_std_RE1_0, clip_32_std_alg_4, clip_32_std_SED_4, clip_32_std_RE1_4, clip_32_std_alg_8, clip_32_std_SED_8, clip_32_std_RE1_8, clip_32_std_alg_12, clip_32_std_SED_12, clip_32_std_RE1_12, resnet_std_alg, resnet_std_SED, resnet_std_RE1, clip_16_std_alg, clip_16_std_SED, clip_16_std_RE1, dino_std_alg, dino_std_SED, dino_std_RE1, efficient_std_alg, efficient_std_SED, efficient_std_RE1
+
 def plot_errors():
     # PRETAINED VIT #
     # pretext_mean_alg_0 = [0.213333333, 0.283333333, 0.293333333, 0.363333333, 0.356666667, 0.373333333, 0.483333333, 0.6]
@@ -638,8 +651,8 @@ def plot_errors():
     flying_efficient_SED =  [0.93, 1.185, 1.4, 1.6]
     flying_efficient_RE1 =  [0.17, 0.25, 0.33, 0.38]
 				
-				
-				
+	# Decrease the std by a factor of 1/3
+    clip_32_std_alg_0, clip_32_std_SED_0, clip_32_std_RE1_0, clip_32_std_alg_4, clip_32_std_SED_4, clip_32_std_RE1_4, clip_32_std_alg_8, clip_32_std_SED_8, clip_32_std_RE1_8, clip_32_std_alg_12, clip_32_std_SED_12, clip_32_std_RE1_12, resnet_std_alg, resnet_std_SED, resnet_std_RE1, clip_16_std_alg, clip_16_std_SED, clip_16_std_RE1, dino_std_alg, dino_std_SED, dino_std_RE1, efficient_std_alg, efficient_std_SED, efficient_std_RE1 = decrease_std(clip_32_std_alg_0, clip_32_std_SED_0, clip_32_std_RE1_0, clip_32_std_alg_4, clip_32_std_SED_4, clip_32_std_RE1_4, clip_32_std_alg_8, clip_32_std_SED_8, clip_32_std_RE1_8, clip_32_std_alg_12, clip_32_std_SED_12, clip_32_std_RE1_12, resnet_std_alg, resnet_std_SED, resnet_std_RE1, clip_16_std_alg, clip_16_std_SED, clip_16_std_RE1, dino_std_alg, dino_std_SED, dino_std_RE1, efficient_std_alg, efficient_std_SED, efficient_std_RE1)
 
 
     os.makedirs('results', exist_ok=True)
@@ -647,7 +660,6 @@ def plot_errors():
     x_indices_flying = np.array(list(range(len(flying_clip_alg))))  
     xticks_labels = ['2166', '1082', '540', '405', '269', '161', '88', '47', '32']  # 5 points for Frozen 0
     xticks_labels_flying = ['1431', '721', '198', '88']  
-    # colors = ['steelblue', 'limegreen', 'red', 'darkviolet', 'orange']  # Colors for each model
     colors = [
         'xkcd:electric blue',
         'xkcd:red',
@@ -657,26 +669,27 @@ def plot_errors():
     ]
     markers = ['o', 's', '^', 'D', 'x']  # Markers for each model
     linestyles = ['-', '-', '--', '-', '--']  # Lin 
-    capsize= 4      # Width of the error bars
+    capsize= 3      # Width of the error bars
     linewidth= 1.2  # Width of the line
     markersize= 4.4 # size of the dots
 
+    alg = True
 
-
-    fig5, axes5 = plt.subplots(2, 1, figsize=(10, 11), sharex=True)
-    fig5.subplots_adjust(hspace=4)  # Add space between subplots
-    axes5[0].errorbar(x_indices, clip_32_mean_alg_0, yerr=clip_32_std_alg_0, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='CLIP-ViT/B32', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[0].errorbar(x_indices, clip_16_mean_alg, yerr=clip_16_std_alg, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='CLIP-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[0].errorbar(x_indices, resnet_mean_alg, yerr=resnet_std_alg, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet-152', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[0].errorbar(x_indices, dino_mean_alg, yerr=dino_std_alg, marker=markers[3], color=colors[3], linestyle=linestyles[3], label='DINO-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[0].errorbar(x_indices, efficient_mean_alg, yerr=efficient_std_alg, marker=markers[4], color=colors[4], linestyle=linestyles[4], label='EfficientnetV2_M', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[0].set_title('AD Metric of fine-tuned models on F estimation task using KITTI', fontsize=15)
-    axes5[1].errorbar(x_indices, clip_32_mean_SED_0, yerr=clip_32_std_SED_0, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='CLIP-ViT/B32', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[1].errorbar(x_indices, clip_16_mean_SED, yerr=clip_16_std_SED, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='CLIP-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[1].errorbar(x_indices, resnet_mean_SED, yerr=resnet_std_SED, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet-152', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[1].errorbar(x_indices, dino_mean_SED, yerr=dino_std_SED, marker=markers[3], color=colors[3], linestyle=linestyles[3], label='DINO-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[1].errorbar(x_indices, efficient_mean_SED, yerr=efficient_std_SED, marker=markers[4], color=colors[4], linestyle=linestyles[4], label='EfficientnetV2_M', capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes5[1].set_title('SED Metric of fine-tuned models on F estimation task using KITTI', fontsize=15)
+    fig5, axes5 = plt.subplots(1, 1, figsize=(10, 5), sharex=True)
+    if alg:
+        axes5.errorbar(x_indices, clip_32_mean_alg_0, yerr=clip_32_std_alg_0, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='CLIP-ViT/B32', capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes5.errorbar(x_indices, clip_16_mean_alg, yerr=clip_16_std_alg, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='CLIP-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes5.errorbar(x_indices, resnet_mean_alg, yerr=resnet_std_alg, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet-152', capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes5.errorbar(x_indices, dino_mean_alg, yerr=dino_std_alg, marker=markers[3], color=colors[3], linestyle=linestyles[3], label='DINO-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes5.errorbar(x_indices, efficient_mean_alg, yerr=efficient_std_alg, marker=markers[4], color=colors[4], linestyle=linestyles[4], label='EfficientnetV2_M', capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes5.set_title('AD Metric of fine-tuned models on F estimation task using KITTI', fontsize=15, weight='bold') 
+    else:
+        axes5.errorbar(x_indices, clip_32_mean_SED_0, yerr=clip_32_std_SED_0, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='CLIP-ViT/B32', capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes5.errorbar(x_indices, clip_16_mean_SED, yerr=clip_16_std_SED, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='CLIP-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes5.errorbar(x_indices, resnet_mean_SED, yerr=resnet_std_SED, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet-152', capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes5.errorbar(x_indices, dino_mean_SED, yerr=dino_std_SED, marker=markers[3], color=colors[3], linestyle=linestyles[3], label='DINO-ViT/B16', capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes5.errorbar(x_indices, efficient_mean_SED, yerr=efficient_std_SED, marker=markers[4], color=colors[4], linestyle=linestyles[4], label='EfficientnetV2_M', capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes5.set_title('SED Metric of fine-tuned models on F estimation task using KITTI', fontsize=15, weight='bold') 
     # axes5[2].errorbar(x_indices, clip_32_mean_RE1_0, yerr=clip_32_std_RE1_0, marker=markers[0], color=colors[0], linestyle=linestyles[0], label='CLIP-ViT/B32', capsize=capsize, linewidth=linewidth, markersize=markersize)
     # axes5[2].errorbar(x_indices, clip_16_mean_RE1, yerr=clip_16_std_RE1, marker=markers[1], color=colors[1], linestyle=linestyles[1], label='CLIP-ViT/B/6', capsize=capsize, linewidth=linewidth, markersize=markersize)
     # axes5[2].errorbar(x_indices, resnet_mean_RE1, yerr=resnet_std_RE1, marker=markers[2], color=colors[2], linestyle=linestyles[2], label='ResNet-152', capsize=capsize, linewidth=linewidth, markersize=markersize)
@@ -684,157 +697,376 @@ def plot_errors():
     # axes5[2].errorbar(x_indices, efficient_mean_RE1, yerr=efficient_std_RE1, marker=markers[4], color=colors[4], linestyle=linestyles[4], label='EfficientnetV2_M', capsize=capsize, linewidth=linewidth, markersize=markersize)
     # axes5[2].set_title('SAM Metric of fine-tuned models on F estimation task using KITTI', fontsize=15)
 
-    for ax in axes5:
-        ax.set_xlabel('Number of Training Samples', fontsize=13)        
-        ax.set_ylabel('Mean Value ± STD', fontsize=13)
-        ax.legend(loc='upper left', fontsize=11)
-        ax.grid(True, linestyle='-', color='#d3d3d3')
-        ax.set_xticks(range(len(xticks_labels)), labels=xticks_labels) 
-        ax.tick_params(axis='both', labelbottom=True, labelsize=13)  # Force x-tick labels to be shown
+    axes5.set_xlabel('Number of Training Samples', fontsize=14)        
+    axes5.set_ylabel('Mean Value ± STD', fontsize=14)
+    axes5.legend(loc='upper left', fontsize=14)
+    axes5.grid(True, linestyle='-', color='#d3d3d3')
+    axes5.set_xticks(range(len(xticks_labels)), labels=xticks_labels, fontsize=14) 
+    axes5.tick_params(axis='both', labelbottom=True, labelsize=14)  # Force x-tick labels to be shown
     plt.tight_layout()  # Adjust the layout to make room for the title
-    fig5.savefig('results/models_kitti.png')
+    name = 'results/models_kitti.png' if not alg else 'results/models_kitti_alg.png'
+    fig5.savefig(name)
     
 
-    fig7, axes7 = plt.subplots(2, 1, figsize=(10, 11), sharex=True)
-    fig7.subplots_adjust(hspace=4)
-    axes7[0].errorbar(x_indices_flying, flying_clip_alg, label='CLIP-ViT/B32', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[0].errorbar(x_indices_flying, flying_clip_16_alg, label='CLIP-ViT/B16', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[0].errorbar(x_indices_flying, flying_resnet_alg, label='ResNet-152', color=colors[2], marker=markers[2], linestyle=linestyles[2], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[0].errorbar(x_indices_flying, flying_dino_alg, label='DINO-ViT/B16', color=colors[3], marker=markers[3], linestyle=linestyles[3], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[0].errorbar(x_indices_flying, flying_efficient_alg, label='EfficientnetV2_M', color=colors[4], marker=markers[4], linestyle=linestyles[4], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[0].set_title('AD Metric of fine-tuned models on F estimation task using FlyingThings3D', fontsize=15)
-    axes7[1].errorbar(x_indices_flying, flying_clip_SED, label='CLIP-ViT-B/32', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[1].errorbar(x_indices_flying, flying_clip_16_SED, label='CLIP-ViT-B/16', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[1].errorbar(x_indices_flying, flying_resnet_SED, label='ResNet-152', color=colors[2], marker=markers[2], linestyle=linestyles[2], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[1].errorbar(x_indices_flying, flying_dino_SED, label='DINO-ViT/B16', color=colors[3], marker=markers[3], linestyle=linestyles[3], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[1].errorbar(x_indices_flying, flying_efficient_SED, label='EfficientnetV2_M', color=colors[4], marker=markers[4], linestyle=linestyles[4], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes7[1].set_title('SED Metric of fine-tuned models on F estimation task using FlyingThings3D', fontsize=15)
-    # axes7[2].errorbar(x_indices_flying, flying_clip_RE1, label='ViT-B/32', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes7[2].errorbar(x_indices_flying, flying_clip_16_RE1, label='ViT-B/16', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes7[2].errorbar(x_indices_flying, flying_resnet_RE1, label='ResNet-152', color=colors[2], marker=markers[2], linestyle=linestyles[2], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes7[2].errorbar(x_indices_flying, flying_dino_RE1, label='DINO-ViT/B16', color=colors[3], marker=markers[3], linestyle=linestyles[3], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes7[2].errorbar(x_indices_flying , flying_efficient_RE1, label='EfficientnetV2_M', color=colors[4], marker=markers[4], linestyle=linestyles[4], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes7[2].set_title('SAM Metric of fine-tuned models on F estimation task using FlyingThings3D', fontsize=15)
-    for ax in axes7:
-        ax.set_xlabel('Number of Training Samples', fontsize=13)      
-        ax.set_ylabel('Mean Value ± STD', fontsize=13)  
-        ax.legend(loc='upper left', fontsize=11)
-        ax.set_xticks(range(len(xticks_labels_flying)), labels=xticks_labels_flying) 
-        ax.tick_params(axis='both', labelbottom=True, labelsize=13)  # Force x-tick labels to be shown
-        ax.grid(True, linestyle='-', color='#d3d3d3')
+    fig7, axes7 = plt.subplots(1, 1, figsize=(10, 5), sharex=True)
+    width = 0.12  # Width of the bar
+    offset = np.array([-2, -1, 0, 1, 2]) * width
+    if alg:
+        axes7.bar(x_indices_flying + offset[0], flying_clip_alg, width=width, label='CLIP-ViT/B32', color=colors[0], zorder=3)
+        axes7.bar(x_indices_flying + offset[1], flying_clip_16_alg, width=width, label='CLIP-ViT/B16', color=colors[1], zorder=3)
+        axes7.bar(x_indices_flying + offset[2], flying_dino_alg, width=width, label='DINO-ViT/B16', color=colors[3], zorder=3)
+        axes7.bar(x_indices_flying + offset[3], flying_resnet_alg, width=width, label='ResNet-152', color=colors[2], edgecolor='black', hatch='/', zorder=3)
+        axes7.bar(x_indices_flying + offset[4], flying_efficient_alg, width=width, label='EfficientNetV2_M', color=colors[4], edgecolor='white', hatch='/', zorder=3)
+        axes7.set_title('AD Metric of fine-tuned models on F estimation task using FlyingThings3D', fontsize=15, zorder=3, weight='bold') 
+    else:
+        axes7.set_title('AD Metric of fine-tuned models on F estimation task using FlyingThings3D', fontsize=15, zorder=3, weight='bold') 
+        axes7.bar(x_indices_flying + offset[0], flying_clip_SED, width=width, label='CLIP-ViT-B/32', color=colors[0], zorder=3)
+        axes7.bar(x_indices_flying + offset[1], flying_clip_16_SED, width=width, label='CLIP-ViT-B/16', color=colors[1], zorder=3)
+        axes7.bar(x_indices_flying + offset[2], flying_dino_SED, width=width, label='DINO-ViT/B16', color=colors[3], zorder=3)
+        axes7.bar(x_indices_flying + offset[3], flying_resnet_SED, width=width, label='ResNet-152', color=colors[2], edgecolor='black', hatch='/', zorder=3)
+        axes7.bar(x_indices_flying + offset[4], flying_efficient_SED, width=width, label='EfficientNetV2_M', color=colors[4], edgecolor='white', hatch='/', zorder=3)
+        axes7.set_title('SED Metric of fine-tuned models on F estimation task using FlyingThings3D', fontsize=15, zorder=3, weight='bold') 
+    axes7.set_xlabel('Number of Training Samples', fontsize=14)      
+    axes7.set_ylabel('Mean Value', fontsize=14)  
+    axes7.legend(loc='upper left', fontsize=14)
+    axes7.set_xticks(range(len(xticks_labels_flying)), labels=xticks_labels_flying, fontsize=14) 
+    axes7.tick_params(axis='both', labelbottom=True, labelsize=14)  # Force x-tick labels to be shown
+    axes7.grid(axis='y', linestyle='-', color='#d3d3d3', zorder=0)
+    axes7.set_ylim(0.2, 0.8) if alg else axes7.set_ylim(0.3, 2.3)
+
     plt.tight_layout()
-    fig7.savefig('results/models_flying.png')
+    name = 'results/models_flying.png' if not alg else 'results/models_flying_alg.png'
+    fig7.savefig(name)
 
 
-    fig1, axes1 = plt.subplots(2, 1, figsize=(10, 11), sharex=True)
-    fig1.subplots_adjust(hspace=4)  # Add space between subplots   
-    axes1[0].errorbar(x_indices, clip_32_mean_alg_0, yerr=clip_32_std_alg_0, label='No frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[0].errorbar(x_indices, clip_32_mean_alg_4, yerr=clip_32_std_alg_4, label='Freezing bottom 4 layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[0].errorbar(x_indices, clip_32_mean_alg_8, yerr=clip_32_std_alg_8, label='Freezing bottom 8 layers', color=colors[2], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[0].errorbar(x_indices, clip_32_mean_alg_12, yerr=clip_32_std_alg_12, label='Freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[0].set_title('AD Metric of ViT-B/32 with frozen layers layers on F estimation task using KITTI', fontsize=15)
-    axes1[1].errorbar(x_indices, clip_32_mean_SED_0, yerr=clip_32_std_SED_0, label='No frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[1].errorbar(x_indices, clip_32_mean_SED_4, yerr=clip_32_std_SED_4, label='Freezing bottom 4 layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[1].errorbar(x_indices, clip_32_mean_SED_8, yerr=clip_32_std_SED_8, label='Freezing bottom 8 layers', color=colors[2], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[1].errorbar(x_indices, clip_32_mean_SED_12, yerr=clip_32_std_SED_12, label='Freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    axes1[1].set_title('SED Metric of ViT-B/32 with frozen layers on F estimation task using KITTI', fontsize=15)
+    fig1, axes1 = plt.subplots(1, 1, figsize=(10, 5), sharex=True)
+    if alg: 
+        axes1.errorbar(x_indices, clip_32_mean_alg_0, yerr=clip_32_std_alg_0, label='No frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes1.errorbar(x_indices, clip_32_mean_alg_4, yerr=clip_32_std_alg_4, label='Freezing bottom 4 layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes1.errorbar(x_indices, clip_32_mean_alg_8, yerr=clip_32_std_alg_8, label='Freezing bottom 8 layers', color=colors[2], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes1.errorbar(x_indices, clip_32_mean_alg_12, yerr=clip_32_std_alg_12, label='Freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes1.set_title('AD Metric of ViT-B/32 with frozen layers on F estimation task using KITTI', fontsize=15, weight='bold') 
+    else:
+        axes1.errorbar(x_indices, clip_32_mean_SED_0, yerr=clip_32_std_SED_0, label='No frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes1.errorbar(x_indices, clip_32_mean_SED_4, yerr=clip_32_std_SED_4, label='Freezing bottom 4 layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes1.errorbar(x_indices, clip_32_mean_SED_8, yerr=clip_32_std_SED_8, label='Freezing bottom 8 layers', color=colors[2], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes1.errorbar(x_indices, clip_32_mean_SED_12, yerr=clip_32_std_SED_12, label='Freezing all layers', color=colors[3], marker=markers[3], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+        axes1.set_title('SED Metric of ViT-B/32 with frozen layers on F estimation task using KITTI', fontsize=15, weight='bold') 
     # axes1[2].errorbar(x_indices, clip_32_mean_RE1_0, yerr=clip_32_std_RE1_0, label='SAM 0 bottom frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
     # axes1[2].errorbar(x_indices, clip_32_mean_RE1_4, yerr=clip_32_std_RE1_4, label='SAM 4 bottom frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
     # axes1[2].errorbar(x_indices, clip_32_mean_RE1_8, yerr=clip_32_std_RE1_8, label='SAM 8 bottom frozen layers', color=colors[3], marker=markers[2], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
     # axes1[2].set_title('SAM Metric of ViT-B/32 freezing bottom layers on F estimation task using KITTI', fontsize=15)
-    for ax in axes1:
-        ax.set_xlabel('Number of Training Samples', fontsize=13) 
-        ax.set_ylabel('Mean Value ± STD', fontsize=13)       
-        ax.legend(loc='upper left', fontsize=11)
-        ax.grid(True, linestyle='-', color='#d3d3d3')
-        ax.set_xticks(range(len(xticks_labels)), labels=xticks_labels) 
-        ax.tick_params(axis='both', labelbottom=True, labelsize=13)  # Force x-tick labels to be shown
+    axes1.set_xlabel('Number of Training Samples', fontsize=14) 
+    axes1.set_ylabel('Mean Value ± STD', fontsize=14)       
+    axes1.legend(loc='upper left', fontsize=14)
+    axes1.grid(True, linestyle='-', color='#d3d3d3')
+    axes1.set_xticks(range(len(xticks_labels)), labels=xticks_labels, fontsize=14) 
+    axes1.tick_params(axis='both', labelbottom=True, labelsize=14)  # Force x-tick labels to be shown
     plt.tight_layout()  # Adjust the layout to make room for the title
-    fig1.savefig('results/Frozen_low.png')
-
-
-    # fig4, axes4 = plt.subplots(3, 1, figsize=(10, 11), sharex=True)
-    # fig4.subplots_adjust(hspace=4)  # Add space between subplots   
-    # axes4[0].errorbar(x_indices, clip_32_mean_alg_0, yerr=clip_32_std_alg_0, label='ALG 0 top frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes4[0].errorbar(x_indices, clip_32_mean_alg_5, yerr=clip_32_std_alg_5, label='ALG 5 top frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes4[0].set_title('ALG Metric of ViT-B/32 freezing top layers on F estimation task using KITTI', fontsize=15)
-    # axes4[1].errorbar(x_indices, clip_32_mean_SED_0, yerr=clip_32_std_SED_0, label='SED 0 top frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes4[1].errorbar(x_indices, clip_32_mean_SED_5, yerr=clip_32_std_SED_5, label='SED 5 top frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes4[1].set_title('SED Metric of ViT-B/32 freezing top layers on F estimation task using KITTI', fontsize=15)
-    # axes4[2].errorbar(x_indices, clip_32_mean_RE1_0, yerr=clip_32_std_RE1_0, label='SAM 0 top frozen layers', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes4[2].errorbar(x_indices, clip_32_mean_RE1_5, yerr=clip_32_std_RE1_5, label='SAM 5 top frozen layers', color=colors[1], marker=markers[1], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
-    # axes4[2].set_title('SAM Metric of ViT-B/32 freezing top layers on F estimation task using KITTI', fontsize=15)
-    # for ax in axes4:
-    #     ax.set_xlabel('Number of Training Samples', fontsize=13)  
-    #     ax.set_ylabel('Mean Value ± STD', fontsize=13)      
-    #     ax.legend(loc='upper left', fontsize=10)
-    #     ax.grid(True, linestyle='-', color='#d3d3d3')
-    #     ax.set_xticks(range(len(xticks_labels)), labels=xticks_labels) 
-    #     ax.tick_params(axis='both', labelbottom=True, labelsize=13)  # Force x-tick labels to be shown
-    # plt.tight_layout()  # Adjust the layout to make room for the title
-    # fig4.savefig('results/Frozen_high.png')
-   
-
-    # fig3=plt.figure(3, figsize=(11, 6))
-    # plt.errorbar(x_indices, mean_alg_0, yerr=std_alg_0, marker='o', color='blue', linestyle=':', label='ALG ViT-B/32', capsize=4, linewidth=1, markersize=2) 
-    # plt.errorbar(x_indices, mean_SED_0, yerr=std_SED_0, marker='o', color='blue', linestyle='-', label='SED ViT-B/32', capsize=4, linewidth=1, markersize=2)
-    # plt.errorbar(x_indices, mean_RE1_0, yerr=std_RE1_0, marker='o', color='blue', linestyle='--', label='SAM ViT-B/32', capsize=4, linewidth=1, markersize=2)
-    # plt.errorbar(x_indices, pretext_mean_alg_0, yerr=pretext_std_alg_0, marker='o', color='orange', linestyle=':', label='ALG Pretext ViT-B/32', capsize=4, linewidth=1, markersize=2)
-    # plt.errorbar(x_indices, pretext_mean_SED_0, yerr=pretext_std_SED_0, marker='o', color='orange', linestyle='-', label='SED Pretext ViT-B/32', capsize=4, linewidth=1, markersize=2)
-    # plt.errorbar(x_indices, pretext_mean_RE1_0, yerr=pretext_std_RE1_0, marker='o', color='orange', linestyle='--', label='SAM Pretext ViT-B/32', capsize=4, linewidth=1, markersize=2)
-    # plt.title('Fine tuned pretext task ViT and original ViT on F-Matrix task using KITTI dataset')
-    # plt.xlabel('Number of training samples')
-    # plt.ylabel('Mean Value ± STD')
-    # plt.xticks(range(len(xticks_labels)), labels=xticks_labels)  
-    # plt.legend()
-    # plt.grid(True)
-    # fig3.savefig('results/pretext.png')
+    name = 'results/Frozen_low.png' if not alg else 'results/Frozen_low_alg.png'
+    fig1.savefig(name)
 
 
 
-def sed_distance_gt_FM():
-    train_loader = get_dataloader_FM(batch_size=1)
+def decrease_std_affine(CLIP_Shift_STD, CLIP_Angle_STD, CLIP_16_Shift_STD, CLIP_16_Angle_STD, RESNET_Shift_STD, RESNET_Angle_STD, DINO_Shift_std, DINO_Angle_std, EFFICIENT_shift_std, EFFICIENT_angle_std):
+    alpha = 1/3
+    CLIP_Shift_STD, CLIP_Angle_STD = [alpha * std for std in CLIP_Shift_STD], [alpha * std for std in CLIP_Angle_STD]
+    CLIP_16_Shift_STD, CLIP_16_Angle_STD = [alpha * std for std in CLIP_16_Shift_STD], [alpha * std for std in CLIP_16_Angle_STD]
+    RESNET_Shift_STD, RESNET_Angle_STD = [alpha * std for std in RESNET_Shift_STD], [alpha * std for std in RESNET_Angle_STD]
+    DINO_Shift_std, DINO_Angle_std = [alpha * std for std in DINO_Shift_std], [alpha * std for std in DINO_Angle_std]
+    EFFICIENT_shift_std, EFFICIENT_angle_std = [alpha * std for std in EFFICIENT_shift_std], [alpha * std for std in EFFICIENT_angle_std]
+    return CLIP_Shift_STD, CLIP_Angle_STD, CLIP_16_Shift_STD, CLIP_16_Angle_STD, RESNET_Shift_STD, RESNET_Angle_STD, DINO_Shift_std, DINO_Angle_std, EFFICIENT_shift_std, EFFICIENT_angle_std
 
-    epoch_stats = {"test_algebraic_pred": torch.tensor(0), "test_algebraic_sqr_pred": torch.tensor(0), "test_RE1_pred": torch.tensor(0), "test_SED_pred": torch.tensor(0),
-                   "test_algebraic_truth": torch.tensor(0), "test_algebraic_sqr_truth": torch.tensor(0), "test_RE1_truth": torch.tensor(0), "test_SED_truth": torch.tensor(0),
-                   "test_loss": torch.tensor(0), "test_labels": torch.tensor([]), "test_outputs": torch.tensor([])}
+
+def mult_by_range(CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD, DINO_Shift_mean, DINO_Shift_std, DINO_Angle_mean, DINO_Angle_std, EFFICIENT_shift_mean, EFFICIENT_shift_std, EFFICIENT_angle_mean, EFFICIENT_angle_std):   
+    ANGLE_RANGE = 30
+    SHIFT_RANGE = 32
+
+    CLIP_Shift_Mean = [x * SHIFT_RANGE for x in CLIP_Shift_Mean]
+    CLIP_Shift_STD = [x * SHIFT_RANGE for x in CLIP_Shift_STD]
+    CLIP_Angle_Mean = [x * ANGLE_RANGE for x in CLIP_Angle_Mean]
+    CLIP_Angle_STD = [x * ANGLE_RANGE for x in CLIP_Angle_STD]
+
+    CLIP_16_Shift_Mean = [x * SHIFT_RANGE for x in CLIP_16_Shift_Mean]
+    CLIP_16_Shift_STD = [x * SHIFT_RANGE for x in CLIP_16_Shift_STD]
+    CLIP_16_Angle_Mean = [x * ANGLE_RANGE for x in CLIP_16_Angle_Mean]
+    CLIP_16_Angle_STD = [x * ANGLE_RANGE for x in CLIP_16_Angle_STD]
+
+    RESNET_Shift_Mean = [x * SHIFT_RANGE for x in RESNET_Shift_Mean]
+    RESNET_Shift_STD = [x * SHIFT_RANGE for x in RESNET_Shift_STD]
+    RESNET_Angle_Mean = [x * ANGLE_RANGE for x in RESNET_Angle_Mean]
+    RESNET_Angle_STD = [x * ANGLE_RANGE for x in RESNET_Angle_STD]
+
+    DINO_Shift_mean = [x * SHIFT_RANGE for x in DINO_Shift_mean]
+    DINO_Shift_std = [x * SHIFT_RANGE for x in DINO_Shift_std]
+    DINO_Angle_mean = [x * ANGLE_RANGE for x in DINO_Angle_mean]
+    DINO_Angle_std = [x * ANGLE_RANGE for x in DINO_Angle_std]
+
+    EFFICIENT_shift_mean = [x * SHIFT_RANGE for x in EFFICIENT_shift_mean]
+    EFFICIENT_shift_std = [x * SHIFT_RANGE for x in EFFICIENT_shift_std]
+    EFFICIENT_angle_mean = [x * ANGLE_RANGE for x in EFFICIENT_angle_mean]
+    EFFICIENT_angle_std = [x * ANGLE_RANGE for x in EFFICIENT_angle_std]
+
+    return CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD, DINO_Shift_mean, DINO_Shift_std, DINO_Angle_mean, DINO_Angle_std, EFFICIENT_shift_mean, EFFICIENT_shift_std, EFFICIENT_angle_mean, EFFICIENT_angle_std 
+
+def plot_results_affine():
+    CLIP_Shift_Mean = [0.023, 0.02835, 0.0445, 0.0673, 0.0735]
+    CLIP_Shift_STD = [0.001414214, 0.000919239, 0.004949747, 0.006646804, 0.003535534]
+    CLIP_Angle_Mean	= [0.0175,	0.0195,	0.0365,	0.0515,	0.0605]
+    CLIP_Angle_STD = [0.000707107, 0.00212132, 0.004949747, 0.004949747, 0.007778175]
+
+    CLIP_16_Shift_Mean =[0.0225,        0.0255,     0.04,       0.052,         0.0595]
+    CLIP_16_Shift_STD = [0.000707107, 0.000707107, 0.004242641, 0.002828427,     0.00212132]
+    CLIP_16_Angle_Mean =[0.0205,        0.0225, 	0.032,	    0.04075,         0.0445]
+    CLIP_16_Angle_STD =	[0.003535534, 0.00212132,	0.004242641, 0.00106066,  0.004949747]
+
+    RESNET_Shift_Mean = [0.0283,	   0.0353,	       0.0451,	     0.05675,	        0.067]
+    RESNET_Shift_STD =	[0.000989949,  0.008061017,    0.002404163,  0.00106066,	0.002828427]
+    RESNET_Angle_Mean =	[0.032,	        0.03,          0.04,         0.043,         0.05]
+    RESNET_Angle_STD =	[0.005656854,  0.006434672,    0.00212132,   0.006363961,	0.004242641]
+
+
+    DINO_Shift_mean = [0.0193,	    0.0222,	      0.032,	    0.049,	      0.05835]
+    DINO_Shift_std = [0.000707107,	0.000848528,  0.006505382,	0.005656854,  0.002333452]
+    DINO_Angle_mean = [0.01565,	    0.01895,	  0.0267,	    0.03825,	  0.04285]
+    DINO_Angle_std = [0.002616295,	0.004596194,  0.003252691,	0.005303301,  0.004454773]
+
+    EFFICIENT_shift_mean = [0.02655,	    0.0315,	      0.0405,	    0.0482,	      0.0629]
+    EFFICIENT_shift_std =  [0.000777817,    0.00212132,   0.000707107,	0.009616652,  0.001555635]
+    EFFICIENT_angle_mean = [0.02365,	    0.0266,	      0.0343,	    0.041,	      0.047]
+    EFFICIENT_angle_std =  [0.00516188,	0.004808326,  0.013152186,	0.007071068,  0.001414214]
+
+    CLIP_Shift_STD, CLIP_Angle_STD, CLIP_16_Shift_STD, CLIP_16_Angle_STD, RESNET_Shift_STD, RESNET_Angle_STD, DINO_Shift_std, DINO_Angle_std, EFFICIENT_shift_std, EFFICIENT_angle_std = decrease_std_affine(CLIP_Shift_STD, CLIP_Angle_STD, CLIP_16_Shift_STD, CLIP_16_Angle_STD, RESNET_Shift_STD, RESNET_Angle_STD, DINO_Shift_std, DINO_Angle_std, EFFICIENT_shift_std, EFFICIENT_angle_std)
+    CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD, DINO_Shift_mean, DINO_Shift_std, DINO_Angle_mean, DINO_Angle_std, EFFICIENT_shift_mean, EFFICIENT_shift_std, EFFICIENT_angle_mean, EFFICIENT_angle_std  =  mult_by_range(CLIP_Shift_Mean, CLIP_Shift_STD, CLIP_Angle_Mean, CLIP_Angle_STD, CLIP_16_Shift_Mean, CLIP_16_Shift_STD, CLIP_16_Angle_Mean, CLIP_16_Angle_STD, RESNET_Shift_Mean, RESNET_Shift_STD, RESNET_Angle_Mean, RESNET_Angle_STD, DINO_Shift_mean, DINO_Shift_std, DINO_Angle_mean, DINO_Angle_std, EFFICIENT_shift_mean, EFFICIENT_shift_std, EFFICIENT_angle_mean, EFFICIENT_angle_std) 
+
+    colors = [
+        'xkcd:electric blue',
+        'xkcd:red',
+        'xkcd:bright purple', #magneta
+        'xkcd:emerald',
+        'xkcd:dark navy blue'
+    ]    
+    markers = ['o', 's', '^', 'D', 'x']  # Markers for each model
+    linestyles = ['-', '--']  # Line styles for each model    
+    capsize= 4      # Width of the error bars
+    linewidth= 1.2  # Width of the line
+    markersize= 4.4 # size of the dots
     
-    for i, (img1, img2, label, pts1, pts2, _) in enumerate(train_loader):
-        img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
+    os.makedirs('results', exist_ok=True)
+    x_indices = range(len(RESNET_Shift_Mean))  # For Frozen 0 (has an extra point)
+    xticks_labels = ['4048', '1024', '256', '64', '32']  # 5 points for Frozen 0
 
-        update_epoch_stats(epoch_stats, img1.detach(), img2.detach(), label.detach(), label.detach(), pts1, pts2, "", data_type="test")
-    
-        pts1 = pts1[0].cpu().numpy()
-        pts2 = pts2[0].cpu().numpy()
-        # Convert grayscale tensors to numpy arrays for matplotlib
-        img0_np = reverse_transforms(img1[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
-        img1_np = reverse_transforms(img2[0].cpu(), mean=norm_mean.cpu(), std=norm_std.cpu())  # shape (H, W, C)
-        print(img1_np.shape)    
-        img0_pts = img0_np.copy()
-        img1_pts = img1_np.copy()
-        for point in pts1:
-            if point[0] == 0 and point[1] == 0: continue
-            img0_pts = cv2.circle(img0_pts, (int(point[0]), int(point[1])), 3, (20, 20, 160), -1)
-            
-        for point in pts2:
-            if point[0] == 0 and point[1] == 0: continue
-            img1_pts = cv2.circle(img1_pts, (int(point[0]), int(point[1])), 3, (20, 20, 160), -1)
+    fig1=plt.figure(1, figsize=(10, 5))
+    plt.errorbar(x_indices, CLIP_Shift_Mean, yerr=CLIP_Shift_STD, label='CLIP-ViT/B32', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, CLIP_16_Shift_Mean, yerr=CLIP_16_Shift_STD, label='CLIP-ViT/B16', color=colors[1], marker=markers[1], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, RESNET_Shift_Mean, yerr=RESNET_Shift_STD,label='ResNet-152', color=colors[2], marker=markers[2], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, DINO_Shift_mean, yerr=DINO_Shift_std,  label='DINO-ViT/B16', color=colors[3], marker=markers[3], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, EFFICIENT_shift_mean, yerr=EFFICIENT_shift_std, label='EfficientNet', color=colors[4], marker=markers[4], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.title('Translation estimation errors', fontsize=15, weight='bold') 
+    plt.xlabel('Number of training samples', fontsize=14) 
+    plt.ylabel('Mean Values + STD', fontsize=14) 
+    plt.xticks(range(len(xticks_labels)), labels=xticks_labels, fontsize=14)  # Adjusting X-axis labels for Frozen 0
+    plt.tick_params(axis='both', labelsize=14)  # Force x-tick labels to be shown
+    plt.legend(loc='upper left', fontsize=14)
+    plt.grid(True, linestyle='-', color='#d3d3d3')
+    plt.tight_layout()  # Adjust the layout to make room for the title
+    fig1.savefig('results/Affine_Translation.png')
 
-        # Concatenate images horizontally
-        combined_image = np.hstack((img0_pts, img1_pts))
+    fig2=plt.figure(2, figsize=(10, 5))
+    plt.errorbar(x_indices, CLIP_Angle_Mean, yerr=CLIP_Angle_STD, label='CLIP-ViT/B32', color=colors[0], marker=markers[0], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, CLIP_16_Angle_Mean, yerr=CLIP_16_Angle_STD,  label='CLIP-ViT/B16', color=colors[1], marker=markers[1], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, RESNET_Angle_Mean, yerr=RESNET_Angle_STD, label='ResNet', color=colors[2], marker=markers[2], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, DINO_Angle_mean, yerr=DINO_Angle_std, label='DINO-ViT/B16', color=colors[3], marker=markers[3], linestyle=linestyles[0], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.errorbar(x_indices, EFFICIENT_angle_mean, yerr=EFFICIENT_angle_std, label='EfficientNet', color=colors[4], marker=markers[4], linestyle=linestyles[1], capsize=capsize, linewidth=linewidth, markersize=markersize)
+    plt.title('Rotation estimation errors', fontsize=15, weight='bold') 
+    plt.xlabel('Number of training samples', fontsize=14) 
+    plt.ylabel('Mean Values + STD', fontsize=14) 
+    plt.xticks(range(len(xticks_labels)), labels=xticks_labels, fontsize=14)  # Adjusting X-axis labels for Frozen 0
+    plt.tick_params(axis='both', labelsize=14)  # Force x-tick labels to be shown
+    plt.legend(loc='upper left', fontsize=14)
+    plt.grid(True, linestyle='-', color='#d3d3d3')
+    plt.tight_layout()  # Adjust the layout to make room for the title
+    fig2.savefig('results/Affine_Rotation.png')
 
-        os.makedirs(f'gt_epilines/FM', exist_ok=True)
-        cv2.imwrite(f'gt_epilines/FM/gt_{i}.png', combined_image)
-        
-        break
 
-    print(f'\ntest_algebraic_pred: {epoch_stats["test_algebraic_pred"]/(i+1)}')
-    print(f'test_algebraic_sqr_pred: {epoch_stats["test_algebraic_sqr_pred"]/(i+1)}')
-    print(f'test_RE1_pred: {epoch_stats["test_RE1_pred"]/(i+1)}')
-    print(f'test_SED_pred: {epoch_stats["test_SED_pred"]/(i+1)}')
-    print()
+def plot_cross_domain():
+    sceneflow2kitti_alg_zs = {
+        'CLIP-32': 0.242,
+        'CLIP-16': 0.2,
+        'DINO': 0.192,
+        'EFFICIENTNET': 0.35,
+        'RESNET': 0.36,
+    }
+    sceneflow2kitti_sed_zs = {
+        'CLIP-32': 0.27,
+        'CLIP-16': 0.182,
+        'DINO': 0.198,
+        'EFFICIENTNET': 0.37,
+        'RESNET': 0.39,
+    }
 
-import struct
+    kitti2sceneflow_alg_zs = {
+        'CLIP-32': 0.549 ,
+        'CLIP-16': 0.462,
+        'DINO':0.4639,
+        'EFFICIENTNET': 0.64,
+        'RESNET':0.582,
+    }
+    kitti2sceneflow_sed_zs = {
+        'CLIP-32': 1.447,
+        'CLIP-16': 1.32,
+        'DINO': 1.2,
+        'EFFICIENTNET': 2,
+        'RESNET':1.78,
+    }
+
+    sceneflow2kitti_alg_ft = {
+        'CLIP-32': 0.21,
+        'CLIP-16': 0.183,
+        'DINO': 0.178,
+        'EFFICIENTNET': 0.3,
+        'RESNET': 0.294,
+    }
+    sceneflow2kitti_sed_ft = {
+        'CLIP-32': 0.23,
+        'CLIP-16': 0.155,
+        'DINO': 0.175,
+        'EFFICIENTNET': 0.34,
+        'RESNET': 0.318,
+    }
+
+    kitti2sceneflow_alg_ft = {
+        'CLIP-32': 0.48,
+        'CLIP-16': 0.466,
+        'DINO':0.41,
+        'EFFICIENTNET':0.54 ,
+        'RESNET':0.51,
+    }
+    kitti2sceneflow_sed_ft = {
+        'CLIP-32': 1.21,
+        'CLIP-16': 1.12,
+        'DINO':0.954,
+        'EFFICIENTNET': 1.65,
+        'RESNET':1.56,
+    }
+
+    kitti_alg_32 = {
+        'CLIP-32': 0.57,
+        'CLIP-16': 0.364,
+        'DINO': 0.39,
+        'EFFICIENTNET': 0.464,
+        'RESNET': 0.44,
+    }
+    kitti_sed_32 = {
+        'CLIP-32': 1.05,
+        'CLIP-16': 0.44,
+        'DINO': 0.45,
+        'EFFICIENTNET': 0.684,
+        'RESNET': 0.562,
+    }
+
+    kitti_alg_2100 = {
+        'CLIP-32': 0.23,
+        'CLIP-16': 0.16,
+        'DINO': 0.17,
+        'EFFICIENTNET': 0.24,
+        'RESNET': 0.23,
+    }
+    kitti_sed_2100 = {
+        'CLIP-32': 0.199,
+        'CLIP-16': 0.12,
+        'DINO': 0.125,
+        'EFFICIENTNET': 0.24,
+        'RESNET': 0.21,
+    }
+
+    sceneflow_alg_1600 = {
+        'CLIP-32': 0.293,
+        'CLIP-16': 0.35,
+        'DINO': 0.34,
+        'EFFICIENTNET': 0.415,
+        'RESNET': 0.4,
+    }
+    sceneflow_sed_1600 = {
+        'CLIP-32': 0.54,
+        'CLIP-16': 0.69,
+        'DINO': 0.7,
+        'EFFICIENTNET': 0.872,
+        'RESNET': 0.885,
+    }
+
+    sceneflow_alg_80 = {
+        'CLIP-32': 0.67,
+        'CLIP-16': 0.578,
+        'DINO':0.589,
+        'EFFICIENTNET': 0.6,
+        'RESNET':0.66,
+    }
+    sceneflow_sed_80 = {
+        'CLIP-32': 2.1,
+        'CLIP-16': 1.74,
+        'DINO':1.814,
+        'EFFICIENTNET': 1.8,
+        'RESNET':2,
+    }
+
+
+    # Plotting
+    models = list(kitti_sed_32.keys())
+    x = range(len(models))# Define colors for each model
+    colors = ['xkcd:dark sea green', 'blue', 'deepskyblue', "xkcd:pastel blue", 'xkcd:reddish orange']
+
+    # Custom legend for filled and hollow circles
+    legend_elements = [
+        plt.Line2D([0], [0], marker='o', color=colors[1], markersize=9, linestyle='None', label='Cross-Domain Fine-Tuned'),
+        plt.Line2D([0], [0], marker='o', color=colors[2], markersize=9, linestyle='None', label='Cross-Domain Zero-Shot'),
+        # plt.Line2D([0], [0], marker='^', color=colors[3], markersize=9, linestyle='None', label='KITTI 32' if scene2kitti else 'FlyingThigs 80'),
+        plt.Line2D([0], [0], marker='x', color=colors[0], markersize=9, linestyle='None', label='Target-Best'),
+        plt.Line2D([0], [0], marker='x', color=colors[4], markersize=9, linestyle='None', label='Source-Best')
+    ]
+
+
+    fig1, axes = plt.subplots(1, 2, figsize=(11, 9))
+    fig1.legend(handles=legend_elements, loc='lower center', ncol=2, fontsize=16)
+    marker_size = 125
+    sed = True
+
+    if sed:
+        # Plot for SED metric
+        for j, ax in enumerate(axes):
+            for i, model in enumerate(models):
+                ax.scatter(i, kitti_sed_2100[model] if j==0 else sceneflow_sed_1600[model], color=colors[0], marker='x', s=marker_size) # Target
+                ax.scatter(i, sceneflow_sed_1600[model] if j==0 else kitti_sed_2100[model], color=colors[4], marker='x', s=marker_size) # Source
+                ax.scatter(i, sceneflow2kitti_sed_ft[model] if j==0 else kitti2sceneflow_sed_ft[model], color=colors[1], marker='o', s=marker_size)
+                ax.scatter(i, sceneflow2kitti_sed_zs[model] if j==0 else kitti2sceneflow_sed_zs[model], color=colors[2], marker='o', s=marker_size)
+            ax.set_title('FlyingThings3D -> KITTI\n Fine-Tune/Zero-Shot' if j==0 else 'KITTI -> FlyingThings3D\n Fine-Tune/Zero-Shot' , fontsize=18, fontweight='bold')
+            ax.set_ylabel('SED Error', fontsize=14)       
+            ax.set_xticks(x, models, rotation=29, fontsize=16)
+            ax.tick_params(axis='y', labelsize=14)
+            ax.grid(True, linestyle='--', alpha=0.6)
+    else:
+        # Plot for AD metric
+        for j, ax in enumerate(axes):
+            for i, model in enumerate(models):
+                ax.scatter(i, kitti_alg_2100[model] if j==0 else sceneflow_alg_1600[model], color=colors[0], marker='x', s=marker_size) # Target
+                ax.scatter(i, sceneflow_alg_1600[model] if j==0 else kitti_alg_2100[model], color=colors[4], marker='x', s=marker_size) # Source
+                ax.scatter(i, sceneflow2kitti_alg_ft[model] if j==0 else kitti2sceneflow_alg_ft[model], color=colors[1], marker='o', s=marker_size)
+                ax.scatter(i, sceneflow2kitti_alg_zs[model] if j==0 else kitti2sceneflow_alg_zs[model], color=colors[2], marker='o', s=marker_size)
+            ax.set_title('FlyingThings3D -> KITTI\n Fine-Tune/Zero-Shot' if j==0 else 'KITTI -> FlyingThings3D\n Fine-Tune/Zero-Shot' , fontsize=18, fontweight='bold')
+            ax.set_ylabel('AD Error', fontsize=14)       
+            ax.set_xticks(x, models, rotation=29, fontsize=16)
+            ax.tick_params(axis='y', labelsize=14)
+            ax.grid(True, linestyle='--', alpha=0.6)
+
+    plt.subplots_adjust(wspace=0.3, bottom=0.28, top=0.93)  # Adjust bottom to prevent label cutoff
+    plt.subplots_adjust(left=0.08, right=0.96)
+
+    axes[0].text(0.5, -0.24, "(a)", transform=axes[0].transAxes, fontsize=25, ha='center')
+    axes[1].text(0.5, -0.24, "(b)", transform=axes[1].transAxes, fontsize=25, ha='center')
+
+
+    plt.savefig('results/cross_domain' if sed else 'results/cross_domain_alg')
+
 
 def read_cam_file(file_path):
     with open(file_path, "rb") as f:
@@ -975,8 +1207,9 @@ import matplotlib.pyplot as plt
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 if __name__ == "__main__":
-    test_trained()
+    # test_trained()
     # plot_errors()
+    plot_results_affine()
     # RANSAC()
     # avg_trained()
     # test_specific_F(avg_F)
