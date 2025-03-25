@@ -96,7 +96,7 @@ def vis_gt():
 
         # Show the figure
         plt.tight_layout()
-        plt.savefig(f"vis/{i}")
+        plt.savefig(f"vis/{i}", make_dir=True)
 
         if i==100: break
         
