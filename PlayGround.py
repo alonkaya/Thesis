@@ -67,7 +67,7 @@ def valid_indices_of_dataset(train_loader, idx):
 
 def vis_gt():
     train_loader, val_loader, test_loader = get_data_loaders(train_size=1, part='head', batch_size=1)
-
+    os.makedirs('vis', exist_ok=True)
     for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
         print(pts1[0].shape)
         img1 = img1[0].cpu().detach()  # Shape (C, H, W)
@@ -96,7 +96,7 @@ def vis_gt():
 
         # Show the figure
         plt.tight_layout()
-        plt.savefig(f"vis/{i}", make_dir=True)
+        plt.savefig(f"vis/{i}.png")
 
         if i==100: break
         
