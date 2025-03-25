@@ -56,14 +56,6 @@ if __name__ == "__main__":
                         print("Invalid data ratio")
                         continue
 
-                frozen_high_layers = 0 if fl > 0 else FROZEN_HIGH_LAYERS
-
-                if not PRETEXT_TRAIN and MODEL==CLIP_MODEL_NAME and not SCENEFLOW and ONLY_CONTINUE and (train_size==0.05 or (train_size==0.025 and part=="head" and fl==0 and frozen_high_layers==0)):
-                        batch_size = 4 
-                else:
-                        batch_size = args.bs
-
-
                 coeff = f'ALG_sqr_{alg_coeff}__' if alg_coeff > 0 else f'RE1_{re1_coeff}__' if re1_coeff > 0 else f'SED_{sed_coeff}__' if sed_coeff > 0 else ''
                 dataset = 'Kitti2Flying' if KITTI2SCENEFLOW and FLYING and SCENEFLOW else 'Flying' if FLYING and SCENEFLOW else 'Sceneflow2Kitti' if SCENEFLOW2KITTI else 'Stereo' if STEREO else 'RealEstate_split' if USE_REALESTATE and REALESTATE_SPLIT else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
                 scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
@@ -72,11 +64,10 @@ if __name__ == "__main__":
                 compress = f'avg_embeddings' if AVG_EMBEDDINGS else 'conv' if USE_CONV else 'all_embeddings'
                 seed_param = "" if seed == 42 else f"__seed_{seed}"
                 data_config = f'ratio_{train_size}__{part}' if not SCENEFLOW else f'ratio_{train_size}'
-                frozen = fl if frozen_high_layers==0 else f'{frozen_high_layers}_high'
                 plots_path = os.path.join('plots', dataset, 'Winners' if STEREO and not SCENEFLOW else '',
                                         f"""{coeff}L2_{L2_coeff}__huber_{huber_coeff}__lr_{lr}__{compress}__{model}__use_reconstruction_{USE_RECONSTRUCTION_LAYER}""",  \
                                         "Trained_vit" if TRAINED_VIT else "", \
-                                        f"""BS_{batch_size}__{data_config}__frozen_{frozen}{ADDITIONS}{seed_param}""")
+                                        f"""BS_{batch_size}__{data_config}__frozen_{fl}{ADDITIONS}{seed_param}""")
                 
                 if ONLY_CONTINUE:
                         model_path = os.path.join("/mnt/sda2/Alon", plots_path, "model.pth") if COMPUTER==0 else os.path.join("/mnt_hdd15tb/alonkay/Thesis", plots_path, 'model.pth') if COMPUTER==1 else os.path.join(plots_path, "model.pth")
@@ -85,7 +76,7 @@ if __name__ == "__main__":
                                 continue
 
                 model = FMatrixRegressor(lr=lr, min_lr=MIN_LR, batch_size=batch_size, L2_coeff=L2_coeff, huber_coeff=huber_coeff, alg_coeff=alg_coeff, re1_coeff=re1_coeff, sed_coeff=sed_coeff, \
-                                         plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl, frozen_high_layers=frozen_high_layers).to(device)
+                                         plots_path=plots_path, trained_vit=TRAINED_VIT, pretrained_path=PRETRAINED_PATH, num_epochs=num_epochs, frozen_layers=fl).to(device)
 
                 # If the model was bad trained, skip it
                 if os.path.exists((f'{model.plots_path}__bad')):
@@ -104,7 +95,7 @@ if __name__ == "__main__":
 {ADDITIONS} learning rate: {lr}, mlp_hidden_sizes: {MLP_HIDDEN_DIM}, jump_frames: {JUMP_FRAMES}, use_reconstruction_layer: {USE_RECONSTRUCTION_LAYER}
 batch_size: {batch_size}, norm: {NORM}, train_seqeunces: {train_seqeunces_stereo}, val_sequences: {val_sequences_stereo}, RL_TEST_NAMES: {RL_TEST_NAMES}, dataset: {dataset},
 average embeddings: {AVG_EMBEDDINGS}, model: {MODEL}, augmentation: {AUGMENTATION}, random crop: {RANDOM_CROP}, part: {part}, get_old_path: {GET_OLD_PATH}, computer: {COMPUTER},
-RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, frozen layers: {fl}, trained vit: {TRAINED_VIT}, MAX_POOL_SIZE: {MAX_POOL_SIZE}
+RE1 coeff: {re1_coeff} SED coeff: {sed_coeff}, ALG_COEFF: {alg_coeff}, L2_coeff: {L2_coeff}, huber_coeff: {huber_coeff}, frozen layers: {fl}, trained vit: {TRAINED_VIT}, CC: {CC},
 crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH}, train_size: {train_size}, norm_mean: {norm_mean}, norm_std: {norm_std}, sched: {SCHED} seed: {seed}\n"""
                         print_and_write(parameters, model.plots_path)
                         
@@ -127,10 +118,3 @@ crop: {CROP} resize: {RESIZE}, use conv: {USE_CONV} pretrained: {PRETRAINED_PATH
                 
                 del model
                 torch.cuda.empty_cache()
-
-320
-480
-372
-230
-620
-972

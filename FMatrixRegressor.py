@@ -85,14 +85,10 @@ class FMatrixRegressor(nn.Module):
             self.model = ViTModel.from_pretrained(model_name).to(device)
             
         # Freeze frozen_layers layers
-        if MODEL==CLIP_MODEL_NAME:
-            for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
-                if layer_idx < self.frozen_layers:
-                    for param in layer.parameters():
-                        param.requires_grad = False
-                elif layer_idx >= len(self.model.vision_model.encoder.layers) - self.frozen_high_layers:
-                    for param in layer.parameters():
-                        param.requires_grad = False
+        for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
+            if layer_idx < self.frozen_layers:
+                for param in layer.parameters():
+                    param.requires_grad = False
 
         ## THIS IS ONLY FOR CONTINUING TRAINING FROM A EARLY STOPPED CHECKPOINT!
         self.parent_model_path = os.path.join("/mnt/sda2/Alon", self.plots_path) if COMPUTER==0 else os.path.join("/mnt_hdd15tb/alonkay/Thesis", self.plots_path) if COMPUTER==1 else self.plots_path
@@ -121,12 +117,12 @@ class FMatrixRegressor(nn.Module):
 
             # Get input dimension for the MLP based on ViT configuration
             self.hidden_size = self.model.config.hidden_sizes[-1] if self.resnet else 1280 if model_name==EFFICIENTNET else self.model.config.hidden_size
-            self.num_patches = 7 if self.resnet or model_name==EFFICIENTNET else self.model.config.image_size // self.model.config.patch_size   
+            self.num_patches = 7 if self.resnet or model_name==EFFICIENTNET else CROP // self.model.config.patch_size   
 
             if self.use_conv:
-                convnet_input_dim = 1 if self.cc else 2*self.hidden_size 
-                self.conv = ConvNet(input_dim=convnet_input_dim, batch_size=self.batch_size).to(device)
-                mlp_input_shape = 2 * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2 
+                convnet_input_dim = 2 if self.cc else 2*self.hidden_size 
+                self.conv = ConvNet(input_dim=convnet_input_dim, batch_size=self.batch_size, num_patches=self.num_patches).to(device)
+                mlp_input_shape = 2 * self.conv.hidden_dims[-1] * math.ceil(self.num_patches / 2)**2 
 
             # Initialize MLP
             self.mlp = MLP(input_dim=mlp_input_shape).to(device)
@@ -151,21 +147,16 @@ class FMatrixRegressor(nn.Module):
             x2_embeddings = x2_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
 
         if self.cc:
-            x1_embeddings = x1_embeddings.reshape(-1, 1, self.num_patches**2, self.hidden_size) # [batch, 1, num_patches^2, hidden_size]
-            x2_embeddings = x2_embeddings.reshape(-1, self.num_patches**2, self.hidden_size, 1) # [batch, num_patches^2, hidden_size, 1]
-
-            # Multipling each vector in x1 with the whole matrix x2 results in Shape: [batch, num_patches^2, num_patches^2, 1]
-            cc = torch.matmul(x1_embeddings, x2_embeddings).reshape(-1, 1, self.num_patches**2, self.num_patches**2)  # [batch, num_patches^2, num_patches^2, 1]
-
-            # Input shape is (batch_size, 1, self.num_patches^2, self.num_patches^2). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
-            embeddings = self.conv(cc)
-
+            # Compute the cross-correlation matrix. Output shape [batch_size, 2, num_patches, num_patches]
+            embeddings = compute_soft_correspondence(x1_embeddings, x2_embeddings, self.num_patches, self.num_patches) 
         else:
-            # Input shape is (batch_size, self.hidden_size*2, self.num_patches, self.num_patches). Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * 3 * 3)
+            # Output shape is (batch_size, 2 * self.hidden_size, num_patches, num_patches)
             x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
             x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
-            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1)
-            embeddings = self.conv(embeddings)
+            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1) 
+        
+        # Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * num_patches/2 * num_patches/2)
+        embeddings = self.conv(embeddings)
         
         return embeddings
 
@@ -261,11 +252,7 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         
         self.save_model(epoch+1, definetly=True) 
         self.test(test_loader)
-
-        try:
-            self.plot_all()
-        except Exception as e:
-            print_and_write(f"Plotting failed: {e}", self.plots_path)
+        self.plot_all()
         
     def dataloader_step(self, dataloader, epoch, epoch_stats, data_type):
         prefix = "val_" if data_type == "val" else "test_" if data_type == "test" else ""
@@ -276,21 +263,17 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             # Forward pass
             output = self.forward(img1, img2)
 
-            if data_type == "train":
+            if data_type == "train" and not self.cc:
                 pts1.requires_grad = True
                 pts2.requires_grad = True
             # Update epoch statistics
             batch_alg_pred, batch_SED_pred, batch_RE1_pred  = update_epoch_stats(
-                epoch_stats, img1.detach(), img2.detach(), label.detach(), output, pts1, pts2, data_type, epoch)
-            
-            if data_type=="test":
-                batch_alg_preds.append(batch_alg_pred.detach())
-                batch_SED_preds.append(batch_SED_pred.detach())
-                batch_RE1_preds.append(batch_RE1_pred.detach())
+                epoch_stats, img1.detach(), img2.detach(), label.detach(), output.detach() if self.cc else output, pts1, pts2, data_type, epoch)
             
             # Compute loss
-            loss = self.L2_coeff*self.L2_loss(output, label) + self.huber_coeff*self.huber_loss(output, label) + \
-                    self.sed_coeff*batch_SED_pred
+            loss = self.L2_coeff*self.L2_loss(output, label) + self.huber_coeff*self.huber_loss(output, label) 
+            if not self.cc:
+                loss += self.sed_coeff*batch_SED_pred 
             epoch_stats[f'{prefix}loss'] = epoch_stats[f'{prefix}loss'] + loss.detach()
 
             if data_type == "train":
@@ -303,6 +286,10 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
             epoch_stats[f'{prefix}labels'] = torch.cat((epoch_stats[f'{prefix}labels'], label.detach()), dim=0)
             epoch_stats[f'{prefix}outputs'] = torch.cat((epoch_stats[f'{prefix}outputs'], output.detach()), dim=0)
 
+            if data_type=="test":
+                batch_alg_preds.append(batch_alg_pred.detach())
+                batch_SED_preds.append(batch_SED_pred.detach())
+                batch_RE1_preds.append(batch_RE1_pred.detach())
         return batch_alg_preds, batch_SED_preds, batch_RE1_preds
 
     def save_model(self, epoch, definetly=False):
@@ -403,9 +390,9 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.num_patches = 7 if self.resnet or self.model_name==EFFICIENTNET else self.model.config.image_size // self.model.config.patch_size   
                 
         if self.use_conv:
-            convnet_input_dim = 1 if self.cc else 2*self.hidden_size 
-            self.conv = ConvNet(input_dim=convnet_input_dim, batch_size=self.batch_size).to(device)
-            mlp_input_shape = 2 * self.conv.hidden_dims[-1] * MAX_POOL_SIZE**2 
+            convnet_input_dim = 2 if self.cc else 2*self.hidden_size 
+            self.conv = ConvNet(input_dim=convnet_input_dim, batch_size=self.batch_size, num_patches=self.num_patches).to(device)
+            mlp_input_shape = 2 * self.conv.hidden_dims[-1] * math.ceil(self.num_patches / 2)**2 
             self.conv.load_state_dict(checkpoint['conv'])
             self.conv.to(device)
 
@@ -417,24 +404,15 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         # Load model
         self.model.load_state_dict(checkpoint['vit']) 
         self.model.to(device)
-        try:
-            # Load optimizer and scheduler
-            self.optimizer = optim.Adam([
-                {'params': self.model.parameters(), 'lr': self.lr},
-                {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
-                {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
-            ])
-            self.scheduler = None
-            self.optimizer.load_state_dict(checkpoint['optimizer'])
-        except Exception as e:
-            self.optimizer = optim.Adam([
-                {'params': self.model.parameters(), 'lr': self.lr},
-                {'params': []},
-                {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
-                {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
-            ])
-            self.scheduler = None
-            self.optimizer.load_state_dict(checkpoint['optimizer'])
+
+        # Load optimizer and scheduler
+        self.optimizer = optim.Adam([
+            {'params': self.model.parameters(), 'lr': self.lr},
+            {'params': self.mlp.parameters(), 'lr': self.lr},   # Potentially higher learning rate for the MLP
+            {'params': self.conv.parameters(), 'lr': self.lr} if self.use_conv else {'params': []}
+        ])
+        self.scheduler = None
+        self.optimizer.load_state_dict(checkpoint['optimizer'])
             
     def append_epoch_stats(self, train_mae, val_mae, epoch_stats):
         self.all_train_mae.append(train_mae)

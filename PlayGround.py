@@ -68,7 +68,7 @@ def valid_indices_of_dataset(train_loader, idx):
 def vis_gt():
     train_loader, val_loader, test_loader = get_data_loaders(train_size=1, part='head', batch_size=1)
 
-    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(val_loader):
+    for i, (img1, img2, label, pts1, pts2, seq_name) in enumerate(train_loader):
         print(pts1[0].shape)
         img1 = img1[0].cpu().detach()  # Shape (C, H, W)
         img2 = img2[0].cpu().detach()  # Shape (C, H, W)
@@ -96,11 +96,9 @@ def vis_gt():
 
         # Show the figure
         plt.tight_layout()
-        plt.savefig("Flying")
-        # time.sleep(2)
-        break
+        plt.savefig(f"vis/{i}")
 
-        # if i==10: break
+        if i==100: break
         
 
 def vis_cognata():
@@ -1209,7 +1207,8 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 if __name__ == "__main__":
     # test_trained()
     # plot_errors()
-    plot_results_affine()
+    # plot_results_affine()
     # RANSAC()
     # avg_trained()
     # test_specific_F(avg_F)
+    vis_gt()

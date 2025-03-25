@@ -1,16 +1,15 @@
 import torch
-device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16, DINO, EFFICIENTNET = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32", "openai/clip-vit-base-patch16", "facebook/dino-vitb16", "timm/tf_efficientnetv2_m.in1k"
+device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16, DINO, EFFICIENTNET, DINOV2 = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32", "openai/clip-vit-base-patch16", "facebook/dino-vitb16", "timm/tf_efficientnetv2_m.in1k", 'facebook/dinov2-base'
 USE_REALESTATE = False
 STEREO = True
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &   
 # gpuQ.py submit -d any -p /home/alonkay/Thesis -e alon_env -c "python Main.py  > output_.log 2>&1"
 # find . -type f -name "model.pth"                  /mnt_hdd15tb/alonkay/Thesis/        /mnt/sda2/Alon
 
-PRETEXT_TRAIN = False
 SCENEFLOW = False
 FLYING = False
-MODEL = CLIP_MODEL_NAME_16
-FROZEN_LAYERS = [0] if MODEL==RESNET_MODEL_NAME or USE_REALESTATE else [0] if FLYING else [0]
+MODEL = DINOV2
+FROZEN_LAYERS = [12]
 FROZEN_HIGH_LAYERS = 0
 COMPUTER = 1 # 0 = 250  1 = 146  2 = else  
 SEQ_RATIOS = [0.2] if not SCENEFLOW else [22] if FLYING else None     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]  /  [9, 80, 170]                                             
@@ -18,11 +17,10 @@ KITTI2SCENEFLOW = False
 SCENEFLOW2KITTI = False
 ONLY_CONTINUE = False
 PART = ["head"] 
-MAX_POOL_SIZE = 7 if MODEL==CLIP_MODEL_NAME_16 or MODEL==DINO else 3 
 ADDITIONS =  "" ## REMEMBER TO PUT "__" !!!!!
-ADDITIONS += "__correct_F" if FLYING else ""
-CC = False
+CC = True
 SEED = [42, 300, 500, 600, 700, 800] # 42, 300, 500, 600, 700, 800
+INIT_DATA = False
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -30,8 +28,7 @@ CROP = 224
 RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
-INIT_DATA = True
-BATCH_SIZE = 8  
+BATCH_SIZE = 4
 
 ### STEREO KITTI ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images
@@ -51,6 +48,7 @@ RL_TRAIN_NUM = [50]   #  14=1872  #  18=2136  #  20=2368  #  50=6560
 REALESTATE_SPLIT = False # 50=4632
 
 ### Training ###
+PRETEXT_TRAIN = False
 MIN_LR = 2e-5
 SCHED = None
 USE_RECONSTRUCTION_LAYER = True
@@ -60,7 +58,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-LR = [1e-4]             
+LR = [5e-4]             
 TRIM_PTS = False
 
 ### Epipolar geometry ###

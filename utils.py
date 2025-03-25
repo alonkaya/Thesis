@@ -30,7 +30,7 @@ class MLP(nn.Module):
         return self.layers(x)
 
 class ConvNet(nn.Module):
-    def __init__(self, input_dim, batch_size, hidden_dims=CONV_HIDDEN_DIM):
+    def __init__(self, input_dim, batch_size, num_patches, hidden_dims=CONV_HIDDEN_DIM):
         super(ConvNet, self).__init__()
         layers = []
         prev_dim = input_dim
@@ -44,22 +44,23 @@ class ConvNet(nn.Module):
             prev_dim = hidden_dim
 
         self.conv_layers = nn.Sequential(*layers)
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2, return_indices=True) if MAX_POOL_SIZE==3 or MAX_POOL_SIZE==7 else nn.MaxPool2d(kernel_size=2, stride=2, padding=1, return_indices=True)
+        padding = 1 if num_patches%2==1 else 0 # If the num_patches is odd, we need to pad the image to make it even
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=padding, return_indices=True)
         self.flatten = nn.Flatten()
         
     def forward(self, x):
-        x = self.conv_layers(x) # shape: (batch_size, hidden_dims[-1], 7, 7)
-
-        # Pooling
-        pooled_features, indices = self.pool(x) # Output shape is (batch_size, hidden_dims[-1], 3, 3)
+        x = self.conv_layers(x) # shape: (batch_size, CONV_HIDDEN_DIM[-1], num_patches, num_patches)
         
-        # normalize the indices by dividing each index by the total number of elements in the pooled feature map (i.e. 3 * 3 = 9).
+        # Pooling
+        pooled_features, indices = self.pool(x) # Output shape is (batch_size, CONV_HIDDEN_DIM[-1], num_patches/2, num_patches/2)
+
+        # normalize the indices by dividing each index by the total number of elements in the pooled feature map (i.e. num_patches/2 * num_patches/2).
         indices = indices.float() / (pooled_features.shape[2] * pooled_features.shape[3])
         indices = indices.expand_as(pooled_features)
         
-        pooled_features_with_position = torch.cat((pooled_features, indices), dim=1) # Output shape: (batch_size, 2 * hidden_dims[-1], 3, 3)
+        pooled_features_with_position = torch.cat((pooled_features, indices), dim=1) # Output shape: (batch_size, 2 * CONV_HIDDEN_DIM[-1], num_patches/2, num_patches/2)
 
-        x = self.flatten(pooled_features_with_position) # shape (batch_size, 2 * hidden_dims[-1] * 3 * 3)
+        x = self.flatten(pooled_features_with_position) # shape (batch_size, 2 * CONV_HIDDEN_DIM[-1] * num_patches/2 * num_patches/2)
 
         return x
 
@@ -421,4 +422,46 @@ def set_seed(seed):
     torch.cuda.manual_seed_all(seed)  # If using multi-GPU.
 
 
+
+def compute_soft_correspondence(x1_embeddings, x2_embeddings, H, W, temperature=1.0):
+    """
+    Computes the soft correspondence between patches from two images.
+
+    Args:
+        x1_embeddings: Tensor of shape [batch_size, H*W, D] for the first image.
+        x2_embeddings: Tensor of shape [batch_size, H*W, D] for the second image.
+        H: Height of the image in patches.
+        W: Width of the image in patches.
+        temperature: Softmax temperature for sharpening or smoothing similarity.
+
+    Returns:
+        soft_correspondences: Tensor of shape [batch_size, H, W, 2] representing the soft estimated positions.
+    """
+    batch_size = x1_embeddings.shape[0]
+
+    # Step 1: Compute similarity matrix (dot product between all patches)
+    S = torch.matmul(x1_embeddings, x2_embeddings.transpose(1, 2))  # Shape: [batch_size, H*W, H*W]
+
+    # Step 2: Apply softmax to get probability distribution
+    S_soft = torch.nn.functional.softmax(S / temperature, dim=-1)  # Shape: [batch_size, H*W, H*W]
+
+    # Step 3: Create patch coordinate grids for the second image
+    y_coords = torch.arange(H).repeat(W, 1).T.flatten().to(x1_embeddings.device)  # Shape: [H*W]
+    x_coords = torch.arange(W).repeat(H, 1).flatten().to(x1_embeddings.device)  # Shape: [H*W]
+
+    # Stack coordinates to form P_j^2 positions
+    P2 = torch.stack([x_coords, y_coords], dim=1).float()  # Shape: [H*W, 2]
+    P2 = P2.unsqueeze(0).repeat(batch_size, 1, 1)  # Shape: [batch_size, H*W, 2]
+    P2[:, :, 0] /= W  # Normalize x-coordinates
+    P2[:, :, 1] /= H  # Normalize y-coordinates
+
+    # Step 4: Compute soft-correspondence position (weighted sum and normalization)
+    weighted_sum = torch.matmul(S_soft, P2)  # Shape: [batch_size, H*W, 2]
+    normalization_factor = torch.sum(S_soft, dim=-1, keepdim=True)  # Shape: [batch_size, H*W, 1]
+    soft_correspondences = weighted_sum / (normalization_factor + 1e-8)  # Avoid division by zero
+
+    # Step 6: Reshape to [batch_size, 2, H, W]
+    soft_correspondences = soft_correspondences.view(batch_size, 2, H, W)
+
+    return soft_correspondences
 

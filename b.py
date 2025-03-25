@@ -79,43 +79,45 @@ transform = transforms.Compose([
 #         plt.show()
 
 class ImageFeatureTransformer(nn.Module):
-    def __init__(self, model=None, dino_model='openai/clip-vit-base-patch16', num_features=768):
+    def __init__(self, model=None, dino_model='openai/clip-vit-base-patch16'):
         super().__init__()
         self.model = CLIPVisionModel.from_pretrained(dino_model).to(device) if model==None else model.model
 
         # Transformer Decoder Layer
-        self.decoder_layer = nn.TransformerDecoderLayer(
-            d_model=num_features, nhead=12, batch_first=True
-        )
-        self.transformer_decoder = nn.TransformerDecoder(self.decoder_layer, num_layers=6).to(device)
+        # self.decoder_layer = nn.TransformerDecoderLayer(
+            # d_model=num_features, nhead=12, batch_first=True
+        # )
+        # self.transformer_decoder = nn.TransformerDecoder(self.decoder_layer, num_layers=6).to(device)
 
     def forward(self, x1, x2):
         # Extract image embeddings
         x1_embeddings = self.model(x1).last_hidden_state[:, 1:, :]  # Remove CLS token
         x2_embeddings = self.model(x2).last_hidden_state[:, 1:, :]  # Remove CLS token
-    
-        query = x1_embeddings[:, 7, :].view(1,1,-1)  # [batch, seq_len(num_patches), features]
-        key = x2_embeddings  # [batch, seq_len(num_patches), features]
-        value = x2_embeddings  # [batch, seq_len, features]
 
-        d_k = query.size(-1)  # Feature dimension for scaling
-        attention_scores = torch.matmul(query, key.transpose(-2, -1))  # [batch, seq_len, seq_len]
-        attn_weights = attention_scores / (d_k ** 0.5)             # Scale by sqrt(d_k)
+        p1 = x1_embeddings[0,0,:].view(1,-1) # shape [1,768]
+        attention_map = p1.matmul(x2_embeddings[0].transpose(0,1)) # shape [1,14*14]
+        return attention_map
 
-        # attn_weights = F.softmax(attn_weights, dim=-1)        # [batch, seq_len, seq_len]
+        # query = x1_embeddings[:, 7, :].view(1,1,-1)  # [batch, seq_len(num_patches), features]
+        # key = x2_embeddings  # [batch, seq_len(num_patches), features]
+        # value = x2_embeddings  # [batch, seq_len, features]
 
-        # for layer in self.transformer_decoder.layers:
-        #     # Ensure need_weights=True to get attention maps
-        #     attn_output, attn_weights = layer.self_attn(query, key, value, need_weights=True) # attn_weights shape: [batch, num_patches, num_patches] After averaging heads.
-        #     attention_maps.append(attn_weights.detach().cpu().numpy())
+        # d_k = query.size(-1)  # Feature dimension for scaling
+        # attention_scores = torch.matmul(query, key.transpose(-2, -1))  # [batch, seq_len, seq_len]
+        # attn_weights = attention_scores / (d_k ** 0.5)             # Scale by sqrt(d_k)
 
-        return attn_weights.detach().cpu().numpy()
+        # # attn_weights = F.softmax(attn_weights, dim=-1)        # [batch, seq_len, seq_len]
+
+        # # for layer in self.transformer_decoder.layers:
+        # #     # Ensure need_weights=True to get attention maps
+        # #     attn_output, attn_weights = layer.self_attn(query, key, value, need_weights=True) # attn_weights shape: [batch, num_patches, num_patches] After averaging heads.
+        # #     attention_maps.append(attn_weights.detach().cpu().numpy())
+
+        # return attn_weights.detach().cpu().numpy()
 
     def visualize_attention(self, image1, image2):
         with torch.no_grad():
-            attention_weights = self.forward(image1, image2)  # First Layer
-            attention_map = attention_weights[0, 0]       
-            attention_map = attention_map.reshape(14,14)
+            attention_map = self.forward(image1, image2).reshape(14,14)
 
            # Plotting
         plt.figure(figsize=(10, 6))
@@ -136,19 +138,21 @@ if __name__ == '__main__':
     img1 = transform(img1).unsqueeze(0).to(device)
     img2 = transform(img2).unsqueeze(0).to(device)
 
-    pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
+    model = ImageFeatureTransformer()
+    model.visualize_attention(img1, img2)
+
+    # pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_16__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
     # pretrained_path = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP__use_reconstruction_True/BS_8__ratio_0.2__mid__frozen_0"
 
-    batch_size=1
-    _, _, test_loader = get_data_loaders(train_size=0.002, part='head', batch_size=batch_size)
+    # batch_size=1
+    # _, _, test_loader = get_data_loaders(train_size=0.002, part='head', batch_size=batch_size)
 
-    with torch.no_grad():
-        model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_path).to(device)
+    # with torch.no_grad():
+    #     # model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_path).to(device)
         
-        # for img1, img2, _, _, _, _ in test_loader:
-        model = ImageFeatureTransformer(model)
-        model.visualize_attention(img1, img2)
-            # break
+    #     # for img1, img2, _, _, _, _ in test_loader:
+    #     model = ImageFeatureTransformer()
+    #     model.visualize_attention(img1, img2)
 
 
 
