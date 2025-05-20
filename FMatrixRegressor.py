@@ -87,10 +87,10 @@ class FMatrixRegressor(nn.Module):
             self.model = ViTModel.from_pretrained(model_name).to(device)
             
         # Freeze frozen_layers layers
-        for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
-            if layer_idx < self.frozen_layers:
-                for param in layer.parameters():
-                    param.requires_grad = False
+        # for layer_idx, layer in enumerate(self.model.vision_model.encoder.layers):
+        #     if layer_idx < self.frozen_layers:
+        #         for param in layer.parameters():
+        #             param.requires_grad = False
 
         ## THIS IS ONLY FOR CONTINUING TRAINING FROM A EARLY STOPPED CHECKPOINT!
         self.parent_model_path = os.path.join("/mnt/sda2/Alon", self.plots_path) if COMPUTER==0 else os.path.join("/mnt_hdd15tb/alonkay/Thesis", self.plots_path) if COMPUTER==1 else self.plots_path
