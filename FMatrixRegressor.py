@@ -82,6 +82,7 @@ class FMatrixRegressor(nn.Module):
             weights = models.efficientnet.EfficientNet_V2_M_Weights.DEFAULT
             self.model = models.efficientnet_v2_m(weights=weights).to(device)
         elif model_name == CLIP_R50 or model_name == CLIP_R101:
+            self.clip_resnet = True
             self.model = timm.create_model(model_name, pretrained=True, num_classes=0, global_pool='')
         else:
             self.model = ViTModel.from_pretrained(model_name).to(device)
@@ -118,8 +119,8 @@ class FMatrixRegressor(nn.Module):
             self.huber_loss = nn.HuberLoss().to(device)
 
             # Get input dimension for the MLP based on ViT configuration
-            self.hidden_size = self.model.config.hidden_sizes[-1] if self.resnet else 1280 if model_name==EFFICIENTNET else self.model.num_features if (model_name==CLIP_R50 or model_name==CLIP_R101) else self.model.config.hidden_size
-            self.num_patches = 7 if (self.resnet or model_name==EFFICIENTNET or model_name==CLIP_R50 or model_name==CLIP_R101) else CROP // self.model.config.patch_size   
+            self.hidden_size = self.model.config.hidden_sizes[-1] if self.resnet else 1280 if model_name==EFFICIENTNET else self.model.num_features if self.clip_resnet else self.model.config.hidden_size
+            self.num_patches = 7 if (self.resnet or model_name==EFFICIENTNET or self.clip_resnet) else CROP // self.model.config.patch_size   
 
             if self.use_conv:
                 convnet_input_dim = 2 if self.cc else 2*self.hidden_size 
@@ -141,10 +142,10 @@ class FMatrixRegressor(nn.Module):
 
     def FeatureExtractor(self, x1, x2):
         # Run ViT. Input shape x1,x2 are (batch_size, channels, height, width)
-        x1_embeddings = self.model.features(x1) if self.model_name==EFFICIENTNET else self.model(x1).last_hidden_state
-        x2_embeddings = self.model.features(x2) if self.model_name==EFFICIENTNET else self.model(x2).last_hidden_state
+        x1_embeddings = self.model.features(x1) if self.model_name==EFFICIENTNET else self.model(x1) if self.clip_resnet else self.model(x1).last_hidden_state
+        x2_embeddings = self.model.features(x2) if self.model_name==EFFICIENTNET else self.model(x2) if self.clip_resnet else self.model(x2).last_hidden_state
 
-        if not self.resnet and not self.model_name==EFFICIENTNET:
+        if not self.resnet and not self.model_name==EFFICIENTNET and not self.clip_resnet:
             x1_embeddings = x1_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
             x2_embeddings = x2_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
 
@@ -384,8 +385,8 @@ SED_truth: {epoch_stats["SED_truth"]}\t\t val_SED_truth: {epoch_stats["val_SED_t
         self.huber_loss = nn.HuberLoss().to(device)
 
         # Get input dimension for the MLP based on ViT configuration
-        self.hidden_size = self.model.config.hidden_sizes[-1] if self.resnet else 1280 if self.model_name==EFFICIENTNET else self.model.config.hidden_size
-        self.num_patches = 7 if self.resnet or self.model_name==EFFICIENTNET else self.model.config.image_size // self.model.config.patch_size   
+        self.hidden_size = self.model.config.hidden_sizes[-1] if self.resnet else 1280 if self.model_name==EFFICIENTNET else self.model.num_features if self.clip_resnet else self.model.config.hidden_size
+        self.num_patches = 7 if (self.resnet or self.model_name==EFFICIENTNET or self.clip_resnet) else CROP // self.model.config.patch_size   
                 
         if self.use_conv:
             convnet_input_dim = 2 if self.cc else 2*self.hidden_size 
