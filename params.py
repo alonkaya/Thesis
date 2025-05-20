@@ -1,5 +1,6 @@
 import torch
 device, RESNET_MODEL_NAME, CLIP_MODEL_NAME, CLIP_MODEL_NAME_16, DINO, EFFICIENTNET, DINOV2 = torch.device(f"cuda" if torch.cuda.is_available() else "cpu"), 'microsoft/resnet-152', "openai/clip-vit-base-patch32", "openai/clip-vit-base-patch16", "facebook/dino-vitb16", "timm/tf_efficientnetv2_m.in1k", 'facebook/dinov2-base'
+CLIP_R50, CLIP_R101 = "timm/resnet50x4_clip.openai", "timm/resnet101_clip.openai"
 USE_REALESTATE = False
 STEREO = True
 # nohup env CUDA_VISIBLE_DEVICES=0 TORCH_USE_CUDA_DSA=1 python Main.py > output_.log 2>&1 &   
