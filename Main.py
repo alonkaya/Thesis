@@ -60,7 +60,7 @@ if __name__ == "__main__":
                 dataset = 'Kitti2Flying' if KITTI2SCENEFLOW and FLYING and SCENEFLOW else 'Flying' if FLYING and SCENEFLOW else 'Sceneflow2Kitti' if SCENEFLOW2KITTI else 'Stereo' if STEREO else 'RealEstate_split' if USE_REALESTATE and REALESTATE_SPLIT else 'RealEstate' if USE_REALESTATE else 'KITTI_RightCamVal' if RIGHTCAMVAL else 'KITTI'
                 scratch = 'Scratch__' if TRAIN_FROM_SCRATCH else ''
                 enlarged_clip = 'Enlarged__' if MODEL == "openai/clip-vit-large-patch14" else ""
-                model = "CLIP" if MODEL==CLIP_MODEL_NAME else "CLIP_16" if MODEL==CLIP_MODEL_NAME_16 else "Resnet" if MODEL==RESNET_MODEL_NAME else "DINO" if MODEL==DINO else "Efficient" if MODEL==EFFICIENTNET else "Google_ViT" 
+                model = "CLIP" if MODEL==CLIP_MODEL_NAME else "CLIP_16" if MODEL==CLIP_MODEL_NAME_16 else "Resnet" if MODEL==RESNET_MODEL_NAME else "DINO" if MODEL==DINO else "Efficient" if MODEL==EFFICIENTNET else "CLIP_R50" if MODEL==CLIP_R50 else "CLIP_R101" if MODEL==CLIP_R101 else "Google_ViT"
                 compress = f'avg_embeddings' if AVG_EMBEDDINGS else 'conv' if USE_CONV else 'all_embeddings'
                 seed_param = "" if seed == 42 else f"__seed_{seed}"
                 data_config = f'ratio_{train_size}__{part}' if not SCENEFLOW else f'ratio_{train_size}'
