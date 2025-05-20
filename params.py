@@ -9,8 +9,8 @@ STEREO = True
 
 SCENEFLOW = False
 FLYING = False
-MODEL = DINOV2
-FROZEN_LAYERS = [12]
+MODEL = CLIP_R50
+FROZEN_LAYERS = [0]
 FROZEN_HIGH_LAYERS = 0
 COMPUTER = 1 # 0 = 250  1 = 146  2 = else  
 SEQ_RATIOS = [0.2] if not SCENEFLOW else [22] if FLYING else None     # [0.002, 0.004, 0.008, 0.015, 0.025, 0.0375, 0.05, 0.1, 0.2]  /  [9, 80, 170]                                             
@@ -19,9 +19,9 @@ SCENEFLOW2KITTI = False
 ONLY_CONTINUE = False
 PART = ["head"] 
 ADDITIONS =  "" ## REMEMBER TO PUT "__" !!!!!
-CC = True
+CC = False
 SEED = [42, 300, 500, 600, 700, 800] # 42, 300, 500, 600, 700, 800
-INIT_DATA = False
+INIT_DATA = True
 
 ### Dataset ###  
 RIGHTCAMVAL = False
@@ -29,7 +29,7 @@ CROP = 224
 RESIZE = 256
 AUGMENTATION = True
 RANDOM_CROP = True
-BATCH_SIZE = 4
+BATCH_SIZE = 8
 
 ### STEREO KITTI ###
 train_seqeunces_stereo = [0,2,3,5] #  10840 images

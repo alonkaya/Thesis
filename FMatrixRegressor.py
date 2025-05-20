@@ -5,6 +5,7 @@ from FunMatrix import *
 import torch.optim as optim
 from torchvision import models
 from transformers import ViTModel, CLIPVisionModel, CLIPVisionConfig, ResNetModel, AutoModel
+import timm
 
 class FMatrixRegressor(nn.Module):
     def __init__(self, lr, batch_size, L2_coeff, huber_coeff, min_lr=MIN_LR, average_embeddings=AVG_EMBEDDINGS, 
@@ -80,8 +81,9 @@ class FMatrixRegressor(nn.Module):
         elif model_name == EFFICIENTNET:
             weights = models.efficientnet.EfficientNet_V2_M_Weights.DEFAULT
             self.model = models.efficientnet_v2_m(weights=weights).to(device)
+        elif model_name == CLIP_R50 or model_name == CLIP_R101:
+            self.model = timm.create_model(model_name, pretrained=True, num_classes=0, global_pool='')
         else:
-            # Initialize ViT pretrained model
             self.model = ViTModel.from_pretrained(model_name).to(device)
             
         # Freeze frozen_layers layers
@@ -116,8 +118,8 @@ class FMatrixRegressor(nn.Module):
             self.huber_loss = nn.HuberLoss().to(device)
 
             # Get input dimension for the MLP based on ViT configuration
-            self.hidden_size = self.model.config.hidden_sizes[-1] if self.resnet else 1280 if model_name==EFFICIENTNET else self.model.config.hidden_size
-            self.num_patches = 7 if self.resnet or model_name==EFFICIENTNET else CROP // self.model.config.patch_size   
+            self.hidden_size = self.model.config.hidden_sizes[-1] if self.resnet else 1280 if model_name==EFFICIENTNET else self.model.num_features if (model_name==CLIP_R50 or model_name==CLIP_R101) else self.model.config.hidden_size
+            self.num_patches = 7 if (self.resnet or model_name==EFFICIENTNET or model_name==CLIP_R50 or model_name==CLIP_R101) else CROP // self.model.config.patch_size   
 
             if self.use_conv:
                 convnet_input_dim = 2 if self.cc else 2*self.hidden_size 
@@ -146,14 +148,10 @@ class FMatrixRegressor(nn.Module):
             x1_embeddings = x1_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
             x2_embeddings = x2_embeddings[:, 1:, :] # Eliminate the CLS token for ViTs
 
-        if self.cc:
-            # Compute the cross-correlation matrix. Output shape [batch_size, 2, num_patches, num_patches]
-            embeddings = compute_soft_correspondence(x1_embeddings, x2_embeddings, self.num_patches, self.num_patches) 
-        else:
-            # Output shape is (batch_size, 2 * self.hidden_size, num_patches, num_patches)
-            x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
-            x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
-            embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1) 
+        # Output shape is (batch_size, 2 * self.hidden_size, num_patches, num_patches)
+        x1_embeddings = x1_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
+        x2_embeddings = x2_embeddings.reshape(-1, self.hidden_size, self.num_patches, self.num_patches)
+        embeddings = torch.cat([x1_embeddings, x2_embeddings], dim=1) 
         
         # Output shape is (batch_size, 2 * CONV_HIDDEN_DIM[-1] * num_patches/2 * num_patches/2)
         embeddings = self.conv(embeddings)
