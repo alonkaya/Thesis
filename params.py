@@ -59,7 +59,7 @@ IMAGE_TYPE = "jpg" if USE_REALESTATE else "png"
 NUM_WORKERS = 0 
 SAVE_MODEL = True
 GET_OLD_PATH = False
-LR = [5e-4]             
+LR = [1e-4]             
 TRIM_PTS = False
 
 ### Epipolar geometry ###
