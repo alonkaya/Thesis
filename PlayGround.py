@@ -1112,24 +1112,24 @@ def test_trained():
     " Only need to change the data type in params i.e SCENEFLOW, KITTI.. "
     batch_size=1
     num_epochs = 0
-    pretrained_model = FLYING_MODEL_PATH
-    pretrained_model = "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_R50__use_reconstruction_True/BS_8__ratio_0.2__head__frozen_0"
+    # pretrained_model = FLYING_MODEL_PATH
+    pretrained_model = ["plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_R50__use_reconstruction_True/BS_8__ratio_0.05__head__frozen_0", "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_R50__use_reconstruction_True/BS_8__ratio_0.025__head__frozen_0", "plots/Stereo/Winners/SED_0.5__L2_1__huber_1__lr_0.0001__conv__CLIP_R50__use_reconstruction_True/BS_8__ratio_0.008__head__frozen_0"]
+    for p in pretrained_model:
+        train_size = 9 if FLYING else 0.002 
+        train_loader, val_loader, test_loader = get_data_loaders(train_size=train_size, part='head', batch_size=batch_size)
+        with torch.no_grad():
+            model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=p).to(device)
+            print(f'\nEpochs: {model.start_epoch}')
 
-    train_size = 9 if FLYING else 0.002 
-    train_loader, val_loader, test_loader = get_data_loaders(train_size=train_size, part='head', batch_size=batch_size)
-    with torch.no_grad():
-        model = FMatrixRegressor(lr=LR[0], batch_size=batch_size, L2_coeff=L2_COEFF, huber_coeff=HUBER_COEFF, trained_vit=TRAINED_VIT, frozen_layers=0, pretrained_path=pretrained_model).to(device)
-        print(f'\nEpochs: {model.start_epoch}')
-
-        # for img1, img2, label, pts1, pts2, _,  in test_loader:
-        #     img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
-        #     F_est = model.forward(img1, img2)
-            # print(f'label: {label}')
-            # print(f'F_est: {F_est}')
-            # print(f'First point pts1: {pts1[0]}')
-            # print(f'First point pts2: {pts2[0]}')
-            # break
-        model.test(test_loader=test_loader, write=False)
+            # for img1, img2, label, pts1, pts2, _,  in test_loader:
+            #     img1, img2, label, pts1, pts2 = img1.to(device), img2.to(device), label.to(device), pts1.to(device), pts2.to(device)
+            #     F_est = model.forward(img1, img2)
+                # print(f'label: {label}')
+                # print(f'F_est: {F_est}')
+                # print(f'First point pts1: {pts1[0]}')
+                # print(f'First point pts2: {pts2[0]}')
+                # break
+            model.test(test_loader=test_loader, write=False)
 
 def test_specific_F(F):
     batch_size=1
